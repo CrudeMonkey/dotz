@@ -1,0 +1,46 @@
+isc.DataSource.create({
+    allowAdvancedCriteria:true,
+    ID:"WebServiceOperation",
+    addGlobalId:false,
+    fields:[
+        {
+            title:"Operation Name",
+            validators:[
+            ],
+            name:"name",
+            required:true
+        },
+        {
+            title:"SOAPAction Header",
+            validators:[
+            ],
+            name:"soapAction"
+        },
+        {
+            title:"Input Message",
+            validators:[
+            ],
+            name:"inputMessage"
+        },
+        {
+            title:"Output Message",
+            validators:[
+            ],
+            name:"outputMessage"
+        },
+        {
+            validators:[
+            ],
+            name:"inputHeaders",
+            type:"WSOperationHeader",
+            multiple:true
+        },
+        {
+            validators:[
+            ],
+            name:"outputHeaders",
+            type:"WSOperationHeader",
+            multiple:true
+        }
+    ]
+})

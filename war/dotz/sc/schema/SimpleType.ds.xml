@@ -1,0 +1,21 @@
+isc.DataSource.create({
+    allowAdvancedCriteria:true,
+    ID:"SimpleType",
+    addGlobalId:false,
+    Constructor:"SimpleType",
+    fields:[
+        {
+            validators:[
+            ],
+            name:"inheritsFrom",
+            type:"string"
+        },
+        {
+            validators:[
+            ],
+            name:"editorType",
+            type:"string"
+        }
+    ],
+    inheritsFrom:"DataSourceField"
+})
