@@ -1,0 +1,68 @@
+{
+  "id": 68,
+  "name": "Test Slide \/ Teleport",
+  "creator": null,
+  "description": "",
+  "folder": "",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    ". ......",
+    ". ......",
+    "R+......",
+    "........",
+    "........",
+    "........",
+    "........",
+    ".....-.."
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "?.??????",
+    "?.??????",
+    ".???????",
+    "????????",
+    "????????",
+    "????????",
+    "????????",
+    "????????"
+  ],
+  "teleporters": [
+    {"from":[1,2],"to":[5,7]}
+  ],
+  "doors": [  ],
+  "lazySusans": [  ],
+  "animals": [  ],
+  "knights": [  ],
+  "clocks": [  ],
+  "lasers": [  ],
+  "mirrors": [  ],
+  "rockets": [  ],
+  "generator": {
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "animalType": "Default",
+    "freq": [
+      [33.3,"dot",0],
+      [33.3,"dot",1],
+      [33.3,"dot",4]
+    ]
+  },
+  "goals": {
+    "dots": {    }
+  }
+}

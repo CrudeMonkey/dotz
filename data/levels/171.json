@@ -1,0 +1,75 @@
+{
+  "id": 171,
+  "name": "Test Swap Reshuffle",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Test",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    ".. .. ..",
+    ".. .. ..",
+    ".. .. ..",
+    ".. .. ..",
+    ".. .. ..",
+    ".. .. ..",
+    ".. .. ..",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "10.12.12",
+    "01.24.24",
+    "41.41.41",
+    "05.12.12",
+    "34.24.24",
+    "41.41.41",
+    "12.12.12",
+    "24124124"
+  ],
+  "teleporters": [  ],
+  "doors": [  ],
+  "conveyors": [  ],
+  "lazySusans": [  ],
+  "dots": [  ],
+  "bombs": [  ],
+  "animals": [  ],
+  "knights": [  ],
+  "clocks": [  ],
+  "lasers": [  ],
+  "mirrors": [  ],
+  "rockets": [  ],
+  "generator": {
+    "generateLetters": false,
+    "swapMode": true,
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "bombStrength": 9,
+    "animalType": "Default",
+    "freq": [
+      [20,"dot",0],
+      [20,"dot",1],
+      [20,"dot",2],
+      [20,"dot",3],
+      [20,"dot",4]
+    ]
+  },
+  "goals": {
+    "dots": {    }
+  },
+  "lastModified": "1446745968315"
+}

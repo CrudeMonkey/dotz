@@ -1,0 +1,194 @@
+/*
+ * Copyright (c) 2014,2015 Ahome' Innovation Technologies. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+apply plugin: 'java'
+apply plugin: 'war'
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+//sonatype_staging_URL='https://oss.sonatype.org/content/repositories/snapshot'
+
+sourceCompatibility = 1.7
+
+targetCompatibility = 1.7
+
+version = '2.0.126-RC1'
+
+group = 'com.ahome-it'
+
+task doJavaDocs(type: Javadoc) {
+    source = sourceSets.main.allJava
+    failOnError = false
+    title = '?'
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: doJavaDocs) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+compileJava.dependsOn(clean)
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'Dotz', 'Implementation-Version': version
+    }
+    from sourceSets.main.allSource
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    main {
+        resources { source java }
+        java { srcDir 'src/main/java' }
+    }
+}
+
+tasks.withType(GroovyCompile) {
+    groovyOptions.optimizationOptions.indy = true
+}
+
+configurations {
+    compile.exclude(group: 'org.slf4j', module: 'log4j-over-slf4j')
+    runtime.exclude(group: 'org.slf4j', module: 'log4j-over-slf4j')
+}
+
+dependencies {
+    //compile(group: 'com.google.gwt', name: 'gwt-user', version: '2.6.1')
+    //compile(group: 'com.ahome-it', name: 'ahome-tooling-nativetools', version: '1.0.45-RELEASE')
+    
+   
+    runtime(group: 'javax.jms', name: 'jms-api', version: '1.1-rev-1')
+    
+    compile(group: 'com.ahome-it', name: 'lienzo-core', version: '2.0.140-RC1') //126
+    runtime(group: 'com.ahome-it', name: 'lienzo-core', version: '2.0.140-RC1')
+    
+    compile(group: 'com.ahome-it', name: 'ahome-tooling-server-rpc', version: '1.0.111-RELEASE')
+    runtime(group: 'com.ahome-it', name: 'ahome-tooling-server-rpc', version: '1.0.111-RELEASE')
+
+    compile(group: 'com.ahome-it', name: 'ahome-tooling-gwtdata', version: '1.0.45-RELEASE')
+    runtime(group: 'com.ahome-it', name: 'ahome-tooling-gwtdata', version: '1.0.45-RELEASE')
+    
+    providedCompile(fileTree(dir: 'war/WEB-INF/lib', include: '*.jar'))
+    providedCompile(group: 'com.google.gwt', name: 'gwt-dev', version: '2.7.0')
+    providedCompile(group: 'com.google.gwt', name: 'gwt-user', version: '2.7.0')
+    providedCompile(group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0')
+}
+
+
+task copySrc(type: Copy) {
+    from 'src/main/java'
+    into 'build/classes/main'
+}
+
+task('gwtCompileWebApp', dependsOn: classes, type: JavaExec) {
+    ext.buildDir = "${project.buildDir}/webapp"
+    inputs.source sourceSets.main.java.srcDirs
+    inputs.dir sourceSets.main.output.resourcesDir
+    outputs.dir buildDir
+    outputs.upToDateSpec = new org.gradle.api.specs.AndSpec()
+    doFirst {
+        file(buildDir).mkdirs()
+    }
+    main = 'com.google.gwt.dev.Compiler'
+    classpath {
+        [sourceSets.main.java.srcDirs, sourceSets.main.output.classesDir, sourceSets.main.compileClasspath]
+    }
+    args =
+            [
+                'com.enno.dotz.Dotz',
+                '-war',
+                buildDir,
+                '-logLevel',
+                'INFO',
+                '-style',
+                'OBF',
+                '-localWorkers',
+                '4',
+                '-XenableClosureCompiler',
+            ]
+    maxHeapSize = '2048M'
+    minHeapSize = '2048M'
+}
+
+war.dependsOn(gwtCompileWebApp,copySrc)
+war {
+    manifest {
+        attributes 'Implementation-Title': 'Dotz', 'Implementation-Version': version
+    }
+    from('war', gwtCompileWebApp.buildDir)
+    webInf { from 'war/WEB-INF' }
+    webXml = file('war/WEB-INF/web.xml')
+    archiveName 'dotz.war'
+}
+
+/*
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+    archives jar
+}
+
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+sonatype_staging_URL='https://oss.sonatype.org/content/repositories/snapshot'
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+            repository(url: "${sonatype_staging_URL}") {
+                authentication(userName: "${sonatype_user}", password: "${sonatype_password}")
+            }
+            pom.project {
+                name 'Lienzo-Core'
+                packaging 'jar'
+                description 'Ahome Lienzo Core - GWT library for high-speed Structued Graphics based on the Canvas element.'
+                url 'https://github.com/ahome-it/lienzo-core'
+                scm {
+                    url 'scm:git@github.com:ahome-it/lienzo-core.git'
+                    connection 'scm:git@github.com:ahome-it/lienzo-core.git'
+                    developerConnection 'scm:git@github.com:ahome-it/lienzo-core.git'
+                }
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        distribution 'repo'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'sprocketnyc'
+                        name 'Dean S. Jones'
+                        email 'deansjones@gmail.com'
+                        url 'http://www.lienzo-core.com'
+                    }
+                }
+            }
+        }
+    }
+}
+*/

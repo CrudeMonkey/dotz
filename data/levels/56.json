@@ -1,0 +1,86 @@
+{
+  "id": 56,
+  "name": "Friggin' Lasers",
+  "creator": "",
+  "description": "",
+  "folder": "Test",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    ".?.????.",
+    "?.??????",
+    "?....?.?",
+    ".???????",
+    ".??????.",
+    "???????.",
+    "????????",
+    "?.????FF"
+  ],
+  "teleporters": [  ],
+  "doors": [
+    {"p":[4,3],"strength":1}
+  ],
+  "lazySusans": [  ],
+  "animals": [
+    {"p":[7,0],"strength":20,"color":2,"type":"Default"},
+    {"p":[1,7],"strength":20,"color":4,"type":"Default"}
+  ],
+  "knights": [  ],
+  "clocks": [  ],
+  "lasers": [
+    {"p":[1,1],"direction":"S"},
+    {"p":[3,2],"direction":"W"},
+    {"p":[4,2],"direction":"E"},
+    {"p":[6,2],"direction":"W"},
+    {"p":[0,4],"direction":"E"},
+    {"p":[7,5],"direction":"N"}
+  ],
+  "mirrors": [
+    {"p":[0,0],"flip":true},
+    {"p":[2,0],"flip":false},
+    {"p":[1,2],"flip":false},
+    {"p":[2,2],"flip":true},
+    {"p":[0,3],"flip":false},
+    {"p":[7,4],"flip":true}
+  ],
+  "generator": {
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "animalType": "Default",
+    "freq": [
+      [20,"dot",0],
+      [20,"dot",1],
+      [20,"dot",2],
+      [20,"dot",3],
+      [20,"dot",4]
+    ]
+  },
+  "goals": {
+    "dots": {    }
+  }
+}

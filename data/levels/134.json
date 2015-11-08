@@ -1,0 +1,73 @@
+{
+  "id": 134,
+  "name": "In The Balance",
+  "creator": "Enno",
+  "description": "Taijitus or Yin-Yang symbols can be used to <br>reshuffle the board.<br>You'll need them in this level.",
+  "folder": "Intro",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    " . . . .",
+    " . . . .",
+    " . . . .",
+    " . . . .",
+    " . . . .",
+    " . . . .",
+    " . . . ."
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "????????",
+    ".?.?.?.?",
+    ".?.?.?.?",
+    ".?.?.?.?",
+    ".?.?.?.?",
+    ".A.A.A.A",
+    ".1.2.4.0",
+    ".0.4.2.1"
+  ],
+  "transporters": [  ],
+  "doors": [  ],
+  "lazySusans": [  ],
+  "dots": [  ],
+  "animals": [  ],
+  "knights": [  ],
+  "clocks": [  ],
+  "lasers": [  ],
+  "mirrors": [  ],
+  "rockets": [  ],
+  "generator": {
+    "generateLetters": false,
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "animalType": "Default",
+    "freq": [
+      [21.7,"dot",0],
+      [21.7,"dot",1],
+      [21.7,"dot",2],
+      [21.7,"dot",4],
+      [13.1,"yinyang"]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "anchors": -1,
+    "maxMoves": 40
+  },
+  "lastModified": "1445974046857"
+}

@@ -1,0 +1,74 @@
+{
+  "id": 27,
+  "name": "Beam me up, Scotty!",
+  "creator": "Enno",
+  "description": "Teleporters can be tricky.<br>You figure it out!",
+  "folder": "Intro",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "...++...",
+    "........",
+    ".-....-.",
+    ". .... .",
+    ".+....+.",
+    "........",
+    "........",
+    ".-....-."
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "????????",
+    "????????",
+    "????????",
+    "?.????.?",
+    "????????",
+    "????????",
+    "????????",
+    "????????"
+  ],
+  "teleporters": [
+    {"from":[3,0],"to":[6,7]},
+    {"from":[4,0],"to":[1,7]},
+    {"from":[1,4],"to":[6,2]},
+    {"from":[6,4],"to":[1,2]}
+  ],
+  "doors": [  ],
+  "lazySusans": [  ],
+  "animals": [  ],
+  "knights": [  ],
+  "clocks": [  ],
+  "generator": {
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "animalType": "Default",
+    "freq": [
+      [27.4,"dot",0],
+      [27.4,"dot",1],
+      [27.4,"dot",2],
+      [17.9,"anchor"]
+    ]
+  },
+  "goals": {
+    "dots": {
+      "0": 10,
+      "1": 10
+    },
+    "anchors": 8,
+    "maxMoves": 20
+  }
+}

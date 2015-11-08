@@ -1,0 +1,73 @@
+{
+  "name": "Two Dots 69",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Two Dots",
+  "numColumns": 7,
+  "numRows": 8,
+  "grid": [
+    ". ... .",
+    ".     .",
+    ". ... .",
+    ". ... .",
+    ". ... .",
+    ".......",
+    "  ...  ",
+    " ..... "
+  ],
+  "ice": [
+    ".......",
+    ".......",
+    ".......",
+    ".......",
+    ".......",
+    ".......",
+    ".......",
+    "......."
+  ],
+  "items": [
+    "A.???.A",
+    "A.....A",
+    "0.134.0",
+    "0.134.0",
+    "4.FFF.1",
+    "43FFF31",
+    "..FFF..",
+    ".FFFFF."
+  ],
+  "teleporters": [  ],
+  "doors": [  ],
+  "conveyors": [  ],
+  "lazySusans": [  ],
+  "dots": [  ],
+  "animals": [  ],
+  "knights": [  ],
+  "clocks": [  ],
+  "lasers": [  ],
+  "mirrors": [  ],
+  "rockets": [  ],
+  "generator": {
+    "generateLetters": false,
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "animalType": "Default",
+    "freq": [
+      [21.3,"dot",0],
+      [21.3,"dot",1],
+      [21.3,"dot",3],
+      [21.3,"dot",4],
+      [15,"anchor"]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "anchors": 6
+  },
+  "id": 160,
+  "lastModified": "1446249292280"
+}

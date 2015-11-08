@@ -1,0 +1,68 @@
+{
+  "id": 11,
+  "name": "Scared Animals",
+  "creator": "Logan",
+  "folder": "Animals",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "00011000",
+    "02200220",
+    "02122120",
+    "021..120",
+    "021..120",
+    "02111120",
+    "02222220",
+    "00000000"
+  ],
+  "teleporters": [  ],
+  "doors": [  ],
+  "lazySusans": [  ],
+  "animals": [
+    {"p":[3,3],"strength":10,"color":0,"type":"Scared"},
+    {"p":[4,3],"strength":10,"color":2,"type":"Scared"},
+    {"p":[3,4],"strength":10,"color":2,"type":"Scared"},
+    {"p":[4,4],"strength":10,"color":0,"type":"Scared"}
+  ],
+  "generator": {
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "animalStrength": 15,
+    "animalType": "Scared",
+    "freq": [
+      [33.2,"dot",0],
+      [33.2,"dot",1],
+      [33.2,"dot",2],
+      [0.4,"animal",0]
+    ]
+  },
+  "goals": {
+    "dots": {
+      "0": 20,
+      "1": 20,
+      "2": 20
+    },
+    "animals": 5
+  }
+}

@@ -1,0 +1,124 @@
+{
+  "id": 36,
+  "name": "Knights of Passion",
+  "creator": "Enno",
+  "description": "Connect knights to explode them.<br>Start with a knight, followed by <br>at least 2 dots of the same color.",
+  "folder": "Intro",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "??.??.??",
+    "????????",
+    ".??????.",
+    "????????",
+    "????????",
+    ".??????.",
+    "????????",
+    "??.??.??"
+  ],
+  "teleporters": [  ],
+  "doors": [  ],
+  "lazySusans": [  ],
+  "animals": [  ],
+  "knights": [
+        {
+      "p": [
+        2,
+        0
+      ],
+      "strength": 3
+    },
+        {
+      "p": [
+        5,
+        0
+      ],
+      "strength": 3
+    },
+        {
+      "p": [
+        0,
+        2
+      ],
+      "strength": 3
+    },
+        {
+      "p": [
+        7,
+        2
+      ],
+      "strength": 3
+    },
+        {
+      "p": [
+        0,
+        5
+      ],
+      "strength": 3
+    },
+        {
+      "p": [
+        7,
+        5
+      ],
+      "strength": 3
+    },
+        {
+      "p": [
+        2,
+        7
+      ],
+      "strength": 3
+    },
+        {
+      "p": [
+        5,
+        7
+      ],
+      "strength": 3
+    }
+  ],
+  "clocks": [  ],
+  "generator": {
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 2,
+    "clockStrength": 10,
+    "animalType": "Default",
+    "freq": [
+      [21.9,"dot",0],
+      [21.9,"dot",1],
+      [21.9,"dot",3],
+      [21.9,"dot",4],
+      [12.4,"knight"]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "knights": 10,
+    "maxMoves": 20
+  }
+}

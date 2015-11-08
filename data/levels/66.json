@@ -1,0 +1,97 @@
+{
+  "id": 66,
+  "name": "Straight Shooter",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Done",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "-......-",
+    "  ....  ",
+    ". .... .",
+    "  .++.  ",
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "????????",
+    "????????",
+    "..????..",
+    "A.?..?.A",
+    "..????..",
+    "????????",
+    "????????",
+    "F??FF??F"
+  ],
+  "teleporters": [
+    {"from":[3,4],"to":[0,1]},
+    {"from":[4,4],"to":[7,1]}
+  ],
+  "doors": [
+    {"p":[0,3],"strength":1},
+    {"p":[3,3],"strength":5,"direction":"N","rotate":-1},
+    {"p":[4,3],"strength":5,"direction":"N","rotate":1},
+    {"p":[7,3],"strength":1},
+    {"p":[0,7],"strength":1},
+    {"p":[3,7],"strength":1},
+    {"p":[4,7],"strength":1},
+    {"p":[7,7],"strength":1}
+  ],
+  "lazySusans": [  ],
+  "animals": [  ],
+  "knights": [  ],
+  "clocks": [  ],
+  "lasers": [  ],
+  "mirrors": [  ],
+  "rockets": [
+        {
+      "p": [
+        3,
+        3
+      ],
+      "direction": "W"
+    },
+        {
+      "p": [
+        4,
+        3
+      ],
+      "direction": "E"
+    }
+  ],
+  "generator": {
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "animalType": "Default",
+    "freq": [
+      [23.3,"dot",0],
+      [23.3,"dot",1],
+      [23.3,"dot",3],
+      [23.3,"dot",4],
+      [6.8,"wild"]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "anchors": 2,
+    "maxMoves": 25
+  }
+}

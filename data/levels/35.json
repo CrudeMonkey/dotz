@@ -1,0 +1,69 @@
+{
+  "id": 35,
+  "name": "Fire in the Hole!",
+  "creator": "Enno",
+  "description": "Fire can be extinguished by connecting dots next to it.<br>Usually fire grows 1 unit per move.<br>It doesn't grow if you killed some last move.",
+  "folder": "Intro",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "F??????F",
+    "????????",
+    "??F??F??",
+    "????????",
+    "????????",
+    "??F??F??",
+    "????????",
+    "F??????F"
+  ],
+  "teleporters": [  ],
+  "doors": [  ],
+  "lazySusans": [  ],
+  "animals": [  ],
+  "knights": [  ],
+  "clocks": [  ],
+  "generator": {
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "animalType": "Default",
+    "freq": [
+      [16.9,"dot",0],
+      [15.9,"dot",1],
+      [16.9,"dot",2],
+      [16.5,"dot",3],
+      [16.9,"dot",4],
+      [5.6,"wild"],
+      [11.5,"fire"]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "fire": 20,
+    "maxMoves": 15
+  }
+}

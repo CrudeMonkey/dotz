@@ -1,0 +1,96 @@
+{
+  "id": 21,
+  "name": "Clockwork Orange",
+  "creator": "Enno",
+  "description": "Drop the clocks to the bottom.<br>They explode if you run out of time!",
+  "folder": "Intro",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "?.????.?",
+    "????????",
+    "????????",
+    "????????",
+    "????????",
+    "?.????.?",
+    "????????",
+    "????????"
+  ],
+  "teleporters": [  ],
+  "doors": [  ],
+  "lazySusans": [  ],
+  "animals": [  ],
+  "knights": [  ],
+  "clocks": [
+        {
+      "p": [
+        1,
+        0
+      ],
+      "strength": 10
+    },
+        {
+      "p": [
+        6,
+        0
+      ],
+      "strength": 10
+    },
+        {
+      "p": [
+        1,
+        5
+      ],
+      "strength": 10
+    },
+        {
+      "p": [
+        6,
+        5
+      ],
+      "strength": 10
+    }
+  ],
+  "generator": {
+    "seed": 123,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 5,
+    "animalType": "Default",
+    "freq": [
+      [25,"dot",0],
+      [25,"dot",1],
+      [24,"dot",2],
+      [9.2,"wild"],
+      [16.9,"clock"]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "clocks": 10,
+    "maxMoves": 20
+  }
+}

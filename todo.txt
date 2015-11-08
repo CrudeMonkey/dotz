@@ -1,0 +1,36 @@
+* Grid Editor
+  - Drag group of cells
+    - Copy / Move / Paste
+  - more error checking
+  - prepareSave: check if goals are attainable
+  - Copy Level button
+* Connect Mode
+  - can you connect thru transporters?
+  - fire goes thru transporter
+
+  
+NEW STUFF
+---------
+* Nukes - connect 2 and blow up stuff (Chris)
+* Boosts
+* Chemicals (H2O)
+* Bombs
+* another RandomItem that only generates dots
+* Extra Moves item
+* Extra Time item
+
+= Farm Club
+* egss, 3 eggs is hatching egg, 3 hatching eggs is bird
+
+LOW PRIORITY
+------------
+* GeneratorPropertiesPanel
+  - when animalStrength loses focus (or Enter hit), update value in animal sliders
+* fix bounce animation
+* nuclear explosion - change dots black before elimination
+* alter look of doors
+* change grid dimensions
+
+* improve error handling in LevelParser
+
+

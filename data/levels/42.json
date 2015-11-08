@@ -1,0 +1,69 @@
+{
+  "id": 42,
+  "name": "Teleport Box",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Test",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    ".... ..+",
+    ".... ...",
+    "....+...",
+    "........",
+    ".-......",
+    ". ......",
+    ". ....-.",
+    ". .... ."
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "????.???",
+    "????.???",
+    "????????",
+    "????????",
+    "????????",
+    "?.??????",
+    "?.??????",
+    "?.????.?"
+  ],
+  "teleporters": [
+    {"from":[7,0],"to":[6,6]},
+    {"from":[4,2],"to":[1,4]}
+  ],
+  "doors": [  ],
+  "lazySusans": [  ],
+  "animals": [  ],
+  "knights": [  ],
+  "clocks": [  ],
+  "generator": {
+    "seed": 123,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "animalType": "Default",
+    "freq": [
+      [18.1,"dot",0],
+      [18.1,"dot",1],
+      [18.1,"dot",2],
+      [18.1,"dot",3],
+      [18.1,"dot",4],
+      [9.4,"wild"]
+    ]
+  },
+  "goals": {
+    "dots": {    }
+  }
+}

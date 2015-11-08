@@ -1,0 +1,69 @@
+{
+  "id": 22,
+  "name": "Easy Does It !",
+  "creator": "Enno",
+  "description": "Connect dots of the same color. <br>You need to remove 10 of each color.<br>Make a square to remove all dots of the same color.<br>",
+  "folder": "Intro",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "????????",
+    "????????",
+    "????????",
+    "????????",
+    "????????",
+    "????????",
+    "????????",
+    "????????"
+  ],
+  "teleporters": [  ],
+  "doors": [  ],
+  "lazySusans": [  ],
+  "animals": [  ],
+  "knights": [  ],
+  "clocks": [  ],
+  "generator": {
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "animalType": "Default",
+    "freq": [
+      [25,"dot",0],
+      [25,"dot",1],
+      [25,"dot",2],
+      [25,"dot",3]
+    ]
+  },
+  "goals": {
+    "dots": {
+      "0": 10,
+      "1": 10,
+      "2": 10
+    },
+    "maxMoves": 30
+  }
+}

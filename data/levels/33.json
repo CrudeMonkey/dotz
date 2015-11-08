@@ -1,0 +1,75 @@
+{
+  "name": "Free the Animals",
+  "creator": "Enno",
+  "description": "Free the animals by connecting them to dots of the same color.<br>Making squares also works, even when it's not connected<br>to an animal. The longer the chain, the better...",
+  "folder": "Intro",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "R......L"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "????????",
+    "????????",
+    ".??????.",
+    "????????",
+    "????????",
+    ".??????.",
+    "????????",
+    ".??????."
+  ],
+  "teleporters": [  ],
+  "doors": [  ],
+  "lazySusans": [
+    {"p":[6,3],"clockwise":false},
+    {"p":[0,3],"clockwise":true}
+  ],
+  "animals": [
+    {"p":[0,2],"strength":10,"color":1,"type":"Default"},
+    {"p":[7,2],"strength":10,"color":0,"type":"Default"},
+    {"p":[0,5],"strength":10,"color":4,"type":"Default"},
+    {"p":[7,5],"strength":10,"color":3,"type":"Default"}
+  ],
+  "knights": [  ],
+  "clocks": [  ],
+  "generator": {
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "animalType": "Default",
+    "freq": [
+      [22.8,"dot",0],
+      [22.8,"dot",1],
+      [22.8,"dot",3],
+      [22.8,"dot",4],
+      [9,"wild"]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "animals": -1,
+    "maxMoves": 20
+  },
+  "id": 33
+}

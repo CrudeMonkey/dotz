@@ -1,0 +1,87 @@
+{
+  "id": 172,
+  "name": "Test Swap Roll",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Test",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "teleporters": [  ],
+  "doors": [
+    {"p":[0,0],"strength":99},
+    {"p":[1,0],"strength":99},
+    {"p":[2,0],"strength":99},
+    {"p":[3,0],"strength":99},
+    {"p":[5,0],"strength":99},
+    {"p":[6,0],"strength":99},
+    {"p":[7,0],"strength":99},
+    {"p":[3,3],"strength":99},
+    {"p":[4,3],"strength":99},
+    {"p":[2,5],"strength":99}
+  ],
+  "conveyors": [  ],
+  "lazySusans": [  ],
+  "dots": [  ],
+  "bombs": [  ],
+  "animals": [  ],
+  "knights": [  ],
+  "clocks": [  ],
+  "lasers": [  ],
+  "mirrors": [  ],
+  "rockets": [  ],
+  "generator": {
+    "generateLetters": false,
+    "swapMode": false,
+    "rollMode": true,
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "bombStrength": 9,
+    "animalType": "Default",
+    "freq": [
+      [20,"dot",0],
+      [20,"dot",1],
+      [20,"dot",2],
+      [20,"dot",3],
+      [20,"dot",4]
+    ]
+  },
+  "goals": {
+    "dots": {    }
+  },
+  "lastModified": "1446847097687"
+}

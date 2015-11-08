@@ -1,0 +1,83 @@
+{
+  "name": "Hells Bells",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Done",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "........",
+    "........",
+    ".R....L.",
+    ". .... .",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "3......3",
+    "3......3",
+    "3......3",
+    "3......3",
+    "3......3",
+    "3......3",
+    "3......3",
+    "3......3"
+  ],
+  "items": [
+    "?.????.?",
+    "????????",
+    "????????",
+    "????????",
+    "?.????.?",
+    "F.????.F",
+    "????????",
+    "????????"
+  ],
+  "teleporters": [  ],
+  "doors": [  ],
+  "lazySusans": [
+    {"p":[1,0],"clockwise":false},
+    {"p":[5,0],"clockwise":true},
+    {"p":[1,6],"clockwise":true},
+    {"p":[5,6],"clockwise":false},
+    {"p":[2,2],"clockwise":true},
+    {"p":[4,2],"clockwise":false}
+  ],
+  "animals": [
+    {"p":[1,0],"strength":20,"color":4,"type":"Follow"},
+    {"p":[6,0],"strength":20,"color":0,"type":"Follow"}
+  ],
+  "knights": [  ],
+  "clocks": [  ],
+  "lasers": [  ],
+  "mirrors": [  ],
+  "rockets": [  ],
+  "generator": {
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "animalType": "Default",
+    "freq": [
+      [25,"dot",0],
+      [25,"dot",1],
+      [25,"dot",2],
+      [25,"dot",4]
+    ]
+  },
+  "goals": {
+    "dots": {
+      "0": 30,
+      "4": 30
+    },
+    "maxMoves": 30,
+    "ice": -1
+  },
+  "id": 84,
+  "lastModified": "1445457000805"
+}

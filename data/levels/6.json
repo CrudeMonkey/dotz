@@ -1,0 +1,126 @@
+{
+  "id": 6,
+  "name": "Goal Level",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Test",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "........",
+    ".......E",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "33333333"
+  ],
+  "items": [
+    ".?FF??.?",
+    "???????.",
+    "??A?????",
+    "????A???",
+    ".??..???",
+    "??A????.",
+    ".???.???",
+    "????WW??"
+  ],
+  "teleporters": [  ],
+  "doors": [
+    {"p":[1,2],"strength":1,"direction":"E"},
+    {"p":[5,2],"strength":1,"direction":"S"},
+    {"p":[1,5],"strength":1,"direction":"N"},
+    {"p":[5,5],"strength":1,"direction":"W"}
+  ],
+  "lazySusans": [  ],
+  "animals": [
+    {"p":[7,1],"strength":20,"color":2,"type":"Default"},
+    {"p":[0,4],"strength":20,"color":1,"type":"Default"},
+    {"p":[7,5],"strength":20,"color":4,"type":"Default"}
+  ],
+  "knights": [
+    {"p":[6,0],"strength":3}
+  ],
+  "clocks": [
+        {
+      "p": [
+        0,
+        6
+      ],
+      "strength": 10
+    }
+  ],
+  "lasers": [
+    {"p":[3,4],"direction":"E"},
+    {"p":[4,6],"direction":"N"}
+  ],
+  "mirrors": [
+    {"p":[4,4],"flip":true}
+  ],
+  "rockets": [
+        {
+      "p": [
+        0,
+        0
+      ],
+      "direction": "E"
+    }
+  ],
+  "generator": {
+    "seed": 123,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": false,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "animalType": "Default",
+    "freq": [
+      [17.5,"dot",0],
+      [17.5,"dot",1],
+      [17.5,"dot",2],
+      [17.5,"dot",3],
+      [17.5,"dot",4],
+      [3.4,"wild"],
+      [3.4,"anchor"],
+      [3.4,"fire"],
+      [0.8,"rocket"],
+      [0.8,"knight"],
+      [0.4,"clock"]
+    ]
+  },
+  "goals": {
+    "dots": {
+      "0": 10,
+      "1": 10,
+      "2": 10,
+      "3": 10,
+      "4": 10
+    },
+    "animals": -1,
+    "knights": 1,
+    "clocks": 1,
+    "anchors": 8,
+    "fire": -1,
+    "circuits": -1,
+    "lasers": 2,
+    "mirrors": 1,
+    "rockets": 1,
+    "maxMoves": 100,
+    "ice": -1,
+    "doors": -1,
+    "score": 40,
+    "time": 3598
+  }
+}

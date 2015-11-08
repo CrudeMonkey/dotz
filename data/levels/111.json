@@ -1,0 +1,77 @@
+{
+  "id": 111,
+  "name": "Riff Raff",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Done",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "RCEEEECL",
+    " R.CC.L ",
+    "  .EE.  ",
+    "  .EE.  ",
+    " CL..RC ",
+    " C EE C ",
+    " . CC . "
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    ".??????.",
+    ".??????.",
+    "..????..",
+    "..????..",
+    "..????..",
+    ".?.??.?.",
+    ".?.??.?.",
+    ".?.??.?."
+  ],
+  "teleporters": [  ],
+  "doors": [  ],
+  "lazySusans": [  ],
+  "animals": [
+    {"p":[0,0],"strength":20,"color":1,"type":"Default"},
+    {"p":[7,0],"strength":20,"color":1,"type":"Default"}
+  ],
+  "knights": [  ],
+  "clocks": [  ],
+  "lasers": [  ],
+  "mirrors": [  ],
+  "rockets": [  ],
+  "generator": {
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "animalType": "Default",
+    "freq": [
+      [21,"dot",0],
+      [21,"dot",1],
+      [21,"dot",2],
+      [21,"dot",4],
+      [10.5,"anchor"],
+      [5.6,"rocket"]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "animals": -1,
+    "anchors": 3,
+    "circuits": -1,
+    "maxMoves": 24
+  },
+  "lastModified": "1445616140624"
+}

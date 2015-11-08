@@ -1,0 +1,63 @@
+{
+  "id": 129,
+  "name": "Two Dots 52",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Two Dots",
+  "numColumns": 7,
+  "numRows": 5,
+  "grid": [
+    " ..... ",
+    " ..... ",
+    " ..... ",
+    ".......",
+    "......."
+  ],
+  "ice": [
+    ".33333.",
+    ".33333.",
+    ".......",
+    ".......",
+    "......."
+  ],
+  "items": [
+    ".A?A?A.",
+    ".?????.",
+    ".?????.",
+    "???44??",
+    "???44??"
+  ],
+  "teleporters": [  ],
+  "doors": [  ],
+  "lazySusans": [  ],
+  "animals": [  ],
+  "knights": [  ],
+  "clocks": [  ],
+  "lasers": [  ],
+  "mirrors": [  ],
+  "rockets": [  ],
+  "generator": {
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "animalType": "Default",
+    "freq": [
+      [20,"dot",0],
+      [20,"dot",1],
+      [20,"dot",2],
+      [20,"dot",3],
+      [20,"dot",4]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "anchors": 3,
+    "maxMoves": 25,
+    "ice": -1
+  },
+  "lastModified": "1445624299774"
+}

@@ -1,0 +1,70 @@
+{
+  "id": 25,
+  "name": "Anchors Away",
+  "creator": "Enno",
+  "description": "Anchors must be dropped to the bottom.<br>",
+  "folder": "Intro",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "????????",
+    "?A????A?",
+    "????????",
+    "?A????A?",
+    "????????",
+    "?A????A?",
+    "????????",
+    "????????"
+  ],
+  "teleporters": [  ],
+  "doors": [  ],
+  "lazySusans": [  ],
+  "animals": [  ],
+  "knights": [  ],
+  "clocks": [  ],
+  "lasers": [  ],
+  "mirrors": [  ],
+  "rockets": [  ],
+  "generator": {
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "animalType": "Default",
+    "freq": [
+      [30.1,"dot",0],
+      [30.1,"dot",1],
+      [30.1,"dot",2],
+      [9.6,"anchor"]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "anchors": 10,
+    "maxMoves": 20
+  },
+  "lastModified": "1445014984437"
+}

@@ -1,0 +1,66 @@
+{
+  "id": 41,
+  "name": "What's My Turn Off ?",
+  "creator": "Enno",
+  "description": "Toggle the cells of a circuit by connecting<br>or exploding dots inside them.<br>Turn on all connecting circuit cells and the circuit will explode.<br>",
+  "folder": "Intro",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "..E..E..",
+    "........",
+    "E......E",
+    "E......E",
+    "E......E",
+    "E......E",
+    "...EE...",
+    "...EE..."
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "????????",
+    "????????",
+    "????????",
+    "????????",
+    "????????",
+    "????????",
+    "????????",
+    "????????"
+  ],
+  "teleporters": [  ],
+  "doors": [  ],
+  "lazySusans": [  ],
+  "animals": [  ],
+  "knights": [  ],
+  "clocks": [  ],
+  "generator": {
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "animalType": "Default",
+    "freq": [
+      [30.1,"dot",0],
+      [30.1,"dot",1],
+      [30.1,"dot",2],
+      [9.8,"wild"]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "circuits": -1,
+    "maxMoves": 10
+  }
+}

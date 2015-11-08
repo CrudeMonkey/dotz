@@ -1,0 +1,71 @@
+{
+  "name": "Two Dots 71",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Two Dots",
+  "numColumns": 6,
+  "numRows": 6,
+  "grid": [
+    "......",
+    "......",
+    "......",
+    "......",
+    ". .. .",
+    "..  .."
+  ],
+  "ice": [
+    "......",
+    "......",
+    "......",
+    "......",
+    "......",
+    "......"
+  ],
+  "items": [
+    "??????",
+    "??????",
+    "??????",
+    "??????",
+    "F.FF.F",
+    "FF..FF"
+  ],
+  "teleporters": [  ],
+  "doors": [  ],
+  "conveyors": [  ],
+  "lazySusans": [  ],
+  "dots": [  ],
+  "animals": [  ],
+  "knights": [  ],
+  "clocks": [  ],
+  "lasers": [  ],
+  "mirrors": [  ],
+  "rockets": [  ],
+  "generator": {
+    "generateLetters": false,
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "animalType": "Default",
+    "freq": [
+      [25,"dot",0],
+      [25,"dot",1],
+      [25,"dot",2],
+      [25,"dot",3]
+    ]
+  },
+  "goals": {
+    "dots": {
+      "0": 20,
+      "1": 25,
+      "2": 30,
+      "3": 15
+    },
+    "maxMoves": 25
+  },
+  "id": 162,
+  "lastModified": "1446250421131"
+}

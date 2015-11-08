@@ -1,0 +1,91 @@
+{
+  "id": 81,
+  "name": "Test final explosions",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Test",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    ".E....E.",
+    "E.......",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "????????",
+    "????????",
+    "???F????",
+    "???.????",
+    "?.????.?",
+    "?????.??",
+    "?.????A?",
+    "?????111"
+  ],
+  "teleporters": [  ],
+  "doors": [
+    {"p":[3,5],"strength":1}
+  ],
+  "lazySusans": [
+    {"p":[0,0],"clockwise":false}
+  ],
+  "animals": [
+    {"p":[1,4],"strength":20,"color":2,"type":"Default"}
+  ],
+  "knights": [
+    {"p":[6,4],"strength":3}
+  ],
+  "clocks": [  ],
+  "lasers": [
+    {"p":[1,6],"direction":"E"}
+  ],
+  "mirrors": [
+    {"p":[5,5],"flip":false}
+  ],
+  "rockets": [
+        {
+      "p": [
+        3,
+        3
+      ],
+      "direction": "E"
+    }
+  ],
+  "generator": {
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "animalType": "Default",
+    "freq": [
+      [20,"dot",0],
+      [20,"dot",1],
+      [20,"dot",2],
+      [20,"dot",3],
+      [20,"dot",4]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "anchors": -1,
+    "maxMoves": 5
+  },
+  "lastModified": "1445439745577"
+}

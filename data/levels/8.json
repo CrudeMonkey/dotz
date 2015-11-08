@@ -1,0 +1,91 @@
+{
+  "id": 8,
+  "name": "Animal Eyes",
+  "creator": "",
+  "folder": "Test",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "..+.....",
+    "..... ..",
+    "..... ..",
+    "........",
+    "........",
+    "......L.",
+    "...... .",
+    ".-.... ."
+  ],
+  "ice": [
+    "........",
+    ".3......",
+    "........",
+    "........",
+    "........",
+    "........",
+    "...3....",
+    "........"
+  ],
+  "items": [
+    "11111111",
+    "?????.?.",
+    ".????.??",
+    "F3F3F3F3",
+    "?.?.????",
+    "?????..?",
+    "?..???.?",
+    "??????.?"
+  ],
+  "teleporters": [
+    {"from":[2,0],"to":[1,7]}
+  ],
+  "doors": [
+        {
+      "p": [
+        1,
+        6
+      ],
+      "strength": 3,
+      "direction": "E"
+    },
+        {
+      "p": [
+        3,
+        7
+      ],
+      "strength": 3
+    }
+  ],
+  "lazySusans": [  ],
+  "animals": [
+    {"p":[7,1],"strength":30,"color":0,"type":"Default"},
+    {"p":[0,2],"strength":20,"color":0,"type":"Scared"},
+    {"p":[1,4],"strength":20,"color":1,"type":"Scared"},
+    {"p":[3,4],"strength":20,"color":3,"type":"Follow"},
+    {"p":[5,5],"strength":20,"color":4,"type":"Follow"},
+    {"p":[2,6],"strength":30,"color":1,"type":"Default"}
+  ],
+  "generator": {
+    "seed": 124,
+    "fireGrowthRate": 2,
+    "maxAnchors": 3,
+    "animalStrength": 10,
+    "animalType": "Default",
+    "freq": [
+      [40.8,"dot",0],
+      [40.8,"dot",1],
+      [12.2,"wild"],
+      [2,"anchor"],
+      [4.1,"fire"]
+    ]
+  },
+  "goals": {
+    "dots": {
+      "0": 50,
+      "1": 50
+    },
+    "animals": 1,
+    "fire": -1,
+    "maxMoves": 100,
+    "ice": -1
+  }
+}

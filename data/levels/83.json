@@ -1,0 +1,82 @@
+{
+  "id": 83,
+  "name": "Silent Knight",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Done",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "...  ...",
+    "-..  ..-",
+    " ..  .. ",
+    " ..++.. ",
+    " ..--.. ",
+    " ..  .. ",
+    "+..  ..+",
+    "...  ..."
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "???..???",
+    "???..???",
+    ".??..??.",
+    ".?A??A?.",
+    ".?A??A?.",
+    ".??..??.",
+    "???..???",
+    "???..???"
+  ],
+  "teleporters": [
+    {"from":[3,3],"to":[0,1]},
+    {"from":[4,3],"to":[7,1]},
+    {"from":[0,6],"to":[3,4]},
+    {"from":[7,6],"to":[4,4]}
+  ],
+  "doors": [
+    {"p":[2,3],"strength":3,"direction":"E"},
+    {"p":[5,3],"strength":3,"direction":"W"},
+    {"p":[2,4],"strength":3,"direction":"E"},
+    {"p":[5,4],"strength":3,"direction":"W"}
+  ],
+  "lazySusans": [  ],
+  "animals": [  ],
+  "knights": [  ],
+  "clocks": [  ],
+  "lasers": [  ],
+  "mirrors": [  ],
+  "rockets": [  ],
+  "generator": {
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "animalType": "Default",
+    "freq": [
+      [19.4,"dot",0],
+      [20.7,"dot",1],
+      [20,"dot",3],
+      [19.7,"dot",4],
+      [10.1,"anchor"],
+      [10,"knight"]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "anchors": 6,
+    "maxMoves": 30
+  },
+  "lastModified": "1445454609269"
+}

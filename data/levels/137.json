@@ -1,0 +1,90 @@
+{
+  "id": 137,
+  "name": "Knight To Remember",
+  "creator": "Enno",
+  "description": "In Word Mode the knight counts as a wild card.",
+  "folder": "Intro",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "  .     ",
+    ".   .   ",
+    "  .   . ",
+    ".   .  .",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "........",
+    "........",
+    "........",
+    "A......A",
+    "........",
+    "????????",
+    "????Y???",
+    "????????"
+  ],
+  "transporters": [  ],
+  "doors": [
+    {"p":[0,4],"strength":1,"direction":"E"},
+    {"p":[1,4],"strength":1,"direction":"E"},
+    {"p":[2,4],"strength":1,"direction":"E"},
+    {"p":[3,4],"strength":1,"direction":"E"},
+    {"p":[4,4],"strength":1,"direction":"N"},
+    {"p":[5,4],"strength":1,"direction":"W"},
+    {"p":[6,4],"strength":1,"direction":"W"},
+    {"p":[7,4],"strength":1,"direction":"W"}
+  ],
+  "lazySusans": [  ],
+  "dots": [
+    {"p":[2,0],"color":0,"letter":"T"},
+    {"p":[4,1],"color":0,"letter":"H"},
+    {"p":[2,2],"color":0,"letter":"N"},
+    {"p":[6,2],"color":0,"letter":"G"},
+    {"p":[4,3],"color":0,"letter":"I"}
+  ],
+  "animals": [  ],
+  "knights": [
+    {"p":[0,1],"strength":3}
+  ],
+  "clocks": [  ],
+  "lasers": [  ],
+  "mirrors": [  ],
+  "rockets": [  ],
+  "generator": {
+    "generateLetters": true,
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "animalType": "Default",
+    "freq": [
+      [20,"dot",0],
+      [20,"dot",1],
+      [20,"dot",2],
+      [20,"dot",3],
+      [20,"dot",4]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "anchors": -1,
+    "maxMoves": 15
+  },
+  "lastModified": "1445967460207"
+}

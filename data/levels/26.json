@@ -1,0 +1,67 @@
+{
+  "id": 26,
+  "name": "Slip Sliding Away",
+  "creator": "Enno",
+  "description": "It's a slippery business!",
+  "folder": "Intro",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "R.....R.",
+    " ..... .",
+    " ......L",
+    ".LR.L.. ",
+    ".  . .R.",
+    ".  . . ."
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "????????",
+    "????????",
+    ".?????.?",
+    ".?????.?",
+    ".??????.",
+    "?..?.??.",
+    "?..?.?.?",
+    "?..?.?.?"
+  ],
+  "teleporters": [  ],
+  "doors": [  ],
+  "lazySusans": [  ],
+  "animals": [  ],
+  "knights": [  ],
+  "clocks": [  ],
+  "generator": {
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "animalType": "Default",
+    "freq": [
+      [29,"dot",1],
+      [29,"dot",3],
+      [29,"dot",4],
+      [13.1,"anchor"]
+    ]
+  },
+  "goals": {
+    "dots": {
+      "1": 10
+    },
+    "anchors": 5
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "id": 54,
+  "name": "Puzzle Time",
+  "creator": "Logan",
+  "description": "--- Can you figure out this puzzle in the target time? ---Good Luck!!",
+  "folder": "Logan",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    ".L....R.",
+    ".EE..EE.",
+    "........",
+    "........",
+    ".EE..EE.",
+    ".E....E.",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "33????33",
+    "1.?33?.1",
+    "14444441",
+    ".413314.",
+    "441??144",
+    "?44??44?",
+    "?4?11?4?",
+    "???11???"
+  ],
+  "teleporters": [  ],
+  "doors": [
+    {"p":[0,3],"strength":1,"direction":"W","rotate":1},
+    {"p":[1,3],"strength":1,"direction":"N","rotate":1},
+    {"p":[6,3],"strength":1,"direction":"N","rotate":-1},
+    {"p":[7,3],"strength":1,"direction":"E","rotate":-1},
+    {"p":[0,4],"strength":1,"direction":"S","rotate":1},
+    {"p":[1,4],"strength":1,"direction":"N","rotate":1},
+    {"p":[6,4],"strength":1,"direction":"N","rotate":-1},
+    {"p":[7,4],"strength":1,"direction":"S","rotate":-1}
+  ],
+  "lazySusans": [  ],
+  "animals": [  ],
+  "knights": [  ],
+  "clocks": [  ],
+  "lasers": [  ],
+  "mirrors": [  ],
+  "generator": {
+    "seed": 1223324234,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "animalType": "Default",
+    "freq": [
+      [50,"dot",0],
+      [50,"dot",2]
+    ]
+  },
+  "goals": {
+    "dots": {
+      "1": 12,
+      "3": 8,
+      "4": 18
+    },
+    "circuits": -1,
+    "maxMoves": 5,
+    "doors": -1,
+    "score": 130,
+    "time": 60
+  }
+}

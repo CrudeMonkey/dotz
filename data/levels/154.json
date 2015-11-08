@@ -1,0 +1,60 @@
+{
+  "name": "Two Dots 62",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Two Dots",
+  "numColumns": 7,
+  "numRows": 3,
+  "grid": [
+    " ..... ",
+    ".......",
+    " ..... "
+  ],
+  "ice": [
+    ".......",
+    ".......",
+    "......."
+  ],
+  "items": [
+    ".F300F.",
+    "FF310FF",
+    ".F330F."
+  ],
+  "teleporters": [  ],
+  "doors": [  ],
+  "conveyors": [  ],
+  "lazySusans": [  ],
+  "dots": [  ],
+  "animals": [  ],
+  "knights": [  ],
+  "clocks": [  ],
+  "lasers": [  ],
+  "mirrors": [  ],
+  "rockets": [  ],
+  "generator": {
+    "generateLetters": false,
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "animalType": "Default",
+    "freq": [
+      [33.3,"dot",0],
+      [33.3,"dot",1],
+      [33.3,"dot",3]
+    ]
+  },
+  "goals": {
+    "dots": {
+      "0": 25,
+      "1": 25,
+      "3": 25
+    },
+    "maxMoves": 21
+  },
+  "id": 154,
+  "lastModified": "1446235171477"
+}

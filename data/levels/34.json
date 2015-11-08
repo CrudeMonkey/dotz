@@ -1,0 +1,76 @@
+{
+  "id": 34,
+  "name": "Animal Instincts",
+  "creator": "Enno",
+  "description": "White Eyes move randomly. Blue Eyes are scared <br>and move away from your last move.<br>Red Eyes come closer.",
+  "folder": "Intro",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "????????",
+    ".??????.",
+    "????????",
+    "?????.??",
+    "??.?????",
+    "????????",
+    ".??????.",
+    "????????"
+  ],
+  "teleporters": [  ],
+  "doors": [  ],
+  "lazySusans": [  ],
+  "animals": [
+    {"p":[0,1],"strength":20,"color":0,"type":"Default"},
+    {"p":[7,1],"strength":20,"color":1,"type":"Default"},
+    {"p":[5,3],"strength":20,"color":2,"type":"Scared"},
+    {"p":[2,4],"strength":20,"color":2,"type":"Scared"},
+    {"p":[0,6],"strength":20,"color":4,"type":"Follow"},
+    {"p":[7,6],"strength":20,"color":3,"type":"Follow"}
+  ],
+  "knights": [  ],
+  "clocks": [  ],
+  "generator": {
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "animalType": "Default",
+    "freq": [
+      [16.6,"dot",0],
+      [16.6,"dot",1],
+      [16.6,"dot",2],
+      [16.6,"dot",3],
+      [16.6,"dot",4],
+      [4.4,"wild"],
+      [12.4,"anchor"]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "anchors": 8,
+    "maxMoves": 30
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "id": 32,
+  "name": "Ice Breaker",
+  "creator": "Enno",
+  "description": "Melt the ice by connecting dots on top of it.<br>The darker the color, the longer it takes.<br>Usually it takes 3 times.",
+  "folder": "Intro",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    ".3....3.",
+    "........",
+    ".3.66.3.",
+    "...66...",
+    ".3.66.3.",
+    "........",
+    ".3....3."
+  ],
+  "items": [
+    "????????",
+    "????????",
+    "????????",
+    "????????",
+    "????????",
+    "????????",
+    "????????",
+    "????????"
+  ],
+  "teleporters": [  ],
+  "doors": [  ],
+  "lazySusans": [  ],
+  "animals": [  ],
+  "knights": [  ],
+  "clocks": [  ],
+  "generator": {
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "animalType": "Default",
+    "freq": [
+      [25,"dot",0],
+      [25,"dot",1],
+      [25,"dot",3],
+      [25,"dot",4]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "maxMoves": 30,
+    "ice": -1
+  }
+}

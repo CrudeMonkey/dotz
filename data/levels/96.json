@@ -1,0 +1,59 @@
+{
+  "id": 96,
+  "name": "Two Dots 20",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Two Dots",
+  "numColumns": 5,
+  "numRows": 4,
+  "grid": [
+    ".....",
+    ".....",
+    ".....",
+    "....."
+  ],
+  "ice": [
+    ".....",
+    ".....",
+    ".....",
+    "....."
+  ],
+  "items": [
+    "?????",
+    "?????",
+    "?????",
+    "?????"
+  ],
+  "teleporters": [  ],
+  "doors": [  ],
+  "lazySusans": [  ],
+  "animals": [  ],
+  "knights": [  ],
+  "clocks": [  ],
+  "lasers": [  ],
+  "mirrors": [  ],
+  "rockets": [  ],
+  "generator": {
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "animalType": "Default",
+    "freq": [
+      [22.2,"dot",1],
+      [22.2,"dot",2],
+      [22.2,"dot",3],
+      [22.2,"dot",4],
+      [11.3,"anchor"]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "anchors": 10,
+    "maxMoves": 35
+  },
+  "lastModified": "1445545102031"
+}
