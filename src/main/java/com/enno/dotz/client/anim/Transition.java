@@ -27,6 +27,11 @@ public abstract class Transition implements IAnimationCallback
         this.item = item;
     }
     
+    public boolean containsItem(Item item)
+    {
+        return this.item == item;
+    }
+    
     @Override
     public void onStart(IAnimation animation, IAnimationHandle handle)
     {

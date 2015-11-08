@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.ait.lienzo.client.core.animation.IAnimationCallback;
 import com.ait.lienzo.client.core.shape.Layer;
 import com.enno.dotz.client.Cell;
 import com.enno.dotz.client.Cell.ChangeColorCell;
@@ -47,7 +48,17 @@ public class GetTransitions
         {
             for (Sound s : m_sounds)
                 s.play();
-        }        
+        }
+        
+        public boolean containsItem(Item item)
+        {
+            for (IAnimationCallback cb : m_list)
+            {
+                if (cb instanceof Transition && ((Transition) cb).containsItem(item))
+                    return true;
+            }
+            return false;
+        }
     }
     
     private Context ctx;
@@ -83,12 +94,21 @@ public class GetTransitions
             }
         };
         
-        boolean looping = true;
-        while (looping)
+        while (true)
         {
-            while (true)
+            m_list = new DropTransitionList(layer, dropDuration);
+
+            for (int col = 0; col < cfg.numColumns; col++)
             {
-                m_list = new DropTransitionList(layer, dropDuration);
+                //Debug.p("start col=" + col);
+                
+                Pt p = new Pt(col, cfg.numRows - 1);
+                trail(p, DOWN, null);
+            }
+            
+            if (m_roll)
+            {
+                checkRolls();
                 
                 for (int col = 0; col < cfg.numColumns; col++)
                 {
@@ -97,27 +117,12 @@ public class GetTransitions
                     Pt p = new Pt(col, cfg.numRows - 1);
                     trail(p, DOWN, null);
                 }
-                
-                if (m_roll)
-                    checkRolls();
-                
-                if (m_list.getTransitions().size() > 0)
-                    animList.add(m_list);
-                else
-                    break;
             }
-            
-            if (m_roll)
-            {            
-                m_list = new DropTransitionList(layer, dropDuration);
-                checkRolls();
-                if (m_list.getTransitions().size() > 0)
-                    animList.add(m_list);
-                else
-                    looping = false;
-            }
+
+            if (m_list.getTransitions().size() > 0)
+                animList.add(m_list);
             else
-                looping = false;
+                break;
         }
         
         return animList;
@@ -135,8 +140,11 @@ public class GetTransitions
                 if (cell.isLocked() || cell.item == null)
                     continue;
                 
-//                if (nearBottom(col, row) || hasItemBelow(col, row))  // bottom row or only holes below
-//                {
+                if (m_list.containsItem(cell.item))
+                    continue;
+                
+                if (isSolidBelow(col, row))  // bottom row or only holes below
+                {
                     int dx = m_lastDx == 0 ? 1 : -m_lastDx;                    
                     if (checkRoll(col, row, dx))
                     {
@@ -148,9 +156,19 @@ public class GetTransitions
                         m_lastDx = -dx;
                         continue;
                     }
-//                }
+                }
             }
         }
+    }
+    
+    protected boolean didCell(Cell cell)
+    {
+        return m_roll && cell.item != null && m_list.containsItem(cell.item);
+    }
+    
+    protected boolean didItem(Item item)
+    {
+        return m_roll && m_list.containsItem(item);
     }
     
     protected boolean checkRoll(int col, int row, int dx)
@@ -162,10 +180,6 @@ public class GetTransitions
         if (under.canBeFilled())
             return false;
         
-        Cell next = state.cell(col + dx, row);
-        if (next.item != null && !next.isLocked())
-            return false;
-        
         Cell below = state.cell(col + dx, row + 1);
         if (!below.canBeFilled())
             return false;
@@ -175,13 +189,36 @@ public class GetTransitions
         return true;
     }
     
-    protected boolean hasItemBelow(int col, int row)
+    protected boolean isSolidBelow(int col, int row)
     {
-        Cell cell = state.cell(col, row + 1);
-        if (cell.item != null)
+        Cell c  = state.cell(col,  row);
+        if (c.isTeleportSource())
+        {
+            Teleport src = (Teleport) c;
+            Cell target = state.cell(src.getOtherCol(), src.getOtherRow());
+            if (target.item == null)
+                return false;
+            else
+                return isSolidBelow(src.getOtherCol(), src.getOtherRow());
+        }
+        
+        if (row == state.numRows - 1)
             return true;
         
-        return false;
+        Cell cell = state.cell(col, row + 1);
+        if (cell.isLocked())
+            return true;
+        
+        if (cell instanceof Hole)
+            return isSolidBelow(col, row + 1);
+        
+        if (cell.isLocked())
+            return true;
+        
+        if (cell.item == null)
+            return false;
+        
+        return isSolidBelow(col, row + 1);
     }
     
     protected void trail(Pt p, DropDirection dir, Pt prev)
@@ -201,7 +238,7 @@ public class GetTransitions
         }
         
         Cell src = state.cell(p.col, p.row);
-        if (src.canDrop() && dir != NOT_ALLOWED)
+        if (!didCell(src) && src.canDrop() && dir != NOT_ALLOWED)
         {
             if (src.isTeleportSource())
             {
@@ -229,7 +266,7 @@ public class GetTransitions
         {
             List<Pt> slideSources = getSlideSources(p);
             DropDirection fillDir = NOT_ALLOWED;
-            if (src.canBeFilled())
+            if (!didCell(src) && src.canBeFilled())
             {
                 // who's gonna fill?
                 List<Pt> fillers = getSlideFillers(slideSources);

@@ -9,11 +9,11 @@
   "grid": [
     "........",
     "........",
-    ".XXXXXXX",
-    ".XXXXXXX",
-    ".XXXXXXX",
-    "X.XXXXX.",
-    "XX.XXX..",
+    ".XXXXXX ",
+    ".XXXXXX ",
+    "..XXXXX ",
+    "X..XXXX.",
+    "XX..XX..",
     "XXX..XX."
   ],
   "ice": [
@@ -70,5 +70,5 @@
   "goals": {
     "dots": {    }
   },
-  "lastModified": "1446838637197"
+  "lastModified": "1447010840056"
 }

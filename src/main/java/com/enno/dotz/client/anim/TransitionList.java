@@ -14,7 +14,7 @@ public class TransitionList extends Callback
 {
     private static Logger logger = Logger.getLogger(TransitionList.class.getName());
     
-    private ParallelAnimation m_list;
+    protected ParallelAnimation m_list;
     private double m_duration;
     private String m_name;
     
@@ -31,7 +31,7 @@ public class TransitionList extends Callback
                 doNext(); // invoke next Callback in the CallbackChain
             }
         };
-    }
+    }    
     
     public boolean condition()
     {

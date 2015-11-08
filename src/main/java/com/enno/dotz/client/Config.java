@@ -34,7 +34,6 @@ public class Config
     public int numRows = 8;
     public int size = 50;               // size of grid cell (iPhone 320x480 - size=40)
 
-    //public int numColors = MAX_COLORS;
     public IColor[] colors = COLORS; //TODO define colors
 
     public double dropDuration = 120;               // animation speed of dropping dot

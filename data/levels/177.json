@@ -1,20 +1,20 @@
 {
-  "id": 172,
-  "name": "Test Swap Roll",
+  "id": 177,
+  "name": "Test Swap Roll 3",
   "creator": "Enno",
   "description": "",
   "folder": "Test",
   "numColumns": 8,
   "numRows": 8,
   "grid": [
+    "X......X",
     "........",
     "........",
-    "........",
-    "........",
-    "........",
-    "........",
-    "........",
-    "........"
+    ".....-.L",
+    ".....X.+",
+    "....R...",
+    "....X...",
+    "....X..."
   ],
   "ice": [
     "........",
@@ -27,28 +27,19 @@
     "........"
   ],
   "items": [
-    "........",
-    "........",
-    "........",
-    "........",
-    "........",
-    "........",
-    "........",
-    "........"
+    ".??????.",
+    "????????",
+    "????????",
+    "???????.",
+    "?????.??",
+    "????.???",
+    "????.???",
+    "????.???"
   ],
-  "teleporters": [  ],
-  "doors": [
-    {"p":[0,0],"strength":99},
-    {"p":[1,0],"strength":99},
-    {"p":[2,0],"strength":99},
-    {"p":[3,0],"strength":99},
-    {"p":[5,0],"strength":99},
-    {"p":[6,0],"strength":99},
-    {"p":[7,0],"strength":99},
-    {"p":[3,3],"strength":99},
-    {"p":[4,3],"strength":99},
-    {"p":[2,5],"strength":99}
+  "teleporters": [
+    {"from":[7,4],"to":[5,3]}
   ],
+  "doors": [  ],
   "conveyors": [  ],
   "lazySusans": [  ],
   "dots": [  ],
@@ -63,7 +54,7 @@
     "generateLetters": false,
     "swapMode": false,
     "rollMode": true,
-    "seed": 123,
+    "seed": -1,
     "fireGrowthRate": 1,
     "maxAnchors": 3,
     "initialDotsOnly": true,
@@ -83,5 +74,5 @@
   "goals": {
     "dots": {    }
   },
-  "lastModified": "1447003136393"
+  "lastModified": "1447010942070"
 }
