@@ -24,6 +24,7 @@ import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Clock;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.DotBomb;
+import com.enno.dotz.client.item.Egg;
 import com.enno.dotz.client.item.Fire;
 import com.enno.dotz.client.item.Item;
 import com.enno.dotz.client.item.Knight;
@@ -314,6 +315,9 @@ public class LevelParser
 
         if (json.isInteger("lasers"))
             goal.setLasers(json.getAsInteger("lasers"));
+        
+        if (json.isInteger("birds"))
+            goal.setBirds(json.getAsInteger("birds"));
 
         if (json.isInteger("mirrors"))
             goal.setMirrors(json.getAsInteger("mirrors"));
@@ -347,43 +351,6 @@ public class LevelParser
         return Direction.NONE;
     }
 
-//    protected Item item(NObject row, String prop)
-//    {
-//        if (row.isString(prop))
-//            return item(row.getAsString(prop));
-//        else if (row.isInteger(prop))
-//            return item(row.getAsInteger(prop));
-//        
-//        return null;                    
-//    }
-    
-//    protected Item item(String s)
-//    {
-//        if (s.equals("random"))
-//        {
-//            return new RandomItem();
-//        }
-//        else if (s.equals("wild"))
-//        {
-//            return new Wild();
-//        }
-//        else if (s.equals("fire"))
-//        {
-//            return new Fire();
-//        }
-//        else if (s.equals("anchor"))
-//        {
-//            return new Anchor();
-//        }
-//        
-//        return null;
-//    }
-    
-//    protected Item item(int color)
-//    {
-//        return new Dot(color);
-//    }
-    
     private Pt pt(NArray a)
     {
         return new Pt(a.getAsInteger(0), a.getAsInteger(1));
@@ -432,6 +399,7 @@ public class LevelParser
                     case 'F': item = new Fire(); break;
                     case 'A': item = new Anchor(); break;
                     case 'Y': item = new YinYang(); break;
+                    case 'E': item = new Egg(); break;
                     case '?': item = new RandomItem(); break;
                     default: 
                         if (Character.isDigit(c))
@@ -538,6 +506,10 @@ public class LevelParser
                 else if (item.equals("yinyang"))
                 {
                     g.add(new ItemFrequency(new YinYang(), f));
+                }
+                else if (item.equals("egg"))
+                {
+                    g.add(new ItemFrequency(new Egg(), f));
                 }
                 else if (item.equals("wild"))
                 {
@@ -786,6 +758,8 @@ public class LevelParser
                     ch = '?';
                 else if (cell.item instanceof YinYang)
                     ch = 'Y';
+                else if (cell.item instanceof Egg)
+                    ch = 'E';
                 
                 itemLine += ch;                
                 
@@ -871,6 +845,9 @@ public class LevelParser
         if (g.getLasers() != 0)
             p.put("lasers", g.getLasers());
         
+        if (g.getBirds() != 0)
+            p.put("birds", g.getBirds());
+        
         if (g.getMirrors() != 0)
             p.put("mirrors", g.getMirrors());
         
@@ -948,6 +925,8 @@ public class LevelParser
             a.push("rocket");
         else if (item instanceof YinYang)
             a.push("yinyang");
+        else if (item instanceof Egg)
+            a.push("egg");
         else if (item instanceof DotBomb)
             a.push("bomb");
         else if (item instanceof Dot)

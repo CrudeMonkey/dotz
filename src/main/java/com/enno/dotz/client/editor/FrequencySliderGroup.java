@@ -13,6 +13,7 @@ import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Clock;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.DotBomb;
+import com.enno.dotz.client.item.Egg;
 import com.enno.dotz.client.item.Fire;
 import com.enno.dotz.client.item.Item;
 import com.enno.dotz.client.item.Knight;
@@ -82,6 +83,10 @@ public class FrequencySliderGroup extends HLayout
         m_list.add(yinyang);
         left.addMember(yinyang);
 
+        FrequencySlider egg = createEggSlider(index++);
+        m_list.add(egg);
+        left.addMember(egg);
+
         FrequencySlider knight = createKnightSlider(index++);
         m_list.add(knight);
         right.addMember(knight);
@@ -145,6 +150,8 @@ public class FrequencySliderGroup extends HLayout
                         mirror.initFrequency(freq);
                     else if (item instanceof YinYang)
                         yinyang.initFrequency(freq);
+                    else if (item instanceof Egg)
+                        egg.initFrequency(freq);
                     else if (item instanceof DotBomb)
                         bomb.initFrequency(freq);
                     else if (item instanceof Animal)
@@ -255,6 +262,15 @@ public class FrequencySliderGroup extends HLayout
     protected FrequencySlider createYinYangSlider(int index)
     {
         YinYang dot = new YinYang();
+        dot.setContext(ctx);
+        return new FrequencySlider(index, dot, this) {
+            
+        };
+    }
+
+    protected FrequencySlider createEggSlider(int index)
+    {
+        Egg dot = new Egg();
         dot.setContext(ctx);
         return new FrequencySlider(index, dot, this) {
             

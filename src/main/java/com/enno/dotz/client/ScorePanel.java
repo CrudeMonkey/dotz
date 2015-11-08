@@ -23,6 +23,7 @@ import com.enno.dotz.client.item.Anchor;
 import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Clock;
 import com.enno.dotz.client.item.Dot;
+import com.enno.dotz.client.item.Egg;
 import com.enno.dotz.client.item.Fire;
 import com.enno.dotz.client.item.Knight;
 import com.enno.dotz.client.item.Laser;
@@ -188,6 +189,10 @@ public class ScorePanel extends LienzoPanel
         need = goal.getLasers();
         if (need != 0)
             m_list.add(new LaserGoal(need, ctx));
+        
+        need = goal.getBirds();
+        if (need != 0)
+            m_list.add(new BirdGoal(need, ctx));
         
         need = goal.getMirrors();
         if (need != 0)
@@ -715,6 +720,36 @@ public class ScorePanel extends LienzoPanel
         {
             int goal = m_goal;
             int got = ctx.score.getShortCircuitedLasers();
+            
+            if (got >= goal)
+                setCompleted();
+            else
+                setText(got + " / " + goal);
+        }
+    }
+    
+    public static class BirdGoal extends GoalItem
+    {
+        private int m_goal;
+        
+        public BirdGoal(int need, Context ctx)
+        {
+            super(ctx);
+            
+            m_goal = need;
+        }
+        
+        protected IPrimitive<?> createShape()
+        {
+            Egg egg = new Egg(true);
+            egg.setContext(ctx);
+            return egg.createShape(SHAPE_SIZE * 0.8);           
+        }
+        
+        protected void updateText()
+        {
+            int goal = m_goal;
+            int got = ctx.score.getBirds();
             
             if (got >= goal)
                 setCompleted();

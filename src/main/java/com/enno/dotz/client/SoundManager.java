@@ -28,6 +28,8 @@ public class SoundManager
         LIGHT_FUSE("316682__theneedle-tv__sparkler-fuse-nm-1.wav"),
         START_ROCKET("140726__j1987__tiny-rocket-clipped.mp3"),
         MISS("125106__oddworld__sfx-tech-gui-select-01.wav"),
+        EGG_CRACK("250133__fngersounds__egg-cracking_clipped.wav"),
+        BIRD("170811__esperar__bird-2-c_clipped.wav"),
         ZAP("268168__shaun105__laser.wav");
 //        BLIP("blip.wav");
         

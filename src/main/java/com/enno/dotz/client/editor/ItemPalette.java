@@ -9,7 +9,7 @@ import com.enno.dotz.client.item.Anchor;
 import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Clock;
 import com.enno.dotz.client.item.Dot;
-import com.enno.dotz.client.item.DotBomb;
+import com.enno.dotz.client.item.Egg;
 import com.enno.dotz.client.item.Fire;
 import com.enno.dotz.client.item.Item;
 import com.enno.dotz.client.item.Knight;
@@ -25,7 +25,7 @@ public class ItemPalette extends Palette<Object>
 {
     public ItemPalette()
     {
-        super(40, ItemButton.SIZE, 6, 4);
+        super(40, ItemButton.SIZE, 6, 5);
         
         ctx.backgroundLayer = new Layer();
         add(ctx.backgroundLayer);
@@ -51,7 +51,9 @@ public class ItemPalette extends Palette<Object>
         addButton(new Clock(11), 2, 3);
         addButton(new Laser(Direction.EAST), 3, 3);
         addButton(new Mirror(false), 4, 3);        
-        addButton(new YinYang(), 5, 4);
+        addButton(new YinYang(), 5, 3);
+
+        addButton(new Egg(), 0, 4);
     }
     
     private void addButton(Object cell, int col, int row)

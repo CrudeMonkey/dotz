@@ -37,6 +37,7 @@ public class EditGoalsTab extends VLayout
     private All m_mirrors;
     private All m_rockets;
     private Num m_lasers;
+    private Num m_birds;
 
     private DotAll[] m_dots = new DotAll[Config.MAX_COLORS];
     private FormItem[] m_fields;
@@ -82,6 +83,19 @@ public class EditGoalsTab extends VLayout
             public void initGoal(Goal goal)
             {
                 val(goal.getLasers());
+            }
+        };
+        m_birds = new Num("Birds") {
+            @Override
+            public void prepareSave(Goal goal)
+            {
+                goal.setBirds(val());
+            }
+
+            @Override
+            public void initGoal(Goal goal)
+            {
+                val(goal.getBirds());
             }
         };
         m_circuits = new All("Circuits") {
@@ -235,13 +249,13 @@ public class EditGoalsTab extends VLayout
         ctx.cfg = new Config();      //TODO could copy the colors later
         
         m_fields = new FormItem[] {
-                new DotImageItem(0, ctx), m_dots[0], m_anchors,  m_time,
+                new DotImageItem(0, ctx), m_dots[0], m_anchors,  m_birds,
                 new DotImageItem(1, ctx), m_dots[1], m_ice,      m_lasers,   
                 new DotImageItem(2, ctx), m_dots[2], m_animals,  m_rockets,
                 new DotImageItem(3, ctx), m_dots[3], m_doors,    m_knights,
                 new DotImageItem(4, ctx), m_dots[4], m_fire,     m_clocks,
                 new DotImageItem(5, ctx), m_dots[5], m_circuits, m_mirrors,
-                m_moves, m_score
+                m_moves, m_score, m_time
         };
         
         form.setFields(m_fields);

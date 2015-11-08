@@ -51,6 +51,8 @@ public class Score
     
     private int m_rocketsInGrid;
     private int m_explodedRockets;
+    
+    private int m_birds;
 
     private int m_score;
     private int m_moves;    
@@ -157,6 +159,16 @@ public class Score
         m_anchorsInGrid--;
     }
 
+    public void addBird()
+    {
+        m_birds++;
+    }
+    
+    public int getBirds()
+    {
+        return m_birds;
+    }
+    
     public int getScore()
     {
         return m_score;

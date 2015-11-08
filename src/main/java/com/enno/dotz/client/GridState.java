@@ -42,6 +42,7 @@ import com.enno.dotz.client.item.Clock;
 import com.enno.dotz.client.item.ColorBomb;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.DotBomb;
+import com.enno.dotz.client.item.Egg;
 import com.enno.dotz.client.item.Explody;
 import com.enno.dotz.client.item.Fire;
 import com.enno.dotz.client.item.Item;
@@ -972,6 +973,8 @@ public class GridState
         public static final int WRAP_BOMB = 8;
         public static final int EXPLODY_5 = 9;
         public static final int KNIGHT = 10;
+        public static final int EGG = 11;
+        public static final int CRACKED_EGG = 12;
 
         private int m_type;
         private Cell m_special;
@@ -985,7 +988,7 @@ public class GridState
             
             addPoints(type);
             
-            if (m_type != KNIGHT)
+            if (m_type != KNIGHT && m_type != EGG && m_type != CRACKED_EGG)
                 m_color = determineColor();
         }
         
@@ -1126,6 +1129,7 @@ public class GridState
         private List<SwapCombo> m_hcombos = new ArrayList<SwapCombo>();
         private List<SwapCombo> m_vcombos = new ArrayList<SwapCombo>();
         private List<SwapCombo> m_combos = new ArrayList<SwapCombo>();
+        private List<SwapCombo> m_eggCombos = new ArrayList<SwapCombo>();
         
         private boolean m_swapped;
         private Cell[] m_swaps = new Cell[2];
@@ -1164,7 +1168,85 @@ public class GridState
             }
         }
         
-        protected void animate2(Runnable whenDone)
+        public boolean hasEggCombos()
+        {
+            return m_eggCombos.size() > 0;
+        }
+        
+        protected void animate2(final Runnable whenDone)
+        {
+            if (hasEggCombos())
+            {
+                TransitionList list = new TransitionList("eggs", ctx.dotLayer, 300) {
+                    @Override
+                    public void done()
+                    {
+                        whenDone.run();
+                    }
+                };
+                
+                boolean playCrack = false;
+                boolean playBird = false;
+                for (final SwapCombo combo : m_eggCombos)
+                {
+                    if (combo.getType() == SwapCombo.EGG)
+                        playCrack = true;
+                    else
+                        playBird = true;
+                    
+                    final Cell special = combo.getSpecial();
+                    double x = m_state.x(special.col);
+                    double y = m_state.y(special.row);
+                    boolean first = true;
+                    for (final Cell c : combo)
+                    {
+                        if (c != special)
+                        {
+                            final boolean theFirst = first;
+                            first = false;
+                            
+                            list.add(new DropTransition(m_state.x(c.col), m_state.y(c.row), x, y, c.item) {
+                                @Override
+                                public void afterEnd()
+                                {
+                                    c.item.removeShapeFromLayer(ctx.dotLayer);
+                                    c.item = null;
+                                    
+                                    if (theFirst)
+                                    {
+                                        if (combo.getType() == SwapCombo.EGG)
+                                        {
+                                            special.item.removeShapeFromLayer(ctx.dotLayer);
+                                            addItem(special, new Egg(true));
+                                        }
+                                        else
+                                        {
+                                            special.item.removeShapeFromLayer(ctx.dotLayer);
+                                            special.item = null;
+                                            ctx.score.addBird();
+                                            //TODO animate bird
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
+                
+                if (playBird)
+                    Sound.BIRD.play();
+                if (playCrack)
+                    Sound.EGG_CRACK.play();
+                
+                list.run();
+                
+                return;
+            }
+            else
+                animate3(whenDone);
+        }
+        
+        protected void animate3(Runnable whenDone)
         {
             switch (m_combos.get(0).getType())
             {
@@ -1377,7 +1459,7 @@ public class GridState
             if (a.item == null || a.isLocked())
                 return false;
             
-            return isColorDot(a.item) || a.item instanceof ColorBomb || a.item instanceof Anchor;
+            return isColorDot(a.item) || a.item instanceof ColorBomb || a.item instanceof Anchor || a.item instanceof Egg;
         }
                 
         public boolean canSwap(Cell a, Cell b)
@@ -1386,7 +1468,7 @@ public class GridState
             if (b.item == null || b.isLocked())
                 return false;
             
-            if (!(isColorDot(b.item) || b.item instanceof ColorBomb || b.item instanceof Anchor || b.item instanceof Mirror))
+            if (!(isColorDot(b.item) || b.item instanceof ColorBomb || b.item instanceof Anchor || b.item instanceof Mirror || b.item instanceof Egg))
                 return false;
             
             if (!validSwap(a.item, b.item) && !validSwap(b.item, a.item))
@@ -1401,7 +1483,8 @@ public class GridState
             m_swaps[1] = b;
             
             findCombos();
-            if (m_combos.size() == 0)
+            findEggCombos();
+            if (m_combos.size() == 0 && m_eggCombos.size() == 0)
             {
                 x = a.item;
                 a.item = b.item;
@@ -1437,7 +1520,8 @@ public class GridState
         public boolean getTransitions()
         {
             findCombos();
-            return m_combos.size() > 0;
+            findEggCombos();
+            return m_combos.size() > 0 || m_eggCombos.size() > 0;
         }
         
         protected void findCombos()
@@ -1502,7 +1586,7 @@ public class GridState
                         combo.add(c2);
                     }
                     
-                    if (combo.size() >= 3&& !combo.isAllWild())
+                    if (combo.size() >= 3 && !combo.isAllWild())
                     {
                         m_vcombos.add(combo);
                         row += combo.size() - 1;
@@ -1523,6 +1607,117 @@ public class GridState
             {
                 Debug.p("findCombos", e);
             }
+        }
+        
+        public void findEggCombos()
+        {
+            // Horizontal combo            
+            for (int row = 0; row < m_state.numRows; row++)
+            {
+                for (int col = 0; col < m_state.numColumns; col++)
+                {
+                    Cell c = m_state.cell(col, row);
+                    if (c.isLocked() || !(c.item instanceof Egg || c.item instanceof Wild))
+                        continue;
+                    
+                    Boolean cracked = null;
+                    if (c.item instanceof Egg)
+                    {
+                        Egg egg = (Egg) c.item;
+                        cracked = egg.isCracked();
+                    }
+
+                    SwapCombo combo = new SwapCombo();
+                    combo.add(c);
+                    
+                    for (int col2 = col + 1; col2 < m_state.numColumns; col2++)                        
+                    {
+                        Cell c2 = m_state.cell(col2, row);
+                        if (c2.isLocked() || !(c2.item instanceof Egg || c2.item instanceof Wild))
+                            break;
+                        
+                        if (c2.item instanceof Egg)
+                        {
+                            Egg egg2 = (Egg) c2.item;
+                            if (cracked == null)
+                            {
+                                cracked = egg2.isCracked();
+                            }
+                            else if (egg2.isCracked() != cracked)
+                                break;
+                        }
+                        
+                        combo.add(c2);
+                    }
+                    
+                    if (combo.size() >= 3)
+                    {
+                        identify(combo);
+                        combo.setType(cracked ? SwapCombo.CRACKED_EGG : SwapCombo.EGG);
+                        m_eggCombos.add(combo);
+                        col += combo.size() - 1;
+                    }
+                }
+            }
+            
+            // Vertical combos
+            for (int col = 0; col < m_state.numColumns; col++)
+            {
+                for (int row = 0; row < m_state.numRows; row++)
+                {
+                    Cell c = m_state.cell(col, row);
+                    if (eggCombosContain(c) || c.isLocked() || !(c.item instanceof Egg || c.item instanceof Wild))
+                        continue;
+                    
+                    Boolean cracked = null;
+                    if (c.item instanceof Egg)
+                    {
+                        Egg egg = (Egg) c.item;
+                        cracked = egg.isCracked();
+                    }
+
+                    SwapCombo combo = new SwapCombo();
+                    combo.add(c);
+                    
+                    for (int row2 = row + 1; row2 < m_state.numRows; row2++)                        
+                    {
+                        Cell c2 = m_state.cell(col, row2);
+                        if (c2.isLocked() || !(c2.item instanceof Egg || c2.item instanceof Wild))
+                            break;
+                        
+                        if (c2.item instanceof Egg)
+                        {
+                            Egg egg2 = (Egg) c2.item;
+                            if (cracked == null)
+                            {
+                                cracked = egg2.isCracked();
+                            }
+                            else if (egg2.isCracked() != cracked)
+                                break;
+                        }
+                        
+                        combo.add(c2);
+                    }
+                    
+                    if (combo.size() >= 3)
+                    {
+                        identify(combo);
+                        combo.setType(cracked ? SwapCombo.CRACKED_EGG : SwapCombo.EGG);
+                        m_eggCombos.add(combo);
+                        row += combo.size() - 1;
+                    }                    
+                }
+            }
+        }
+        
+        protected boolean eggCombosContain(Cell c)
+        {
+            for (SwapCombo combo : m_eggCombos)
+            {
+                if (combo.contains(c))
+                    return true;
+            }
+            return false;
         }
         
         protected boolean specialSwap(Cell a, Cell b)

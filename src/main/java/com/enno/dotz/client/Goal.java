@@ -18,6 +18,7 @@ public class Goal
     protected int m_lasers;
     protected int m_mirrors;
     protected int m_rockets;
+    protected int m_birds;
     
     protected int m_score;
     protected int m_time;
@@ -157,6 +158,16 @@ public class Goal
         m_mirrors = goal;
     }
     
+    public int getBirds()
+    {
+        return m_birds;
+    }
+
+    public void setBirds(int birds)
+    {
+        m_birds = birds;
+    }
+
     public int getMirrors()
     {
         return m_mirrors;
