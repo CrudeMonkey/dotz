@@ -70,6 +70,12 @@ public abstract class EditLevelDialog extends MXWindow
             {
                 return m_props.isLetterMode();
             }
+            
+            @Override
+            protected boolean isDominoMode()
+            {
+                return m_props.isDominoMode();
+            }
         };
         
         m_tabs.addTab("Layout", m_layout);  

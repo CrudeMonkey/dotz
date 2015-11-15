@@ -8,6 +8,7 @@ import com.enno.dotz.client.Direction;
 import com.enno.dotz.client.item.Anchor;
 import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Clock;
+import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.Egg;
 import com.enno.dotz.client.item.Fire;
@@ -54,6 +55,7 @@ public class ItemPalette extends Palette<Object>
         addButton(new YinYang(), 5, 3);
 
         addButton(new Egg(), 0, 4);
+        addButton(new Domino(), 1, 4);
     }
     
     private void addButton(Object cell, int col, int row)

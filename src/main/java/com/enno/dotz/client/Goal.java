@@ -19,6 +19,7 @@ public class Goal
     protected int m_mirrors;
     protected int m_rockets;
     protected int m_birds;
+    protected int m_dominoes;
     
     protected int m_score;
     protected int m_time;
@@ -186,5 +187,15 @@ public class Goal
     public boolean isOutOfMoves(Score score)
     {
         return m_maxMoves != 0 && score.getMoves() >= m_maxMoves;
+    }
+
+    public int getDominoes()
+    {
+        return m_dominoes;
+    }
+    
+    public void setDominoes(int goal)
+    {
+        m_dominoes = goal;
     }
 }

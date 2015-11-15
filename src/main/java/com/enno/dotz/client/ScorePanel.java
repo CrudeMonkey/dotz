@@ -22,6 +22,7 @@ import com.enno.dotz.client.Cell.Door;
 import com.enno.dotz.client.item.Anchor;
 import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Clock;
+import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.Egg;
 import com.enno.dotz.client.item.Fire;
@@ -202,10 +203,14 @@ public class ScorePanel extends LienzoPanel
         if (need != 0)
             m_list.add(new RocketGoal(need, ctx));
         
+        need = goal.getDominoes();
+        if (need != 0)
+            m_list.add(new DominoGoal(need, ctx));
+
         need = goal.getScore();
         if (need != 0)
             m_list.add(new ScoreGoal(need, ctx));
-        
+
         // Layout the GoalItems
         int cols = Math.max(8, ctx.cfg.numColumns);
         int rows = m_list.size() > cols ? 2 : 1;
@@ -750,6 +755,36 @@ public class ScorePanel extends LienzoPanel
         {
             int goal = m_goal;
             int got = ctx.score.getBirds();
+            
+            if (got >= goal)
+                setCompleted();
+            else
+                setText(got + " / " + goal);
+        }
+    }
+    
+    public static class DominoGoal extends GoalItem
+    {
+        private int m_goal;
+        
+        public DominoGoal(int need, Context ctx)
+        {
+            super(ctx);
+            
+            m_goal = need;
+        }
+        
+        protected IPrimitive<?> createShape()
+        {
+            Domino domino = new Domino(1, 2, true);
+            domino.setContext(ctx);
+            return domino.createShape(SHAPE_SIZE * 0.8);           
+        }
+        
+        protected void updateText()
+        {
+            int goal = m_goal;
+            int got = ctx.score.getExplodedDominoes();
             
             if (got >= goal)
                 setCompleted();

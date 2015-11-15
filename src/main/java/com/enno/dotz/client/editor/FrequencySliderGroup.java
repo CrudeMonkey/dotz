@@ -11,6 +11,7 @@ import com.enno.dotz.client.Generator.ItemFrequency;
 import com.enno.dotz.client.item.Anchor;
 import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Clock;
+import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.DotBomb;
 import com.enno.dotz.client.item.Egg;
@@ -107,6 +108,10 @@ public class FrequencySliderGroup extends HLayout
         m_list.add(bomb);
         right.addMember(bomb);
         
+        FrequencySlider domino = createDominoSlider(index++);
+        m_list.add(domino);
+        right.addMember(domino);
+        
         if (isNew)
         {
             for (FrequencySlider slider : dots)
@@ -154,6 +159,8 @@ public class FrequencySliderGroup extends HLayout
                         egg.initFrequency(freq);
                     else if (item instanceof DotBomb)
                         bomb.initFrequency(freq);
+                    else if (item instanceof Domino)
+                        domino.initFrequency(freq);
                     else if (item instanceof Animal)
                     {
                         int color = ((Animal) item).getColor();                    
@@ -280,6 +287,15 @@ public class FrequencySliderGroup extends HLayout
     protected FrequencySlider createBombSlider(int index)
     {
         DotBomb dot = new DotBomb(new Dot(0), 9);
+        dot.setContext(ctx);
+        return new FrequencySlider(index, dot, this) {
+            
+        };
+    }
+
+    protected FrequencySlider createDominoSlider(int index)
+    {
+        Domino dot = new Domino(3, 6, false);
         dot.setContext(ctx);
         return new FrequencySlider(index, dot, this) {
             

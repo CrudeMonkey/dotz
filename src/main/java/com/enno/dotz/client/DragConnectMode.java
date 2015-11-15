@@ -3,7 +3,6 @@ package com.enno.dotz.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ait.lienzo.client.core.animation.LayerRedrawManager;
 import com.ait.lienzo.client.core.event.NodeMouseDownEvent;
 import com.ait.lienzo.client.core.event.NodeMouseDownHandler;
 import com.ait.lienzo.client.core.event.NodeMouseMoveEvent;
@@ -16,14 +15,13 @@ import com.ait.lienzo.client.core.shape.Layer;
 import com.enno.dotz.client.SoundManager.Sound;
 import com.enno.dotz.client.anim.Pt;
 import com.enno.dotz.client.item.Animal;
+import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.DotBomb;
+import com.enno.dotz.client.item.Egg;
 import com.enno.dotz.client.item.Knight;
-import com.enno.dotz.client.item.Mirror;
-import com.enno.dotz.client.item.Rocket;
-import com.enno.dotz.client.item.YinYang;
+import com.enno.dotz.client.item.Wild;
 import com.enno.dotz.client.util.Debug;
-import com.google.gwt.event.shared.HandlerRegistration;
 
 public class DragConnectMode extends ConnectMode
 {
@@ -34,7 +32,9 @@ public class DragConnectMode extends ConnectMode
     protected int m_lastCellCol, m_lastCellRow;
     protected boolean m_isSquare = false;
     protected boolean m_isKnightMode;
+    protected boolean m_isEggMode;
     protected boolean m_isWordMode;
+    protected boolean m_isDominoMode;
     
     private boolean m_dragging;
     private double m_margin;
@@ -105,13 +105,16 @@ public class DragConnectMode extends ConnectMode
                 if (flipMirror(cell) || fireRocket(cell) || reshuffle(cell))
                     return;
                 
-                if (!cell.canConnect(null, m_isWordMode) && !(cell.item instanceof Knight))
+                //TODO simplify
+                if (!cell.canConnect(null, m_isWordMode) && !(!cell.isLocked() && (cell.item instanceof Knight || cell.item instanceof Egg)))
                     return;
                 
                 //Debug.p("dragging=true");
                 m_dragging = true;
                 
                 m_isKnightMode = cell.item instanceof Knight;
+                m_isEggMode = cell.item instanceof Egg;
+                m_isDominoMode = cell.item instanceof Domino;
                 
                 m_layer.add(m_dragLine);
                 
@@ -193,11 +196,24 @@ public class DragConnectMode extends ConnectMode
         }
         else
         {
-            if (m_cells.size() < 2 || ctx.isWild(m_color))
-                return;
-        
-            if (m_isKnightMode && m_cells.size() < 3)
-                return;        
+            if (m_isEggMode)
+            {
+                if (m_cells.size() < 3)
+                    return;
+            }
+            else if (m_isDominoMode)
+            {
+                if (m_cells.size() < 2)
+                    return;
+            }
+            else
+            {
+                if (m_cells.size() < 2 || ctx.isWild(m_color))
+                    return;
+            
+                if (m_isKnightMode && m_cells.size() < 3)
+                    return;
+            }
         }
         
         stop(); // stop listening to user input
@@ -205,7 +221,7 @@ public class DragConnectMode extends ConnectMode
         Cell lastCell = m_cells.get(m_cells.size() - 1);
         ctx.lastMove = new Pt(lastCell.col, lastCell.row);
         
-        m_state.processChain(m_cells, m_isSquare, m_isKnightMode, m_isWordMode, word, m_color, new Runnable() {
+        m_state.processChain(m_cells, m_isSquare, m_isKnightMode, m_isWordMode, m_isEggMode, word, m_color, new Runnable() {
             public void run()
             {
                 start(); // next move
@@ -229,6 +245,13 @@ public class DragConnectMode extends ConnectMode
             m_isSquare = false;
             m_dragLine.pop();
             popCell();
+            
+            if (m_isDominoMode)
+            {
+                Domino.Chain ch = new Domino.Chain(m_cells);            
+                ch.updateDragLine(m_dragLine, m_state);
+            }
+            
             m_dragLine.adjust(m_state.x(col), m_state.y(row));
             return;
         }
@@ -297,17 +320,61 @@ public class DragConnectMode extends ConnectMode
             {
                 // neighbor cell (horizontal/vertical)
                 Cell neighbor = m_state.cell(col,  row);
-                if (!neighbor.canConnect(m_color, m_isWordMode))
-                    return;
                 
-                if (didCell(col, row))
+                if (m_isDominoMode)
                 {
-                    if (ctx.isWild(m_color)) // can't make a square of all wildcards
+                    if (didCell(col, row) || neighbor.isLocked() || !(neighbor.item instanceof Domino))
                         return;
                     
-                    // made a square
-                    m_isSquare = true;
-                    Debug.p("square=true");
+                    Domino.Chain ch = new Domino.Chain(m_cells);
+                    if (!ch.connect(neighbor))
+                        return;
+                    
+                    ch.updateDragLine(m_dragLine, m_state);
+                    pushCell(neighbor, col, row);
+                    return;
+                    //TODO didCell
+                }
+                else if (m_isEggMode)
+                {
+                    if (didCell(col, row) || neighbor.isLocked() || !(neighbor.item instanceof Egg || neighbor.item instanceof Wild))
+                        return;
+                    
+                    Boolean cracked = isCracked();
+                    if (neighbor.item instanceof Egg)
+                    {
+                        Egg egg = (Egg) neighbor.item;
+                        if (cracked != null && cracked != egg.isCracked())
+                            return;
+                    }
+                }
+                else
+                {
+                    // If all cells are Wild and it's an Egg, switch to Egg mode
+                    if (neighbor.item instanceof Egg)
+                    {
+                        for (Cell c : m_cells)
+                        {
+                            if (!(c.item instanceof Wild))
+                                return;
+                        }
+                        m_isEggMode = true;
+                    }
+                    else
+                    {
+                        if (!neighbor.canConnect(m_color, m_isWordMode))
+                            return;
+                        
+                        if (didCell(col, row))
+                        {
+                            if (ctx.isWild(m_color)) // can't make a square of all wildcards
+                                return;
+                            
+                            // made a square
+                            m_isSquare = true;
+                            Debug.p("square=true");
+                        }
+                    }
                 }
                 
                 // push cell
@@ -316,6 +383,16 @@ public class DragConnectMode extends ConnectMode
                 m_dragLine.add(0, 0);
             }
         }
+    }
+    
+    protected Boolean isCracked()
+    {
+        for (Cell cell : m_cells)
+        {
+            if (cell.item instanceof Egg)
+                return ((Egg) cell.item).isCracked();
+        }
+        return null;
     }
     
     protected boolean hasAnimals()
@@ -389,6 +466,11 @@ public class DragConnectMode extends ConnectMode
                 m_dragLine.setStrokeColor(cfg.connectColor(m_color));
             }
         }
+        else if (m_isEggMode || m_isDominoMode)
+        {
+            m_color = Config.WILD_ID;
+            m_dragLine.setStrokeColor(cfg.connectColor(m_color));
+        }
         else
         {
             Integer newColor = cell.item.getColor();
@@ -421,15 +503,40 @@ public class DragConnectMode extends ConnectMode
         m_lastCellCol = prevCell.col;
         m_lastCellRow = prevCell.row;
         
-        Integer newColor = Config.WILD_ID;
-        for (int i = m_isKnightMode ? 1 : 0; i < n; i++)
+        if (m_isEggMode)
         {
-            newColor = m_cells.get(i).item.getColor();                
-            if (!ctx.isWild(newColor))
-                break;
+            // If only wild cards left, then switch to regular mode
+            boolean allWild = true;
+            for (Cell cell : m_cells)
+            {
+                if (!(cell.item instanceof Wild))
+                {
+                    allWild = false;
+                    break;
+                }
+            }
+            if (allWild)
+            {
+                m_isEggMode = false;
+                m_color = Config.WILD_ID;
+            }
+        }
+        else if (m_isDominoMode)
+        {
+            m_color = Config.WILD_ID;
+        }
+        else
+        {
+            Integer newColor = Config.WILD_ID;
+            for (int i = m_isKnightMode ? 1 : 0; i < n; i++)
+            {
+                newColor = m_cells.get(i).item.getColor();                
+                if (!ctx.isWild(newColor))
+                    break;
+            }
+            m_color = newColor;
         }
         
-        m_color = newColor;
         m_dragLine.setStrokeColor(cfg.connectColor(m_color));
     }
     

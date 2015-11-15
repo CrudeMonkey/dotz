@@ -46,7 +46,7 @@ public class CellPalette extends Palette<Cell>
         addButton(new ConveyorCell(Direction.NORTH, -1), 1, 2);
         addButton(new ConveyorCell(Direction.NORTH, 0), 2, 2);
         addButton(new ConveyorCell(Direction.NORTH, 1), 3, 2);
-        addButton(new Rock(), 3, 2);
+        addButton(new Rock(), 4, 2);
     }
     
     private void addButton(Cell cell, int col, int row)

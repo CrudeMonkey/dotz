@@ -74,6 +74,8 @@ public class SwapConnectMode extends ConnectMode
                         if (m_start.col != col - 1 && m_start.col != col + 1)
                             return;
                     }
+                    else
+                        return;
                 }
                 
                 GetSwapMatches matches = new GetSwapMatches(ctx);

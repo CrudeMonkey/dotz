@@ -37,6 +37,7 @@ import com.enno.dotz.client.editor.ModePalette.RotateItem;
 import com.enno.dotz.client.editor.TeleportConnections.Link;
 import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Clock;
+import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.DotBomb;
 import com.enno.dotz.client.item.Item;
@@ -188,6 +189,7 @@ public abstract class EditLayoutTab extends VLayout
     }
     
     protected abstract boolean isLetterMode();
+    protected abstract boolean isDominoMode();
 
     public void replaceGrid(GridState state)
     {
@@ -297,6 +299,49 @@ public abstract class EditLayoutTab extends VLayout
     
     public void keyPressed(int x, int y, char c)
     {
+        GridState state = ctx.state;
+        int col = state.col(x);
+        int row = state.row(y);            
+        
+        if (!state.isValidCell(col, row))
+            return;
+            
+        Cell cell = state.cell(col, row);
+        
+        if (isDominoMode())
+        {
+            if (cell.item instanceof Domino)
+            {
+                Domino domino = (Domino) cell.item;
+                int[] num = { domino.num[0], domino.num[1] };
+                if (c >= '0' && c <= '9')
+                {
+                    num[0] = (int) (c - '0');
+                }
+                else
+                {
+                    switch (c)
+                    {
+                        case '!': num[1] = 1; break;
+                        case '@': num[1] = 2; break;
+                        case '#': num[1] = 3; break;
+                        case '$': num[1] = 4; break;
+                        case '%': num[1] = 5; break;
+                        case '^': num[1] = 6; break;
+                        case '&': num[1] = 7; break;
+                        case '*': num[1] = 8; break;
+                        case '(': num[1] = 9; break;
+                        case ')': num[1] = 0; break;
+                        default: return;
+                    }
+                }
+                Domino newDomino = new Domino(num[0], num[1], domino.vertical);
+                removeItem(cell);
+                addItem(cell, newDomino);
+            }
+            return;
+        }
+        
         if (!isLetterMode())
             return;
         
@@ -306,16 +351,7 @@ public abstract class EditLayoutTab extends VLayout
         String letter = Character.toString(c).toUpperCase();
         if (letter.equals("Q"))
             letter = "Qu";
-        
-        GridState state = ctx.state;
-        
-        int col = state.col(x);
-        int row = state.row(y);            
-        
-        if (!state.isValidCell(col, row))
-            return;
-            
-        Cell cell = state.cell(col, row);
+                
         if (cell.item instanceof Dot)
         {
             Dot dot = (Dot) cell.item;

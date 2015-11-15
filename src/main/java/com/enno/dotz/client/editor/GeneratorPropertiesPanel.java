@@ -25,6 +25,7 @@ public abstract class GeneratorPropertiesPanel extends VLayout
     private static final String DOTS_MODE = "Dots Mode";
     private static final String LETTER_MODE = "Letter Mode";
     private static final String SWAP_MODE = "Swap Mode";
+    private static final String DOMINO_MODE = "Domino Mode";
     
     private MXTextInput m_seed;
     private SpinnerItem m_animalStrength;
@@ -34,6 +35,7 @@ public abstract class GeneratorPropertiesPanel extends VLayout
     private SpinnerItem m_fireGrowthRate;
     private MXSelectItem m_animalType;
     private SpinnerItem m_maxAnchors;
+    private SpinnerItem m_maxDomino;
     private SpinnerItem m_knightStrength;
     private SpinnerItem m_bombStrength;
     private SpinnerItem m_clockStrength;
@@ -68,6 +70,7 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         modeMap.put(DOTS_MODE, DOTS_MODE);
         modeMap.put(LETTER_MODE, LETTER_MODE);
         modeMap.put(SWAP_MODE, SWAP_MODE);
+        modeMap.put(DOMINO_MODE, DOMINO_MODE);
         
         m_mode = new MXComboBoxItem();
         m_mode.setTitle("Mode");
@@ -126,6 +129,14 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         m_maxAnchors.setStep(1);
         m_maxAnchors.setWidth(70);
         
+        m_maxDomino = new SpinnerItem();
+        m_maxDomino.setTitle("Max Domino");
+        m_maxDomino.setValue(6);
+        m_maxDomino.setMin(1);
+        m_maxDomino.setMax(9);
+        m_maxDomino.setStep(1);
+        m_maxDomino.setWidth(70);
+        
         m_knightStrength = new SpinnerItem();
         m_knightStrength.setTitle("Knight Strength");
         m_knightStrength.setMin(1);
@@ -150,12 +161,14 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         m_randomSeed.setColSpan(2);
         m_rollMode.setColSpan(2);
         m_mode.setColSpan(2);
+        m_initialDotsOnly.setColSpan(2);
         
         form.setFields(
                 m_mode, m_animalStrength, m_knightStrength,
-                m_randomSeed, m_animalType, m_fireGrowthRate, 
-                m_seed, m_genSeed, m_maxAnchors, m_clockStrength,
-                m_rollMode, m_initialDotsOnly, m_bombStrength);
+                m_rollMode, m_animalType, m_fireGrowthRate, 
+                m_randomSeed, m_maxAnchors, m_clockStrength,
+                m_seed, m_genSeed, m_maxDomino, m_bombStrength,
+                m_initialDotsOnly);
         
         m_seed.setDisabled(true);
         m_genSeed.setDisabled(true);
@@ -182,10 +195,11 @@ public abstract class GeneratorPropertiesPanel extends VLayout
             m_bombStrength.setValue(g.bombStrength);
             m_animalType.setValue(g.animalType.getName());
             m_maxAnchors.setValue(g.maxAnchors);
+            m_maxDomino.setValue(g.maxDomino);
             m_initialDotsOnly.setValue(g.initialDotsOnly);
             m_rollMode.setValue(g.rollMode);
                         
-            m_mode.setValue(g.generateLetters ? LETTER_MODE : (g.swapMode ? SWAP_MODE : DOTS_MODE));
+            m_mode.setValue(g.generateLetters ? LETTER_MODE : (g.swapMode ? SWAP_MODE : (g.dominoMode ? DOMINO_MODE : DOTS_MODE)));
             
             if (g.getSeed() != Generator.RANDOM_SEED)
             {
@@ -226,6 +240,7 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         g.setSeed(m_randomSeed.isChecked() ? Generator.RANDOM_SEED : Long.parseLong(m_seed.getValueAsString()));
         g.fireGrowthRate = Integer.parseInt(m_fireGrowthRate.getValueAsString());
         g.maxAnchors = Integer.parseInt(m_maxAnchors.getValueAsString());
+        g.maxDomino = Integer.parseInt(m_maxDomino.getValueAsString());
         g.animalStrength = Integer.parseInt(m_animalStrength.getValueAsString());
         g.bombStrength = Integer.parseInt(m_bombStrength.getValueAsString());
         g.knightStrength = Integer.parseInt(m_knightStrength.getValueAsString());
@@ -234,12 +249,18 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         g.initialDotsOnly = m_initialDotsOnly.isChecked();
         g.generateLetters = isLetterMode();
         g.swapMode = SWAP_MODE.equals(m_mode.getValueAsString());
+        g.dominoMode = DOMINO_MODE.equals(m_mode.getValueAsString());
         g.rollMode = m_rollMode.isChecked();
     }
 
     public boolean isLetterMode()
     {
         return LETTER_MODE.equals(m_mode.getValueAsString());
+    }
+
+    public boolean isDominoMode()
+    {
+        return DOMINO_MODE.equals(m_mode.getValueAsString());
     }
     
     protected abstract void setLetterMode(boolean isLetterMode);

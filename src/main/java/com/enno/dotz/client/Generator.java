@@ -5,9 +5,11 @@ import java.util.List;
 import java.util.Random;
 
 import com.ait.lienzo.shared.core.types.IColor;
+import com.enno.dotz.client.anim.Pt;
 import com.enno.dotz.client.item.Anchor;
 import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Clock;
+import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.DotBomb;
 import com.enno.dotz.client.item.Item;
@@ -42,11 +44,14 @@ public class Generator
     public boolean     generateLetters = false;
     public boolean     swapMode        = false;
     public boolean     rollMode        = false;
+    public boolean     dominoMode      = false;
+    public int         maxDomino       = 9;
     
     private int        m_excludeDotColor = -1; // when user makes a square, that color is not generated
 
     private int m_numDotColors;
 
+    private DominoGenerator m_dominoGenerator;
 
     public Generator()
     {
@@ -106,6 +111,8 @@ public class Generator
         g.generateLetters = generateLetters;
         g.swapMode = swapMode;
         g.rollMode = rollMode;
+        g.dominoMode = dominoMode;
+        g.maxDomino = maxDomino;
         
         for (ItemFrequency f : m_list)
         {
@@ -143,7 +150,16 @@ public class Generator
                 if (f.item instanceof Dot)
                     m_numDotColors++;
             }
-        }                 
+        }
+    }
+    
+    protected DominoGenerator getDominoGenerator()
+    {
+        if (m_dominoGenerator == null)
+        {
+            m_dominoGenerator = new DominoGenerator(maxDomino);
+        }
+        return m_dominoGenerator;
     }
     
     protected ItemFrequency getNext(boolean initial)
@@ -170,10 +186,18 @@ public class Generator
     
     public Item getNextItem(Context ctx, boolean initial)
     {
+        if (initial && dominoMode)
+        {
+            //TODO Wild
+            Domino domino = getDominoGenerator().nextDomino(getRandom());
+            domino.init(ctx);
+            return domino;
+        }
+        
         Item item;
         while (true)
         {
-            item = getNext(initial).createItem(ctx, generateLetters ? s_letterGenerator : null);
+            item = getNext(initial).createItem(ctx, generateLetters ? s_letterGenerator : null, getDominoGenerator());
             
             if (m_list.size() > 1)
             {
@@ -193,7 +217,7 @@ public class Generator
                 do
                 {
                     // Generate dot
-                    dot = (Dot) getNextDot().createItem(ctx, generateLetters ? s_letterGenerator : null);
+                    dot = (Dot) getNextDot().createItem(ctx, generateLetters ? s_letterGenerator : null, getDominoGenerator());
                 }
                 while (m_excludeDotColor != -1 && m_numDotColors > 1 && dot.color == m_excludeDotColor);
                 
@@ -242,7 +266,7 @@ public class Generator
         Item item;
         while (true)
         {
-            item = getNextDot().createItem(ctx, generateLetters ? s_letterGenerator : null);
+            item = getNextDot().createItem(ctx, generateLetters ? s_letterGenerator : null, getDominoGenerator());
             if (oldItem.getColor() == item.getColor())
                 continue;
             
@@ -330,7 +354,7 @@ public class Generator
             return new ItemFrequency(item.copy(), frequency);
         }
 
-        public Item createItem(Context ctx, FrequencyGenerator<String> letterGenerator)
+        public Item createItem(Context ctx, FrequencyGenerator<String> letterGenerator, DominoGenerator dominoGenerator)
         {
             if (item instanceof Animal)
             {
@@ -372,7 +396,31 @@ public class Generator
             {
                 ((Dot) item).letter = letterGenerator.next(ctx.generator.getRandom());
             }
+            else if (item instanceof Domino)
+            {
+                return dominoGenerator.nextDomino(ctx.generator.getRandom());
+            }
             return item.copy();
+        }
+    }
+    
+    public static class DominoGenerator extends FrequencyGenerator<Pt>
+    {
+        public DominoGenerator(int max)
+        {
+            for (int top = 0; top <= max; top++)
+            {
+                for (int bottom = 0; bottom <= top; bottom++)
+                {
+                    add(1, new Pt(top, bottom));
+                }
+            }
+        }
+        
+        public Domino nextDomino(Random rnd)
+        {
+            Pt pt = next(rnd);
+            return new Domino(pt.col, pt.row, Direction.randomDirection(rnd));
         }
     }
 }

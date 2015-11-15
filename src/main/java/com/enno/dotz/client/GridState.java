@@ -223,10 +223,10 @@ public class GridState
         if (ctx.generator.swapMode)
             processSwapChain(null, nextMoveCallback);
         else
-            processChain(new ArrayList<Cell>(), false, false, false, null, null, nextMoveCallback);
+            processChain(new ArrayList<Cell>(), false, false, false, false, null, null, nextMoveCallback);
     }
     
-    public void processChain(final List<Cell> cells, final boolean is_square, final boolean isKnightMode, final boolean isWordMode, final String word, final Integer color, final Runnable nextMoveCallback)
+    public void processChain(final List<Cell> cells, final boolean is_square, final boolean isKnightMode, final boolean isWordMode, final boolean isEggMode, final String word, final Integer color, final Runnable nextMoveCallback)
     {
         if (isWordMode)
         {
@@ -238,6 +238,17 @@ public class GridState
                     processChain2(cells, is_square, isKnightMode, isWordMode, word, color, nextMoveCallback);
                 }
             };
+        }
+        else if (isEggMode)
+        {
+            GetSwapMatches.doEggs(ctx, cells, new Runnable() {
+                @Override
+                public void run()
+                {
+                    cells.clear(); // don't explode these cells - already merged eggs
+                    processChain2(cells, is_square, isKnightMode, isWordMode, word, color, nextMoveCallback);
+                }
+            });
         }
         else
             processChain2(cells, is_square, isKnightMode, isWordMode, word, color, nextMoveCallback);
@@ -582,6 +593,9 @@ public class GridState
     {
         if (ctx.generator.generateLetters)
             return false;
+        
+        if (ctx.generator.dominoMode)
+            return false; // TODO
         
         if (ctx.generator.swapMode)
             return mustReshuffleSwapMode();
@@ -1139,6 +1153,28 @@ public class GridState
         {
             this.ctx = ctx;
             m_state = ctx.state;
+        }
+        
+        public static void doEggs(Context ctx, List<Cell> cells, Runnable whenDone)
+        {
+            Boolean cracked = null;
+            for (Cell c : cells)
+            {
+                if (c.item instanceof Egg)
+                {
+                    Egg egg = (Egg) c.item;
+                    cracked = egg.isCracked();
+                    break;
+                }
+            }
+            
+            GetSwapMatches g = new GetSwapMatches(ctx);
+            SwapCombo combo = new SwapCombo();
+            combo.addAll(cells);
+            combo.setSpecial(cells.get(cells.size() - 1));
+            combo.setType(cracked ? SwapCombo.CRACKED_EGG : SwapCombo.EGG);
+            g.m_eggCombos.add(combo);
+            g.animate(whenDone);
         }
         
         public void animate(final Runnable whenDone)

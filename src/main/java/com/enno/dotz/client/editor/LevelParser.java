@@ -22,6 +22,7 @@ import com.enno.dotz.client.anim.Pt;
 import com.enno.dotz.client.item.Anchor;
 import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Clock;
+import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.DotBomb;
 import com.enno.dotz.client.item.Egg;
@@ -203,6 +204,20 @@ public class LevelParser
                     c.item = new Clock(strength);
                 }
             }
+            if (p.isArray("dominoes"))
+            {
+                NArray t = p.getAsArray("dominoes");
+                for (int i = 0, n = t.size(); i < n; i++)
+                {
+                    NObject row = t.getAsObject(i);
+                    Pt pt = pt(row.getAsArray("p"));
+                    Pt num = pt(row.getAsArray("num"));
+                    boolean vertical = row.getAsBoolean("vertical");                                        
+                    
+                    Cell c = grid.cell(pt.col, pt.row);
+                    c.item = new Domino(num.col, num.row, vertical);
+                }
+            }
             if (p.isArray("dots"))
             {
                 NArray t = p.getAsArray("dots");
@@ -318,6 +333,9 @@ public class LevelParser
         
         if (json.isInteger("birds"))
             goal.setBirds(json.getAsInteger("birds"));
+
+        if (json.isInteger("dominoes"))
+            goal.setDominoes(json.getAsInteger("dominoes"));
 
         if (json.isInteger("mirrors"))
             goal.setMirrors(json.getAsInteger("mirrors"));
@@ -447,11 +465,17 @@ public class LevelParser
         if (p.isBoolean("rollMode"))
             g.rollMode = p.getAsBoolean("rollMode");
 
+        if (p.isBoolean("dominoMode"))
+            g.dominoMode = p.getAsBoolean("dominoMode");
+
         if (p.isInteger("fireGrowthRate"))
             g.fireGrowthRate = p.getAsInteger("fireGrowthRate");
         
         if (p.isInteger("maxAnchors"))
             g.maxAnchors = p.getAsInteger("maxAnchors");
+        
+        if (p.isInteger("maxDomino"))
+            g.maxDomino = p.getAsInteger("maxDomino");
         
         if (p.isInteger("animalStrength"))
             g.animalStrength = p.getAsInteger("animalStrength");
@@ -510,6 +534,10 @@ public class LevelParser
                 else if (item.equals("egg"))
                 {
                     g.add(new ItemFrequency(new Egg(), f));
+                }
+                else if (item.equals("domino"))
+                {
+                    g.add(new ItemFrequency(new Domino(), f));
                 }
                 else if (item.equals("wild"))
                 {
@@ -588,6 +616,7 @@ public class LevelParser
         NArray rockets = new NArray();
         NArray dots = new NArray();
         NArray bombs = new NArray();
+        NArray dominoes = new NArray();
         
         for (int row = 0; row < c.numRows; row++)
         {
@@ -719,6 +748,15 @@ public class LevelParser
                     a.put("flip", an.isFlipped());
                     mirrors.push(a);
                 }
+                else if (cell.item instanceof Domino)
+                {
+                    Domino an = (Domino) cell.item;
+                    NObject a = new NObject();
+                    a.put("p", pt(col, row));
+                    a.put("num", pt(an.num[0], an.num[1]));
+                    a.put("vertical", an.vertical);
+                    dominoes.push(a);
+                }
                 else if (cell.item instanceof Dot)
                 {
                     Dot dot = (Dot) cell.item;
@@ -794,6 +832,7 @@ public class LevelParser
         p.put("lasers", lasers);
         p.put("mirrors", mirrors);
         p.put("rockets", rockets);
+        p.put("dominoes", dominoes);
         p.put("generator", generator(c.generator));        
         p.put("goals", goal(c.goals));
         
@@ -848,6 +887,9 @@ public class LevelParser
         if (g.getBirds() != 0)
             p.put("birds", g.getBirds());
         
+        if (g.getDominoes() != 0)
+            p.put("dominoes", g.getDominoes());
+        
         if (g.getMirrors() != 0)
             p.put("mirrors", g.getMirrors());
         
@@ -878,9 +920,11 @@ public class LevelParser
         p.put("generateLetters", g.generateLetters);
         p.put("swapMode", g.swapMode);
         p.put("rollMode", g.rollMode);
+        p.put("dominoMode", g.dominoMode);
         p.put("seed", g.getSeed());
         p.put("fireGrowthRate", g.fireGrowthRate);
         p.put("maxAnchors", g.maxAnchors);
+        p.put("maxDomino", g.maxDomino);
         p.put("initialDotsOnly", g.initialDotsOnly);
         p.put("animalStrength", g.animalStrength);
         p.put("knightStrength", g.knightStrength);
@@ -929,6 +973,8 @@ public class LevelParser
             a.push("egg");
         else if (item instanceof DotBomb)
             a.push("bomb");
+        else if (item instanceof Domino)
+            a.push("domino");
         else if (item instanceof Dot)
         {
             a.push("dot");

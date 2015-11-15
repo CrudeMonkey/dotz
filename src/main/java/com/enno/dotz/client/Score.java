@@ -52,6 +52,8 @@ public class Score
     private int m_rocketsInGrid;
     private int m_explodedRockets;
     
+    private int m_explodedDominoes;
+    
     private int m_birds;
 
     private int m_score;
@@ -158,6 +160,12 @@ public class Score
         m_explodedAnchors++;
         m_anchorsInGrid--;
     }
+    
+    public void explodedDomino()
+    {
+        m_explodedDominoes++;
+        addPoints(1);
+    }
 
     public void addBird()
     {
@@ -222,6 +230,11 @@ public class Score
     public int getExplodedKnights()
     {
         return m_explodedKnights;
+    }
+    
+    public int getExplodedDominoes()
+    {
+        return m_explodedDominoes;
     }
     
     public int getExplodedLasers()

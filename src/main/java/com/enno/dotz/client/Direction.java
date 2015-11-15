@@ -87,4 +87,12 @@ public class Direction
         }
         return 0; // should never happen
     }
+
+    public static int fromVector(int dx, int dy)
+    {
+        if (dx == 0)
+            return dy == 1 ? SOUTH : NORTH;
+        else
+            return dx == 1 ? EAST : WEST;
+    }
 }

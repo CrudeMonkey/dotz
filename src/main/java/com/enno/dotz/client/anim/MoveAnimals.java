@@ -16,6 +16,7 @@ import com.enno.dotz.client.GridState;
 import com.enno.dotz.client.anim.Transition.DropTransition;
 import com.enno.dotz.client.anim.Transition.MoveAnimalTransition;
 import com.enno.dotz.client.item.Animal;
+import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
 
 public class MoveAnimals
@@ -129,6 +130,49 @@ public class MoveAnimals
                                 }
                             });
                             list.add(new DropTransition(state.x(target.col), state.y(target.row), state.x(col), state.y(row), target.item));
+                        }
+                        else if (ctx.generator.dominoMode)
+                        {
+                            int pip = animal.getStrength() % (ctx.generator.maxDomino + 1);
+                            boolean vertical = col == target.col; 
+                            final Domino newDot = new Domino(pip, pip, vertical);
+                            
+                            newDot.init(ctx);
+                            newDot.moveShape(state.x(col), state.y(row));
+                            
+                            list.add(new MoveAnimalTransition(state.x(col), state.y(row), state.x(target.col), state.y(target.row), animal)
+                            {
+                                public void afterStart()
+                                {
+                                    newDot.addShapeToLayer(ctx.dotLayer);
+                                    
+                                    animal.removeShapeFromLayer(ctx.dotLayer);
+                                    animal.addShapeToLayer(ctx.nukeLayer);
+                                    
+                                    ctx.nukeLayer.setVisible(true);
+                                    ctx.dotLayer.draw();
+                                }
+                                
+                                public void afterEnd()
+                                {
+                                    if (target.item != null)
+                                    {
+                                        target.item.removeShapeFromLayer(ctx.dotLayer);
+                                        ctx.score.ate(target.item);
+                                    }
+    
+                                    src.item = newDot;
+                                    target.item = animal;
+                                    
+                                    animal.removeShapeFromLayer(ctx.nukeLayer);
+                                    animal.addShapeToLayer(ctx.dotLayer);
+                                    
+                                    ctx.nukeLayer.draw();
+                                    ctx.dotLayer.draw();
+                                    
+                                    ctx.nukeLayer.setVisible(false);
+                                }
+                            });
                         }
                         else
                         {
