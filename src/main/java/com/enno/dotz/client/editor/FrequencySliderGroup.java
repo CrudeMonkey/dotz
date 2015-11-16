@@ -295,7 +295,7 @@ public class FrequencySliderGroup extends HLayout
 
     protected FrequencySlider createDominoSlider(int index)
     {
-        Domino dot = new Domino(3, 6, false);
+        Domino dot = new Domino(3, 6, true);
         dot.setContext(ctx);
         return new FrequencySlider(index, dot, this) {
             

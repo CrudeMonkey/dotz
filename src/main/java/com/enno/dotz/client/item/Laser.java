@@ -170,7 +170,8 @@ public class Laser extends Item
                         {
                             Laser laser2 = (Laser) cell2.item;
                             Pt d2 = Direction.vector(laser2.getDirection());
-                            if (d.col == -d2.col && d.row == d2.row) // opposite direction
+                            if (d.col == -d2.col && d.row == d2.row 
+                             || d.col == d2.col && d.row == -d2.row) // opposite direction
                             {
                                 list.add(loc);
                                 list.add(new Pt(col2, row2));
