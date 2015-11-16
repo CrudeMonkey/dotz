@@ -27,13 +27,13 @@
     "........"
   ],
   "items": [
-    "......??",
-    ".....???",
-    "?.....??",
+    "......W?",
+    ".....WW?",
+    "W.....W?",
     "????????",
-    "????????",
-    "????????",
-    "???.???.",
+    "???????.",
+    "??????..",
+    "???.?WW.",
     "....?..."
   ],
   "teleporters": [  ],
@@ -42,7 +42,9 @@
   "lazySusans": [  ],
   "dots": [  ],
   "bombs": [  ],
-  "animals": [  ],
+  "animals": [
+    {"p":[7,4],"strength":20,"color":2,"type":"Default"}
+  ],
   "knights": [  ],
   "clocks": [  ],
   "lasers": [  ],
@@ -227,6 +229,28 @@
     },
         {
       "p": [
+        6,
+        5
+      ],
+      "num": [
+        1,
+        1
+      ],
+      "vertical": false
+    },
+        {
+      "p": [
+        7,
+        5
+      ],
+      "num": [
+        1,
+        0
+      ],
+      "vertical": false
+    },
+        {
+      "p": [
         3,
         6
       ],
@@ -330,7 +354,7 @@
     "swapMode": false,
     "rollMode": false,
     "dominoMode": true,
-    "seed": -1,
+    "seed": 123,
     "fireGrowthRate": 1,
     "maxAnchors": 3,
     "maxDomino": 1,
@@ -347,5 +371,5 @@
   "goals": {
     "dots": {    }
   },
-  "lastModified": "1447471035426"
+  "lastModified": "1447629796406"
 }

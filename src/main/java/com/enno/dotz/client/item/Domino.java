@@ -198,7 +198,8 @@ public class Domino extends Item
             public Link(Cell cell)
             {
                 this.cell = cell;
-                d = (Domino) cell.item;
+                if (cell.item instanceof Domino)
+                    d = (Domino) cell.item;
             }
 
             public boolean canConnect(int i, int pip)
@@ -223,12 +224,15 @@ public class Domino extends Item
             protected boolean sameDominoChain(int i)
             {
                 Link prev = connect[i];
-                if (prev == null)
+                if (prev == null || d == null)
                     return true;
                 
                 Domino pd = prev.d;
-                if (pd.num[0] != d.num[0] || pd.num[1] != d.num[1] || pd.vertical != d.vertical)
-                    return false;
+                if (pd != null)
+                {
+                    if (pd.num[0] != d.num[0] || pd.num[1] != d.num[1] || pd.vertical != d.vertical)
+                        return false;
+                }
                 
                 if (d.vertical)
                 {
@@ -258,13 +262,40 @@ public class Domino extends Item
                     return true;
                                 
                 Domino pd = prev.d;
+                if (pd == null)
+                {
+                    if (d.vertical)
+                    {
+                        // must be same row
+                        return prev.cell.row == cell.row;
+                    }
+                    else
+                    {
+                        // must be same column
+                        return prev.cell.col == cell.col;
+                    }
+                }
+                
                 if (pd.isDouble() && parallel(prev))
                 {
                     return prev.parallelDoubleChain(1 - i);
                 }
 
+                //  previous domino must have  -| connection to double 
                 boolean sameDirection = prev.d.vertical == d.vertical;
-                return !sameDirection;    //  previous domino has  -| connection to double                
+                if (sameDirection)
+                    return false;
+                
+                if (d.vertical)
+                {
+                    // must be same row
+                    return prev.cell.row == cell.row;
+                }
+                else
+                {
+                    // must be same column
+                    return prev.cell.col == cell.col;
+                }    
             }
 
             public void connect(int i, Link link)
@@ -310,6 +341,9 @@ public class Domino extends Item
             
             protected void swapChain(int i)
             {
+                if (d == null)
+                    return;
+                
                 Link prev = connect[i];
                 if (prev != null)
                     prev.swapChain(1 - i);
@@ -332,6 +366,11 @@ public class Domino extends Item
             
             public Point2D getPos(Link link, GridState state)
             {
+                if (d == null)
+                {
+                    return new Point2D(state.x(cell.col), state.y(cell.row));
+                }
+                
                 double dx = 0, dy = 0;
                 if (connect[0] != null || connect[1] != null)
                 {
@@ -362,11 +401,17 @@ public class Domino extends Item
         
         public boolean connect(Cell cell)
         {
-            if (!(cell.isLocked() || cell.item instanceof Domino))
+            if (cell.isLocked() || !(cell.item instanceof Domino || cell.item instanceof Wild || cell.item instanceof Animal))
                 return false;
             
             if (containsLink(cell))
-                return false;
+                return false; // no loops
+            
+            if (cell.item instanceof Animal)
+            {
+                if (!isPreviousDouble(size() - 1)) // Animal must connect to double (optionally followed by Wild cards)
+                    return false;
+            }
             
             Link link = new Link(cell);
             if (size() == 0)
@@ -376,6 +421,9 @@ public class Domino extends Item
             }
             
             Link prev = get(size() - 1);
+            if (prev.cell.item instanceof Animal)
+                return false; // can't connect to Animal
+            
             int dir = Direction.fromVector(cell.col - prev.cell.col, cell.row - prev.cell.row);
             if (!canConnect(dir, prev, link))
                 return false;
@@ -384,8 +432,85 @@ public class Domino extends Item
             return true;
         }
         
-        protected boolean canConnect(int dir, Link prev, Link link)
+        protected boolean isPreviousDouble(int pos)
         {
+            if (pos >= size())
+                return false;
+            
+            Link prev = get(pos);
+            if (prev.d == null)
+                return isPreviousDouble(pos - 1);
+            
+            return prev.d.isDouble();
+        }
+        
+        protected static boolean canConnect(int dir, Link prev, Link link)
+        {
+            if (prev.d == null) // previous is Wild
+            {
+                prev.connect[1] = link;
+                if (link.d == null) // Animal or Wild
+                {
+                    link.connect[0] = prev;
+                    return true;
+                }
+                
+                // connect Domino to Wild
+                switch (dir)
+                {
+                    case Direction.SOUTH:
+                    case Direction.EAST:
+                        return connectDominoToWild(prev, link, 0);
+                    case Direction.NORTH:
+                    case Direction.WEST:
+                        return connectDominoToWild(prev, link, 1);
+                }
+                return false; // never happens
+            }
+            
+            if (link.d == null)
+            {
+                // connect Wild/Animal to Domino
+                Integer mustConnect = null;
+                switch (dir)
+                {
+                    case Direction.EAST:
+                        if (!prev.d.vertical)
+                            mustConnect = 1;
+                        break;
+                    case Direction.WEST:
+                        if (!prev.d.vertical)
+                            mustConnect = 0;
+                        break;
+                    case Direction.NORTH:
+                        if (prev.d.vertical)
+                            mustConnect = 0;
+                        break;
+                    case Direction.SOUTH:
+                        if (prev.d.vertical)
+                            mustConnect = 1;
+                        break;
+                }
+                if (mustConnect != null && prev.connect[mustConnect] != null)
+                {
+                    if (prev.sameDominoChain(mustConnect))
+                    {
+                        prev.swapChain(mustConnect);
+                    }
+                    else if (prev.parallelDoubleChain(mustConnect))
+                    {
+                        prev.swapDoubleChain(mustConnect);
+                    }
+                    else
+                        return false;
+                }
+                if (mustConnect == null)
+                {
+                    mustConnect = prev.connect[0] == null ? 0 : 1;
+                }
+                return connectWildToDomino(prev, mustConnect, link);
+            }
+            
             int pref = prev.connect[0] == null ? 0 : 1;
             int other = 1 - pref;
             switch (dir)
@@ -454,6 +579,20 @@ public class Domino extends Item
             return false;
         }
         
+        private static boolean connectWildToDomino(Link prev, int open, Link link)
+        {
+            prev.connect[open] = link;
+            link.connect[0] = prev;
+            return true;
+        }
+
+        private static boolean connectDominoToWild(Link prev, Link link, int i)
+        {
+            prev.connect[1] = link;
+            link.connect[i] = prev;
+            return true;
+        }
+
         protected boolean containsLink(Cell cell)
         {
             for (Link link : this)

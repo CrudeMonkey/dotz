@@ -248,8 +248,20 @@ public class DragConnectMode extends ConnectMode
             
             if (m_isDominoMode)
             {
-                Domino.Chain ch = new Domino.Chain(m_cells);            
-                ch.updateDragLine(m_dragLine, m_state);
+                if (isOnlyWildCards())
+                {
+                    m_isDominoMode = false;
+                    m_dragLine.clear();
+                    for (Cell cell : m_cells)
+                    {
+                        m_dragLine.add(m_state.x(cell.col), m_state.y(cell.row));
+                    }
+                }
+                else
+                {
+                    Domino.Chain ch = new Domino.Chain(m_cells);            
+                    ch.updateDragLine(m_dragLine, m_state);
+                }
             }
             
             m_dragLine.adjust(m_state.x(col), m_state.y(row));
@@ -321,9 +333,13 @@ public class DragConnectMode extends ConnectMode
                 // neighbor cell (horizontal/vertical)
                 Cell neighbor = m_state.cell(col,  row);
                 
+                if (!m_isEggMode && !m_isDominoMode && !m_isKnightMode && neighbor.item instanceof Domino && isOnlyWildCards())
+                    m_isDominoMode = true;
+                
                 if (m_isDominoMode)
                 {
-                    if (didCell(col, row) || neighbor.isLocked() || !(neighbor.item instanceof Domino))
+                    if (didCell(col, row) || neighbor.isLocked() || 
+                            !(neighbor.item instanceof Domino || neighbor.item instanceof Animal || neighbor.item instanceof Wild))
                         return;
                     
                     Domino.Chain ch = new Domino.Chain(m_cells);
@@ -393,6 +409,16 @@ public class DragConnectMode extends ConnectMode
                 return ((Egg) cell.item).isCracked();
         }
         return null;
+    }
+    
+    protected boolean isOnlyWildCards()
+    {
+        for (Cell cell : m_cells)
+        {
+            if (!(cell.item instanceof Wild))
+                return false;
+        }
+        return true;
     }
     
     protected boolean hasAnimals()
