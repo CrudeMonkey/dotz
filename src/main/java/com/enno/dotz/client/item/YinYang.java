@@ -67,6 +67,14 @@ public class YinYang extends Item
     }
 
     @Override
+    public void animate(long t, double cursorX, double cursorY)
+    {
+        long speed = 4000;
+        double rot = (t % speed) * Math.PI * 2 / speed;
+        shape.setRotation(rot);
+    }
+    
+    @Override
     public ExplodeAction explode(Integer color, int chainSize)
     {
         // TODO Auto-generated method stub

@@ -126,26 +126,37 @@ public class Dot extends Item
         }
     }
     
+    @Override
     public Integer getColor()
     {
         return color;
     }
     
+    @Override
     public boolean canConnect()
     {
         return true;
     }
 
+    @Override
     public boolean canGrowFire()
     {
         return true;
     }
 
+    @Override
     public boolean canChangeColor()
     {
         return true;
     }
 
+    @Override
+    public boolean canReshuffle()
+    {
+        return true;
+    }
+
+    @Override
     protected Item doCopy()
     {
         return new Dot(color, letter);

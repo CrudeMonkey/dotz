@@ -30,6 +30,8 @@ public class SoundManager
         MISS("125106__oddworld__sfx-tech-gui-select-01.wav"),
         EGG_CRACK("250133__fngersounds__egg-cracking_clipped.wav"),
         BIRD("170811__esperar__bird-2-c_clipped.wav"),
+        DRIP("25879__acclivity__drip1.wav"),
+        AXE("322171__liamg-sfx__axe-impact-gore.wav"),
         ZAP("268168__shaun105__laser.wav");
 //        BLIP("blip.wav");
         

@@ -12,16 +12,19 @@ public class ColorBomb extends Item
     {
     }
 
+    @Override
     public Integer getColor()
     {
         return Config.WILD_ID;
     }
     
+    @Override
     public boolean canConnect()
     {
         return false;
     }
 
+    @Override
     public boolean canGrowFire()
     {
         return true; //TODO or not?

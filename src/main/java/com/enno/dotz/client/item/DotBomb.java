@@ -32,22 +32,32 @@ public class DotBomb extends Item
         m_dot = dot;
     }
     
+    @Override
     public Integer getColor()
     {
         return m_dot.getColor();
     }
     
+    @Override
     public boolean canConnect()
     {
         return true;
     }
 
+    @Override
     public boolean canGrowFire()
     {
         return true; //TODO or not?
     }
 
+    @Override
     public boolean canChangeColor()
+    {
+        return true;
+    }
+
+    @Override
+    public boolean canReshuffle()
     {
         return true;
     }

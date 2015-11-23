@@ -87,7 +87,8 @@ class LevelDB
         String resource = m_levelDirectory + "/" + level.id + ".json"
         
         String json = new PrettyPrinter(['teleporters', 'conveyors', 'lazySusans', 'doors', 'animals', 
-            'freq', 'lasers', 'mirrors', 'knights', 'dots', 'bombs']).toString(level)
+            'freq', 'lasers', 'mirrors', 'knights', 'dots', 'bombs', 'rockets', 'turners', 'eggs',
+            'dominoes', 'drops']).toString(level)
         //String json = level.toJSONString()
         
         File file = new File(resource)

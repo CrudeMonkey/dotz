@@ -1,0 +1,86 @@
+{
+  "id": 185,
+  "name": "Test Domino Turner",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Test",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "????????",
+    "??????.?",
+    "?.????.?",
+    ".??.?.?.",
+    "?.????.?",
+    "???????.",
+    "??.??.??",
+    "????????"
+  ],
+  "lasers": [
+    {"p":[0,3],"direction":"E"},
+    {"p":[7,5],"direction":"E"}
+  ],
+  "mirrors": [
+    {"p":[6,1],"flip":false},
+    {"p":[5,3],"flip":false}
+  ],
+  "rockets": [
+    {"p":[6,2],"direction":"E"},
+    {"p":[1,4],"direction":"E"}
+  ],
+  "turners": [
+    {"p":[1,2],"n":1},
+    {"p":[3,3],"n":2},
+    {"p":[7,3],"n":3},
+    {"p":[6,4],"n":3},
+    {"p":[2,6],"n":1},
+    {"p":[5,6],"n":2}
+  ],
+  "generator": {
+    "generateLetters": false,
+    "swapMode": false,
+    "rollMode": false,
+    "dominoMode": true,
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "maxDomino": 6,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "bombStrength": 9,
+    "animalType": "Default",
+    "freq": [
+      [7.9,"rocket"],
+      [10.8,"turner"],
+      [17.9,"mirror"],
+      [10.5,"laser"],
+      [52.9,"domino"]
+    ]
+  },
+  "goals": {
+    "dots": {    }
+  },
+  "lastModified": "1447714094658"
+}

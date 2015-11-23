@@ -25,7 +25,7 @@ public class ModePalette extends Palette<Object>
 {
     public ModePalette(ConnectTeleportMode connectTeleportMode)
     {
-        super(40, ItemButton.SIZE, 5, 2);
+        super(40, ItemButton.SIZE, 6, 1);
         
         ctx.backgroundLayer = new Layer();
         add(ctx.backgroundLayer);
@@ -38,7 +38,7 @@ public class ModePalette extends Palette<Object>
         addButton(new DeleteSusan(), 2, 0);
         addButton(connectTeleportMode, 3, 0);
         addButton(new RotateItem(), 4, 0);
-        addButton(new Bombify(), 0, 1);
+        addButton(new Bombify(), 5, 0);
     }
     
     private void addButton(Object cell, int col, int row)

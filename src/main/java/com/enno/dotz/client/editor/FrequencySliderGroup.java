@@ -11,16 +11,21 @@ import com.enno.dotz.client.Generator.ItemFrequency;
 import com.enno.dotz.client.item.Anchor;
 import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Clock;
+import com.enno.dotz.client.item.ColorBomb;
 import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.DotBomb;
+import com.enno.dotz.client.item.Drop;
 import com.enno.dotz.client.item.Egg;
 import com.enno.dotz.client.item.Fire;
+import com.enno.dotz.client.item.IcePick;
 import com.enno.dotz.client.item.Item;
+import com.enno.dotz.client.item.Key;
 import com.enno.dotz.client.item.Knight;
 import com.enno.dotz.client.item.Laser;
 import com.enno.dotz.client.item.Mirror;
 import com.enno.dotz.client.item.Rocket;
+import com.enno.dotz.client.item.Turner;
 import com.enno.dotz.client.item.Wild;
 import com.enno.dotz.client.item.YinYang;
 import com.smartgwt.client.util.SC;
@@ -88,6 +93,18 @@ public class FrequencySliderGroup extends HLayout
         m_list.add(egg);
         left.addMember(egg);
 
+        FrequencySlider turner = createTurnerSlider(index++);
+        m_list.add(turner);
+        left.addMember(turner);
+
+        FrequencySlider colorBomb = createColorBombSlider(index++);
+        m_list.add(colorBomb);
+        left.addMember(colorBomb);
+
+        FrequencySlider pick = createIcePickSlider(index++);
+        m_list.add(pick);
+        left.addMember(pick);
+
         FrequencySlider knight = createKnightSlider(index++);
         m_list.add(knight);
         right.addMember(knight);
@@ -111,6 +128,14 @@ public class FrequencySliderGroup extends HLayout
         FrequencySlider domino = createDominoSlider(index++);
         m_list.add(domino);
         right.addMember(domino);
+        
+        FrequencySlider drop = createDropSlider(index++);
+        m_list.add(drop);
+        right.addMember(drop);
+        
+        FrequencySlider key = createKeySlider(index++);
+        m_list.add(key);
+        right.addMember(key);
         
         if (isNew)
         {
@@ -161,6 +186,16 @@ public class FrequencySliderGroup extends HLayout
                         bomb.initFrequency(freq);
                     else if (item instanceof Domino)
                         domino.initFrequency(freq);
+                    else if (item instanceof Turner)
+                        turner.initFrequency(freq);
+                    else if (item instanceof Drop)
+                        drop.initFrequency(freq);
+                    else if (item instanceof ColorBomb)
+                        colorBomb.initFrequency(freq);
+                    else if (item instanceof Key)
+                        key.initFrequency(freq);
+                    else if (item instanceof IcePick)
+                        pick.initFrequency(freq);
                     else if (item instanceof Animal)
                     {
                         int color = ((Animal) item).getColor();                    
@@ -257,6 +292,15 @@ public class FrequencySliderGroup extends HLayout
         };
     }
 
+    protected FrequencySlider createIcePickSlider(int index)
+    {
+        IcePick dot = new IcePick();
+        dot.setContext(ctx);
+        return new FrequencySlider(index, dot, this) {
+            
+        };
+    }
+
     protected FrequencySlider createClockSlider(int index)
     {
         Clock dot = new Clock(1);
@@ -284,9 +328,27 @@ public class FrequencySliderGroup extends HLayout
         };
     }
 
+    protected FrequencySlider createKeySlider(int index)
+    {
+        Key dot = new Key();
+        dot.setContext(ctx);
+        return new FrequencySlider(index, dot, this) {
+            
+        };
+    }
+
     protected FrequencySlider createBombSlider(int index)
     {
         DotBomb dot = new DotBomb(new Dot(0), 9);
+        dot.setContext(ctx);
+        return new FrequencySlider(index, dot, this) {
+            
+        };
+    }
+    
+    protected FrequencySlider createColorBombSlider(int index)
+    {
+        ColorBomb dot = new ColorBomb();
         dot.setContext(ctx);
         return new FrequencySlider(index, dot, this) {
             
@@ -296,6 +358,24 @@ public class FrequencySliderGroup extends HLayout
     protected FrequencySlider createDominoSlider(int index)
     {
         Domino dot = new Domino(3, 6, true);
+        dot.setContext(ctx);
+        return new FrequencySlider(index, dot, this) {
+            
+        };
+    }
+
+    protected FrequencySlider createDropSlider(int index)
+    {
+        Drop dot = new Drop();
+        dot.setContext(ctx);
+        return new FrequencySlider(index, dot, this) {
+            
+        };
+    }
+
+    protected FrequencySlider createTurnerSlider(int index)
+    {
+        Turner dot = new Turner(1);
         dot.setContext(ctx);
         return new FrequencySlider(index, dot, this) {
             

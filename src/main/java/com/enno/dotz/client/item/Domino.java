@@ -74,7 +74,7 @@ public class Domino extends Item
     
     public Domino()
     {
-        this(3, 6, false);
+        this(2, 1, true);
     }
 
     public boolean isDouble()
@@ -119,16 +119,19 @@ public class Domino extends Item
     }
     
     @Override
-    public void rotate()
+    public void rotate(int n)
     {
-        if (vertical)
+        for (int i = 0; i < n; i++)
         {
-            int swap = num[0];
-            num[0] = num[1];
-            num[1] = swap;
-            flip = !flip;
+            if (vertical)
+            {
+                int swap = num[0];
+                num[0] = num[1];
+                num[1] = swap;
+                flip = !flip;
+            }
+            vertical = !vertical;
         }
-        vertical = !vertical;
         setRotation(shape);
     }
     
@@ -155,26 +158,37 @@ public class Domino extends Item
         }
     }
     
+    @Override
     public boolean canConnect()
     {
         return true;
     }
 
+    @Override
     public boolean canGrowFire()
     {
         return true;
     }
 
+    @Override
     public boolean canChangeColor()
     {
-        return false;
+        return true; // ChangeColorCell replaces the Domino
     }
 
+    @Override
     public boolean canRotate()
     {
         return true;
     }
 
+    @Override
+    public boolean canReshuffle()
+    {
+        return true;
+    }
+
+    @Override
     protected Item doCopy()
     {
         return new Domino(num[0], num[1], vertical);
@@ -617,5 +631,128 @@ public class Domino extends Item
             pts.push(new Point2D(0, 0));
             d.setPoints(pts);
         }
+    }
+
+    public static boolean canConnect(Item a, Item b, int dcol, int drow)
+    {
+        if (a instanceof Domino)
+        {
+            if (b instanceof Wild)
+            {
+                return true;
+            }
+            else if (b instanceof Domino)
+            {
+                Domino da = (Domino) a;
+                Domino db = (Domino) b;
+                if (dcol == 1) // EAST
+                {
+                    if (da.vertical)
+                    {
+                        if (db.vertical)
+                        {
+                            return da.num[0] == db.num[0] || da.num[1] == db.num[1]; // ||
+                        }
+                        else
+                        {
+                            return da.num[0] == db.num[0] || da.num[1] == db.num[0]; // |-
+                        }
+                    }
+                    else
+                    {
+                        if (db.vertical)
+                        {
+                            return da.num[1] == db.num[0] || da.num[1] == db.num[1]; // -|
+                        }
+                        else
+                        {
+                            return da.num[1] == db.num[0]; // --
+                        }
+                    }
+                }
+                else // SOUTH
+                {
+                    if (da.vertical)
+                    {
+                        if (db.vertical)
+                        {
+                            return da.num[1] == db.num[0]; // |
+                        }
+                        else
+                        {
+                            return da.num[1] == db.num[0] || da.num[1] == db.num[1]; // L
+                        }
+                    }
+                    else
+                    {
+                        if (db.vertical)
+                        {
+                            return da.num[0] == db.num[0] || da.num[1] == db.num[0]; // T
+                        }
+                        else
+                        {
+                            return da.num[0] == db.num[0] || da.num[1] == db.num[1]; // =
+                        }
+                    }
+                }
+            }
+            else if (a instanceof Wild)
+            {
+                if (b instanceof Domino)
+                    return true;
+            }
+        }
+        return false;
+    }
+    
+    public static boolean hasAnimalChain(GridState state)
+    {
+        List<Cell> chain = new ArrayList<Cell>();
+        for (int col = 0; col < state.numColumns; col++)
+        {
+            for (int row = 0; row < state.numRows; row++)
+            {
+                Cell c = state.cell(col, row);
+                if (c.isLocked() || !(c.item instanceof Animal))
+                    continue;
+                
+                chain.clear();
+                chain.add(c);
+                if (findDoubleChain(chain, c, state))
+                    return true;
+            }
+        }
+        return false;
+    }
+    
+    protected static boolean findDoubleChain(List<Cell> chain, Cell c, GridState state)
+    {
+        return findDoubleChain(chain, c.col + 1, c.row, state)
+                || findDoubleChain(chain, c.col - 1, c.row, state)
+                || findDoubleChain(chain, c.col, c.row + 1, state)
+                || findDoubleChain(chain, c.col, c.row - 1, state);        
+    }
+    
+    protected static boolean findDoubleChain(List<Cell> chain, int col, int row, GridState state)
+    {
+        if (!state.isValidCell(col, row))
+            return false;
+        
+        Cell c = state.cell(col, row);
+        if (c.isLocked() || chain.contains(c))
+            return false;
+        
+        if (c.item instanceof Wild)
+        {
+            chain.add(c);
+            boolean found = findDoubleChain(chain, c, state);
+            chain.remove(chain.size() - 1);
+            return found;
+        }
+        if (c.item instanceof Domino)
+        {
+            return ((Domino) c.item).isDouble();
+        }
+        return false;
     }
 }

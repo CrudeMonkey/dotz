@@ -14,7 +14,6 @@ import com.ait.lienzo.client.core.shape.Line;
 import com.ait.lienzo.client.widget.LienzoPanel;
 import com.ait.lienzo.shared.core.types.ColorName;
 import com.enno.dotz.client.item.Animal.EyeTracker;
-import com.enno.dotz.client.item.Item;
 
 public class DotzGridPanel extends LienzoPanel
 {
@@ -74,6 +73,7 @@ public class DotzGridPanel extends LienzoPanel
         
         m_connectLayer = new Layer(); // only this layer responds to events (for performance)
         add(m_connectLayer);
+        ctx.connectLayer = m_connectLayer;
         
         m_dotLayer = createLayer();
         add(m_dotLayer);
@@ -112,7 +112,8 @@ public class DotzGridPanel extends LienzoPanel
         m_state.endOfLevel = m_endOfLevel;
         
         m_connectMode = ctx.generator.swapMode ? new SwapConnectMode(ctx, m_connectLayer) : new DragConnectMode(ctx, m_connectLayer);        
-
+        ctx.boostPanel.setConnectMode(m_connectMode);
+        
         startItemAnimation();
 
         m_state.doInitialTransitions(new Runnable() {

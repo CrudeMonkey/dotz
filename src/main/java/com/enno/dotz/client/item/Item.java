@@ -56,6 +56,11 @@ public abstract class Item
     {
         return false;
     }
+    
+    public boolean canReshuffle()
+    {
+        return false;
+    }
 
     public boolean canExplodeNextTo()
     {
@@ -89,7 +94,7 @@ public abstract class Item
     }
     
     /** Used by layout editor to rotate Mirror and Laser */
-    public void rotate()
+    public void rotate(int n)
     {
     }
     

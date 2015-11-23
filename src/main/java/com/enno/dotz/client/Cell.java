@@ -192,16 +192,27 @@ public abstract class Cell
         }
     }
     
-    public void explode(Integer color, int chainSize)
+    public boolean reduceIce(int n)
     {
         if (ice > 0)
         {
-            ice--;
+            ice -= n;
+            if (ice < 0)
+                ice = 0;
+            
             updateIce();
             
             if (ice == 0)
                 ctx.score.explodedIce(); // only the last ice counts
+            
+            return true;
         }
+        return false;
+    }
+    
+    public void explode(Integer color, int chainSize)
+    {
+        reduceIce(1);
         
         if (item != null)
         {
@@ -1139,6 +1150,16 @@ public abstract class Cell
             }
         }
 
+        /** Unlock with key */
+        public void unlock()
+        {
+            // ASSUMPTION: it's locked
+            m_strength = 0;
+            ctx.score.explodedDoor();                    
+            ctx.doorLayer.remove(m_shape);
+            m_text.setVisible(false);
+        }
+        
         public void setStrength(int strength)
         {
             m_strength = strength;

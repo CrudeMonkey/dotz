@@ -41,16 +41,19 @@ public class Anchor extends Item
         return group;
     }
     
+    @Override
     public boolean canDropFromBottom()
     {
         return true;
     }
     
+    @Override
     public boolean canGrowFire()
     {
         return true;
     }
     
+    @Override
     protected Item doCopy()
     {
         return new Anchor();

@@ -5,6 +5,7 @@ import com.ait.lienzo.client.core.shape.Layer;
 import com.ait.lienzo.client.core.types.Point2D;
 import com.ait.lienzo.shared.core.types.ArrowType;
 import com.ait.lienzo.shared.core.types.ColorName;
+import com.enno.dotz.client.BoostPanel;
 import com.enno.dotz.client.Cell;
 import com.enno.dotz.client.Config;
 import com.enno.dotz.client.Context;
@@ -22,6 +23,7 @@ public class PreviewLevelPanel extends VLayout
     private DotzGridPanel m_grid;
     private Context ctx;
     private ScorePanel m_score;
+    private BoostPanel m_boostPanel;    
     private Layer m_connectionLayer;
 
     public PreviewLevelPanel(Config level)
@@ -48,6 +50,10 @@ public class PreviewLevelPanel extends VLayout
         GridContainer g = new GridContainer();            
         g.addMember(m_grid, ctx.cfg);
         addMember(g);
+        
+        m_boostPanel = new BoostPanel(ctx);
+        ctx.boostPanel = m_boostPanel;
+        addMember(m_boostPanel);        
         
         m_grid.init(false);
         initItemGraphics();

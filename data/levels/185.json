@@ -1,0 +1,72 @@
+{
+  "id": 185,
+  "name": "Tick Tock",
+  "creator": "Logan",
+  "description": "",
+  "folder": "Puzzle",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "XX....XX",
+    "XXXXXXXX",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "..1111..",
+    "........",
+    "00442222",
+    "33003333",
+    "55550022",
+    "11444400",
+    "33113333",
+    "22221111"
+  ],
+  "generator": {
+    "generateLetters": false,
+    "swapMode": false,
+    "rollMode": false,
+    "dominoMode": false,
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "maxDomino": 6,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "bombStrength": 9,
+    "animalType": "Default",
+    "freq": [
+      [100,"dot",0]
+    ]
+  },
+  "goals": {
+    "dots": {
+      "0": 16,
+      "1": 12,
+      "2": 10,
+      "3": 12,
+      "4": 6,
+      "5": 4
+    },
+    "maxMoves": 15,
+    "score": 60,
+    "time": 300
+  },
+  "lastModified": "1447717140044"
+}

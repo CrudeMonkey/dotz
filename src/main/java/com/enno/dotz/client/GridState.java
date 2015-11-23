@@ -40,6 +40,7 @@ import com.enno.dotz.client.item.Anchor;
 import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Clock;
 import com.enno.dotz.client.item.ColorBomb;
+import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.DotBomb;
 import com.enno.dotz.client.item.Egg;
@@ -559,7 +560,7 @@ public class GridState
                     continue;
                 
                 Item item = cell.item;
-                if (item instanceof Dot || item instanceof Wild)
+                if (item.canReshuffle())
                     pts.add(new Pt(col, row));
             }
         }
@@ -593,10 +594,7 @@ public class GridState
     {
         if (ctx.generator.generateLetters)
             return false;
-        
-        if (ctx.generator.dominoMode)
-            return false; // TODO
-        
+                
         if (ctx.generator.swapMode)
             return mustReshuffleSwapMode();
         
@@ -624,8 +622,11 @@ public class GridState
                     Item item2 = cell2.item;
                     if (item2 != null)
                     {
-                        if (canConnect(item, item2))
+                        if (canConnect(item, item2, 1, 0))
+                        {
+                            Debug.p("can connect " + col + "," + row + " - " + (col+1) + "," + row);
                             return false;
+                        }
                     }
                 }
                 
@@ -638,12 +639,19 @@ public class GridState
                     Item item2 = cell2.item;
                     if (item2 != null)
                     {
-                        if (canConnect(item, item2))
+                        if (canConnect(item, item2, 0, 1))
+                        {
+                            Debug.p("can connect " + col + "," + row + " - " + col + "," + (row+1));
                             return false;
+                        }
                     }
                 }
             }
         }
+        
+        if (Domino.hasAnimalChain(this)) // Animal - optional wild cards - double Domino
+            return false;
+        
         //TODO check knights
         
         return true;
@@ -809,7 +817,7 @@ public class GridState
         return null;
     }
     
-    protected boolean canConnect(Item a, Item b)
+    protected boolean canConnect(Item a, Item b, int dcol, int drow)
     {
         boolean aDot = (a instanceof Dot || a instanceof Animal);
         if (aDot && b instanceof Wild)
@@ -819,7 +827,10 @@ public class GridState
         if (bDot && a instanceof Wild)
             return true;
         
-        if (aDot && bDot && a.getColor() == b.getColor())
+        if (aDot && bDot)
+            return a.getColor() == b.getColor();
+        
+        if (Domino.canConnect(a, b, dcol, drow))
             return true;
         
         return false;
@@ -1484,10 +1495,7 @@ public class GridState
         
         private void addItem(Cell cell, Item item)
         {
-            cell.item = item;
-            item.init(ctx);
-            item.moveShape(m_state.x(cell.col), m_state.y(cell.row));
-            item.addShapeToLayer(ctx.dotLayer);
+            m_state.addItem(cell, item);
         }
 
         public static boolean isSwapStart(Cell a)
@@ -2664,10 +2672,14 @@ public class GridState
     
     public void addExplody(Cell cell)
     {
-        Explody ex = new Explody();
-        ex.init(ctx);
-        ex.moveShape(x(cell.col), y(cell.row));
-        ex.addShapeToLayer(ctx.dotLayer);
-        cell.item = ex;
+        addItem(cell, new Explody());
+    }
+    
+    public void addItem(Cell cell, Item item)
+    {
+        item.init(ctx);
+        item.moveShape(x(cell.col), y(cell.row));
+        item.addShapeToLayer(ctx.dotLayer);
+        cell.item = item;
     }
 }

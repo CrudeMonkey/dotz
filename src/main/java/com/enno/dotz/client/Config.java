@@ -45,6 +45,7 @@ public class Config
     public Generator generator;
     
     public Goal goals;
+    public Boosts boosts;
     
     public GridState grid;
     

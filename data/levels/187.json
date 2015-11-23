@@ -1,0 +1,90 @@
+{
+  "name": "Test Color Bombs",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Test",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "????????",
+    "????????",
+    "????.???",
+    "??????.?",
+    "????????",
+    "??????.?",
+    "????????",
+    "????????"
+  ],
+  "colorBombs": [
+        {
+      "p": [
+        4,
+        2
+      ]
+    },
+        {
+      "p": [
+        6,
+        3
+      ]
+    },
+        {
+      "p": [
+        6,
+        5
+      ]
+    }
+  ],
+  "generator": {
+    "generateLetters": false,
+    "swapMode": false,
+    "rollMode": false,
+    "dominoMode": false,
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "maxDomino": 6,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "bombStrength": 9,
+    "animalType": "Default",
+    "freq": [
+      [19.3,"dot",0],
+      [19.3,"dot",1],
+      [19.3,"dot",2],
+      [19.3,"dot",3],
+      [19.3,"dot",4],
+      [3.4,"colorBomb"]
+    ]
+  },
+  "goals": {
+    "dots": {    }
+  },
+  "boosts": {
+    "colorBombs": 8
+  },
+  "id": 187,
+  "lastModified": "1447990145305"
+}

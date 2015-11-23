@@ -812,6 +812,7 @@ public class MainPanel extends VLayout
         private DotzGridPanel m_grid;
         private ScorePanel m_score;
         private StatsPanel m_statsPanel;
+        private BoostPanel m_boostPanel;
         
         private boolean m_playing;
         private EndOfLevel m_endOfLevel;
@@ -834,6 +835,10 @@ public class MainPanel extends VLayout
             m_statsPanel = new StatsPanel(ctx);
             ctx.statsPanel = m_statsPanel;
             addMember(m_statsPanel);
+            
+            m_boostPanel = new BoostPanel(ctx);
+            ctx.boostPanel = m_boostPanel;
+            addMember(m_boostPanel);
         }
         
         public void cancelLevel()

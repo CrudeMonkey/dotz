@@ -59,7 +59,7 @@ public class Mirror extends Item
     }
     
     @Override
-    public void rotate()
+    public void rotate(int n) // ignore n
     {
         m_flipped = !m_flipped;
         shape.setRotation(m_flipped ? Math.PI / 2 : 0);

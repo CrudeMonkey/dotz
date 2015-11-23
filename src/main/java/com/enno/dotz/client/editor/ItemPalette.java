@@ -8,17 +8,22 @@ import com.enno.dotz.client.Direction;
 import com.enno.dotz.client.item.Anchor;
 import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Clock;
+import com.enno.dotz.client.item.ColorBomb;
 import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
+import com.enno.dotz.client.item.Drop;
 import com.enno.dotz.client.item.Egg;
 import com.enno.dotz.client.item.Fire;
+import com.enno.dotz.client.item.IcePick;
 import com.enno.dotz.client.item.Item;
+import com.enno.dotz.client.item.Key;
 import com.enno.dotz.client.item.Knight;
 import com.enno.dotz.client.item.Laser;
 import com.enno.dotz.client.item.LazySusan;
 import com.enno.dotz.client.item.Mirror;
 import com.enno.dotz.client.item.RandomItem;
 import com.enno.dotz.client.item.Rocket;
+import com.enno.dotz.client.item.Turner;
 import com.enno.dotz.client.item.Wild;
 import com.enno.dotz.client.item.YinYang;
 
@@ -26,7 +31,7 @@ public class ItemPalette extends Palette<Object>
 {
     public ItemPalette()
     {
-        super(40, ItemButton.SIZE, 6, 5);
+        super(40, ItemButton.SIZE, 6, 6);
         
         ctx.backgroundLayer = new Layer();
         add(ctx.backgroundLayer);
@@ -56,6 +61,12 @@ public class ItemPalette extends Palette<Object>
 
         addButton(new Egg(), 0, 4);
         addButton(new Domino(), 1, 4);
+        addButton(new Turner(3), 2, 4);
+        addButton(new Drop(), 3, 4);
+        addButton(new ColorBomb(), 4, 4);
+        addButton(new Key(), 5, 4);
+        
+        addButton(new IcePick(), 0, 5);
     }
     
     private void addButton(Object cell, int col, int row)

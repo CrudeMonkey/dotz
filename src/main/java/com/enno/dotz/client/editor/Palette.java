@@ -18,6 +18,7 @@ public abstract class Palette<T> extends LienzoPanel
     protected Context ctx;
     protected List<PaletteButton<T>> m_list = new ArrayList<PaletteButton<T>>();
     private int m_buttonSize;
+    protected boolean m_active = true;
     
     protected Palette(int size, int buttonSize, int numColumns, int numRows)
     {
@@ -34,6 +35,9 @@ public abstract class Palette<T> extends LienzoPanel
             @Override
             public void onMouseDown(MouseDownEvent event)
             {
+                if (!m_active)
+                    return;
+                
                 int col = event.getX() / m_buttonSize;
                 int row = event.getY() / m_buttonSize;
                 
@@ -45,12 +49,19 @@ public abstract class Palette<T> extends LienzoPanel
                 }
                 ctx.backgroundLayer.draw();   // redraw button borders
                 
-                if (selected != null)
-                    selected(selected.getItem());
+                selected(selected);
             }
         });
     }
     
+    
+    protected void selected(PaletteButton<T> selected)
+    {
+        if (selected == null)
+            selected((T) null);
+        else
+            selected(selected.getItem());
+    }
     
     protected void selected(T selected)
     { 
@@ -68,9 +79,10 @@ public abstract class Palette<T> extends LienzoPanel
     public abstract static class PaletteButton<T> extends Group
     {
         private int m_col, m_row, m_numColumns, m_numRows;
-        private T m_cell;
+        protected T m_cell;
 
         private Rectangle m_border;
+        protected Context ctx;
 
         public PaletteButton(int col, int row, int numCols, int numRows, int size, T cell, Context ctx, boolean addBackground)
         {
@@ -78,6 +90,7 @@ public abstract class Palette<T> extends LienzoPanel
             m_row = row;
             m_numColumns = numCols;
             m_numRows = numRows;
+            this.ctx = ctx;
             
             m_cell = cell;
             

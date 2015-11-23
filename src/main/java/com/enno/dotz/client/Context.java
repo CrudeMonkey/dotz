@@ -20,14 +20,16 @@ public class Context
     public Layer doorLayer;
     public Layer nukeLayer;
     public Layer laserLayer;
+    public Layer connectLayer;
     
+    public DotzGridPanel gridPanel;
+    public BoostPanel boostPanel;
     public ScorePanel scorePanel;
     public StatsPanel statsPanel;
 
     public Pt lastMove; // location of last connect
     
     public boolean killed;
-    public DotzGridPanel gridPanel;
     
     public boolean isWild(Integer color)
     {

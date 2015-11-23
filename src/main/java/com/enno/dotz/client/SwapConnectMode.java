@@ -119,7 +119,16 @@ public class SwapConnectMode extends ConnectMode
                 
                 Cell cell = m_state.cell(col, row);                
                 
+                if (m_specialMode != null)
+                {
+                    m_specialMode.click(cell);
+                    return;
+                }
+                
                 if (flipMirror(cell) || fireRocket(cell) || reshuffle(cell))
+                    return;
+                
+                if (startSpecialMode(cell, event.getX(), event.getY()))
                     return;
                 
                 if (!(GetSwapMatches.isSwapStart(cell) || cell.item instanceof Knight))
@@ -137,6 +146,12 @@ public class SwapConnectMode extends ConnectMode
             @Override
             public void onNodeMouseOut(NodeMouseOutEvent event)
             {
+                if (m_specialMode != null)
+                {
+                    m_specialMode.mouseOut();
+                    return;
+                }
+                
                 if (m_swapping)
                 {
                     Sound.MISS.play();

@@ -6,6 +6,7 @@ import java.util.Random;
 import com.enno.dotz.client.Config;
 import com.enno.dotz.client.Generator;
 import com.enno.dotz.client.item.Animal;
+import com.enno.dotz.client.ui.MXAccordion;
 import com.enno.dotz.client.ui.MXCheckBox;
 import com.enno.dotz.client.ui.MXComboBoxItem;
 import com.enno.dotz.client.ui.MXForm;
@@ -41,10 +42,12 @@ public abstract class GeneratorPropertiesPanel extends VLayout
     private SpinnerItem m_clockStrength;
     private ButtonItem m_genSeed;
     private MXComboBoxItem m_mode;
+    private BoostPropertiesPanel m_boostProps;
 
     public GeneratorPropertiesPanel(boolean isNew, Config level)
     {
         setMargin(10);
+        setMembersMargin(10);
         
         MXForm form = new MXForm();
         form.setNumCols(8);
@@ -98,7 +101,7 @@ public abstract class GeneratorPropertiesPanel extends VLayout
             @Override
             public void onClick(ClickEvent event)
             {
-                m_seed.setValue("" + Math.abs(new Random().nextLong() / 2));
+                m_seed.setValue("" + Math.abs(new Random().nextInt()));
             }
         });
         
@@ -209,10 +212,17 @@ public abstract class GeneratorPropertiesPanel extends VLayout
                 m_genSeed.setDisabled(false);
             }
         }
+        
+        m_boostProps = new BoostPropertiesPanel(isNew, level);
+        MXAccordion acc = MXAccordion.createAccordion("Boosts", m_boostProps);
+        addMember(acc);
     }
 
     public boolean validate()
     {
+        if (!m_boostProps.validate())
+            return false;
+        
         if (!m_randomSeed.isChecked())
         {
             try
@@ -236,6 +246,8 @@ public abstract class GeneratorPropertiesPanel extends VLayout
 
     public void prepareSave(Config level)
     {
+        m_boostProps.prepareSave(level);
+        
         Generator g = level.generator;
         g.setSeed(m_randomSeed.isChecked() ? Generator.RANDOM_SEED : Long.parseLong(m_seed.getValueAsString()));
         g.fireGrowthRate = Integer.parseInt(m_fireGrowthRate.getValueAsString());

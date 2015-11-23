@@ -5,7 +5,9 @@ import java.util.List;
 
 import com.ait.tooling.nativetools.client.NArray;
 import com.ait.tooling.nativetools.client.NObject;
+import com.enno.dotz.client.Config;
 import com.enno.dotz.client.io.ClientRequest;
+import com.enno.dotz.client.io.MAsyncCallback;
 import com.enno.dotz.client.io.ServiceCallback;
 import com.enno.dotz.client.ui.MXButtonsPanel;
 import com.enno.dotz.client.ui.MXForm;
@@ -14,6 +16,7 @@ import com.enno.dotz.client.ui.MXListGridField;
 import com.enno.dotz.client.ui.MXRecordList;
 import com.enno.dotz.client.ui.MXTextInput;
 import com.enno.dotz.client.ui.MXWindow;
+import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.ListGridFieldType;
 import com.smartgwt.client.types.SelectionStyle;
 import com.smartgwt.client.util.BooleanCallback;
@@ -21,8 +24,11 @@ import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
+import com.smartgwt.client.widgets.events.DoubleClickEvent;
+import com.smartgwt.client.widgets.events.DoubleClickHandler;
 import com.smartgwt.client.widgets.form.fields.StaticTextItem;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
+import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 
 public class EditSetDialog extends MXWindow
@@ -34,6 +40,9 @@ public class EditSetDialog extends MXWindow
     private MXTextInput m_creator;
     
     private boolean m_changed;
+    
+    private PreviewLevelPanel m_previewPanel;
+    private VLayout m_previewContainer;
     
     public EditSetDialog(boolean isNew, NObject set)
     {
@@ -58,7 +67,7 @@ public class EditSetDialog extends MXWindow
         
         m_grid.setData(MXRecordList.toRecordArray(m_set.getAsArray("levels")));
         
-        setWidth(800);
+        setWidth(1200);
         setHeight(600);
         
         centerInPage();
@@ -66,6 +75,20 @@ public class EditSetDialog extends MXWindow
     }
 
     private Canvas createPane()
+    {
+        HLayout pane = new HLayout();
+        pane.setMembersMargin(10);
+        pane.addMember(createLeftPane());
+        
+        m_previewContainer = new VLayout();
+        m_previewContainer.setAlign(Alignment.CENTER);
+        m_previewContainer.setDefaultLayoutAlign(Alignment.CENTER);
+        pane.addMember(m_previewContainer);
+        
+        return pane;
+    }    
+    
+    private Canvas createLeftPane()
     {
         VLayout pane = new VLayout();
         pane.setMargin(10);
@@ -99,7 +122,7 @@ public class EditSetDialog extends MXWindow
         
         m_grid.setFields(id, name, creator);
         
-        pane.addMember(m_grid);
+        pane.addMember(m_grid);        
         
         MXButtonsPanel buttons = new MXButtonsPanel();
         MXButtonsPanel buttons2 = new MXButtonsPanel();
@@ -213,6 +236,20 @@ public class EditSetDialog extends MXWindow
                 playSet(setId, index);
             }
         });
+        buttons2.add("Preview", new ClickHandler()
+        {
+            @Override
+            public void onClick(ClickEvent event)
+            {
+                ListGridRecord rec = m_grid.getSelectedRecord();
+                if (rec == null)
+                {
+                    SC.warn("Select a level first");
+                    return;
+                }
+                previewLevel(rec.getAttributeAsInt("id"));
+            }
+        });
         buttons.add("Save", new ClickHandler()
         {
             @Override
@@ -247,6 +284,23 @@ public class EditSetDialog extends MXWindow
                 if (Boolean.TRUE.equals(ok))
                     EditSetDialog.super.closeWindow();
             }
+        });
+    }
+
+    protected void previewLevel(Integer levelId)
+    {
+        ClientRequest.loadLevel(levelId, new MAsyncCallback<Config>() {
+            @Override
+            public void onSuccess(Config level)
+            {
+                if (m_previewPanel != null)
+                {
+                    m_previewContainer.removeMember(m_previewPanel);
+                    m_previewPanel = null;
+                }
+                m_previewPanel = new PreviewLevelPanel(level);
+                m_previewContainer.addMember(m_previewPanel);
+            }            
         });
     }
     

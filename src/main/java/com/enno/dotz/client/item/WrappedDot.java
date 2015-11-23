@@ -17,22 +17,32 @@ public class WrappedDot extends Item
         this.color = color;
     }
 
+    @Override
     public Integer getColor()
     {
         return color;
     }
     
+    @Override
     public boolean canConnect()
     {
         return true;
     }
 
+    @Override
     public boolean canGrowFire()
     {
         return true; //TODO or not?
     }
 
+    @Override
     public boolean canChangeColor()
+    {
+        return true;
+    }
+
+    @Override
+    public boolean canReshuffle()
     {
         return true;
     }

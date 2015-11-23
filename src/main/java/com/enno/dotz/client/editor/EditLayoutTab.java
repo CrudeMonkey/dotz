@@ -43,6 +43,7 @@ import com.enno.dotz.client.item.DotBomb;
 import com.enno.dotz.client.item.Item;
 import com.enno.dotz.client.item.Knight;
 import com.enno.dotz.client.item.LazySusan;
+import com.enno.dotz.client.item.Turner;
 import com.enno.dotz.client.ui.MXAccordion;
 import com.enno.dotz.client.ui.UTabSet;
 import com.enno.dotz.client.util.Debug;
@@ -146,7 +147,7 @@ public abstract class EditLayoutTab extends VLayout
         };
         
         acc = MXAccordion.createAccordion("Mode", wrap(m_modePalette));
-        acc.setWidth(250);
+        acc.setWidth(300);
         acc.setHeight(100);
         right.addMember(acc);        
         
@@ -249,7 +250,8 @@ public abstract class EditLayoutTab extends VLayout
             m_mode.stop();
         
         m_mode = (LayoutMode) mode;
-        m_mode.start();        
+        if (m_mode != null)
+            m_mode.start();        
     }
     
     public boolean validate(boolean save)
@@ -715,7 +717,7 @@ public abstract class EditLayoutTab extends VLayout
                     m_mouseDown = true;
                     m_pt = null;
                     m_lastConveyorCell = null;
-                    selectCell(event.getX(), event.getY());
+                    selectCell(event.getX(), event.getY(), event.isShiftKeyDown());
                 }
             });
             
@@ -735,9 +737,9 @@ public abstract class EditLayoutTab extends VLayout
                 {
                     m_x = event.getX();
                     m_y = event.getY();
-                                        
+                    
                     if (m_mouseDown)
-                        selectCell(event.getX(), event.getY());
+                        selectCell(event.getX(), event.getY(), event.isShiftKeyDown());
                 }
             });
             
@@ -786,7 +788,7 @@ public abstract class EditLayoutTab extends VLayout
             m_keyPressHandler.removeHandler();
         }
 
-        protected void selectCell(int x, int y)
+        protected void selectCell(int x, int y, boolean shift)
         {
             GridState state = ctx.state;
             
@@ -815,7 +817,7 @@ public abstract class EditLayoutTab extends VLayout
             }
             else if (m_operation instanceof RotateItem)
             {
-                rotateItem(cell);
+                rotateItem(cell, shift);
             }
             else if (m_operation instanceof Item)
             {
@@ -1076,8 +1078,6 @@ public abstract class EditLayoutTab extends VLayout
             
             oldCell.removeGraphics();
             
-            //newCell = newCell.copy();
-            
             if (newCell instanceof Door)
             {
                 Door door = (Door) newCell;
@@ -1095,13 +1095,25 @@ public abstract class EditLayoutTab extends VLayout
             m_grid.draw();        
         }        
         
-        protected void rotateItem(Cell cell)
+        protected void rotateItem(Cell cell, boolean shift)
         {
-            if (cell.item != null && cell.item.canRotate())
+            if (!shift)
             {
-                cell.item.rotate();
-                ctx.dotLayer.draw();
-                return;
+                if (cell.item instanceof Turner)
+                {
+                    int n = ((Turner) cell.item).n;
+                    Turner newItem = new Turner((n % 3) + 1);
+                    removeItem(cell);
+                    addItem(cell, newItem);
+                    return;
+                }
+                
+                if (cell.item != null && cell.item.canRotate())
+                {
+                    cell.item.rotate(1);
+                    ctx.dotLayer.draw();
+                    return;
+                }
             }
             
             if (cell instanceof Door)

@@ -1,0 +1,60 @@
+{
+  "name": "Test Domino Reshuffle",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Test",
+  "numColumns": 8,
+  "numRows": 3,
+  "grid": [
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "????????",
+    "????????",
+    "????????"
+  ],
+  "teleporters": [  ],
+  "doors": [  ],
+  "conveyors": [  ],
+  "lazySusans": [  ],
+  "dots": [  ],
+  "bombs": [  ],
+  "animals": [  ],
+  "knights": [  ],
+  "clocks": [  ],
+  "lasers": [  ],
+  "mirrors": [  ],
+  "rockets": [  ],
+  "dominoes": [  ],
+  "generator": {
+    "generateLetters": false,
+    "swapMode": false,
+    "rollMode": false,
+    "dominoMode": false,
+    "seed": 123,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "maxDomino": 9,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "bombStrength": 9,
+    "animalType": "Default",
+    "freq": [
+      [100,"domino"]
+    ]
+  },
+  "goals": {
+    "dots": {    }
+  },
+  "id": 183,
+  "lastModified": "1447641830588"
+}

@@ -128,9 +128,11 @@ public class Rocket extends Item
     }
     
     @Override
-    public void rotate()
+    public void rotate(int n)
     {
-        m_direction = Direction.rotate(m_direction, true);
+        for (int i = 0; i < n; i++)
+            m_direction = Direction.rotate(m_direction, true);
+        
         updateRotation(shape);
     }
     

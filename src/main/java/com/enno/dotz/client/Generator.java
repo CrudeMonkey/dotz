@@ -17,6 +17,7 @@ import com.enno.dotz.client.item.Knight;
 import com.enno.dotz.client.item.Laser;
 import com.enno.dotz.client.item.Mirror;
 import com.enno.dotz.client.item.Rocket;
+import com.enno.dotz.client.item.Turner;
 import com.enno.dotz.client.item.Wild;
 import com.enno.dotz.client.util.FrequencyGenerator;
 
@@ -189,9 +190,7 @@ public class Generator
         if (initial && dominoMode)
         {
             //TODO Wild
-            Domino domino = getDominoGenerator().nextDomino(getRandom());
-            domino.init(ctx);
-            return domino;
+            return getNextDomino(ctx);
         }
         
         Item item;
@@ -257,9 +256,22 @@ public class Generator
         item.init(ctx);
         return item;
     }
+    
+    protected Item getNextDomino(Context ctx)
+    {
+        Domino domino = getDominoGenerator().nextDomino(getRandom());
+        domino.init(ctx);
+        return domino;
+    }
 
     public Item changeColor(Context ctx, Item oldItem)
     {
+        boolean isDomino = oldItem instanceof Domino;
+        if (isDomino)
+        {
+            return getNextDomino(ctx);
+        }
+        
         if (!hasAtLeastTwoColors())
             return oldItem;
         
@@ -386,6 +398,11 @@ public class Generator
             {
                 Rocket rocket = (Rocket) item;
                 rocket.setDirection(Direction.randomDirection(ctx.generator.getRandom()));
+            }
+            else if (item instanceof Turner)
+            {
+                Turner turner = (Turner) item;
+                turner.n = 1 + ctx.generator.getRandom().nextInt(3);
             }
             else if (item instanceof DotBomb)
             {

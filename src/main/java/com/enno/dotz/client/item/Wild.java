@@ -48,6 +48,12 @@ public class Wild extends Item
     }
     
     @Override
+    public boolean canReshuffle()
+    {
+        return true;
+    }
+
+    @Override
     protected Item doCopy()
     {
         return new Wild();

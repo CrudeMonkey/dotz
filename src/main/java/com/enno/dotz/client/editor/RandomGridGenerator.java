@@ -501,7 +501,7 @@ public class RandomGridGenerator
     {
         public void gen(Properties props)
         {
-            for (int row = 0; row < nc; row++)
+            for (int row = 0; row < nr; row++)
             {
                 for (int col = 0; col < nc; col++)
                 {

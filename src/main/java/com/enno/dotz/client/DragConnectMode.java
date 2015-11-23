@@ -1,8 +1,11 @@
 package com.enno.dotz.client;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import com.ait.lienzo.client.core.animation.LayerRedrawManager;
 import com.ait.lienzo.client.core.event.NodeMouseDownEvent;
 import com.ait.lienzo.client.core.event.NodeMouseDownHandler;
 import com.ait.lienzo.client.core.event.NodeMouseMoveEvent;
@@ -12,16 +15,28 @@ import com.ait.lienzo.client.core.event.NodeMouseOutHandler;
 import com.ait.lienzo.client.core.event.NodeMouseUpEvent;
 import com.ait.lienzo.client.core.event.NodeMouseUpHandler;
 import com.ait.lienzo.client.core.shape.Layer;
+import com.ait.lienzo.client.core.shape.Rectangle;
+import com.ait.lienzo.shared.core.types.ColorName;
+import com.enno.dotz.client.Cell.Door;
+import com.enno.dotz.client.GridState.GetSwapMatches;
 import com.enno.dotz.client.SoundManager.Sound;
 import com.enno.dotz.client.anim.Pt;
 import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.DotBomb;
+import com.enno.dotz.client.item.Drop;
 import com.enno.dotz.client.item.Egg;
+import com.enno.dotz.client.item.Explody;
+import com.enno.dotz.client.item.Fire;
+import com.enno.dotz.client.item.IcePick;
+import com.enno.dotz.client.item.Item;
 import com.enno.dotz.client.item.Knight;
+import com.enno.dotz.client.item.Turner;
 import com.enno.dotz.client.item.Wild;
+import com.enno.dotz.client.item.WrappedDot;
 import com.enno.dotz.client.util.Debug;
+import com.google.gwt.event.shared.HandlerRegistration;
 
 public class DragConnectMode extends ConnectMode
 {
@@ -55,7 +70,7 @@ public class DragConnectMode extends ConnectMode
             {
                 int col = m_state.col(event.getX());
                 int row = m_state.row(event.getY());
-                
+                                
                 if (m_isWordMode)
                 {
                     // Must be relatively near the center so you can drag diagonal lines
@@ -76,10 +91,11 @@ public class DragConnectMode extends ConnectMode
         {                
             @Override
             public void onNodeMouseUp(NodeMouseUpEvent event)
-            {                 
+            {
                 endOfDrag();
                 connectDone();
             }
+
         };
         
         m_mouseDownHandler = new NodeMouseDownHandler()
@@ -91,6 +107,14 @@ public class DragConnectMode extends ConnectMode
                 int row = m_state.row(event.getY());
                 if (row < 0 || row >= cfg.numRows || col < 0 || col >= cfg.numColumns)
                     return;
+
+                Cell cell = m_state.cell(col, row);
+
+                if (m_specialMode != null)
+                {
+                    m_specialMode.click(cell);
+                    return;
+                }
                 
                 // clear variables
                 Debug.p("square=false");
@@ -101,8 +125,10 @@ public class DragConnectMode extends ConnectMode
                 
                 //Debug.p("mouse down in cell " + col + "," + row);
                 
-                Cell cell = m_state.cell(col, row);
                 if (flipMirror(cell) || fireRocket(cell) || reshuffle(cell))
+                    return;
+                
+                if (startSpecialMode(cell, event.getX(), event.getY()))
                     return;
                 
                 //TODO simplify
@@ -136,6 +162,12 @@ public class DragConnectMode extends ConnectMode
             @Override
             public void onNodeMouseOut(NodeMouseOutEvent event)
             {
+                if (m_specialMode != null)
+                {
+                    m_specialMode.mouseOut();
+                    return;
+                }
+                
                 if (m_dragging)
                 {
                     Sound.MISS.play();
@@ -584,5 +616,685 @@ public class DragConnectMode extends ConnectMode
                 return true;
         }
         return false;
+    }
+    
+    public static abstract class SpecialMode
+    {
+        protected Cell m_sourceCell;
+        protected Item m_item;
+        protected Cell m_targetCell;
+        private Rectangle m_box;
+        protected DragLine m_dragLine;
+        private Runnable m_removeItem;
+        
+        protected Context ctx;
+        protected GridState m_state;
+        protected Layer m_layer;
+        protected int m_lastCellCol = -1;
+        protected int m_lastCellRow = -1;
+        protected ConnectMode m_connectMode;
+        
+        protected HandlerRegistration m_lineMoveReg;
+        protected HandlerRegistration m_mouseUpReg;
+        
+        protected SpecialMode(Cell cell, Context ctx, ConnectMode connectMode)
+        {
+            this.ctx = ctx;
+            m_state = ctx.state;
+            m_sourceCell = cell;
+            m_item = m_sourceCell.item;
+            m_layer = ctx.connectLayer;
+            m_connectMode = connectMode;
+        }
+        
+        protected SpecialMode(Item item, Context ctx, ConnectMode connectMode, Runnable removeItem)
+        {
+            this.ctx = ctx;
+            m_state = ctx.state;
+            m_item = item;
+            m_layer = ctx.connectLayer;
+            m_connectMode = connectMode;
+            m_removeItem = removeItem;
+        }
+        
+        public void update(int row, int col)
+        {
+            if (!m_state.isValidCell(col, row))
+            {
+                m_targetCell = null;
+                return;
+            }
+            
+            if (col == m_lastCellCol && row == m_lastCellRow)
+                return; // still same cell
+            
+            m_lastCellCol = col;
+            m_lastCellRow = row;
+            
+            m_targetCell = m_state.cell(col, row);
+            update(m_targetCell);
+        }
+
+        protected abstract void update(Cell cell);        
+        
+        public void cancel()
+        {
+            if (m_lineMoveReg != null)
+                m_lineMoveReg.removeHandler();
+            
+            if (m_mouseUpReg != null)
+                m_mouseUpReg.removeHandler();
+            
+            if (m_dragLine != null)
+                m_layer.remove(m_dragLine);
+            
+            removeDragBox();
+            redraw();
+            
+            m_connectMode.cancelSpecialMode();
+        }
+
+        public void done()
+        {
+            if (m_targetCell == null)
+                Sound.MISS.play();
+            else
+                done(m_targetCell, true);
+        }
+        
+        public abstract void done(Cell cell, boolean alwaysCancel);
+        
+        protected void startMoveListener()
+        {
+            m_lineMoveReg = m_layer.addNodeMouseMoveHandler(new NodeMouseMoveHandler() {
+
+                @Override
+                public void onNodeMouseMove(NodeMouseMoveEvent event)
+                {
+                    int col = m_state.col(event.getX());
+                    int row = m_state.row(event.getY());
+                    
+                    update(row, col);
+                }
+            });
+        }
+        
+        protected void startMouseUpListener()
+        {
+            m_mouseUpReg = m_layer.addNodeMouseUpHandler(new NodeMouseUpHandler()
+            {                
+                @Override
+                public void onNodeMouseUp(NodeMouseUpEvent event)
+                {
+                    cancel();
+                    done();
+                }
+            });
+        }
+        
+        public void mouseOut()
+        {
+            if (m_mouseUpReg != null)
+            {
+                cancel();
+                Sound.MISS.play();
+            }
+        }
+        
+        protected void startDragLine(Cell cell, int x, int y)
+        {
+            m_dragLine = new DragLine();
+            m_dragLine.clear();            
+            m_dragLine.setStrokeColor(ColorName.BLACK);
+            m_dragLine.add(m_state.x(cell.col), m_state.y(cell.row));
+            m_dragLine.add(x, y);
+            
+            m_layer.add(m_dragLine);
+            redraw();
+        }
+
+        protected void createDragBox(Cell cell, int n)
+        {
+            double w = n * ctx.cfg.size;
+            double sw = 3;
+            m_box = new Rectangle(w - sw, w - sw);
+            if (cell != null)
+            {
+                m_box.setX(m_state.x(cell.col) - w / 2 - sw / 2);
+                m_box.setY(m_state.y(cell.row) - w / 2 - sw / 2);
+            }
+            else
+            {
+                m_box.setVisible(false);
+            }
+            m_box.setStrokeColor(ColorName.BLACK);
+            m_box.setStrokeWidth(sw);
+            m_box.setDashArray(4, 4);
+            
+            ctx.nukeLayer.setVisible(true);
+            ctx.nukeLayer.add(m_box);
+        }
+
+        protected void updateDragLine(Cell cell)
+        {
+            if (m_dragLine != null)
+            {
+                m_dragLine.adjust(m_state.x(cell.col), m_state.y(cell.row));
+                redraw();
+            }
+        }
+        
+        protected void removeDragBox()
+        {
+            if (m_box != null)
+            {
+                ctx.nukeLayer.remove(m_box);
+                ctx.nukeLayer.setVisible(false);
+            }
+        }
+        
+        protected void updateDragBox(Cell cell)
+        {
+            double w = m_box.getWidth();
+            m_box.setX(m_state.x(cell.col) - w / 2);
+            m_box.setY(m_state.y(cell.row) - w / 2);
+            m_box.setVisible(true);
+            LayerRedrawManager.get().schedule(ctx.nukeLayer);
+        }
+        
+        protected void removeStartItem()
+        {
+            if (m_sourceCell != null)
+            {
+                m_sourceCell.item.removeShapeFromLayer(ctx.dotLayer);
+                m_sourceCell.item = null;
+            }
+            if (m_removeItem != null)
+                m_removeItem.run();
+        }
+        
+        protected void process()
+        {
+            m_connectMode.stop();
+            
+            m_state.processChain(new Runnable() {
+                public void run()
+                {
+                    m_connectMode.start(); // next move
+                }
+            });
+        }
+        
+        protected void redraw()
+        {
+            LayerRedrawManager.get().schedule(m_layer);
+        }
+        
+        public void click(Cell cell)
+        {
+            done(cell, false);
+        }
+    }
+    
+    public static class TurnMode extends SpecialMode
+    {
+        public TurnMode(Cell cell, int x, int y, Context ctx, ConnectMode connectMode)
+        {
+            super(cell, ctx, connectMode);
+            
+            startMoveListener();
+            startMouseUpListener();
+            
+            startDragLine(cell, x, y);            
+            createDragBox(cell, 1);
+        }        
+
+        public TurnMode(Item item, Context ctx, ConnectMode connectMode, Runnable removeItem)
+        {
+            super(item, ctx, connectMode, removeItem);
+            
+            startMoveListener();
+                        
+            createDragBox(null, 1);
+        }
+
+        @Override
+        protected void update(Cell cell)
+        {
+            updateDragLine(cell);
+            updateDragBox(cell);
+        }
+
+        @Override
+        public void done(Cell cell, boolean alwaysCancel)
+        {
+            if (cell.isLocked() || cell.item == null || !cell.item.canRotate())
+            {
+                if (alwaysCancel)
+                    cancel();
+                
+                Sound.MISS.play();
+                return;
+            }
+            
+            cancel();
+            
+            Sound.FLIP_MIRROR.play();
+            int n = ((Turner) m_item).n;
+            cell.item.rotate(n);
+            
+            removeStartItem();
+            process();
+        }
+    }
+    
+    public static class ColorBombMode extends SpecialMode
+    {
+        public ColorBombMode(Cell cell, int x, int y, Context ctx, ConnectMode connectMode)
+        {
+            super(cell, ctx, connectMode);
+            
+            startMoveListener();
+            startMouseUpListener();
+            
+            startDragLine(cell, x, y);            
+            createDragBox(cell, 1);
+        }        
+
+        public ColorBombMode(Item item, Context ctx, ConnectMode connectMode, Runnable removeItem)
+        {
+            super(item, ctx, connectMode, removeItem);
+            
+            startMoveListener();
+                        
+            createDragBox(null, 1);
+        }
+
+        @Override
+        protected void update(Cell cell)
+        {
+            updateDragLine(cell);
+            updateDragBox(cell);
+        }
+
+        @Override
+        public void done(Cell cell, boolean alwaysCancel)
+        {
+            if (cell.isLocked() || !(cell.item instanceof Dot))
+            {
+                if (alwaysCancel)
+                    cancel();
+                
+                Sound.MISS.play();
+                return;
+            }
+            
+            cancel();
+            
+            Sound.DROP.play();
+            explode(cell.item.getColor());
+            
+            removeStartItem();
+            process();
+        }
+        
+        private void explode(Integer color)
+        {
+            Set<Cell> exploded = new HashSet<Cell>();
+            Set<Cell> explodies = new HashSet<Cell>();
+            for (int row = 0; row < m_state.numRows; row++)
+            {
+                for (int col = 0; col < m_state.numColumns; col++)
+                {
+                    Cell cell = m_state.cell(col, row);
+                    Item item = cell.item;
+                    if (item != null && !exploded.contains(cell) && cell.canExplode(color))
+                    {
+                        explode(cell, color, exploded, explodies);
+                    }
+                }
+            }
+            m_state.explodeNeighbors(exploded);
+            
+            for (Cell explody : explodies)
+            {
+                if (explody.item == null)
+                    m_state.addExplody(explody);
+            }
+        }
+
+        private void explode(Cell cell, Integer color, Set<Cell> exploded, Set<Cell> explodies)
+        {
+            if (cell.item instanceof WrappedDot)
+                explodies.add(cell);
+            
+            exploded.add(cell);
+            cell.explode(color, 1);
+        }
+    }
+    
+    public static class ReshuffleMode extends SpecialMode
+    {        
+        public ReshuffleMode(Item item, Context ctx, ConnectMode connectMode, Runnable removeItem)
+        {
+            super(item, ctx, connectMode, removeItem);
+            
+            startMoveListener();
+                        
+            createDragBox(null, 1);
+        }
+
+        @Override
+        protected void update(Cell cell)
+        {
+            updateDragLine(cell);
+            updateDragBox(cell);
+        }
+        
+        @Override
+        public void done(Cell cell, boolean alwaysCancel)
+        {           
+            cancel();
+            
+            Sound.RESHUFFLE.play();            
+            ctx.state.reshuffle();
+            
+            removeStartItem();
+            process();
+        }
+    }
+    
+    public static class WildCardMode extends SpecialMode
+    {        
+        public WildCardMode(Item item, Context ctx, ConnectMode connectMode, Runnable removeItem)
+        {
+            super(item, ctx, connectMode, removeItem);
+            
+            startMoveListener();
+                        
+            createDragBox(null, 1);
+        }
+
+        @Override
+        protected void update(Cell cell)
+        {
+            updateDragLine(cell);
+            updateDragBox(cell);
+        }
+
+        public static boolean canReplace(Cell cell)
+        {
+            return ExplodyMode.canReplace(cell);
+        }
+        
+        @Override
+        public void done(Cell cell, boolean alwaysCancel)
+        {
+            if (!canReplace(cell))
+            {
+                if (alwaysCancel)
+                    cancel();
+                
+                Sound.MISS.play();
+                return;
+            }
+            
+            cancel();
+            
+            Sound.DROP.play();
+            
+            cell.explode(null, 1);
+            if (cell.item == null)
+                m_state.addItem(cell, new Wild());
+            
+            removeStartItem();
+            process();
+        }
+    }
+    
+    public static class KeyMode extends SpecialMode
+    {        
+        public KeyMode(Cell cell, int x, int y, Context ctx, ConnectMode connectMode)
+        {
+            super(cell, ctx, connectMode);
+            
+            startMoveListener();
+            startMouseUpListener();
+            
+            startDragLine(cell, x, y);            
+            createDragBox(cell, 1);
+        }        
+
+        public KeyMode(Item item, Context ctx, ConnectMode connectMode, Runnable removeItem)
+        {
+            super(item, ctx, connectMode, removeItem);
+            
+            startMoveListener();
+                        
+            createDragBox(null, 1);
+        }
+
+        @Override
+        protected void update(Cell cell)
+        {
+            updateDragLine(cell);
+            updateDragBox(cell);
+        }
+
+        public static boolean canReplace(Cell cell)
+        {
+            return ExplodyMode.canReplace(cell);
+        }
+        
+        @Override
+        public void done(Cell cell, boolean alwaysCancel)
+        {
+            if (!cell.isLocked())
+            {
+                if (alwaysCancel)
+                    cancel();
+                
+                Sound.MISS.play();
+                return;
+            }
+            
+            cancel();
+            
+            Sound.DROP.play();
+            
+            ((Door) cell).unlock();
+            
+            removeStartItem();
+            process();
+        }
+    }
+    
+    public static class ExplodyMode extends SpecialMode
+    {        
+        public ExplodyMode(Item item, Context ctx, ConnectMode connectMode, Runnable removeItem)
+        {
+            super(item, ctx, connectMode, removeItem);
+            
+            startMoveListener();
+                        
+            createDragBox(null, 1);
+        }
+
+        @Override
+        protected void update(Cell cell)
+        {
+            updateDragLine(cell);
+            updateDragBox(cell);
+        }
+
+        public static boolean canReplace(Cell cell)
+        {
+            return GetSwapMatches.isSwapStart(cell) || cell.item instanceof Domino;
+        }
+        
+        @Override
+        public void done(Cell cell, boolean alwaysCancel)
+        {
+            if (!canReplace(cell))
+            {
+                if (alwaysCancel)
+                    cancel();
+                
+                Sound.MISS.play();
+                return;
+            }
+            
+            cancel();
+            
+            Sound.DROP.play();
+            
+            cell.explode(null, 1);
+            if (cell.item == null)
+                m_state.addItem(cell, new Explody());
+            
+            removeStartItem();
+            process();
+        }
+    }
+    
+    public static class DropMode extends SpecialMode
+    {
+        public DropMode(Cell cell, int x, int y, Context ctx, ConnectMode connectMode)
+        {
+            super(cell, ctx, connectMode);
+            
+            startMoveListener();
+            startMouseUpListener();
+            
+            startDragLine(cell, x, y);
+            
+            int n = ((Drop) m_item).getRadius();
+            createDragBox(cell, n);
+        }        
+
+        public DropMode(Item item, Context ctx, ConnectMode connectMode, Runnable removeItem)
+        {
+            super(item, ctx, connectMode, removeItem);
+            
+            startMoveListener();
+            
+            int n = ((Drop) m_item).getRadius();
+            createDragBox(null, n);
+        }
+
+        @Override
+        protected void update(Cell cell)
+        {
+            updateDragLine(cell);
+            updateDragBox(cell);
+        }
+
+        @Override
+        public void done(Cell cell, boolean alwaysCancel)
+        {
+            int n = ((Drop) m_item).getRadius();
+            
+            boolean doused = false;
+            for (int col = cell.col - n / 2, ci = 0; ci < n; ci++, col++)
+            {
+                for (int row = cell.row - n / 2, ri = 0; ri < n; ri++, row++)
+                {
+                    if (!m_state.isValidCell(col, row))
+                        continue;
+                    
+                    Cell c = m_state.cell(col, row);
+                    if (!c.isLocked() && c.item instanceof Fire)
+                    {
+                        c.explode(null, 0);
+                        doused = true;
+                    }
+                }
+            }
+            
+            if (!doused)
+            {
+                if (alwaysCancel)
+                    cancel();
+                
+                Sound.MISS.play();
+                return;
+            }
+            
+            Sound.DRIP.play();
+            cancel();
+            
+            removeStartItem();
+            process();
+        }        
+    }
+    
+    public static class IcePickMode extends SpecialMode
+    {
+        public IcePickMode(Cell cell, int x, int y, Context ctx, ConnectMode connectMode)
+        {
+            super(cell, ctx, connectMode);
+            
+            startMoveListener();
+            startMouseUpListener();
+            
+            startDragLine(cell, x, y);
+            
+            int n = ((IcePick) m_item).getRadius();
+            createDragBox(cell, n);
+        }        
+
+        public IcePickMode(Item item, Context ctx, ConnectMode connectMode, Runnable removeItem)
+        {
+            super(item, ctx, connectMode, removeItem);
+            
+            startMoveListener();
+            
+            int n = ((IcePick) m_item).getRadius();
+            createDragBox(null, n);
+        }
+
+        @Override
+        protected void update(Cell cell)
+        {
+            updateDragLine(cell);
+            updateDragBox(cell);
+        }
+
+        @Override
+        public void done(Cell cell, boolean alwaysCancel)
+        {
+            int n = ((IcePick) m_item).getRadius();
+            int strength = ((IcePick) m_item).getStrength();
+            
+            boolean melted = false;
+            for (int col = cell.col - n / 2, ci = 0; ci < n; ci++, col++)
+            {
+                for (int row = cell.row - n / 2, ri = 0; ri < n; ri++, row++)
+                {
+                    if (!m_state.isValidCell(col, row))
+                        continue;
+                    
+                    Cell c = m_state.cell(col, row);
+                    if (c.reduceIce(strength))
+                        melted = true;
+                }
+            }
+            
+            if (!melted)
+            {
+                if (alwaysCancel)
+                    cancel();
+                
+                Sound.MISS.play();
+                return;
+            }
+            
+            Sound.AXE.play();
+            
+            cancel();
+            
+            removeStartItem();
+            process();
+        }        
     }
 }
