@@ -86,6 +86,11 @@ public abstract class Item
     {
         return false;
     }
+
+    public boolean isArmed()
+    {
+        return false; // overriden by Striped with armed=true
+    }
     
     /** Used by layout editor to rotate Mirror and Laser */
     public boolean canRotate()

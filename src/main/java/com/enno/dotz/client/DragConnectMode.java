@@ -920,7 +920,7 @@ public class DragConnectMode extends ConnectMode
         @Override
         public void done(Cell cell, boolean alwaysCancel)
         {
-            if (cell.isLocked() || !(cell.item instanceof Dot))
+            if (cell.isLocked() || ctx.generator.dominoMode && !isDoubleDomino(cell) || !ctx.generator.dominoMode && !(cell.item instanceof Dot))
             {
                 if (alwaysCancel)
                     cancel();
@@ -932,10 +932,45 @@ public class DragConnectMode extends ConnectMode
             cancel();
             
             Sound.DROP.play();
-            explode(cell.item.getColor());
+            if (ctx.generator.dominoMode)
+                explodeDominoes((Domino) cell.item);
+            else
+                explode(cell.item.getColor());
             
             removeStartItem();
             process();
+        }
+        
+        private boolean isDoubleDomino(Cell cell)
+        {
+            if (!(cell.item instanceof Domino))
+                return false;
+            
+            return ((Domino) cell.item).isDouble();
+        }
+        
+        private void explodeDominoes(Domino doubleDomino)
+        {
+            int pip = doubleDomino.num[0];
+            
+            Set<Cell> exploded = new HashSet<Cell>();            
+            for (int row = 0; row < m_state.numRows; row++)
+            {
+                for (int col = 0; col < m_state.numColumns; col++)
+                {
+                    Cell cell = m_state.cell(col, row);
+                    Item item = cell.item;
+                    if (item != null && !cell.isLocked() && !exploded.contains(cell) && cell.item instanceof Domino)
+                    {
+                        Domino d = (Domino) cell.item;
+                        if (d.num[0] == pip || d.num[1] == pip)
+                        {
+                            explodeDomino(cell, exploded);
+                        }
+                    }
+                }
+                m_state.explodeNeighbors(exploded);                
+            }
         }
         
         private void explode(Integer color)
@@ -961,6 +996,12 @@ public class DragConnectMode extends ConnectMode
                 if (explody.item == null)
                     m_state.addExplody(explody);
             }
+        }
+        
+        private void explodeDomino(Cell cell, Set<Cell> exploded)
+        {
+            exploded.add(cell);
+            cell.explode(null, 1);
         }
 
         private void explode(Cell cell, Integer color, Set<Cell> exploded, Set<Cell> explodies)
@@ -1289,7 +1330,7 @@ public class DragConnectMode extends ConnectMode
                 return;
             }
             
-            Sound.AXE.play();
+            Sound.AXE.play();   
             
             cancel();
             

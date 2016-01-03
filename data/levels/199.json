@@ -1,0 +1,70 @@
+{
+  "id": 199,
+  "name": "Animals Poop Double",
+  "creator": "Enno",
+  "description": "Only a chain ending with a double domino<br>can free the animals. <br>Wild cards may follow the double.",
+  "folder": "Intro\/Domino",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "????????",
+    "????????",
+    "????????",
+    "????????",
+    ".??????.",
+    "????????",
+    "????????",
+    "????????"
+  ],
+  "animals": [
+    {"p":[0,4],"strength":10,"color":0,"type":"Default"},
+    {"p":[7,4],"strength":10,"color":5,"type":"Default"}
+  ],
+  "generator": {
+    "generateLetters": false,
+    "swapMode": false,
+    "rollMode": false,
+    "dominoMode": true,
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "maxDomino": 6,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "bombStrength": 9,
+    "animalType": "Default",
+    "freq": [
+      [10.9,"wild"],
+      [89.1,"domino"]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "animals": -1,
+    "maxMoves": 12
+  },
+  "boosts": {  },
+  "lastModified": "1449268477526"
+}

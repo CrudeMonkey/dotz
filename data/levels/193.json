@@ -1,0 +1,75 @@
+{
+  "id": 193,
+  "name": "Rain Drops Keep Falling On My Head",
+  "creator": "Enno",
+  "description": "Use the water drops to extinguish the fire.",
+  "folder": "Intro",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "XX....XX",
+    ".X....X."
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "F??????F",
+    "????????",
+    "??.??F??",
+    "????????",
+    "F??????F",
+    "??F??.??",
+    "..????..",
+    "F.????.F"
+  ],
+  "drops": [
+    {"p":[2,2]},
+    {"p":[5,5]}
+  ],
+  "generator": {
+    "generateLetters": false,
+    "swapMode": false,
+    "rollMode": false,
+    "dominoMode": false,
+    "seed": -1,
+    "fireGrowthRate": 4,
+    "maxAnchors": 3,
+    "maxDomino": 6,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "bombStrength": 9,
+    "animalType": "Default",
+    "freq": [
+      [14.3,"dot",0],
+      [14.3,"dot",1],
+      [14.3,"dot",2],
+      [14.3,"dot",3],
+      [14.3,"dot",4],
+      [14.3,"dot",5],
+      [14.3,"drop"]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "fire": -1,
+    "maxMoves": 10
+  },
+  "boosts": {  },
+  "lastModified": "1448834060940"
+}

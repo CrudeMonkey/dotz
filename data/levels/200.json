@@ -1,0 +1,74 @@
+{
+  "id": 200,
+  "name": "Color Bombs and Domino",
+  "creator": "Enno",
+  "description": "Place a color bomb on a double domino<br>to eliminate all dominoes with matching numbers.",
+  "folder": "Intro\/Domino",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "????????",
+    "????????",
+    "??.?????",
+    "????????",
+    "????????",
+    "????????",
+    "????????",
+    "????????"
+  ],
+  "colorBombs": [
+        {
+      "p": [
+        2,
+        2
+      ]
+    }
+  ],
+  "generator": {
+    "generateLetters": false,
+    "swapMode": false,
+    "rollMode": false,
+    "dominoMode": true,
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "maxDomino": 9,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "bombStrength": 9,
+    "animalType": "Default",
+    "freq": [
+      [6.4,"colorBomb"],
+      [93.6,"domino"]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "dominoes": 100,
+    "maxMoves": 15
+  },
+  "boosts": {  },
+  "lastModified": "1449268477533"
+}

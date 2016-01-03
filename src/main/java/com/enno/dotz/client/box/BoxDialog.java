@@ -1,5 +1,10 @@
 package com.enno.dotz.client.box;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.python.antlr.PythonParser.list_for_return;
+
 import com.ait.lienzo.client.core.event.NodeMouseClickEvent;
 import com.ait.lienzo.client.core.event.NodeMouseClickHandler;
 import com.ait.lienzo.client.core.shape.Rectangle;
@@ -68,6 +73,8 @@ public class BoxDialog extends BoxVLayout
     
     public void setInnerText(String... lines)
     {
+        lines = splitBr(lines);
+        
         BoxDefaults b = BoxDefaults.INSTANCE;
         
         BoxVLayout innerText = new BoxVLayout();
@@ -88,6 +95,37 @@ public class BoxDialog extends BoxVLayout
         setInnerContent(innerText);
     }
     
+
+    private static String[] splitBr(String[] s)
+    {
+        if (containsBr(s))
+        {
+            List<String> list = new ArrayList<String>();
+            for (String str : s)
+            {
+                if (str.contains("<br>"))
+                {
+                    for (String a : str.split("\\<br\\>"))
+                        list.add(a);
+                }
+                else
+                    list.add(str);
+            }
+            return list.toArray(new String[list.size()]);
+        }
+        return s;
+    }
+    
+    private static boolean containsBr(String[] s)
+    {
+        for (String str : s)
+        {
+            if (str.contains("<br>"))
+                return true;
+        }
+        return false;
+    }
+
     public void addButton(String text, NodeMouseClickHandler onClick)
     {
         if (m_buttonPanel == null)

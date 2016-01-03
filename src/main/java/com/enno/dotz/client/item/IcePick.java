@@ -43,6 +43,12 @@ public class IcePick extends Item
     {
         return true;
     }
+
+    @Override
+    public boolean canDropFromBottom()
+    {
+        return true;
+    }
     
     @Override
     protected Item doCopy()

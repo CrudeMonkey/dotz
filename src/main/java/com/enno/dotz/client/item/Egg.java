@@ -62,6 +62,19 @@ public class Egg extends Item
     }
 
     @Override
+    public boolean canRotate()
+    {
+        return true;
+    }
+    
+    @Override
+    public void rotate(int n)
+    {
+        m_cracked = !m_cracked;
+        m_crack.setVisible(m_cracked);
+    }
+    
+    @Override
     protected Item doCopy()
     {
         return new Egg(m_cracked);

@@ -1,0 +1,66 @@
+{
+  "id": 198,
+  "name": "The Domino Effect",
+  "creator": "Enno",
+  "description": "This is Domino Level.<br>Wild Cards connect any dominoes.<br>The question marks change the dominoes.",
+  "folder": "Intro\/Domino",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "........",
+    "CCCCCCCC",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "????????",
+    "?W????W?",
+    "????????",
+    "????????",
+    "????????",
+    "?W????W?",
+    "????????",
+    "????????"
+  ],
+  "generator": {
+    "generateLetters": false,
+    "swapMode": false,
+    "rollMode": false,
+    "dominoMode": true,
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "maxDomino": 4,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "bombStrength": 9,
+    "animalType": "Default",
+    "freq": [
+      [13.5,"wild"],
+      [86.5,"domino"]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "dominoes": 30,
+    "maxMoves": 10
+  },
+  "boosts": {  },
+  "lastModified": "1449268477511"
+}

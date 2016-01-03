@@ -14,6 +14,7 @@ import com.ait.lienzo.client.core.types.Point2DArray;
 import com.ait.lienzo.shared.core.types.ArrowType;
 import com.ait.lienzo.shared.core.types.ColorName;
 import com.enno.dotz.client.Cell;
+import com.enno.dotz.client.Cell.Cage;
 import com.enno.dotz.client.Cell.ConveyorCell;
 import com.enno.dotz.client.Cell.Door;
 import com.enno.dotz.client.Cell.Hole;
@@ -1083,6 +1084,11 @@ public abstract class EditLayoutTab extends VLayout
                 Door door = (Door) newCell;
                 door.setStrength(m_editorProps.getDoorStrength());
                 door.setRotationDirection(m_editorProps.getDoorRotation());
+            }
+            else if (newCell instanceof Cage)
+            {
+                Cage cage = (Cage) newCell;
+                cage.setStrength(m_editorProps.getDoorStrength());
             }
             
             newCell.init(ctx);

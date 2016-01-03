@@ -1,5 +1,6 @@
 package com.enno.dotz.client;
 
+import com.enno.dotz.client.Cell.Cage;
 import com.enno.dotz.client.Cell.Door;
 import com.enno.dotz.client.item.Anchor;
 import com.enno.dotz.client.item.Animal;
@@ -35,6 +36,9 @@ public class Score
     
     private int m_initialDoorCount;
     private int m_explodedDoors;
+    
+    private int m_initialCageCount;
+    private int m_explodedCages;
 
     private int m_initialIceCount;
     private int m_explodedIce;
@@ -73,7 +77,12 @@ public class Score
     
     public void explodedDoor()
     {
-        m_explodedDoors += 1;     // NOTE: 0 points
+        m_explodedDoors++;     // NOTE: 0 points
+    }
+
+    public void explodedCage()
+    {
+        m_explodedCages++;     // NOTE: 0 points
     }
     
     public void explodedFire()
@@ -332,6 +341,11 @@ public class Score
         return m_initialDoorCount - m_explodedDoors;
     }
 
+    public int getCagesInGrid()
+    {
+        return m_initialCageCount - m_explodedCages;
+    }
+
     public int getIceInGrid()
     {
         return m_initialIceCount - m_explodedIce;
@@ -410,6 +424,10 @@ public class Score
                 if (cell instanceof Door)
                 {
                     m_initialDoorCount++;
+                }
+                else if (cell instanceof Cage)
+                {
+                    m_initialCageCount++;
                 }
                 
                 if (cell.ice > 0)

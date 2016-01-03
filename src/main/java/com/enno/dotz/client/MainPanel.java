@@ -149,7 +149,34 @@ public class MainPanel extends VLayout
             @Override
             public void onClick(MenuItemClickEvent event)
             {
-                new OrganizeLevelDialog();
+                new OrganizeLevelDialog()
+                {
+                    @Override
+                    public void playLevel(final int levelId)
+                    {
+                        m_modeManager.askSaveLevel(new Runnable()
+                        {                                            
+                            @Override
+                            public void run()
+                            {
+                                MainPanel.this.playLevel(levelId);
+                            }
+                        });
+                    }
+                    
+                    @Override
+                    public void editLevel(final int levelId)
+                    {
+                        m_modeManager.askSaveLevel(new Runnable()
+                        {                                            
+                            @Override
+                            public void run()
+                            {
+                                MainPanel.this.editLevel(levelId);
+                            }
+                        });
+                    }
+                };
             }
         });
 
@@ -191,8 +218,7 @@ public class MainPanel extends VLayout
             public void onClick(MenuItemClickEvent event)
             {
                 new EditSetDialog(true, null)
-                {                                
-                    
+                {                                                    
                     @Override
                     public void playLevel(final int levelId)
                     {
@@ -639,7 +665,7 @@ public class MainPanel extends VLayout
         
         protected boolean isLastLevel()
         {
-            return m_index == m_set.getAsArray("levels").size() - 1;
+            return m_index == m_set.getAsArray("levels").size();
         }
         
         public void playNextLevel()
@@ -927,7 +953,7 @@ public class MainPanel extends VLayout
         {
             int left = 50; // TODO center it
             int top = 250;
-            MXNotification.say("Information", msg, 300, 120, left, top, cb);
+            MXNotification.say(title == null ? "Information" : title, msg, 300, 120, left, top, cb);
         }
     }
     
@@ -962,7 +988,7 @@ public class MainPanel extends VLayout
             MXNotification.ask(title, msg, 300, 120, left, top, cb);
         }
     }
-
+    
     private void createNewLevel()
     {
         new NewLevelDialog()

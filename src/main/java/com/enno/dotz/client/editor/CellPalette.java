@@ -4,6 +4,7 @@ import com.ait.lienzo.client.core.shape.Layer;
 import com.ait.lienzo.client.core.shape.Rectangle;
 import com.ait.lienzo.shared.core.types.ColorName;
 import com.enno.dotz.client.Cell;
+import com.enno.dotz.client.Cell.Cage;
 import com.enno.dotz.client.Cell.ChangeColorCell;
 import com.enno.dotz.client.Cell.CircuitCell;
 import com.enno.dotz.client.Cell.ConveyorCell;
@@ -47,6 +48,7 @@ public class CellPalette extends Palette<Cell>
         addButton(new ConveyorCell(Direction.NORTH, 0), 2, 2);
         addButton(new ConveyorCell(Direction.NORTH, 1), 3, 2);
         addButton(new Rock(), 4, 2);
+        addButton(new Cage(1), 5, 2);
     }
     
     private void addButton(Cell cell, int col, int row)

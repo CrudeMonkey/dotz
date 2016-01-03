@@ -24,8 +24,8 @@ public class Explosions
         this.state = ctx.state;
         exploding.addAll(cells);
         
-        int nc = state.numColumns;
-        int nr = state.numRows;
+        
+        
         for (Cell c : cells)
         {
             int col = c.col;

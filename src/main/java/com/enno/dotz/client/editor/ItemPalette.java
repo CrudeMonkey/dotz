@@ -23,6 +23,7 @@ import com.enno.dotz.client.item.LazySusan;
 import com.enno.dotz.client.item.Mirror;
 import com.enno.dotz.client.item.RandomItem;
 import com.enno.dotz.client.item.Rocket;
+import com.enno.dotz.client.item.Striped;
 import com.enno.dotz.client.item.Turner;
 import com.enno.dotz.client.item.Wild;
 import com.enno.dotz.client.item.YinYang;
@@ -67,6 +68,7 @@ public class ItemPalette extends Palette<Object>
         addButton(new Key(), 5, 4);
         
         addButton(new IcePick(), 0, 5);
+        addButton(new Striped(0, false), 1, 5);
     }
     
     private void addButton(Object cell, int col, int row)

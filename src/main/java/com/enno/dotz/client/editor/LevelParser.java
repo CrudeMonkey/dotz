@@ -4,6 +4,7 @@ import com.ait.tooling.nativetools.client.NArray;
 import com.ait.tooling.nativetools.client.NObject;
 import com.enno.dotz.client.Boosts;
 import com.enno.dotz.client.Cell;
+import com.enno.dotz.client.Cell.Cage;
 import com.enno.dotz.client.Cell.ChangeColorCell;
 import com.enno.dotz.client.Cell.CircuitCell;
 import com.enno.dotz.client.Cell.ConveyorCell;
@@ -110,7 +111,19 @@ public class LevelParser
                     grid.setCell(pt.col, pt.row, c);
                 }
             }
-            
+            if (p.isArray("cages"))
+            {
+                NArray t = p.getAsArray("cages");
+                for (int i = 0, n = t.size(); i < n; i++)
+                {
+                    NObject row = t.getAsObject(i);
+                    Pt pt = pt(row.getAsArray("p"));
+                    int strength = row.getAsInteger("strength");                  
+                    
+                    Cage c = new Cage(strength);
+                    grid.setCell(pt.col, pt.row, c);
+                }
+            }
             if (p.isArray("conveyors"))
             {
                 NArray t = p.getAsArray("conveyors");
@@ -740,6 +753,7 @@ public class LevelParser
         NArray picks = new NArray();
         NArray colorBombs = new NArray();
         NArray doors = new NArray();
+        NArray cages = new NArray();
         NArray conveyors = new NArray();
         NArray mirrors = new NArray();
         NArray lasers = new NArray();
@@ -813,6 +827,16 @@ public class LevelParser
                     }
                     gridLine += '.';
                     doors.push(a);
+                }
+                else if (cell instanceof Cage)
+                {
+                    Cage b = (Cage) cell;
+                    NObject a = new NObject();
+                    a.put("p", pt(col, row));
+                    a.put("strength", b.getStrength());
+                    
+                    gridLine += '.';
+                    cages.push(a);
                 }
                 else if (cell instanceof ConveyorCell)
                 {
@@ -995,6 +1019,7 @@ public class LevelParser
         p.put("items", items);
         add(p, "teleporters", teleporters);
         add(p, "doors", doors);
+        add(p, "cages", cages);
         add(p, "conveyors", conveyors);
         add(p, "lazySusans", lazySusans);
         add(p, "dots", dots);

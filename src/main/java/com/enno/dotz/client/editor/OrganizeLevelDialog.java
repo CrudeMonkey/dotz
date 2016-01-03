@@ -25,6 +25,7 @@ import com.smartgwt.client.widgets.events.DropEvent;
 import com.smartgwt.client.widgets.events.DropHandler;
 import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
+import com.smartgwt.client.widgets.grid.ListGridRecord;
 import com.smartgwt.client.widgets.grid.events.RecordClickEvent;
 import com.smartgwt.client.widgets.grid.events.RecordClickHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
@@ -49,7 +50,7 @@ public class OrganizeLevelDialog extends MXWindow
         addItem(createPane());
         
         setWidth(1000);
-        setHeight(550);
+        setHeight(575);
         
         centerInPage();
         
@@ -129,6 +130,7 @@ public class OrganizeLevelDialog extends MXWindow
                 });
             }
         });
+        
         buttons.add("Save", new ClickHandler()
         {
             @Override
@@ -139,6 +141,45 @@ public class OrganizeLevelDialog extends MXWindow
         });
         
         buttons.add("Close", createCancelButtonHandler());
+        
+        MXButtonsPanel buttons2 = new MXButtonsPanel();
+        buttons2.add("Play Level", new ClickHandler()
+        {
+            @Override
+            public void onClick(ClickEvent event)
+            {
+                ListGridRecord rec = m_tree.getSelectedRecord();
+                if (rec == null || rec.getAttributeAsBoolean("is_folder"))
+                {
+                    SC.warn("Select a level first");
+                    return;
+                }
+                
+                int levelId = rec.getAttributeAsInt("id");
+                
+                closeWindow();
+                playLevel(levelId);
+            }
+        });
+        buttons2.add("Edit Level", new ClickHandler()
+        {
+            @Override
+            public void onClick(ClickEvent event)
+            {
+                ListGridRecord rec = m_tree.getSelectedRecord();
+                if (rec == null || rec.getAttributeAsBoolean("is_folder"))
+                {
+                    SC.warn("Select a level first");
+                    return;
+                }
+                
+                int levelId = rec.getAttributeAsInt("id");
+                
+                closeWindow();
+                editLevel(levelId);
+            }
+        });
+
         
         MXForm form = new MXForm();
         m_preview = new MXCheckBox();
@@ -164,8 +205,19 @@ public class OrganizeLevelDialog extends MXWindow
         buttons.addMember(form);
         
         pane.addMember(buttons);
+        pane.addMember(buttons2);
         
         return pane;
+    }
+    
+    public void playLevel(int levelId)
+    {
+        // override
+    }
+    
+    public void editLevel(int levelId)
+    {
+        // override
     }
     
     private MXTreeGrid createTreeGrid()
@@ -181,6 +233,7 @@ public class OrganizeLevelDialog extends MXWindow
         tree.setOnFolderOpenClose(false);
         tree.setOpenTree(false);
         tree.setCanReparentNodes(true);
+        tree.setSortFoldersBeforeLeaves(true);
         
         tree.addDropHandler(new DropHandler()
         {
@@ -226,16 +279,33 @@ public class OrganizeLevelDialog extends MXWindow
     
     protected void createFolder(String folderName)
     {
+        String parent = "0";
+        Record rec  = m_tree.getSelectedRecord();
+        if (rec != null)
+        {
+            if (rec.getAttributeAsBoolean("is_folder"))
+            {
+                parent = rec.getAttribute("primary");
+            }
+        }
         String id = "" + m_primary++;
         
         NObject folder = new NObject();
         folder.put("name", folderName);
         folder.put("primary", id);
-        folder.put("parent", "0");
+        folder.put("parent", parent);
         folder.put("is_folder", true);
         
-        TreeNode pa = new TreeNode(folder.getJSO());
-        m_tree.addData(pa);
+        TreeNode node = new TreeNode(folder.getJSO());
+        if (parent.equals("0"))
+        {
+            m_tree.addData(node);
+        }
+        else
+        {
+            TreeNode pa = m_tree.getTree().find("primary", parent);
+            m_tree.getTree().add(node, pa);
+        }
     }
     
     protected void setLevels(NArray levels)
@@ -278,6 +348,9 @@ public class OrganizeLevelDialog extends MXWindow
 
     protected void previewLevel(Integer levelId)
     {
+        if (levelId == null)
+            return;
+        
         ClientRequest.loadLevel(levelId, new MAsyncCallback<Config>() {
             @Override
             public void onSuccess(Config level)

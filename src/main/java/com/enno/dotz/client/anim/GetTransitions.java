@@ -143,7 +143,7 @@ public class GetTransitions
                 if (m_list.containsItem(cell.item))
                     continue;
                 
-                if (isSolidBelow(col, row))  // bottom row or only holes below
+                if (isSolidBelow(col, row))  // bottom row or only holes/cages below
                 {
                     int dx = m_lastDx == 0 ? 1 : -m_lastDx;                    
                     if (checkRoll(col, row, dx))
@@ -206,14 +206,14 @@ public class GetTransitions
             return true;
         
         Cell cell = state.cell(col, row + 1);
-        if (cell.isLocked())
+        if (cell.isLockedDoor())
             return true;
         
-        if (cell instanceof Hole)
+        if (cell instanceof Hole || cell.isLockedCage())
             return isSolidBelow(col, row + 1);
         
-        if (cell.isLocked())
-            return true;
+//        if (cell.isLocked())
+//            return true;
         
         if (cell.item == null)
             return false;
@@ -248,7 +248,7 @@ public class GetTransitions
                 if (target.canBeFilled())
                     addTeleport(src, target);
             }
-            else if (nearBottom(p.col, p.row))  // bottom row or only holes below
+            else if (nearBottom(p.col, p.row))  // bottom row or only holes/cages below
             {
                 // see if anchor can fall
                 if (src.item.canDropFromBottom())
@@ -334,7 +334,7 @@ public class GetTransitions
             if (endOfLine(c))
                 return null;
             
-            if (c instanceof Hole)
+            if (c instanceof Hole || c.isLockedCage())
             {
                 return getSourceAbove(new Pt(p.col, p.row - 1));
             }
@@ -530,7 +530,8 @@ public class GetTransitions
             if (row == cfg.numRows - 1)
                 return true; // bottom row
             
-            if (! (state.cell(col, row + 1) instanceof Hole))
+            Cell c = state.cell(col, row + 1);
+            if (! (c instanceof Hole || c.isLockedCage()))
                 return false;
             
             row++;
@@ -544,12 +545,11 @@ public class GetTransitions
             return null;
         
         Cell c = state.cell(col, row + 1);
-        if (c instanceof Hole)
+        if (c instanceof Hole || c.isLockedCage())
             return getTargetCell(col, row + 1);
         else if (c.isTeleportTarget()) 
             return null;
         
         return c;
     }
-    
 }

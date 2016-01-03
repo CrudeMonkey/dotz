@@ -12,7 +12,10 @@ import com.enno.dotz.client.item.Clock;
 import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.DotBomb;
+import com.enno.dotz.client.item.Drop;
+import com.enno.dotz.client.item.IcePick;
 import com.enno.dotz.client.item.Item;
+import com.enno.dotz.client.item.Key;
 import com.enno.dotz.client.item.Knight;
 import com.enno.dotz.client.item.Laser;
 import com.enno.dotz.client.item.Mirror;
@@ -23,6 +26,11 @@ import com.enno.dotz.client.util.FrequencyGenerator;
 
 public class Generator
 {
+    public static final int DOT_MODE = 0;
+    public static final int DOMINO_MODE = 1;
+    public static final int LETTER_MODE = 2;
+    public static final int SWAP_MODE = 3;
+    
     public static final long RANDOM_SEED = -1;
 
     protected static FrequencyGenerator<String> s_letterGenerator = createLetterGenerator();
@@ -57,6 +65,18 @@ public class Generator
     public Generator()
     {
     }    
+    
+    public int getMode()
+    {
+        if (dominoMode)
+            return DOMINO_MODE;
+        if (swapMode)
+            return SWAP_MODE;
+        if (generateLetters)
+            return LETTER_MODE;
+        
+        return DOT_MODE;
+    }
     
     public void setSeed(long seed)
     {
@@ -207,6 +227,13 @@ public class Generator
                 }
             
                 if (m_excludeDotColor != -1 && m_numDotColors > 1 && item instanceof Dot && ((Dot) item).color == m_excludeDotColor)
+                    continue;
+                
+                if (item instanceof Drop && ctx.score.getFireInGrid() == 0)                    
+                    continue;
+                if (item instanceof Key && ctx.score.getDoorsInGrid() == 0)                    
+                    continue;
+                if (item instanceof IcePick && ctx.score.getIceInGrid() == 0)                    
                     continue;
             }
             

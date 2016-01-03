@@ -3,7 +3,7 @@
   "name": "Test Slide \/ Teleport",
   "creator": null,
   "description": "",
-  "folder": "",
+  "folder": "Test",
   "numColumns": 8,
   "numRows": 8,
   "grid": [
@@ -64,5 +64,6 @@
   },
   "goals": {
     "dots": {    }
-  }
+  },
+  "lastModified": "1449268521327"
 }

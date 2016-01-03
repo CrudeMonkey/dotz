@@ -1,0 +1,71 @@
+{
+  "id": 203,
+  "name": "Candy Crush 5",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Swap",
+  "numColumns": 6,
+  "numRows": 9,
+  "grid": [
+    "......",
+    ".    .",
+    "......",
+    " .... ",
+    "......",
+    " .... ",
+    "......",
+    " .... ",
+    "......"
+  ],
+  "ice": [
+    "......",
+    "......",
+    "......",
+    "......",
+    "......",
+    "......",
+    "......",
+    "......",
+    "......"
+  ],
+  "items": [
+    "??????",
+    "?....?",
+    "??????",
+    ".????.",
+    "??????",
+    ".????.",
+    "??????",
+    ".????.",
+    "??????"
+  ],
+  "generator": {
+    "generateLetters": false,
+    "swapMode": true,
+    "rollMode": false,
+    "dominoMode": false,
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "maxDomino": 6,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "bombStrength": 9,
+    "animalType": "Default",
+    "freq": [
+      [20,"dot",0],
+      [20,"dot",1],
+      [20,"dot",2],
+      [20,"dot",3],
+      [20,"dot",4]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "maxMoves": 18
+  },
+  "boosts": {  },
+  "lastModified": "1449272465434"
+}

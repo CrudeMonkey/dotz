@@ -10,12 +10,14 @@ import com.enno.dotz.client.io.ClientRequest;
 import com.enno.dotz.client.io.MAsyncCallback;
 import com.enno.dotz.client.io.ServiceCallback;
 import com.enno.dotz.client.ui.MXButtonsPanel;
+import com.enno.dotz.client.ui.MXCheckBox;
 import com.enno.dotz.client.ui.MXForm;
 import com.enno.dotz.client.ui.MXListGrid;
 import com.enno.dotz.client.ui.MXListGridField;
 import com.enno.dotz.client.ui.MXRecordList;
 import com.enno.dotz.client.ui.MXTextInput;
 import com.enno.dotz.client.ui.MXWindow;
+import com.smartgwt.client.data.Record;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.ListGridFieldType;
 import com.smartgwt.client.types.SelectionStyle;
@@ -27,7 +29,11 @@ import com.smartgwt.client.widgets.events.ClickHandler;
 import com.smartgwt.client.widgets.events.DoubleClickEvent;
 import com.smartgwt.client.widgets.events.DoubleClickHandler;
 import com.smartgwt.client.widgets.form.fields.StaticTextItem;
+import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
+import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.grid.ListGridRecord;
+import com.smartgwt.client.widgets.grid.events.RecordClickEvent;
+import com.smartgwt.client.widgets.grid.events.RecordClickHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 import com.smartgwt.client.widgets.layout.VLayout;
 
@@ -43,6 +49,7 @@ public class EditSetDialog extends MXWindow
     
     private PreviewLevelPanel m_previewPanel;
     private VLayout m_previewContainer;
+    private MXCheckBox m_preview;
     
     public EditSetDialog(boolean isNew, NObject set)
     {
@@ -123,6 +130,22 @@ public class EditSetDialog extends MXWindow
         m_grid.setFields(id, name, creator);
         
         pane.addMember(m_grid);        
+        
+        m_grid.addRecordClickHandler(new RecordClickHandler()
+        {            
+            @Override
+            public void onRecordClick(RecordClickEvent event)
+            {
+                if (m_preview.isChecked())
+                {
+                    Record rec  = m_grid.getSelectedRecord();
+                    if (rec != null)
+                    {
+                        previewLevel(rec.getAttributeAsInt("id"));
+                    }
+                }
+            }
+        });
         
         MXButtonsPanel buttons = new MXButtonsPanel();
         MXButtonsPanel buttons2 = new MXButtonsPanel();
@@ -236,20 +259,20 @@ public class EditSetDialog extends MXWindow
                 playSet(setId, index);
             }
         });
-        buttons2.add("Preview", new ClickHandler()
-        {
-            @Override
-            public void onClick(ClickEvent event)
-            {
-                ListGridRecord rec = m_grid.getSelectedRecord();
-                if (rec == null)
-                {
-                    SC.warn("Select a level first");
-                    return;
-                }
-                previewLevel(rec.getAttributeAsInt("id"));
-            }
-        });
+//        buttons2.add("Preview", new ClickHandler()
+//        {
+//            @Override
+//            public void onClick(ClickEvent event)
+//            {
+//                ListGridRecord rec = m_grid.getSelectedRecord();
+//                if (rec == null)
+//                {
+//                    SC.warn("Select a level first");
+//                    return;
+//                }
+//                previewLevel(rec.getAttributeAsInt("id"));
+//            }
+//        });
         buttons.add("Save", new ClickHandler()
         {
             @Override
@@ -260,6 +283,29 @@ public class EditSetDialog extends MXWindow
             }
         });
         buttons.add("Close", createCancelButtonHandler());
+        
+        MXForm form2 = new MXForm();
+        m_preview = new MXCheckBox();
+        m_preview.setTitle("Preview");
+        m_preview.setValue(false);
+        form2.setFields(m_preview);
+        buttons2.addMember(form2);
+        
+        m_preview.addChangedHandler(new ChangedHandler()
+        {            
+            @Override
+            public void onChanged(ChangedEvent event)
+            {
+                if (m_preview.isChecked())
+                {
+                    Record rec  = m_grid.getSelectedRecord();
+                    if (rec != null)
+                    {
+                        previewLevel(rec.getAttributeAsInt("id"));
+                    }
+                }
+            }
+        });
         
         pane.addMember(buttons);
         pane.addMember(buttons2);

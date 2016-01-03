@@ -3,7 +3,7 @@
   "name": "Circuit Time",
   "creator": "Enno",
   "description": "",
-  "folder": "Work",
+  "folder": "Done",
   "numColumns": 8,
   "numRows": 8,
   "grid": [
@@ -36,11 +36,6 @@
     "W..??..W",
     "?..??..?"
   ],
-  "teleporters": [  ],
-  "doors": [  ],
-  "lazySusans": [  ],
-  "animals": [  ],
-  "knights": [  ],
   "clocks": [
         {
       "p": [
@@ -57,17 +52,20 @@
       "strength": 10
     }
   ],
-  "lasers": [  ],
-  "mirrors": [  ],
-  "rockets": [  ],
   "generator": {
+    "generateLetters": false,
+    "swapMode": false,
+    "rollMode": false,
+    "dominoMode": false,
     "seed": -1,
     "fireGrowthRate": 1,
     "maxAnchors": 3,
+    "maxDomino": 9,
     "initialDotsOnly": true,
     "animalStrength": 10,
     "knightStrength": 3,
     "clockStrength": 10,
+    "bombStrength": 9,
     "animalType": "Default",
     "freq": [
       [0.4,"dot",0],
@@ -81,7 +79,10 @@
   },
   "goals": {
     "dots": {    },
-    "circuits": -1
+    "circuits": -1,
+    "maxMoves": 40,
+    "ice": -1
   },
-  "lastModified": "1445266410106"
+  "boosts": {  },
+  "lastModified": "1449269695612"
 }

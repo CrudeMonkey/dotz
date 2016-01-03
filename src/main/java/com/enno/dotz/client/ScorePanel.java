@@ -8,6 +8,7 @@ import com.ait.lienzo.client.core.shape.Group;
 import com.ait.lienzo.client.core.shape.IPrimitive;
 import com.ait.lienzo.client.core.shape.Layer;
 import com.ait.lienzo.client.core.shape.Line;
+import com.ait.lienzo.client.core.shape.Picture;
 import com.ait.lienzo.client.core.shape.PolyLine;
 import com.ait.lienzo.client.core.shape.Rectangle;
 import com.ait.lienzo.client.core.shape.Text;
@@ -746,9 +747,17 @@ public class ScorePanel extends LienzoPanel
         
         protected IPrimitive<?> createShape()
         {
-            Egg egg = new Egg(true);
-            egg.setContext(ctx);
-            return egg.createShape(SHAPE_SIZE * 0.8);           
+            Picture p = new Picture("images/chicken.png");
+            p.setX(-16);
+            p.setY(-16);
+            
+            Group g = new Group();
+            g.add(p);
+            return g;
+            
+//            Egg egg = new Egg(true);
+//            egg.setContext(ctx);
+//            return egg.createShape(SHAPE_SIZE * 0.8);           
         }
         
         protected void updateText()

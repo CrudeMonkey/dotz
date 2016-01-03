@@ -6,12 +6,15 @@ import com.ait.lienzo.client.core.animation.IAnimationHandle;
 import com.ait.lienzo.client.core.animation.IndefiniteAnimation;
 import com.ait.lienzo.client.core.animation.LayerRedrawManager;
 import com.ait.lienzo.client.core.shape.Layer;
+import com.ait.lienzo.client.core.shape.Picture;
 import com.ait.lienzo.client.core.shape.Text;
 import com.ait.lienzo.client.widget.LienzoPanel;
 import com.ait.lienzo.shared.core.types.ColorName;
 
 public class StatsPanel extends LienzoPanel
 {
+    private static Picture[] s_modeIcons = initModeIcons();
+    
     private Context ctx;
 
     private Text m_score;
@@ -45,7 +48,7 @@ public class StatsPanel extends LienzoPanel
         m_moves.setFillColor(ColorName.BLACK);
         m_moves.setFontSize(10);
         m_moves.setFontStyle("bold");
-        m_moves.setX(20);
+        m_moves.setX(40);
         m_moves.setY(30);
         m_layer.add(m_moves);
         
@@ -68,11 +71,31 @@ public class StatsPanel extends LienzoPanel
         draw();
     }
     
+    private static Picture[] initModeIcons()
+    {
+        return new Picture[] {
+                new Picture("images/blue_dot.png"),
+                new Picture("images/domino.png"),
+                new Picture("images/blue_dot_T.png"),
+                new Picture("images/refresh.png"),
+        };
+    }
+
     public void setGoals(Goal goal)
     {
         update();
+        
+        m_goalTime = ctx.cfg.goals.getTime();
+        m_lastTime = -1;
+        m_startTime = System.currentTimeMillis();
+        updateTime();
+        
+        Picture pic = s_modeIcons[ctx.generator.getMode()];
+        pic.setX(10);
+        pic.setY(17);
+        m_layer.add(pic);
     }
-    
+
     public void update()
     {
         updateMoves();
@@ -117,8 +140,6 @@ public class StatsPanel extends LienzoPanel
         m_outOfTimeCallback = outOfTimeCallback;
         m_startTime = System.currentTimeMillis();
         m_lastTime = 0;
-        
-        m_goalTime = ctx.cfg.goals.getTime();
         
         m_animation = new IndefiniteAnimation(new AnimationCallback() {            
             @Override

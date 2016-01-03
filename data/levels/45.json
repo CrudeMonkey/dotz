@@ -3,7 +3,7 @@
   "name": "Huge Test",
   "creator": null,
   "description": "",
-  "folder": "",
+  "folder": "Test",
   "numColumns": 8,
   "numRows": 8,
   "grid": [
@@ -43,20 +43,8 @@
     {"from":[5,0],"to":[7,7]}
   ],
   "doors": [
-        {
-      "p": [
-        3,
-        6
-      ],
-      "strength": 1
-    },
-        {
-      "p": [
-        4,
-        6
-      ],
-      "strength": 1
-    }
+    {"p":[3,6],"strength":1},
+    {"p":[4,6],"strength":1}
   ],
   "lazySusans": [
     {"p":[5,3],"clockwise":false},
@@ -67,34 +55,10 @@
     {"p":[7,1],"strength":20,"color":0,"type":"Default"}
   ],
   "knights": [
-        {
-      "p": [
-        0,
-        0
-      ],
-      "strength": 10
-    },
-        {
-      "p": [
-        7,
-        0
-      ],
-      "strength": 10
-    },
-        {
-      "p": [
-        0,
-        7
-      ],
-      "strength": 10
-    },
-        {
-      "p": [
-        7,
-        7
-      ],
-      "strength": 10
-    }
+    {"p":[0,0],"strength":10},
+    {"p":[7,0],"strength":10},
+    {"p":[0,7],"strength":10},
+    {"p":[7,7],"strength":10}
   ],
   "clocks": [
         {
@@ -154,5 +118,6 @@
     "maxMoves": 50,
     "doors": -1,
     "score": 500
-  }
+  },
+  "lastModified": "1449268521296"
 }

@@ -38,6 +38,7 @@ import com.enno.dotz.client.anim.Transition.DropTransition;
 import com.enno.dotz.client.anim.TransitionList;
 import com.enno.dotz.client.item.Anchor;
 import com.enno.dotz.client.item.Animal;
+import com.enno.dotz.client.item.Bird;
 import com.enno.dotz.client.item.Clock;
 import com.enno.dotz.client.item.ColorBomb;
 import com.enno.dotz.client.item.Domino;
@@ -53,6 +54,7 @@ import com.enno.dotz.client.item.LazySusan;
 import com.enno.dotz.client.item.Mirror;
 import com.enno.dotz.client.item.RandomItem;
 import com.enno.dotz.client.item.Rocket;
+import com.enno.dotz.client.item.Striped;
 import com.enno.dotz.client.item.Wild;
 import com.enno.dotz.client.item.WrappedDot;
 import com.enno.dotz.client.item.YinYang;
@@ -453,7 +455,7 @@ public class GridState
             int col = r.nextInt(numColumns);
             int row = r.nextInt(numRows);
             Cell c = cell(col, row);
-            if (!c.isLocked() && (c.item instanceof Dot || c.item instanceof Wild))
+            if (!c.isLocked() && (c.item instanceof Dot || c.item instanceof Wild || c.item instanceof Domino))
                 return c;
         }
     }
@@ -560,7 +562,7 @@ public class GridState
                     continue;
                 
                 Item item = cell.item;
-                if (item.canReshuffle())
+                if (item != null && item.canReshuffle())
                     pts.add(new Pt(col, row));
             }
         }
@@ -1143,6 +1145,11 @@ public class GridState
         {
             return getColor() == Config.WILD_ID;
         }
+
+        public boolean isVertical()
+        {
+            return m_vertical;
+        }
     }
     
     public static class GetSwapMatches
@@ -1272,6 +1279,8 @@ public class GridState
                                             special.item = null;
                                             ctx.score.addBird();
                                             //TODO animate bird
+
+                                            new Bird().animate(special.col, special.row, ctx, null);
                                         }
                                     }
                                 }
@@ -1281,7 +1290,9 @@ public class GridState
                 }
                 
                 if (playBird)
-                    Sound.BIRD.play();
+                {
+                    Sound.CHICKEN.play();
+                }
                 if (playCrack)
                     Sound.EGG_CRACK.play();
                 
@@ -1351,7 +1362,7 @@ public class GridState
                         Cell special = combo.getSpecial();
                         if (special.item == null)
                         {
-                            addItem(special, new Wild());
+                            addItem(special, new Striped(combo.getColor(), combo.isVertical())); // new Wild());
                         }
                         break;
                     }
@@ -1487,7 +1498,7 @@ public class GridState
         private void explode(Cell cell, Integer color, Set<Cell> exploded, Set<Cell> explodies)
         {
             if (cell.item instanceof WrappedDot)
-                explodies.add(cell);
+                explodies.add(cell);            
             
             exploded.add(cell);
             cell.explode(color, 1);
@@ -1558,7 +1569,7 @@ public class GridState
 
         protected static boolean isColorDot(Item item)
         {
-            return item instanceof Dot || item instanceof DotBomb || item instanceof WrappedDot || item instanceof Wild;
+            return item instanceof Dot || item instanceof DotBomb || item instanceof WrappedDot || item instanceof Wild || item instanceof Striped;
         }
         
         public boolean getTransitions()
@@ -1661,7 +1672,7 @@ public class GridState
                 for (int col = 0; col < m_state.numColumns; col++)
                 {
                     Cell c = m_state.cell(col, row);
-                    if (c.isLocked() || !(c.item instanceof Egg || c.item instanceof Wild))
+                    if (c.isLocked() || !(c.item instanceof Egg || c.item instanceof Wild)) //TODO cage
                         continue;
                     
                     Boolean cracked = null;
@@ -1872,7 +1883,15 @@ public class GridState
                     return;
                 }                
             }
-            combo.setSpecial(combo.get(rnd.nextInt(combo.size())));
+            
+            Cell c;
+            do
+            {
+                c = combo.get(rnd.nextInt(combo.size()));
+            }
+            while (c.isLockedCage());
+            
+            combo.setSpecial(c);
             
             if (combo.size() == 4)
             {
@@ -1885,7 +1904,7 @@ public class GridState
 
         private boolean canStart(Cell c)
         {
-            if (c.item == null || c.isLocked() || m_explosions.contains(c))
+            if (c.item == null || c.isLockedDoor() || m_explosions.contains(c))
                 return false;
             
             //TODO specials
@@ -1894,7 +1913,7 @@ public class GridState
 
         private boolean canConnect(Cell c, SwapCombo combo)
         {
-            if (c.item == null || c.isLocked() || m_explosions.contains(c))
+            if (c.item == null || c.isLockedDoor() || m_explosions.contains(c))
                 return false;
             
             if (isColorDot(c.item) || c.item instanceof Animal)
@@ -2530,7 +2549,7 @@ public class GridState
             if (contains(c) || m_cells.contains(c))
                 return;
             
-            if (c instanceof Hole || c instanceof Slide || c instanceof Rock)
+            if (c instanceof Hole || c instanceof Slide || c instanceof Rock || c.isLockedCage())
                 return;
             
             //Debug.p("add neighbor " + c);
@@ -2603,7 +2622,10 @@ public class GridState
                     for (int col = 0; col < numColumns; col++)
                     {
                         Cell a = cell(col, row);
-                        if (a.item instanceof Explody)
+                        if (a.item == null)
+                            continue;
+                        
+                        if (a.item instanceof Explody || a.item.isArmed())
                         {
                             cells.add(a);
                         }

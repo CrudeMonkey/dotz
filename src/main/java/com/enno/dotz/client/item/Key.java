@@ -24,7 +24,7 @@ public class Key extends Item
         double x1 = sz * 0.1;
         double x2 = sz * 0.25;
         
-        double x3 = -sz * 0.09;
+        double x3 = -sz * 0.08;
         double x4 = sz * 0.35;
         
         double y1 = sz * 0.15;

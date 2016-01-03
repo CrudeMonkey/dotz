@@ -135,6 +135,21 @@ public abstract class Cell
     {
         return false;
     }
+    
+    public boolean isLockedCage()
+    {
+        return false;
+    }
+    
+    /**
+     * Whether it's a locked Door or a Rock.
+     * 
+     * @return
+     */
+    public boolean isLockedDoor()
+    {
+        return false;
+    }
 
     public boolean isTeleportSource()
     {
@@ -865,6 +880,12 @@ public abstract class Cell
         {
             return true;
         }
+
+        @Override
+        public boolean isLockedDoor()
+        {
+            return true;
+        }
         
         @Override
         public Cell copy()
@@ -1057,12 +1078,6 @@ public abstract class Cell
         }
         
         @Override
-        public boolean canExplode(Integer color)
-        {
-            return super.canExplode(color);
-        }
-        
-        @Override
         public boolean canBeNuked()
         {
             return m_strength > 0 || super.canBeNuked();
@@ -1121,6 +1136,12 @@ public abstract class Cell
         public boolean isLocked()
         {
             return m_strength > 0;
+        }
+        
+        @Override
+        public boolean isLockedDoor()
+        {
+            return isLocked();
         }
         
         @Override
@@ -1183,6 +1204,170 @@ public abstract class Cell
         public void setRotationDirection(int rotationDirection)
         {
             m_rotationDirection = rotationDirection;
+        }
+    }
+    
+    public static class Cage extends Cell
+    {
+        private int m_strength;
+        private Group m_shape;
+        private Text m_text;
+        
+        public Cage(int strength)
+        {
+            m_strength = strength;
+        }
+        
+        @Override
+        public Cell copy()
+        {
+            Cage c = new Cage(m_strength);
+            c.copyValues(this);
+            return c;
+        }
+        
+        @Override
+        public boolean isLockedCage()
+        {
+            return isLocked();
+        }
+        
+        @Override
+        public boolean isLocked()
+        {
+            return m_strength > 0;
+        }
+        
+        @Override
+        public boolean canDrop()
+        {
+            return m_strength == 0 && super.canDrop();
+        }
+        
+        @Override
+        public boolean canBeFilled()
+        {
+            return m_strength == 0 && super.canBeFilled();
+        }
+        
+//        @Override
+//        public boolean canConnect(Integer color, boolean isWordMode)
+//        {
+//            return m_strength == 0 && super.canConnect(color, isWordMode);
+//        }
+        
+        @Override
+        public boolean canExplode(Integer color)
+        {
+            return super.canExplode(color);
+        }
+        
+        @Override
+        public boolean canBeNuked()
+        {
+            return m_strength > 0 || super.canBeNuked();
+        }
+
+        @Override
+        public boolean canGrowFire()
+        {
+            return m_strength == 0 && super.canGrowFire();
+        }
+        
+        @Override
+        public boolean stopsLaser()
+        {
+            return isLocked() || itemStopsLaser();
+        }
+
+        @Override
+        public void explode(Integer color, int chainSize)
+        {
+            if (m_strength == 0)
+            {
+                super.explode(color, chainSize);
+            }
+            else
+            {
+                m_strength--;
+                
+                if (m_strength == 0)
+                {
+                    ctx.score.explodedCage();                    
+                    ctx.doorLayer.remove(m_shape);
+                }
+                else if (m_strength > 1)
+                {
+                    m_text.setText("" + m_strength);
+                }
+                else // strength == 1
+                {
+                    m_text.setVisible(false);
+                }
+            }
+        }
+        @Override
+        public void initGraphics(int col, int row, double x, double y)
+        {
+            super.initGraphics(col, row, x, y);
+            
+            m_shape = createShape(ctx.cfg.size);
+            ctx.doorLayer.add(m_shape);
+        }
+
+        @Override
+        public void removeGraphics()
+        {
+            super.removeGraphics();
+            ctx.doorLayer.remove(m_shape);
+        }
+        
+        public Group createShape(double sz)
+        {
+            Group shape = new Group();
+            shape.setX(m_x - sz / 2);
+            shape.setY(m_y - sz / 2);
+            
+            double b = 0.1 * sz;
+            double s2 = sz - 2 * b;
+            Rectangle r = new Rectangle(s2, s2);
+            r.setX(b);
+            r.setY(b);
+            r.setStrokeColor(ColorName.BLACK);
+            shape.add(r);
+            
+            double w = s2 / 4;
+            for (int i = 1; i < 4; i++)
+            {
+                Line line = new Line(b + i * w, b, b + i * w, sz - b);
+                line.setStrokeColor(ColorName.BLACK);
+                shape.add(line);
+            }
+            
+            m_text = new Text("" + m_strength);
+            m_text.setFillColor(ColorName.BLACK);
+            m_text.setFontSize(9);
+            m_text.setFontStyle(FontWeight.BOLD.getCssName());
+            m_text.setX(6);
+            m_text.setY(5);
+            m_text.setTextBaseLine(TextBaseLine.TOP); // y position is position of top of the text
+            
+            shape.add(m_text);
+            
+            if (m_strength < 2)
+                m_text.setVisible(false);
+            
+            return shape;
+        }
+
+        public void setStrength(int strength)
+        {
+            m_strength = strength;
+        }
+
+        public int getStrength()
+        {
+            return m_strength;
         }
     }
     
