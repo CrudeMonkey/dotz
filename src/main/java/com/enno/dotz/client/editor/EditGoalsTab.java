@@ -34,6 +34,7 @@ public class EditGoalsTab extends VLayout
     private All m_anchors;
     private All m_clocks;
     private All m_doors;
+    private All m_cages;
     private All m_mirrors;
     private All m_rockets;
     private Num m_lasers;
@@ -168,6 +169,19 @@ public class EditGoalsTab extends VLayout
                 val(goal.getDoors());
             }};
             
+        m_cages = new All("Cages"){
+            @Override
+            public void prepareSave(Goal goal)
+            {
+                goal.setCages(val());
+            }
+
+            @Override
+            public void initGoal(Goal goal)
+            {
+                val(goal.getCages());
+            }};
+                
         m_animals = new All("Animals"){
             @Override
             public void prepareSave(Goal goal)
@@ -270,8 +284,8 @@ public class EditGoalsTab extends VLayout
                 new DotImageItem(3, ctx), m_dots[3], m_doors,    m_knights,
                 new DotImageItem(4, ctx), m_dots[4], m_fire,     m_clocks,
                 new DotImageItem(5, ctx), m_dots[5], m_circuits, m_rockets,
-                m_moves, m_score, m_mirrors,
-                m_time
+                m_moves, m_cages, m_mirrors,
+                m_time, m_score
         };
         
         form.setFields(m_fields);

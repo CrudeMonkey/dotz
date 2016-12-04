@@ -230,6 +230,11 @@ public class Score
     {
         return m_explodedDoors;
     }
+
+    public int getExplodedCages()
+    {
+        return m_explodedCages;
+    }
     
     public int getExplodedCircuits()
     {
@@ -374,6 +379,11 @@ public class Score
     public int getInitialDoors()
     {
         return m_initialDoorCount;
+    }
+
+    public int getInitialCages()
+    {
+        return m_initialCageCount;
     }
 
     public int getInitialCircuits()

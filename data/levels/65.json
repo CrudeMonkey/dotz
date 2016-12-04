@@ -8,8 +8,8 @@
   "numRows": 8,
   "grid": [
     "..EEEE..",
-    "..EEEE..",
-    "..EEEE..",
+    "..EEE...",
+    "..EEE...",
     "..    ..",
     "...  ...",
     "...  ...",
@@ -36,32 +36,50 @@
     ".??..??.",
     ".??..??."
   ],
-  "teleporters": [  ],
   "doors": [
     {"p":[0,7],"strength":99},
     {"p":[7,7],"strength":99}
   ],
-  "lazySusans": [  ],
+  "conveyors": [
+    {"p":[5,1],"turn":-1,"direction":"W"},
+    {"p":[6,1],"turn":0,"direction":"W"},
+    {"p":[7,1],"turn":-1,"direction":"N"},
+    {"p":[5,2],"turn":-1,"direction":"S"},
+    {"p":[6,2],"turn":1,"direction":"E"},
+    {"p":[7,2],"turn":0,"direction":"N"},
+    {"p":[6,3],"turn":0,"direction":"S"},
+    {"p":[7,3],"turn":0,"direction":"N"},
+    {"p":[5,4],"turn":-1,"direction":"W"},
+    {"p":[6,4],"turn":1,"direction":"S"},
+    {"p":[7,4],"turn":0,"direction":"N"},
+    {"p":[5,5],"turn":0,"direction":"S"},
+    {"p":[6,5],"turn":1,"direction":"N"},
+    {"p":[7,5],"turn":-1,"direction":"E"},
+    {"p":[5,6],"turn":-1,"direction":"S"},
+    {"p":[6,6],"turn":-1,"direction":"E"}
+  ],
   "animals": [
     {"p":[2,4],"strength":20,"color":4,"type":"Follow"},
-    {"p":[5,4],"strength":20,"color":2,"type":"Follow"}
+    {"p":[5,4],"strength":20,"color":2,"type":"Default"}
   ],
-  "knights": [  ],
-  "clocks": [  ],
   "lasers": [
     {"p":[0,6],"direction":"E"},
     {"p":[7,6],"direction":"W"}
   ],
-  "mirrors": [  ],
-  "rockets": [  ],
   "generator": {
+    "generateLetters": false,
+    "swapMode": false,
+    "rollMode": false,
+    "dominoMode": false,
     "seed": -1,
     "fireGrowthRate": 1,
     "maxAnchors": 3,
+    "maxDomino": 9,
     "initialDotsOnly": true,
     "animalStrength": 10,
     "knightStrength": 3,
     "clockStrength": 10,
+    "bombStrength": 9,
     "animalType": "Default",
     "freq": [
       [24.4,"dot",0],
@@ -76,5 +94,6 @@
     "lasers": 2,
     "maxMoves": 35
   },
-  "lastModified": "1445645262473"
+  "boosts": {  },
+  "lastModified": "1460251541451"
 }

@@ -1,16 +1,15 @@
 {
-  "id": 198,
-  "name": "The Domino Effect",
+  "name": "Test Striped",
   "creator": "Enno",
-  "description": "This is Domino Level.<br>Wild Cards connect any dominoes.<br>The question marks change the dominoes.",
-  "folder": "Intro\/Domino",
+  "description": "",
+  "folder": "Test\/Striped",
   "numColumns": 8,
   "numRows": 8,
   "grid": [
     "........",
     "........",
     "........",
-    "CCCCCCCC",
+    "........",
     "........",
     "........",
     "........",
@@ -28,23 +27,23 @@
   ],
   "items": [
     "????????",
-    "?W????W?",
     "????????",
     "????????",
     "????????",
-    "?W????W?",
+    "????????",
+    "????????",
     "????????",
     "????????"
   ],
   "generator": {
     "generateLetters": false,
-    "swapMode": false,
+    "swapMode": true,
     "rollMode": false,
-    "dominoMode": true,
+    "dominoMode": false,
     "seed": -1,
     "fireGrowthRate": 1,
     "maxAnchors": 3,
-    "maxDomino": 4,
+    "maxDomino": 6,
     "initialDotsOnly": true,
     "animalStrength": 10,
     "knightStrength": 3,
@@ -52,15 +51,16 @@
     "bombStrength": 9,
     "animalType": "Default",
     "freq": [
-      [13.5,"wild"],
-      [86.5,"domino"]
+      [25,"dot",0],
+      [25,"dot",1],
+      [25,"dot",2],
+      [25,"dot",4]
     ]
   },
   "goals": {
-    "dots": {    },
-    "dominoes": 30,
-    "maxMoves": 10
+    "dots": {    }
   },
   "boosts": {  },
-  "lastModified": "1460251731833"
+  "id": 205,
+  "lastModified": "1451854909610"
 }

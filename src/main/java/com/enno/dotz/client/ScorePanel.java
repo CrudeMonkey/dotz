@@ -18,6 +18,7 @@ import com.ait.lienzo.shared.core.types.Color;
 import com.ait.lienzo.shared.core.types.ColorName;
 import com.ait.lienzo.shared.core.types.TextAlign;
 import com.ait.lienzo.shared.core.types.TextBaseLine;
+import com.enno.dotz.client.Cell.Cage;
 import com.enno.dotz.client.Cell.CircuitCell;
 import com.enno.dotz.client.Cell.Door;
 import com.enno.dotz.client.item.Anchor;
@@ -25,7 +26,6 @@ import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Clock;
 import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
-import com.enno.dotz.client.item.Egg;
 import com.enno.dotz.client.item.Fire;
 import com.enno.dotz.client.item.Knight;
 import com.enno.dotz.client.item.Laser;
@@ -183,6 +183,10 @@ public class ScorePanel extends LienzoPanel
         need = goal.getDoors();
         if (need != 0)
             m_list.add(new DoorGoal(need, ctx));
+        
+        need = goal.getCages();
+        if (need != 0)
+            m_list.add(new CageGoal(need, ctx));
         
         need = goal.getCircuits();
         if (need != 0)
@@ -658,6 +662,45 @@ public class ScorePanel extends LienzoPanel
         {
             int goal = m_goal == Goal.ALL ? ctx.score.getInitialDoors() : m_goal;
             int got = ctx.score.getExplodedDoors();
+            
+            if (got >= goal)
+                setCompleted();
+            else
+                setText(got + " / " + goal);
+        }
+    }
+    
+    
+    public static class CageGoal extends GoalItem
+    {
+        private int m_goal;
+        
+        public CageGoal(int need, Context ctx)
+        {
+            super(ctx);
+            
+            m_goal = need;
+        }
+        
+        protected IPrimitive<?> createShape()
+        {
+            Cage animal = new Cage(1);
+            double sz = SHAPE_SIZE * 0.6;
+            
+            Group wrap = new Group();
+            
+            Group shape = animal.createShape(sz);
+            shape.setX(-sz/2);
+            shape.setY(-sz/2);
+            
+            wrap.add(shape);
+            return wrap;
+        }
+        
+        protected void updateText()
+        {
+            int goal = m_goal == Goal.ALL ? ctx.score.getInitialCages() : m_goal;
+            int got = ctx.score.getExplodedCages();
             
             if (got >= goal)
                 setCompleted();

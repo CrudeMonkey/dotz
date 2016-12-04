@@ -8,6 +8,9 @@
   - can you connect thru transporters?
   - fire goes thru transporter
 
+BUGS
+- Hole or Cage next to Slide - above Slide doesn't refill (GetTransitions.getSourceAbove skips holes)
+
   
 NEW STUFF
 ---------

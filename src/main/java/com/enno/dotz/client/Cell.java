@@ -62,7 +62,8 @@ public abstract class Cell
     
     public boolean canDrop()
     {
-        return item != null;
+        return item != null && !item.isArmed(); 
+        // NOTE: armed striped candy should blast the line it is on
     }
     
     /**

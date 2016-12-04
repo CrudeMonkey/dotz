@@ -979,7 +979,10 @@ public class GridState
                 for (int col = 0; col < numColumns; col++)
                 {
                     Cell a = cell(col, row);
-                    if (a.item instanceof Explody)
+                    if (a.item == null)
+                        continue;
+                    
+                    if (a.item instanceof Explody || a.item.isArmed())
                     {
                         return true;
                     }
@@ -1002,6 +1005,7 @@ public class GridState
         public static final int KNIGHT = 10;
         public static final int EGG = 11;
         public static final int CRACKED_EGG = 12;
+        public static final int STRIPED_BOMB = 13;
 
         private int m_type;
         private Cell m_special;
@@ -1165,11 +1169,12 @@ public class GridState
         
         private boolean m_swapped;
         private Cell[] m_swaps = new Cell[2];
-        private Random rnd = new Random();
+        private Random rnd;
         
         public GetSwapMatches(Context ctx)
         {
             this.ctx = ctx;
+            rnd = ctx.generator.getRandom();
             m_state = ctx.state;
         }
         
@@ -1317,6 +1322,9 @@ public class GridState
                 case SwapCombo.WRAP_BOMB:
                     animateWrapBomb(whenDone);
                     return;
+                case SwapCombo.STRIPED_BOMB:
+                    animateStripedBomb(whenDone);
+                    return;
             }
             
             Set<Cell> exploded = new HashSet<Cell>();           
@@ -1427,6 +1435,50 @@ public class GridState
                 if (explody.item == null)
                     m_state.addExplody(explody);
             }
+            
+            whenDone.run();
+        }
+        
+
+        protected void animateStripedBomb(Runnable whenDone)
+        {
+            SwapCombo combo = m_combos.get(0);
+            int color = combo.getColor();
+            
+            Sound.DROP.play();
+            
+            Set<Cell> exploded = new HashSet<Cell>();
+            
+            exploded.add(m_swaps[0]);
+            m_swaps[0].explode(color, 1);
+            exploded.add(m_swaps[1]);
+            m_swaps[1].explode(color, 1);
+            
+            for (int row = 0; row < m_state.numRows; row++)
+            {
+                for (int col = 0; col < m_state.numColumns; col++)
+                {
+                    Cell cell = m_state.cell(col, row);
+                    Item item = cell.item;
+                    if (item != null && !exploded.contains(cell) && cell.canExplode(color) && !cell.isLocked())
+                    {
+                        if (cell.item instanceof Dot)
+                        {
+                            Striped striped = new Striped(((Dot) cell.item).color, rnd.nextBoolean());
+                            striped.armed = true;
+
+                            cell.item.removeShapeFromLayer(ctx.dotLayer);
+                            addItem(cell, striped);
+                        }
+                        else if (cell.item instanceof Striped)
+                        {
+                            ((Striped) cell.item).armed = true;
+                        }
+                    }
+                }
+            }
+            
+            m_state.explodeNeighbors(exploded);
             
             whenDone.run();
         }
@@ -1791,6 +1843,10 @@ public class GridState
                 {
                     return addCombo(SwapCombo.COLOR_BOMB);
                 }
+                else if (b.item instanceof Striped)
+                {
+                    return addCombo(SwapCombo.STRIPED_BOMB);
+                }
             }
             else if (a.item instanceof WrappedDot)
             {
@@ -1885,9 +1941,17 @@ public class GridState
             }
             
             Cell c;
+            int i = 0;
             do
             {
                 c = combo.get(rnd.nextInt(combo.size()));
+                i++;
+                if (i < 50)
+                {
+                    c = combo.get(0);
+                    Debug.p("can't find uncaged special"); // should never happen
+                    break;
+                }
             }
             while (c.isLockedCage());
             
@@ -2578,7 +2642,8 @@ public class GridState
     
     public TransitionList explosions()
     {
-        final List<Cell> cells = new ArrayList<Cell>();
+        final List<Cell> explodies = new ArrayList<Cell>();
+        final List<Cell> armed = new ArrayList<Cell>();
         
         return new TransitionList("explosions", ctx.nukeLayer, cfg.explosionDuration)
         {
@@ -2605,7 +2670,12 @@ public class GridState
                 ctx.nukeLayer.draw();
                 ctx.nukeLayer.setVisible(false);
                 
-                for (Cell cell : cells)
+                for (Cell cell : explodies)
+                {
+                    cell.item.removeShapeFromLayer(ctx.dotLayer);
+                    cell.item = null;
+                }
+                for (Cell cell : armed)
                 {
                     cell.item.removeShapeFromLayer(ctx.dotLayer);
                     cell.item = null;
@@ -2625,13 +2695,17 @@ public class GridState
                         if (a.item == null)
                             continue;
                         
-                        if (a.item instanceof Explody || a.item.isArmed())
+                        if (a.item instanceof Explody)
                         {
-                            cells.add(a);
+                            explodies.add(a);
+                        }
+                        else if (a.item.isArmed())
+                        {
+                            armed.add(a);
                         }
                     }
                 }
-                new Explosions(this, cells, ctx);
+                new Explosions(this, explodies, armed, ctx);
             }
         };        
     }

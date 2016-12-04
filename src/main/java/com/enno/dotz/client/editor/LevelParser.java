@@ -446,6 +446,9 @@ public class LevelParser
         if (json.isInteger("doors"))
             goal.setDoors(json.getAsInteger("doors"));
 
+        if (json.isInteger("cages"))
+            goal.setCages(json.getAsInteger("cages"));
+
         if (json.isInteger("circuits"))
             goal.setCircuits(json.getAsInteger("circuits"));
 
@@ -1139,6 +1142,9 @@ public class LevelParser
         
         if (g.getDoors() != 0)
             p.put("doors", g.getDoors());
+        
+        if (g.getCages() != 0)
+            p.put("cages", g.getCages());
         
         if (g.getScore() != 0)
             p.put("score", g.getScore());

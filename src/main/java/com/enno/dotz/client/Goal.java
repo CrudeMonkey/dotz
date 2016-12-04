@@ -12,6 +12,7 @@ public class Goal
     protected int m_clocks;
     protected int m_anchors;
     protected int m_doors;
+    protected int m_cages;
     protected int m_ice;
     protected int m_fire;
     protected int m_circuits;
@@ -99,9 +100,19 @@ public class Goal
         return m_doors;
     }
 
-    public void setDoors(int Doors)
+    public void setDoors(int doors)
     {
-        m_doors = Doors;
+        m_doors = doors;
+    }
+    
+    public int getCages()
+    {
+        return m_cages;
+    }
+
+    public void setCages(int cages)
+    {
+        m_cages = cages;
     }
 
     public int getIce()

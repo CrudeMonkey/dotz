@@ -168,4 +168,49 @@ public abstract class Transition implements IAnimationCallback
             m_line.setPoints(pts);
         }
     }
+    
+    public static class BlastTransition extends Transition
+    {
+        private Line[] m_line = new Line[2];
+        private Context ctx;
+        
+        public BlastTransition(double from_x, double from_y, double to_x, double to_y, Context ctx)
+        {
+            super(from_x, from_y, to_x, to_y, null);
+            this.ctx = ctx;
+        }
+        
+        public void afterStart()
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                m_line[i] = new Line(from_x, from_y, from_x, from_y);
+                m_line[i].setStrokeColor(ColorName.BLACK);
+                m_line[i].setStrokeWidth(2);
+                ctx.nukeLayer.add(m_line[i]);
+            }
+        }
+        
+        public void afterEnd()
+        {
+            ctx.nukeLayer.remove(m_line[0]);
+            ctx.nukeLayer.remove(m_line[1]);
+        }
+        
+        protected void move(double pct)
+        {
+            if (m_line[0] == null)
+                return; // m_line doesn't exists yet at move(0)
+            
+            for (int i = 0; i < 2; i++)
+            {
+                int d = i == 0 ? 1 : -1;
+                Point2DArray pts = m_line[i].getPoints();
+                Point2D pt = pts.get(1);
+                pt.setX(from_x + d * dx * pct);
+                pt.setY(from_y + d * dy * pct);
+                m_line[i].setPoints(pts);
+            }
+        }
+    }
 }
