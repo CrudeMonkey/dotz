@@ -1,5 +1,7 @@
 package com.enno.dotz.client.anim;
 
+import java.util.ArrayList;
+
 import com.enno.dotz.client.DropDirection;
 
 public class Pt
@@ -33,5 +35,18 @@ public class Pt
     public int hashCode()
     {
         return col * 100 + row;
+    }
+    
+    public static class PtList extends ArrayList<Pt>
+    {
+        public boolean contains(int col, int row)
+        {
+            for (Pt p : this)
+            {
+                if (p.col == col && p.row == row)
+                    return true;
+            }
+            return false;
+        }
     }
 }

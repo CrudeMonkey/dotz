@@ -4,7 +4,6 @@ import static com.enno.dotz.client.DropDirection.DOWN;
 import static com.enno.dotz.client.DropDirection.LEFT;
 import static com.enno.dotz.client.DropDirection.NOT_ALLOWED;
 import static com.enno.dotz.client.DropDirection.RIGHT;
-import static com.enno.dotz.client.DropDirection.TELEPORT;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -24,6 +23,7 @@ import com.enno.dotz.client.Context;
 import com.enno.dotz.client.DropDirection;
 import com.enno.dotz.client.GridState;
 import com.enno.dotz.client.SoundManager.Sound;
+import com.enno.dotz.client.anim.Pt.PtList;
 import com.enno.dotz.client.anim.Transition.DropTransition;
 import com.enno.dotz.client.item.Anchor;
 import com.enno.dotz.client.item.Clock;
@@ -123,28 +123,21 @@ public class GetTransitions
         {
             m_list = new DropTransitionList(layer, dropDuration);
 
-            if (!checkSlipperyAnchorRolls())
+            PtList ptList = new PtList();
+            boolean found = false;
+            if (m_slipperyAnchors)
             {
-                for (int col = 0; col < cfg.numColumns; col++)
-                {
-                    //Debug.p("start col=" + col);
-                    
-                    Pt p = new Pt(col, cfg.numRows - 1);
-                    trail(p, DOWN, null);
-                }
-                
-                if (m_roll)
-                {
-                    checkRolls();
-                    
-                    for (int col = 0; col < cfg.numColumns; col++)
-                    {
-                        //Debug.p("start col=" + col);
-                        
-                        Pt p = new Pt(col, cfg.numRows - 1);
-                        trail(p, DOWN, null);
-                    }
-                }
+                found = checkDrops(true, ptList);   // check slippery anchors
+                if (!found && m_roll)
+                    found = checkRolls(true, ptList);
+            }
+            
+            if (!found)
+            {
+                found = checkDrops(false, ptList);  // check regular drops
+            
+                if (!found && m_roll)
+                    checkRolls(false, ptList);
             }
             
             if (m_list.getTransitions().size() > 0)
@@ -152,130 +145,213 @@ public class GetTransitions
             else
                 break;
         }
-        
         return animList;
     }
     
-    private boolean checkSlipperyAnchorRolls()
+    private boolean checkRolls(boolean anchorsOnly, PtList droppedInto)
     {
-        if (!m_slipperyAnchors)
-            return false;
+        int before = droppedInto.size();
         
-        boolean slippy = false;
-        
-        for (int row = cfg.numRows - 1; row >= 0; row--)
+        boolean found = true;
+        while (found)
         {
-            for (int col = 0; col < cfg.numColumns; col++)
+            found = false;
+            
+            for (int row = cfg.numRows - 1; row > 0; row--)
             {
-                Cell cell = state.cell(col, row);
-                if (cell.isLocked() || !(cell.item instanceof Anchor))
-                    continue;
-                
-                if (m_list.containsItem(cell.item))
-                    continue;
-                
-                if (state.isValidCell(col, row + 1))
+                for (int col = 0; col < cfg.numColumns; col++)
                 {
-                    Cell under = state.cell(col, row + 1);
-                    if (under.canBeFilled())
-                    {
-                        addDropDown(state.cell(col, row), under);
-                        slippy = true;
+                    Pt p = new Pt(col, row);
+                    if (droppedInto.contains(p))
                         continue;
+                    
+                    Cell c = state.cell(col, row);
+                    if (!c.canBeFilled())
+                        continue;
+                    
+                    Cell above = state.cell(col, row - 1);
+                    if (above.item != null)
+                        continue;
+                    
+                    boolean canRollFromLeft = false;
+                    boolean canRollFromRight = false;
+                    if (col > 0)
+                    {
+                        Cell left = state.cell(col - 1, row - 1);
+                        if (left.canDrop() && checkAnchor(left, anchorsOnly) && !droppedInto.contains(col - 1, row - 1) && isSolidBelow(col - 1, row - 1))
+                            canRollFromLeft = true;
                     }
-                }
-                
-                if (isSolidBelow(col, row))  // bottom row or only holes/cages below
-                {
-                    int dx = m_lastDx == 0 ? 1 : -m_lastDx;                    
-                    if (isEmpty(col + dx, row) && checkRoll(col, row, dx))
+                    if (col < state.numColumns - 1)
                     {
-                        m_lastDx = dx;
-                        slippy = true;
-                        continue;
+                        Cell right = state.cell(col + 1, row - 1);
+                        if (right.canDrop() && checkAnchor(right, anchorsOnly) && !droppedInto.contains(col + 1, row - 1) && isSolidBelow(col + 1, row - 1))
+                            canRollFromRight = true;
                     }
-                    if (isEmpty(col - dx, row) && checkRoll(col, row, -dx))
+                    
+                    Cell src = null;
+                    if (canRollFromLeft)
                     {
-                        m_lastDx = -dx;
-                        slippy = true;
-                        continue;
+                        if (canRollFromRight)
+                        {
+                            if (c.lastSlideDir == DropDirection.LEFT)
+                            {
+                                src = state.cell(col + 1, row - 1); // right
+                                c.lastSlideDir = DropDirection.RIGHT;
+                            }
+                            else
+                            {
+                                src = state.cell(col - 1, row - 1); // left
+                                c.lastSlideDir = DropDirection.LEFT;
+                            }
+                        }
+                        else
+                        {
+                            src = state.cell(col - 1, row - 1); // left
+                            c.lastSlideDir = DropDirection.LEFT;
+                        }
+                    }
+                    else if (canRollFromRight)
+                    {
+                        src = state.cell(col + 1, row - 1); // right
+                        c.lastSlideDir = DropDirection.RIGHT;
+                    }
+                    if (src != null)
+                    {
+                        addRollDown(src, c);
+                        found = true;
+                        droppedInto.add(p);
                     }
                 }
             }
         }
-        return slippy;
+        int added = droppedInto.size() - before;
+        //Debug.p("total: " + added);
+        return added > 0;
     }
+    
+    private boolean checkDrops(boolean anchorsOnly, PtList droppedInto)
+    {
+        int before = droppedInto.size();
+        
+        boolean found = true;
+        while (found)
+        {
+            found = false;
+            
+            for (int row = cfg.numRows; row >= 0; row--)
+            {
+                for (int col = 0; col < cfg.numColumns; col++)
+                {
+                    Pt p = new Pt(col, row);
+                    if (droppedInto.contains(p))
+                        continue;
+                    
+                    if (row == cfg.numRows)     // near bottom
+                    {
+                        Pt above = getSourceAbove(p);
+                        if (above != null)
+                        {
+                            if (above.row == -1)
+                            {
+                                // Entire row of holes or locked cages - nothing to drop
+                            }
+                            else 
+                            {
+                                Cell aboveCell = state.cell(above.col, above.row);
+                                if (aboveCell.canDrop() && aboveCell.item.canDropFromBottom() && checkAnchor(aboveCell, anchorsOnly))
+                                {
+                                    // Drop out of bottom
+                                    addDropOut(aboveCell);
+                                    found = true;
+                                    droppedInto.add(p);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Cell c = state.cell(col, row);
+                        if (!c.canBeFilled())
+                            continue;
+                        
+                        if (nextToSlide(p))
+                        {
+                            List<Pt> slideSources = getSlideSources(p);
+                            DropDirection fillDir = NOT_ALLOWED;
+                            
+                            // who's gonna fill?
+                            List<Pt> fillers = getSlideFillers(slideSources, anchorsOnly, droppedInto);
+                            int n = fillers.size();
+                            if (n > 0)
+                            {
+                                if (n == 1 || c.lastSlideDir == null)
+                                    fillDir = fillers.get(0).dir;
+                                else
+                                    fillDir = getNextSlideDir(c.lastSlideDir.next(), fillers);
 
-    private boolean isEmpty(int col, int row)
-    {
-        if (!state.isValidCell(col, row))
-            return false;
-        
-        return state.cell(col, row).item == null;
-    }
-    
-    private static int m_lastDx = 0;
-    
-    protected void checkRolls()
-    {
-        for (int row = cfg.numRows - 1; row >= 0; row--)
-        {
-            for (int col = 0; col < cfg.numColumns; col++)
-            {
-                Cell cell = state.cell(col, row);
-                if (cell.isLocked() || cell.item == null)
-                    continue;
-                
-                if (m_list.containsItem(cell.item))
-                    continue;
-                
-                if (isSolidBelow(col, row) && !cell.isTeleportSource())  // bottom row or only holes/cages below
-                {
-                    int dx = m_lastDx == 0 ? 1 : -m_lastDx;                    
-                    if (checkRoll(col, row, dx))
-                    {
-                        m_lastDx = dx;
-                        continue;
-                    }
-                    else if (checkRoll(col, row, -dx))
-                    {
-                        m_lastDx = -dx;
-                        continue;
+                                //Debug.p("n=" + n + " lastSlideDir=" + src.lastSlideDir + "fill=" + fillDir);
+                                c.lastSlideDir = fillDir; // remember for next time
+                                
+                                if (fillDir != DropDirection.DOWN)
+                                {
+                                    int prevCol = fillDir == DropDirection.RIGHT ? col - 1 : col + 1;
+                                    Cell aboveCell = state.cell(prevCol, row - 1);
+                                    
+                                    // Add slide transition                                    
+                                    addDropDown(aboveCell, c);
+                                    found = true;
+                                    droppedInto.add(p);
+                                    continue;
+                                }
+                                // else fall through and use source above - which could be a Transport target or Spawn etc.
+                            }
+                        }
+                        
+                        Pt above = getSourceAbove(p);
+                        if (above != null)
+                        {
+                            if (above.row == -1)
+                            {
+                                if (!anchorsOnly)
+                                {
+                                    // Drop from top
+                                    addSpawn(above, p);
+                                    found = true;
+                                    droppedInto.add(p);
+                                }
+                            }
+                            else if (!droppedInto.contains(above))
+                            {
+                                Cell aboveCell = state.cell(above.col, above.row);
+                                if (aboveCell.canDrop() && checkAnchor(aboveCell, anchorsOnly))
+                                {
+                                    // Add transition
+                                    if (aboveCell.isTeleportSource())
+                                        addTeleport(aboveCell, c);
+                                    else
+                                        addDropDown(aboveCell, c);
+                                    
+                                    found = true;
+                                    droppedInto.add(p);
+                                }
+                            }
+                        }
                     }
                 }
             }
+            //Debug.p("found " + droppedInto);
         }
+        int added = droppedInto.size() - before;
+        //Debug.p("total: " + added);
+        return added > 0;
     }
     
-    protected boolean didCell(Cell cell)
+    private boolean checkAnchor(Cell c, boolean anchorsOnly)
     {
-        return m_roll && cell.item != null && m_list.containsItem(cell.item);
+        return !anchorsOnly || c.item instanceof Anchor;
     }
     
-    protected boolean didItem(Item item)
-    {
-        return m_roll && m_list.containsItem(item);
-    }
-    
-    protected boolean checkRoll(int col, int row, int dx)
-    {
-        if (!state.isValidCell(col + dx, row + 1))
-            return false; // can't roll there
-        
-        Cell under = state.cell(col, row + 1);
-        if (under.canBeFilled())
-            return false;
-        
-        Cell below = state.cell(col + dx, row + 1);
-        if (!below.canBeFilled())
-            return false;
-        
-        addDropDown(state.cell(col, row), below);
-        
-        return true;
-    }
-    
-    protected boolean isSolidBelow(int col, int row)
+    private boolean isSolidBelow(int col, int row)
     {
         Cell c  = state.cell(col, row);
         if (c.isTeleportSource())
@@ -306,119 +382,20 @@ public class GetTransitions
         
         return isSolidBelow(col, row + 1);
     }
-    
-    protected void trail(Pt p, DropDirection dir, Pt prev)
-    {
-        //Debug.p("trail " + p);
-        if (p.row == -1)
-        {
-            // Reached the top. 
-            // Do we need to spawn a new Item?
-            if (dir != NOT_ALLOWED && prev != null)
-            {
-                Cell target = state.cell(prev.col, prev.row);
-                if (target.canBeFilled())
-                    addSpawn(p, prev);
-            }
-            return; // end of trail
-        }
-        
-        Cell src = state.cell(p.col, p.row);
-        if (!didCell(src) && src.canDrop() && dir != NOT_ALLOWED)
-        {
-            if (src.isTeleportSource())
-            {
-                if (dir == TELEPORT)
-                {
-                    Teleport tsrc = (Teleport) src;                                
-                        
-                    Cell target = state.cell(tsrc.getOtherCol(), tsrc.getOtherRow());
-                    if (target.canBeFilled())
-                        addTeleport(src, target);
-                }
-            }
-            else if (nearBottom(p.col, p.row))  // bottom row or only holes/cages below
-            {
-                // see if anchor can fall
-                if (src.item.canDropFromBottom())
-                    addDropOut(src);
-            }
-            else if (prev != null)
-            {
-                Cell target = state.cell(prev.col, prev.row);
-                if (target.canBeFilled())
-                    addDropDown(src, target);
-            }
-        }
-        
-        if (nextToSlide(p))
-        {
-            List<Pt> slideSources = getSlideSources(p);
-            DropDirection fillDir = NOT_ALLOWED;
-            if (!didCell(src) && src.canBeFilled()) // NOTE: didCell() applies to rolls only
-            {
-                // who's gonna fill?
-                List<Pt> fillers = getSlideFillers(slideSources);
-                int n = fillers.size();
-                if (n > 0)
-                {
-                    if (n == 1 || src.lastSlideDir == null)
-                        fillDir = fillers.get(0).dir;
-                    else
-                        fillDir = getNextSlideDir(src.lastSlideDir.next(), fillers);
 
-                    //Debug.p("n=" + n + " lastSlideDir=" + src.lastSlideDir + "fill=" + fillDir);
-                    src.lastSlideDir = fillDir; // remember for next time
-                }
-            }
-            for (Pt slideSrc : slideSources)
-            {
-                DropDirection d = fillDir == slideSrc.dir ? fillDir : NOT_ALLOWED;
-                trail(slideSrc, d, p);
-            }
-        }
-        else
-        {
-            // If it's a Teleport target, also check above it.
-            boolean isTeleportTarget = state.cell(p.col, p.row).isTeleportTarget();
-            
-            // only possible source is up
-            Pt above = getSourceAbove(p);
-            if (above != null)
-            {
-                trail(above, isTeleportTarget ? TELEPORT : DOWN, p);    
-                
-                if (p.row > 0 && isTeleportTarget)
-                {
-                    Cell aboveSrc = state.cell(p.col, p.row - 1);
-                    if (!(aboveSrc.isTeleportSource() || aboveSrc instanceof Slide))
-                        trail(new Pt(p.col, p.row - 1), DOWN, null);
-                }
-            }
-            else
-            {
-                //Debug.p("nothing above " + p);
-                // Experimental - see Candy Crush 77 - when no source above (and above is a Hole, then spawn there)
-//                if (state.cell(p.col, p.row - 1) instanceof Hole)
-//                {
-//                    Cell target = state.cell(p.col, p.row);
-//                    if (target.canBeFilled())
-//                        addSpawn(new Pt(p.col, p.row - 1), p);
-//                }
-            }
-        }
-    }
-
-    protected Pt getSourceAbove(Pt p)
+    private Pt getSourceAbove(Pt p)
     {
-        Cell target = state.cell(p.col, p.row);
-        if (target.isTeleportTarget())
+        if (p.row < state.numRows)
         {
-            // return the Teleport Source
-            Teleport tt = (Teleport) target;
-            Pt trans = new Pt(tt.getOtherCol(), tt.getOtherRow());
-            trans.dir = DOWN;
-            return trans;
+            Cell target = state.cell(p.col, p.row);
+            if (target.isTeleportTarget())
+            {
+                // return the Teleport Source
+                Teleport tt = (Teleport) target;
+                Pt trans = new Pt(tt.getOtherCol(), tt.getOtherRow());
+                trans.dir = DOWN;
+                return trans;
+            }
         }
         
         if (p.row == 0)
@@ -446,8 +423,13 @@ public class GetTransitions
             }
         }            
     }
+
+    private void addRollDown(Cell src, final Cell target)
+    {
+        addDropDown(src, target); // TODO animate roll
+    }
     
-    protected void addDropDown(Cell src, final Cell target)
+    private void addDropDown(Cell src, final Cell target)
     {
         if (target instanceof ChangeColorCell && src.item.canChangeColor())
         {
@@ -474,7 +456,7 @@ public class GetTransitions
         }
     }
     
-    protected void addSpawn(final Pt src, Pt target)
+    private void addSpawn(final Pt src, Pt target)
     {
         Item item = ctx.generator.getNextItem(ctx, false);
         m_list.add(new DropTransition(state.x(src.col), state.y(src.row), state.x(target.col), state.y(target.row), item) {
@@ -487,7 +469,7 @@ public class GetTransitions
         state.cell(target.col, target.row).item = item;
     }
     
-    protected void addDropOut(Cell src)
+    private void addDropOut(Cell src)
     {
         if (src.item instanceof Anchor)
             m_list.addSound(Sound.DROPPED_ANCHOR);
@@ -504,7 +486,7 @@ public class GetTransitions
         src.item = null;
     }
     
-    protected void addTeleport(Cell src, Cell target)
+    private void addTeleport(Cell src, Cell target)
     {
         //Debug.p("teleport from " + src + " to " + target);
         
@@ -537,7 +519,7 @@ public class GetTransitions
         src.item = null;
     }
     
-    protected DropDirection getNextSlideDir(DropDirection dir, List<Pt> fillers)
+    private DropDirection getNextSlideDir(DropDirection dir, List<Pt> fillers)
     {
         // return dir if it's in the list
         for (Pt p : fillers)
@@ -549,7 +531,7 @@ public class GetTransitions
         return getNextSlideDir(dir.next(), fillers);
     }
     
-    protected List<Pt> getSlideSources(Pt p)
+    private List<Pt> getSlideSources(Pt p)
     {
         //TODO could cache these in the cell
         List<Pt> list = new ArrayList<Pt>();
@@ -585,7 +567,7 @@ public class GetTransitions
         return list;
     }
     
-    protected List<Pt> getSlideFillers(List<Pt> sources)
+    private List<Pt> getSlideFillers(List<Pt> sources)
     {
         List<Pt> list = new ArrayList<Pt>();
         for (Pt p : sources)
@@ -596,6 +578,23 @@ public class GetTransitions
             {
                 Cell c = state.cell(p.col, p.row);
                 if (c.canDrop())
+                    list.add(p);
+            }
+        }
+        return list;
+    }
+    
+    protected List<Pt> getSlideFillers(List<Pt> sources, boolean anchorsOnly, PtList droppedInto)
+    {
+        List<Pt> list = new ArrayList<Pt>();
+        for (Pt p : sources)
+        {
+            if (p.row == -1 && !anchorsOnly)
+                list.add(p);
+            else
+            {
+                Cell c = state.cell(p.col, p.row);
+                if (c.canDrop() && checkAnchor(c, anchorsOnly) && !droppedInto.contains(p))
                     list.add(p);
             }
         }
