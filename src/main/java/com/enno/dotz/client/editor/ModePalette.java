@@ -16,8 +16,11 @@ import com.ait.lienzo.shared.core.types.TextAlign;
 import com.ait.lienzo.shared.core.types.TextBaseLine;
 import com.enno.dotz.client.Context;
 import com.enno.dotz.client.editor.EditLayoutTab.ConnectTeleportMode;
+import com.enno.dotz.client.item.Chest;
+import com.enno.dotz.client.item.Cog;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.DotBomb;
+import com.enno.dotz.client.item.Item;
 import com.enno.dotz.client.item.LazySusan;
 import com.enno.dotz.client.item.Wild;
 
@@ -25,7 +28,7 @@ public class ModePalette extends Palette<Object>
 {
     public ModePalette(ConnectTeleportMode connectTeleportMode)
     {
-        super(40, ItemButton.SIZE, 6, 1);
+        super(40, ItemButton.SIZE, 6, 2);
         
         ctx.backgroundLayer = new Layer();
         add(ctx.backgroundLayer);
@@ -39,6 +42,9 @@ public class ModePalette extends Palette<Object>
         addButton(connectTeleportMode, 3, 0);
         addButton(new RotateItem(), 4, 0);
         addButton(new Bombify(), 5, 0);
+        addButton(new SetController(), 0, 1);
+        addButton(new Chestify(), 1, 1);
+        addButton(new Stick(), 2, 1);
     }
     
     private void addButton(Object cell, int col, int row)
@@ -92,6 +98,27 @@ public class ModePalette extends Palette<Object>
             shape.setY(y);
             ctx.dotLayer.add(shape);
         }
+        else if (cell instanceof Chestify)
+        {
+            IPrimitive<?> shape = ((Chestify) cell).createShape(ctx.cfg.size);
+            shape.setX(x);
+            shape.setY(y);
+            ctx.dotLayer.add(shape);
+        }
+        else if (cell instanceof SetController)
+        {
+            IPrimitive<?> shape = ((SetController) cell).createShape(ctx.cfg.size);
+            shape.setX(x);
+            shape.setY(y);
+            ctx.dotLayer.add(shape);
+        }
+        else if (cell instanceof Stick)
+        {
+            IPrimitive<?> shape = ((Stick) cell).createShape(ctx.cfg.size);
+            shape.setX(x);
+            shape.setY(y);
+            ctx.dotLayer.add(shape);
+        }
         
         ItemButton b = new ItemButton(col, row, numCols, numRows, cell, ctx);
         b.setX((col + 0.5) * W);
@@ -105,7 +132,7 @@ public class ModePalette extends Palette<Object>
         {
             Group g = new Group();
             
-            g.add(new Wild().createShape(size));
+            g.add(new Wild(false).createShape(size));
             
             double d = size * 0.65;
             double d2 = d / 2;
@@ -149,12 +176,36 @@ public class ModePalette extends Palette<Object>
             return g;
         }
     }
+    
+    public static class Stick
+    {
+        public IPrimitive<?> createShape(int size)
+        {
+            return Item.createStuckShape(size);
+        }
+    }
 
     public static class Bombify
     {
         public IPrimitive<?> createShape(int sz)
         {
-            return new DotBomb(new Dot(0), 9).createShape(sz);
+            return new DotBomb(new Dot(0), 9, false).createShape(sz);
+        }
+    }
+
+    public static class Chestify
+    {
+        public IPrimitive<?> createShape(int sz)
+        {
+            return new Chest(new Dot(0), 9).createShape(sz);
+        }
+    }
+    
+    public static class SetController
+    {
+        public IPrimitive<?> createShape(int sz)
+        {
+            return new Cog().createShape(sz);
         }
     }
     

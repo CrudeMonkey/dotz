@@ -1,0 +1,130 @@
+{
+  "id": 210,
+  "name": "Jelly Splash - Slime Guards",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Jelly Splash",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "????????",
+    "????????",
+    "????????",
+    "???.????",
+    "??.?.???",
+    "?.???.??",
+    ".?????.?",
+    "???????."
+  ],
+  "blockers": [
+        {
+      "p": [
+        3,
+        3
+      ],
+      "strength": 3
+    },
+        {
+      "p": [
+        2,
+        4
+      ],
+      "strength": 2
+    },
+        {
+      "p": [
+        4,
+        4
+      ],
+      "strength": 2
+    },
+        {
+      "p": [
+        1,
+        5
+      ],
+      "strength": 2
+    },
+        {
+      "p": [
+        5,
+        5
+      ],
+      "strength": 2
+    },
+        {
+      "p": [
+        0,
+        6
+      ],
+      "strength": 2
+    },
+        {
+      "p": [
+        6,
+        6
+      ],
+      "strength": 2
+    },
+        {
+      "p": [
+        7,
+        7
+      ],
+      "strength": 2
+    }
+  ],
+  "generator": {
+    "generateLetters": false,
+    "swapMode": false,
+    "rollMode": true,
+    "diagonalMode": true,
+    "dominoMode": false,
+    "slipperyAnchors": true,
+    "minChainLength": 3,
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "maxDomino": 6,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "bombStrength": 9,
+    "blockerStrength": 2,
+    "animalType": "Default",
+    "rewardStrategies": "s4,s6",
+    "freq": [
+      [23.2,"dot",0],
+      [23.2,"dot",1],
+      [23.2,"dot",2],
+      [23.2,"dot",3],
+      [7.1,"blocker"]
+    ]
+  },
+  "goals": {
+    "dots": {    }
+  },
+  "boosts": {  },
+  "lastModified": "1480950795204"
+}

@@ -55,7 +55,7 @@ public abstract class SelectLevelDialog extends MXWindow
         m_closeOnSelect = closeOnSelect;
         m_multiple = multiple;
         
-        addItem(createPane());
+        addItem(createPane(false));
         
         setWidth(1000);
         setHeight(550);
@@ -72,12 +72,30 @@ public abstract class SelectLevelDialog extends MXWindow
             }
         });
     }
+    
+    public SelectLevelDialog(NArray levels)
+    {
+        setTitle("Select Level");
+        
+        m_closeOnSelect = true;
+        m_multiple = false;
+        
+        addItem(createPane(true));
+        
+        setWidth(1000);
+        setHeight(550);
+        
+        centerInPage();
+        
+        setLevels(levels);
+        show();
+    }
 
-    private Canvas createPane()
+    private Canvas createPane(boolean addNewButton)
     {
         HLayout pane = new HLayout();
         pane.setMembersMargin(10);
-        pane.addMember(createLeftPane());
+        pane.addMember(createLeftPane(addNewButton));
         
         m_previewContainer = new VLayout();
         m_previewContainer.setAlign(Alignment.CENTER);
@@ -87,7 +105,7 @@ public abstract class SelectLevelDialog extends MXWindow
         return pane;
     }    
     
-    private Canvas createLeftPane()
+    private Canvas createLeftPane(boolean addNewButton)
     {
         VLayout pane = new VLayout();
         pane.setMargin(10);
@@ -131,6 +149,20 @@ public abstract class SelectLevelDialog extends MXWindow
                 }
             }
         });
+        
+        if (addNewButton)
+        {
+            buttons.add("New", new ClickHandler()
+            {
+                @Override
+                public void onClick(ClickEvent event)
+                {
+                    closeWindow();
+                    
+                    createNewLevel();
+                }
+            });
+        }
         
         buttons.add("Cancel", createCancelButtonHandler());
         
@@ -278,5 +310,9 @@ public abstract class SelectLevelDialog extends MXWindow
     
     public void selected(int levelId)
     {        
+    }
+    
+    public void createNewLevel()
+    {
     }
 }

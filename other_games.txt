@@ -1,0 +1,17 @@
+Toy Blast
+---------
+* 9x9
+* one click matches non-diagonal connected dots
+* bubble=cage with item, brick=door without item, balloon=blocker, 
+* rewards: 5=striped (rocket), 7=wrapped/explody (dynamite), 9=ColorBomb (globe) - at end of chain
+* combos: 2 striped=
+
+Jelly Splash
+------------
+* 7x9
+* diagonal
+* min chain length = 3
+* rewards: wrapped dots, random placement, sometimes more than one - not sure if dependendat on chain length...
+* blaster (wrapped dot) activates at end of chain
+* blasters combine, when two blasters hit each other, all blasters go both hor./vertically
+* slippery anchors

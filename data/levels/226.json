@@ -1,0 +1,118 @@
+{
+  "id": 226,
+  "name": "Test Click Mode",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Test",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "????????",
+    "????????",
+    "2???????",
+    "2?????WW",
+    "2????2??",
+    "2???222.",
+    "???????.",
+    "???????0"
+  ],
+  "doors": [
+    {"p":[5,4],"strength":1}
+  ],
+  "cages": [
+        {
+      "p": [
+        0,
+        3
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        0,
+        4
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        1,
+        4
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        0,
+        5
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        1,
+        5
+      ],
+      "strength": 1
+    }
+  ],
+  "animals": [
+    {"p":[7,5],"strength":20,"color":3,"type":"Default"}
+  ],
+  "generator": {
+    "generateLetters": false,
+    "swapMode": false,
+    "clickMode": true,
+    "rollMode": false,
+    "diagonalMode": false,
+    "dominoMode": false,
+    "slipperyAnchors": false,
+    "minChainLength": 2,
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "maxDomino": 6,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "bombStrength": 9,
+    "blockerStrength": 2,
+    "animalType": "Default",
+    "animalAction": "Default",
+    "icePickRadius": 3,
+    "dropRadius": 3,
+    "freq": [
+      [20,"dot",0],
+      [20,"dot",1],
+      [20,"dot",2],
+      [20,"dot",3],
+      [20,"dot",4]
+    ]
+  },
+  "goals": {
+    "dots": {    }
+  },
+  "boosts": {  },
+  "lastModified": "1481480964110"
+}

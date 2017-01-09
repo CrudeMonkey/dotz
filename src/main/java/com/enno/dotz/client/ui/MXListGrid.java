@@ -1,6 +1,7 @@
 
 package com.enno.dotz.client.ui;
 
+import com.ait.tooling.nativetools.client.NArray;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.widgets.grid.ListGrid;
@@ -181,5 +182,10 @@ public class MXListGrid extends ListGrid
         }
              
         return allgood;
+    }
+    
+    public void setData(NArray a)
+    {
+        setData(MXRecordList.toRecordArray(a));
     }
 }

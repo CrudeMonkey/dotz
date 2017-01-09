@@ -1,0 +1,78 @@
+{
+  "id": 236,
+  "name": "Test Toy Blast with Blaster",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Test",
+  "numColumns": 9,
+  "numRows": 9,
+  "grid": [
+    ".........",
+    ".........",
+    ".........",
+    ".........",
+    ".........",
+    ".........",
+    ".........",
+    ".........",
+    "........."
+  ],
+  "ice": [
+    ".........",
+    ".........",
+    ".........",
+    ".........",
+    ".........",
+    ".........",
+    ".........",
+    ".........",
+    "........."
+  ],
+  "items": [
+    "?????????",
+    "?????????",
+    "?????????",
+    "?????????",
+    "?????????",
+    "?????????",
+    "?????????",
+    "?????????",
+    "?????????"
+  ],
+  "generator": {
+    "generateLetters": false,
+    "swapMode": false,
+    "clickMode": true,
+    "rollMode": false,
+    "diagonalMode": false,
+    "dominoMode": false,
+    "slipperyAnchors": false,
+    "minChainLength": 2,
+    "seed": 123,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "maxDomino": 9,
+    "initialDotsOnly": false,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "bombStrength": 9,
+    "blockerStrength": 2,
+    "animalType": "Default",
+    "animalAction": "Default",
+    "rewardStrategies": "B5,E7,C9",
+    "icePickRadius": 3,
+    "dropRadius": 3,
+    "freq": [
+      [25,"dot",0],
+      [25,"dot",1],
+      [25,"dot",3],
+      [25,"dot",4]
+    ]
+  },
+  "goals": {
+    "dots": {    }
+  },
+  "boosts": {  },
+  "lastModified": "1482022260034"
+}

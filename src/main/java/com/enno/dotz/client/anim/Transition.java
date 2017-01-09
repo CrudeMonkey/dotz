@@ -173,11 +173,13 @@ public abstract class Transition implements IAnimationCallback
     {
         private Line[] m_line = new Line[2];
         private Context ctx;
+        private boolean m_isWide;
         
-        public BlastTransition(double from_x, double from_y, double to_x, double to_y, Context ctx)
+        public BlastTransition(double from_x, double from_y, double to_x, double to_y, boolean isWide, Context ctx)
         {
             super(from_x, from_y, to_x, to_y, null);
             this.ctx = ctx;
+            m_isWide = isWide;
         }
         
         public void afterStart()
@@ -186,7 +188,10 @@ public abstract class Transition implements IAnimationCallback
             {
                 m_line[i] = new Line(from_x, from_y, from_x, from_y);
                 m_line[i].setStrokeColor(ColorName.BLACK);
-                m_line[i].setStrokeWidth(2);
+                m_line[i].setStrokeWidth(m_isWide ? 30 + 2 * ctx.cfg.size : 30);
+                m_line[i].setDashArray(1, 1);
+                if (i == 0)
+                    m_line[i].setDashOffset(1); // align left/right sides
                 ctx.nukeLayer.add(m_line[i]);
             }
         }

@@ -16,8 +16,10 @@ import com.enno.dotz.client.GridState;
 import com.enno.dotz.client.anim.Transition.DropTransition;
 import com.enno.dotz.client.anim.Transition.MoveAnimalTransition;
 import com.enno.dotz.client.item.Animal;
+import com.enno.dotz.client.item.Animal.Action;
 import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
+import com.enno.dotz.client.item.DotBomb;
 
 public class MoveAnimals
 {
@@ -101,7 +103,7 @@ public class MoveAnimals
                         verboten.add(src);
                         verboten.add(target);
                         
-                        if (ctx.generator.swapMode)
+                        if (animal.getAction() == Action.SWAP) //ctx.generator.swapMode)
                         {
                             // Swap animal with target dot
                             list.add(new MoveAnimalTransition(state.x(col), state.y(row), state.x(target.col), state.y(target.row), animal)
@@ -131,11 +133,53 @@ public class MoveAnimals
                             });
                             list.add(new DropTransition(state.x(target.col), state.y(target.row), state.x(col), state.y(row), target.item));
                         }
+                        else if (animal.getAction() == Action.BOMBIFY)
+                        {
+                            // Swap animal with target dot
+                            list.add(new MoveAnimalTransition(state.x(col), state.y(row), state.x(target.col), state.y(target.row), animal)
+                            {
+                                public void afterStart()
+                                {
+                                    animal.removeShapeFromLayer(ctx.dotLayer);
+                                    animal.addShapeToLayer(ctx.nukeLayer);
+                                    
+                                    ctx.nukeLayer.setVisible(true);
+                                    ctx.dotLayer.draw();
+                                }
+                                
+                                public void afterEnd()
+                                {
+                                    animal.removeShapeFromLayer(ctx.nukeLayer);
+                                    animal.addShapeToLayer(ctx.dotLayer);
+                                    
+                                    if (target.item instanceof Dot)
+                                    {
+                                        DotBomb bomb = new DotBomb((Dot) target.item, 10, false); //TODO strength
+                                        bomb.init(ctx);
+                                        bomb.moveShape(state.x(src.col), state.y(src.row));
+                                        
+                                        target.item.removeShapeFromLayer(ctx.dotLayer);
+                                        bomb.addShapeToLayer(ctx.dotLayer);
+                                        target.item = bomb;
+                                        // no need to track Dot or DotBomb count
+                                    }
+                                    
+                                    src.item = target.item;
+                                    target.item = animal;
+                                    
+                                    ctx.nukeLayer.draw();
+                                    ctx.dotLayer.draw();
+                                    
+                                    ctx.nukeLayer.setVisible(false);
+                                }
+                            });
+                            list.add(new DropTransition(state.x(target.col), state.y(target.row), state.x(col), state.y(row), target.item));
+                        }
                         else if (ctx.generator.dominoMode)
                         {
                             int pip = animal.getStrength() % (ctx.generator.maxDomino + 1);
                             boolean vertical = col == target.col; 
-                            final Domino newDot = new Domino(pip, pip, vertical);
+                            final Domino newDot = new Domino(pip, pip, vertical, false);
                             
                             newDot.init(ctx);
                             newDot.moveShape(state.x(col), state.y(row));
@@ -178,7 +222,7 @@ public class MoveAnimals
                         {
                             final Dot newDot = new Dot(animal.getColor());
                             if (ctx.generator.generateLetters)
-                                newDot.letter = ctx.generator.nextLetter();
+                                newDot.setLetter(ctx.generator.nextLetter());
                             
                             newDot.init(ctx);
                             newDot.moveShape(state.x(col), state.y(row));

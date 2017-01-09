@@ -11,15 +11,32 @@ import com.ait.lienzo.shared.core.types.TextBaseLine;
 import com.google.gwt.dom.client.Style.FontWeight;
 
 public class Drop extends Item
-{   
+{
+    private int m_radius;
+    
     public Drop()
     {
+        this(3, false);
     }
     
+    public Drop(int radius, boolean stuck)
+    {
+        m_radius = radius;
+        m_stuck = stuck;
+    }
+    
+    public void setRadius(int radius)
+    {
+        m_radius = radius;
+    }
+
     @Override
     public IPrimitive<?> createShape(double sz)
     {
         Group shape = new Group();
+        
+        if (isStuck())
+            shape.add(createStuckShape(sz));
         
         double scale = 0.055; //sz * 0.08 / 50;
         
@@ -43,7 +60,7 @@ public class Drop extends Item
         p.setFillColor(Color.fromColorString("#C4CEE4"));
         //p.setStrokeWidth(1 / scale);
         g.add(p);
-        
+
         shape.add(g);
         return shape;
     }
@@ -57,7 +74,7 @@ public class Drop extends Item
     @Override
     protected Item doCopy()
     {
-        return new Drop();
+        return new Drop(m_radius, m_stuck);
     }
     
     @Override
@@ -74,6 +91,6 @@ public class Drop extends Item
 
     public int getRadius()
     {
-        return 3;
+        return m_radius;
     }
 }

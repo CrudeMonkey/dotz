@@ -1,6 +1,8 @@
 
 package com.enno.dotz.client.io;
 
+import java.util.List;
+
 import com.ait.tooling.gwtdata.client.rpc.JSONCommandCallback;
 import com.ait.tooling.gwtdata.client.rpc.JSONCommandRequest;
 import com.ait.tooling.nativetools.client.NArray;
@@ -56,6 +58,12 @@ public class ClientRequest
     {
         NObject req = new NObject("id", levelId);
         request("DeleteLevelCommand", req, CallbackUtils.waiting("Deleting Level...", callback));
+    }
+
+    public static void deleteSet(int setId, ServiceCallback callback)
+    {
+        NObject req = new NObject("id", setId);
+        request("DeleteSetCommand", req, CallbackUtils.waiting("Deleting Set...", callback));
     }
 
     public static void getLevelList(boolean tree, final MAsyncCallback<NArray> callback)
@@ -134,7 +142,34 @@ public class ClientRequest
             }
         }));
     }
-    
+
+    public static void loadRecentLevels(final ServiceCallback callback)
+    {
+        request("LoadRecentLevelsCommand", new NObject(), CallbackUtils.waiting("Getting Scores...", new ServiceCallback() {
+            @Override
+            public void onSuccess(NObject result)
+            {
+                callback.onSuccess(result);
+            }
+        }));
+    }
+
+    public static void saveRecentLevels(List<Integer> levelIds, final ServiceCallback callback)
+    {
+        NArray a = new NArray();
+        for (Integer levelId : levelIds)
+            a.push(levelId);
+        
+        request("SaveRecentLevelsCommand", new NObject("levelIds", a), new ServiceCallback() {
+            @Override
+            public void onSuccess(NObject result)
+            {
+                if (callback != null)
+                    callback.onSuccess(result);
+            }
+        });
+    }
+
     protected static void request(String command, NObject request, final AsyncCallback<NObject> callback)
     {        
         s_req.call(command, request, new JSONCommandCallback() {
@@ -158,5 +193,4 @@ public class ClientRequest
             }
         });
     }
-
 }

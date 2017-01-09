@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.ait.lienzo.client.core.shape.Circle;
 import com.ait.lienzo.client.core.shape.Group;
 import com.ait.lienzo.client.core.shape.Line;
+import com.ait.lienzo.client.core.shape.MultiPath;
 import com.ait.lienzo.client.core.shape.PolyLine;
 import com.ait.lienzo.client.core.shape.Polygon;
 import com.ait.lienzo.client.core.shape.Rectangle;
@@ -20,14 +22,30 @@ import com.ait.lienzo.shared.core.types.LineCap;
 import com.ait.lienzo.shared.core.types.LineJoin;
 import com.ait.lienzo.shared.core.types.TextAlign;
 import com.ait.lienzo.shared.core.types.TextBaseLine;
+import com.enno.dotz.client.Controller.Controllable;
 import com.enno.dotz.client.anim.Pt;
+import com.enno.dotz.client.item.Chest;
 import com.enno.dotz.client.item.Explody;
 import com.enno.dotz.client.item.Item;
 import com.enno.dotz.client.item.Item.ExplodeAction;
+import com.enno.dotz.client.item.RandomItem;
 import com.google.gwt.dom.client.Style.FontWeight;
 
 public abstract class Cell
 {
+    public static interface Unlockable
+    {
+        /**
+         * @return Whether the cell can be unlocked with a Key (e.g. Door/Cage)
+         */
+        boolean canUnlock();
+        
+        /**
+         * With a Key.
+         */
+        void unlock();
+    }
+    
     public Item item;
     public int col, row;
     
@@ -62,7 +80,7 @@ public abstract class Cell
     
     public boolean canDrop()
     {
-        return item != null && !item.isArmed(); 
+        return item != null && !item.isArmed() && item.canDrop(); 
         // NOTE: armed striped candy should blast the line it is on
     }
     
@@ -152,6 +170,11 @@ public abstract class Cell
         return false;
     }
 
+    public boolean isUnpoppedBubble()
+    {
+        return false;
+    }
+    
     public boolean isTeleportSource()
     {
         return false;
@@ -179,7 +202,17 @@ public abstract class Cell
         
         return item.stopsLaser();
     }
-    
+
+    /**
+     * E.g. Blinking Cage
+     * 
+     * @return
+     */
+    public boolean hasController()
+    {
+        return false;
+    }
+
     public String toString()
     {
         return col + "," + row;
@@ -248,6 +281,32 @@ public abstract class Cell
                 item.removeShapeFromLayer(ctx.dotLayer);
                 item = null;
             }
+            else if (action == ExplodeAction.OPEN)                
+            {
+                openChest();
+            }
+        }
+    }
+    
+    public void openChest()
+    {
+        Chest chest = (Chest) item;
+        item.removeShapeFromLayer(ctx.dotLayer);
+        item = chest.getItem();
+        
+        if (item != null)
+        {
+            if (item instanceof RandomItem)
+            {
+                item = ctx.generator.getNextItem(ctx, false);
+                // NOTE: calls item.init(ctx);
+            }
+            else
+            {
+                item.init(ctx);
+            }
+            item.addShapeToLayer(ctx.dotLayer);
+            item.moveShape(ctx.state.x(col), ctx.state.y(row));
         }
     }
     
@@ -284,7 +343,24 @@ public abstract class Cell
             m_iceShape.setFillColor(new Color(r, r, r));
         }
     }
+
+    /**
+     * @return  Whether +/- keys can modify the strength in the Level Editor.
+     */
+    public boolean canIncrementStrength()
+    {
+        return false;
+    }
     
+    /**
+     * Override for cells that can increment/decrement strength in the layout editor (with +/- or '<' / '>')
+     * 
+     * @param ds    {1, -1} 
+     */
+    public void incrementStrength(int ds)
+    {
+    }
+
     public static class ItemCell extends Cell
     {
         public ItemCell()
@@ -541,7 +617,13 @@ public abstract class Cell
             
             super.animate(t, cursorX, cursorY);
         }
-
+        
+        @Override
+        public boolean stopsLaser()
+        {
+            return false;
+        }
+        
         public int getDirection()
         {
             return m_direction;
@@ -897,8 +979,11 @@ public abstract class Cell
         }
     }
     
-    public static class Door extends Cell
+    public static class Door extends Cell implements Controllable, Unlockable
     {
+        private boolean m_blinking;
+        private Controller m_controller;
+        
         private int m_rotationDirection = 1; // 1 is clockwise, -1 is CCW, 0 is neither
         private int m_direction;
         private int m_strength;
@@ -909,6 +994,7 @@ public abstract class Cell
         private Pt m_neighbor;
         private Polygon m_b;
         private Polygon m_a;
+        private Rectangle m_offDash;
         
         public Door(int strength, int direction, int rotationDirection)
         {
@@ -916,11 +1002,27 @@ public abstract class Cell
             m_strength = strength;
             m_rotationDirection = rotationDirection;
         }
+
+        /** Blinking Door */
+        public Door(String sequence)
+        {
+            m_blinking = true;
+            m_strength = 1;
+            m_rotationDirection = 0;
+            m_direction = Direction.NONE;
+            m_controller = new Controller(sequence);
+        }
+        
+        public boolean isBlinking()
+        {
+            return m_blinking;
+        }
         
         @Override
         public Cell copy()
         {
-            Door c = new Door(m_strength, m_direction, m_rotationDirection);
+            Door c = m_blinking ? new Door(m_controller.getSequence()) :
+                new Door(m_strength, m_direction, m_rotationDirection);
             c.copyValues(this);
             return c;
         }
@@ -1008,6 +1110,15 @@ public abstract class Cell
             if (m_strength < 2)
                 m_text.setVisible(false);
             
+            if (m_blinking)
+            {
+                Rectangle r = new Rectangle(sz, sz);
+                r.setStrokeColor(ColorName.BLACK);
+                r.setDashArray(3, 3);
+                shape.add(r);
+                m_offDash = r;
+            }
+            
             return shape;
         }
         
@@ -1024,7 +1135,7 @@ public abstract class Cell
             m_b.setRotation(angle);
         }
         
-        protected void tick()
+        protected void tickRotateDoor()
         {
             if (m_direction == Direction.NONE || m_rotationDirection == 0)
                 return;
@@ -1043,6 +1154,37 @@ public abstract class Cell
             m_direction = Direction.rotate(m_direction, true); // clockwise
             setRotation();
             ctx.doorLayer.draw();
+        }
+        
+        @Override
+        public String getSequence()
+        {
+            if (m_controller == null)
+                return null;
+            
+            return m_controller.getSequence();
+        }
+        
+        @Override
+        public void setSequence(String seq)
+        {
+            m_controller = new Controller(seq);
+        }
+        
+        @Override
+        public boolean hasController()
+        {
+            return m_blinking;
+        }
+        
+        @Override
+        public void tick()
+        {
+            if (!m_blinking)
+                return;
+            
+            m_strength = m_controller.tick();
+            updateStrength();
         }
         
         @Override
@@ -1093,6 +1235,9 @@ public abstract class Cell
         @Override
         public boolean canExplodeNextTo(Collection<Cell> cells)
         {
+            if (m_blinking && m_strength > 0)
+                return false;
+            
             if (m_strength == 0)
             {
                 return super.canExplodeNextTo(cells);
@@ -1148,7 +1293,7 @@ public abstract class Cell
         @Override
         public void explode(Integer color, int chainSize)
         {
-            if (m_strength == 0)
+            if (m_strength == 0 || m_blinking)
             {
                 super.explode(color, chainSize);
             }
@@ -1161,21 +1306,37 @@ public abstract class Cell
                     ctx.score.explodedDoor();                    
                     ctx.doorLayer.remove(m_shape);
                 }
-                else if (m_strength > 1)
-                {
-                    m_text.setText("" + m_strength);
-                }
-                else // strength == 1
-                {
-                    m_text.setVisible(false);
-                }
+                
+                updateStrength();
             }
         }
 
+        protected void updateStrength()
+        {
+            m_text.setText("" + m_strength);
+            m_text.setVisible(m_strength > 1);
+            
+            m_shape.setVisible(m_strength > 0);
+            
+            ctx.doorLayer.draw();
+        }
+        
+        @Override
+        public boolean canUnlock()
+        {
+            if (m_blinking)
+                return false; // can't unlock blinking door
+            
+            return isLocked();
+        }
+        
         /** Unlock with key */
+        @Override
         public void unlock()
         {
-            // ASSUMPTION: it's locked
+            if (!canUnlock())
+                return;
+            
             m_strength = 0;
             ctx.score.explodedDoor();                    
             ctx.doorLayer.remove(m_shape);
@@ -1206,25 +1367,96 @@ public abstract class Cell
         {
             m_rotationDirection = rotationDirection;
         }
+        
+        @Override
+        public boolean canIncrementStrength()
+        {
+            return !m_blinking;
+        }
+        
+        @Override
+        public void incrementStrength(int ds)
+        {
+            if (m_strength <= 1 && ds == -1)
+                return;
+            
+            m_strength += ds;
+            m_text.setText("" + m_strength);
+            m_text.setVisible(m_strength > 1);
+            
+            ctx.doorLayer.draw();
+        }
+
+        @Override
+        public void animate(long t, double cursorX, double cursorY)
+        {
+            if (m_blinking)
+            {
+                int n = (int) ((t / 50) % 6);
+                m_offDash.setDashOffset(5 - n);
+            }
+            
+            super.animate(t, cursorX, cursorY);
+        }
+
+        public boolean hasDirection()
+        {
+            return m_direction != Direction.NONE;
+        }
     }
     
-    public static class Cage extends Cell
+    public static class Cage extends Cell implements Controllable, Unlockable
     {
-        private int m_strength;
+        protected int m_strength;
+        
         private Group m_shape;
         private Text m_text;
+        protected IColor m_color = ColorName.BLACK;
+        
+        private boolean m_blinking;
+        private Controller m_controller;
+        
+        private Line[] m_offDash = new Line[3];
         
         public Cage(int strength)
         {
             m_strength = strength;
         }
         
+        /** Blinking cage */
+        public Cage(String sequence)
+        {
+            m_strength = 1;
+            m_controller = new Controller(sequence);
+            m_blinking = true;
+        }
+        
+        public boolean isBlinking()
+        {
+            return m_blinking;
+        }
+        
+        @Override
+        public boolean hasController()
+        {
+            return m_blinking;
+        }
+
         @Override
         public Cell copy()
         {
-            Cage c = new Cage(m_strength);
+            Cage c = m_blinking ? new Cage(m_controller.getSequence()) : new Cage(m_strength);
             c.copyValues(this);
             return c;
+        }
+        
+        @Override
+        public boolean canConnect(Integer color, boolean isWordMode)
+        {
+            if (m_blinking)
+                return m_strength == 0 && super.canConnect(color, isWordMode);
+            else
+                return super.canConnect(color, isWordMode);
         }
         
         @Override
@@ -1240,6 +1472,28 @@ public abstract class Cell
         }
         
         @Override
+        public boolean canUnlock()
+        {
+            if (m_blinking)
+                return false; // can't unlock blinking cage
+            
+            return isLocked();
+        }
+        
+        /** Unlock with key */
+        @Override
+        public void unlock()
+        {
+            if (!canUnlock())
+                return;
+            
+            m_strength = 0;
+            ctx.score.explodedCage();                    
+            ctx.doorLayer.remove(m_shape);
+            m_text.setVisible(false);
+        }
+
+        @Override
         public boolean canDrop()
         {
             return m_strength == 0 && super.canDrop();
@@ -1250,12 +1504,6 @@ public abstract class Cell
         {
             return m_strength == 0 && super.canBeFilled();
         }
-        
-//        @Override
-//        public boolean canConnect(Integer color, boolean isWordMode)
-//        {
-//            return m_strength == 0 && super.canConnect(color, isWordMode);
-//        }
         
         @Override
         public boolean canExplode(Integer color)
@@ -1281,15 +1529,52 @@ public abstract class Cell
             return isLocked() || itemStopsLaser();
         }
 
+      @Override
+      public boolean canExplodeNextTo(Collection<Cell> cells)
+      {
+          if (m_blinking && m_strength > 0)
+              return false;
+          
+          if (m_strength == 0)
+              return super.canExplodeNextTo(cells);
+          
+          return false;
+      }
+        
+//        @Override
+//        public boolean canExplodeNextTo(Collection<Cell> cells)
+//        {
+//            if (m_blinking)
+//            {
+//                if (m_strength > 0)
+//                    return false;
+//                else
+//                    return super.canExplodeNextTo(cells);
+//            }
+//            
+//            if (m_strength == 0 || item instanceof Chest)
+//            {
+//                return super.canExplodeNextTo(cells);
+//            }
+//            
+//            return false;
+//        }
+        
         @Override
         public void explode(Integer color, int chainSize)
         {
-            if (m_strength == 0)
+            if (m_strength == 0 || m_blinking)
             {
                 super.explode(color, chainSize);
             }
             else
             {
+//                if (item instanceof Chest)
+//                {
+//                    super.explode(color, chainSize);
+//                    return;
+//                }
+                
                 m_strength--;
                 
                 if (m_strength == 0)
@@ -1297,16 +1582,11 @@ public abstract class Cell
                     ctx.score.explodedCage();                    
                     ctx.doorLayer.remove(m_shape);
                 }
-                else if (m_strength > 1)
-                {
-                    m_text.setText("" + m_strength);
-                }
-                else // strength == 1
-                {
-                    m_text.setVisible(false);
-                }
+                
+                updateStrength();
             }
         }
+        
         @Override
         public void initGraphics(int col, int row, double x, double y)
         {
@@ -1334,14 +1614,22 @@ public abstract class Cell
             Rectangle r = new Rectangle(s2, s2);
             r.setX(b);
             r.setY(b);
-            r.setStrokeColor(ColorName.BLACK);
+            r.setStrokeColor(m_color);
             shape.add(r);
             
             double w = s2 / 4;
             for (int i = 1; i < 4; i++)
             {
                 Line line = new Line(b + i * w, b, b + i * w, sz - b);
-                line.setStrokeColor(ColorName.BLACK);
+                line.setStrokeColor(m_color);
+                
+                if (m_blinking)
+                {
+                    line.setLineCap(LineCap.SQUARE);
+                    line.setDashArray(3, 3);
+                    m_offDash[i-1] = line;
+                }
+                
                 shape.add(line);
             }
             
@@ -1369,6 +1657,235 @@ public abstract class Cell
         public int getStrength()
         {
             return m_strength;
+        }
+        
+        @Override
+        public boolean canIncrementStrength()
+        {
+            return !m_blinking;
+        }
+        
+        @Override
+        public void incrementStrength(int ds)
+        {
+            if (m_strength <= 1 && ds == -1)
+                return;
+            
+            m_strength += ds;
+            updateStrength();
+        }
+        
+        protected void updateStrength()
+        {
+            m_text.setText("" + m_strength);
+            m_text.setVisible(m_strength > 1);
+            
+            m_shape.setVisible(m_strength > 0);
+            
+            ctx.doorLayer.draw();
+        }
+        
+        @Override
+        public void tick()
+        {
+            if (!m_blinking)
+                return;
+            
+            m_strength = m_controller.tick();
+            updateStrength();
+        }
+
+        @Override
+        public String getSequence()
+        {
+            if (m_controller == null)
+                return null;
+            
+            return m_controller.getSequence();
+        }
+        
+        @Override
+        public void setSequence(String seq)
+        {
+            m_controller = new Controller(seq);
+        }
+
+        @Override
+        public void animate(long t, double cursorX, double cursorY)
+        {
+            if (m_blinking)
+            {
+                int n = (int) ((t / 50) % 6);
+                for (int i = 0; i < m_offDash.length; i++)
+                    m_offDash[i].setDashOffset(5 - n);
+            }
+            
+            super.animate(t, cursorX, cursorY);
+        }
+    }
+    
+    public static class Bubble extends Cell
+    {
+        private boolean m_popped;
+        private Group m_shape;
+        
+        public boolean isPopped()
+        {
+            return m_popped;
+        }
+        
+        @Override
+        public boolean isUnpoppedBubble()
+        {
+            return !m_popped;
+        }
+        
+        @Override
+        public boolean canGrowFire()
+        {
+            if (!m_popped)
+                return false;
+            
+            return super.canGrowFire();
+        }
+        
+        @Override
+        public boolean canBeNuked()
+        {
+            if (!m_popped)
+                return true; // TODO not sure
+            
+            return super.canBeNuked();
+        }
+        
+        @Override
+        public boolean stopsLaser()
+        {
+            return !m_popped || super.stopsLaser();
+        }
+        
+//        @Override
+//        public boolean canExplodeNextTo(Collection<Cell> cells)
+//        {
+//            if (m_popped)
+//                return super.canExplodeNextTo(cells);
+//            
+//            return item instanceof Chest;
+//        }
+        
+        @Override
+        public void initGraphics(int col, int row, double x, double y)
+        {
+            super.initGraphics(col, row, x, y);
+            
+            m_shape = createShape(ctx.cfg.size);
+            ctx.doorLayer.add(m_shape);
+        }
+
+        @Override
+        public void removeGraphics()
+        {
+            super.removeGraphics();
+            ctx.doorLayer.remove(m_shape);
+        }
+        
+        public Group createShape(double sz)
+        {
+            Group shape = new Group();
+            shape.setX(m_x - sz / 2);
+            shape.setY(m_y - sz / 2);
+        
+            double r = sz * 0.45;
+            double r2 = r * 0.9;
+            double alpha = 0.6;
+            
+            double dr = Math.sqrt(2) * 0.5 * (r - r2);
+            Circle c = new Circle(r2);
+            c.setFillColor(Color.fromColorString("#93DEFF"));
+            c.setFillAlpha(alpha);
+            c.setX(sz / 2 - dr);
+            c.setY(sz / 2 - dr);
+            shape.add(c);
+            
+            MultiPath b = new MultiPath();
+            b.M(0, r);
+            b.A(r, r, 0, 0, 0, 0, -r);
+            b.A(r, r, 0, 0, 0, 0, r);
+            b.A(r2, r2, 0, 0, 1, 0, r - 2*r2);
+            b.A(r2, r2, 0, 0, 1, 0, r);
+            b.Z();
+            //b.setStrokeColor(ColorName.BLACK);
+            b.setFillAlpha(alpha);
+            b.setFillColor(Color.fromColorString("#DDF9FE"));
+//            b.setFillColor(ColorName.BLACK);
+            b.setRotation(Math.PI * 0.75);
+            b.setX(sz / 2);
+            b.setY(sz / 2);
+            shape.add(b);
+            
+            MultiPath p = new MultiPath();
+            double r1 = r * 0.7;
+            r2 = r * 0.85;
+            double a = 0.5;
+            double x = r1 * Math.cos(a);
+            double y = r1 * Math.sin(a);
+            p.M(x, y);
+            x = r1 * Math.cos(-a);
+            y = r1 * Math.sin(-a);
+            p.A(r1, r1, 0, 0, 0, x, y);
+            x = r2 * Math.cos(-a);
+            y = r2 * Math.sin(-a);
+            p.L(x, y);
+            x = r2 * Math.cos(a);
+            y = r2 * Math.sin(a);
+            p.A(r2, r2, 0, 0, 1, x, y);
+            p.Z();
+            p.setFillColor(ColorName.WHITE);
+            p.setFillAlpha(0.6);
+            //p.setStrokeColor(ColorName.BLACK);
+            p.setRotation(Math.PI * -0.75);
+            p.setX(sz / 2);
+            p.setY(sz / 2);
+            shape.add(p);
+
+            c = new Circle(r);
+            c.setStrokeColor(ColorName.LIGHTBLUE);
+//            c.setFillColor(Color.fromColorString("#93DEFF"));
+//            c.setFillAlpha(0.4);
+            c.setX(sz / 2);
+            c.setY(sz / 2);
+            shape.add(c);
+
+            return shape;
+        }
+        
+        @Override
+        public void zap()
+        {
+            if (m_popped)
+                super.zap();
+        }
+        
+        @Override
+        public void explode(Integer color, int chainSize)
+        {
+            if (m_popped || (item != null && item.canExplodeNextTo()))
+            {
+                super.explode(color, chainSize);
+                return;
+            }
+            
+            ctx.score.explodedBubble();                    
+            ctx.doorLayer.remove(m_shape);
+            m_popped = true;
+            
+            super.explode(color, chainSize);
+        }
+        
+        @Override
+        public Cell copy()
+        {
+            return new Bubble();
         }
     }
     

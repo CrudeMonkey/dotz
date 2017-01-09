@@ -1,8 +1,6 @@
 package com.enno.dotz.client;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import com.ait.lienzo.client.core.animation.LayerRedrawManager;
@@ -17,11 +15,11 @@ import com.ait.lienzo.client.core.event.NodeMouseUpHandler;
 import com.ait.lienzo.client.core.shape.Layer;
 import com.ait.lienzo.client.core.shape.Rectangle;
 import com.ait.lienzo.shared.core.types.ColorName;
-import com.enno.dotz.client.Cell.Door;
-import com.enno.dotz.client.GridState.GetSwapMatches;
+import com.enno.dotz.client.Cell.Unlockable;
 import com.enno.dotz.client.SoundManager.Sound;
 import com.enno.dotz.client.anim.Pt;
 import com.enno.dotz.client.item.Animal;
+import com.enno.dotz.client.item.Chest;
 import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.DotBomb;
@@ -32,10 +30,10 @@ import com.enno.dotz.client.item.Fire;
 import com.enno.dotz.client.item.IcePick;
 import com.enno.dotz.client.item.Item;
 import com.enno.dotz.client.item.Knight;
+import com.enno.dotz.client.item.Mirror;
 import com.enno.dotz.client.item.Turner;
 import com.enno.dotz.client.item.Wild;
 import com.enno.dotz.client.item.WrappedDot;
-import com.enno.dotz.client.util.Debug;
 import com.google.gwt.event.shared.HandlerRegistration;
 
 public class DragConnectMode extends ConnectMode
@@ -43,13 +41,15 @@ public class DragConnectMode extends ConnectMode
     protected Integer m_color;
     protected DragLine m_dragLine = new DragLine();
     
-    protected List<Cell> m_cells = new ArrayList<Cell>();
+    protected CellList m_cells = new CellList();
     protected int m_lastCellCol, m_lastCellRow;
     protected boolean m_isSquare = false;
     protected boolean m_isKnightMode;
     protected boolean m_isEggMode;
     protected boolean m_isWordMode;
+    protected boolean m_isDiagonalMode;
     protected boolean m_isDominoMode;
+    protected int m_minChainLength;
     
     private boolean m_dragging;
     private double m_margin;
@@ -61,6 +61,8 @@ public class DragConnectMode extends ConnectMode
         m_margin = ctx.cfg.size * 0.35; // for letter mode
         
         m_isWordMode = ctx.generator.generateLetters;
+        m_isDiagonalMode = ctx.generator.diagonalMode;
+        m_minChainLength = ctx.generator.minChainLength;
         
         //TODO replace with GWT handlers! - don't need Node detection here!
         m_lineMoveHandler = new NodeMouseMoveHandler() {
@@ -71,7 +73,7 @@ public class DragConnectMode extends ConnectMode
                 int col = m_state.col(event.getX());
                 int row = m_state.row(event.getY());
                                 
-                if (m_isWordMode)
+                if (m_isWordMode || m_isDiagonalMode)
                 {
                     // Must be relatively near the center so you can drag diagonal lines
                     double dx = Math.abs(m_state.x(col) - event.getX());
@@ -95,7 +97,6 @@ public class DragConnectMode extends ConnectMode
                 endOfDrag();
                 connectDone();
             }
-
         };
         
         m_mouseDownHandler = new NodeMouseDownHandler()
@@ -117,7 +118,7 @@ public class DragConnectMode extends ConnectMode
                 }
                 
                 // clear variables
-                Debug.p("square=false");
+                //Debug.p("square=false");
                 m_isSquare = false;
                 m_color = null;
                 m_cells.clear();
@@ -125,7 +126,7 @@ public class DragConnectMode extends ConnectMode
                 
                 //Debug.p("mouse down in cell " + col + "," + row);
                 
-                if (flipMirror(cell) || fireRocket(cell) || reshuffle(cell))
+                if (isTriggeredBySingleClick(cell))
                     return;
                 
                 if (startSpecialMode(cell, event.getX(), event.getY()))
@@ -193,38 +194,78 @@ public class DragConnectMode extends ConnectMode
     protected void connectDone()
     {
         String word = null;
+        int wordPoints = 0;
         if (m_isWordMode)
         {
-            if (m_cells.size() < 2)
+            if (m_cells.size() < m_minChainLength)
                 return;
             
             if (m_isKnightMode && m_cells.size() < 3)
                 return;
             
-            // When first item is an Animal, only wild cards and dots of the same color can be connected
-            // and there must be at least 5
-            if (hasAnimals() && m_cells.size() < 5)
+            // When first item is an Animal, there must be at least 5
+            if (m_cells.hasAnimals() && !(m_cells.size() >= 5 || m_cells.isOneColor() && m_cells.size() >= 4))
             {
                 Sound.MISS.play();
                 return;
             }
             
+            int wordMultiplier = 1;
             StringBuilder b = new StringBuilder();
             for (Cell c : m_cells)
             {
+                Dot dot = null;
                 if (c.item instanceof Dot)
-                    b.append(((Dot) c.item).letter);
+                    dot = (Dot) c.item;
                 else if (c.item instanceof DotBomb)
-                    b.append(((DotBomb) c.item).getDot().letter);
-                else
+                    dot = ((DotBomb) c.item).getDot();
+                
+                if (dot == null)               
+                {
                     b.append('?'); // wild card or animal
+                }
+                else
+                {
+                    LetterMultiplier mult = dot.getLetterMultiplier();
+                    if (mult == null)
+                    {
+                        wordPoints += dot.getLetterPoints();
+                    }
+                    else
+                    {
+                        if (mult.isWordMultiplier())
+                        {
+                            wordPoints += dot.getLetterPoints();
+                            wordMultiplier *= mult.getMultiplier();
+                        }
+                        else // letter multiplier
+                        {
+                            wordPoints += dot.getLetterPoints() * mult.getMultiplier();                            
+                        }
+                    }
+                    b.append(dot.getLetter());
+                }
             }
-            word = WordList.getWord(b.toString());
+            wordPoints *= wordMultiplier;
+            word = WordList.getWord(b.toString(), ctx.guessedWords);
+            
+//            if (ctx.generator.findWords)
+//            {
+//                ctx.findWordList.foundWord(word);
+////                if (!ctx.findWordList.foundWord(word))
+////                    word = null;
+//            }
+            
             if (word == null)
             {
                 Sound.MISS.play();
                 return;
             }
+            
+            if (!ctx.generator.removeLetters)   // don't allow duplicate words
+                ctx.guessedWords.add(word);
+            
+            ctx.bestWords.addWord(word, wordPoints);
         }
         else
         {
@@ -235,12 +276,12 @@ public class DragConnectMode extends ConnectMode
             }
             else if (m_isDominoMode)
             {
-                if (m_cells.size() < 2)
+                if (m_cells.size() < m_minChainLength)
                     return;
             }
             else
             {
-                if (m_cells.size() < 2 || ctx.isWild(m_color))
+                if (m_cells.size() < m_minChainLength || ctx.isWild(m_color))
                     return;
             
                 if (m_isKnightMode && m_cells.size() < 3)
@@ -253,7 +294,7 @@ public class DragConnectMode extends ConnectMode
         Cell lastCell = m_cells.get(m_cells.size() - 1);
         ctx.lastMove = new Pt(lastCell.col, lastCell.row);
         
-        m_state.processChain(m_cells, m_isSquare, m_isKnightMode, m_isWordMode, m_isEggMode, word, m_color, new Runnable() {
+        m_state.processChain(new UserAction(m_cells, m_isSquare, m_isKnightMode, m_isWordMode, m_isEggMode, word, wordPoints, m_color), new Runnable() {
             public void run()
             {
                 start(); // next move
@@ -271,16 +312,16 @@ public class DragConnectMode extends ConnectMode
         
         // p("drag " + col + "," + row);
         
-        if (previousCell(col, row))
+        if (m_cells.previousCell(col, row))
         {
-            Debug.p("square=false");
+            //Debug.p("square=false");
             m_isSquare = false;
             m_dragLine.pop();
             popCell();
             
             if (m_isDominoMode)
             {
-                if (isOnlyWildCards())
+                if (m_cells.isOnlyWildCards())
                 {
                     m_isDominoMode = false;
                     m_dragLine.clear();
@@ -309,14 +350,14 @@ public class DragConnectMode extends ConnectMode
             int drow = Math.abs(row - m_lastCellRow);
             if (dcol == 1 && drow == 2 || dcol == 2 && drow == 1)
             {
-                Cell neighbor = m_state.cell(col,  row);
+                Cell neighbor = m_state.cell(col, row);
                 if (!neighbor.canConnect(m_color, m_isWordMode))
                     return;
                 
                 if (m_isWordMode && invalidAnimalChain(neighbor))
                     return;                    
                 
-                if (!didCell(col, row))
+                if (!m_cells.didCell(col, row))
                 {
                     // push cell
                     m_dragLine.adjust(m_state.x(col), m_state.y(row));
@@ -342,9 +383,9 @@ public class DragConnectMode extends ConnectMode
                     return;
                 }
                 
-                if (didCell(col, row))
+                if (m_cells.didCell(col, row))
                 {
-                    if (hasDiagonal() || isDiagonal(m_lastCellCol, m_lastCellRow, col, row))
+                    if (m_cells.hasDiagonal() || m_cells.isDiagonal(m_lastCellCol, m_lastCellRow, col, row))
                         return;
                     
                     // made a square
@@ -360,17 +401,18 @@ public class DragConnectMode extends ConnectMode
         else
         {        
             if ((col == m_lastCellCol && (row == m_lastCellRow + 1 || row == m_lastCellRow - 1))
-             || (row == m_lastCellRow && (col == m_lastCellCol + 1 || col == m_lastCellCol - 1)))
+             || (row == m_lastCellRow && (col == m_lastCellCol + 1 || col == m_lastCellCol - 1)) 
+             || m_isDiagonalMode && isDiagonal(row, col))
             {
                 // neighbor cell (horizontal/vertical)
-                Cell neighbor = m_state.cell(col,  row);
+                Cell neighbor = m_state.cell(col, row);
                 
-                if (!m_isEggMode && !m_isDominoMode && !m_isKnightMode && neighbor.item instanceof Domino && isOnlyWildCards())
+                if (!m_isEggMode && !m_isDominoMode && !m_isKnightMode && neighbor.item instanceof Domino && m_cells.isOnlyWildCards())
                     m_isDominoMode = true;
                 
                 if (m_isDominoMode)
                 {
-                    if (didCell(col, row) || neighbor.isLocked() || 
+                    if (m_cells.didCell(col, row) || neighbor.isLocked() || 
                             !(neighbor.item instanceof Domino || neighbor.item instanceof Animal || neighbor.item instanceof Wild))
                         return;
                     
@@ -385,10 +427,10 @@ public class DragConnectMode extends ConnectMode
                 }
                 else if (m_isEggMode)
                 {
-                    if (didCell(col, row) || neighbor.isLocked() || !(neighbor.item instanceof Egg || neighbor.item instanceof Wild))
+                    if (m_cells.didCell(col, row) || neighbor.isLocked() || !(neighbor.item instanceof Egg || neighbor.item instanceof Wild))
                         return;
                     
-                    Boolean cracked = isCracked();
+                    Boolean cracked = m_cells.isCracked();
                     if (neighbor.item instanceof Egg)
                     {
                         Egg egg = (Egg) neighbor.item;
@@ -398,6 +440,10 @@ public class DragConnectMode extends ConnectMode
                 }
                 else
                 {
+                    // Can't make squares in diagonal mode
+                    if (m_isDiagonalMode && m_cells.didCell(col, row))
+                        return;
+                    
                     // If all cells are Wild and it's an Egg, switch to Egg mode
                     if (neighbor.item instanceof Egg)
                     {
@@ -413,14 +459,14 @@ public class DragConnectMode extends ConnectMode
                         if (!neighbor.canConnect(m_color, m_isWordMode))
                             return;
                         
-                        if (didCell(col, row))
+                        if (m_cells.didCell(col, row))
                         {
                             if (ctx.isWild(m_color)) // can't make a square of all wildcards
                                 return;
                             
                             // made a square
                             m_isSquare = true;
-                            Debug.p("square=true");
+                            //Debug.p("square=true");
                         }
                     }
                 }
@@ -433,34 +479,11 @@ public class DragConnectMode extends ConnectMode
         }
     }
     
-    protected Boolean isCracked()
+    protected boolean isDiagonal(int row, int col)
     {
-        for (Cell cell : m_cells)
-        {
-            if (cell.item instanceof Egg)
-                return ((Egg) cell.item).isCracked();
-        }
-        return null;
-    }
-    
-    protected boolean isOnlyWildCards()
-    {
-        for (Cell cell : m_cells)
-        {
-            if (!(cell.item instanceof Wild))
-                return false;
-        }
-        return true;
-    }
-    
-    protected boolean hasAnimals()
-    {
-        for (Cell cell : m_cells)
-        {
-            if (cell.item instanceof Animal)
-                return true;
-        }
-        return false;
+        int dcol = Math.abs(col - m_lastCellCol);
+        int drow = Math.abs(row - m_lastCellRow);
+        return (dcol < 2 && drow < 2);
     }
     
     protected boolean invalidAnimalChain(Cell c)
@@ -480,24 +503,6 @@ public class DragConnectMode extends ConnectMode
         return false;
     }
     
-    protected boolean hasDiagonal()
-    {
-        int n = m_cells.size();
-        for (int i = 1; i < n; i++)
-        {
-            Cell a = m_cells.get(i-1);
-            Cell b = m_cells.get(i);
-            if (isDiagonal(a.col, a.row, b.col, b.row))
-                return true;
-        }
-        return false;
-    }
-    
-    protected boolean isDiagonal(int cola, int rowa, int colb, int rowb)
-    {
-        return cola != colb && rowa != rowb;
-    }
-
     protected void pushCell(Cell cell, int col, int row)
     {
         // p("push " + col + "," + row);
@@ -538,16 +543,6 @@ public class DragConnectMode extends ConnectMode
                 m_dragLine.setStrokeColor(cfg.connectColor(m_color));
             }
         }
-    }
-    
-    protected void dumpChain()
-    {
-        StringBuilder b = new StringBuilder();
-        for (Cell c : m_cells)
-        {
-            b.append(c.col).append(",").append(c.row).append(" ");
-        }
-        Debug.p(b.toString());
     }
     
     protected void popCell()
@@ -597,27 +592,7 @@ public class DragConnectMode extends ConnectMode
         
         m_dragLine.setStrokeColor(cfg.connectColor(m_color));
     }
-    
-    protected boolean previousCell(int col, int row)
-    {
-        int n = m_cells.size();
-        if (n < 2)
-            return false;
-        
-        Cell prevCell = m_cells.get(n - 2);
-        return prevCell.col == col && prevCell.row == row;
-    }
-    
-    protected boolean didCell(int col, int row)
-    {
-        for (Cell c : m_cells)
-        {
-            if (c.col == col && c.row == row)
-                return true;
-        }
-        return false;
-    }
-    
+
     public static abstract class SpecialMode
     {
         protected Cell m_sourceCell;
@@ -789,7 +764,9 @@ public class DragConnectMode extends ConnectMode
             if (m_box != null)
             {
                 ctx.nukeLayer.remove(m_box);
+                LayerRedrawManager.get().schedule(ctx.nukeLayer);
                 ctx.nukeLayer.setVisible(false);
+                m_box = null;
             }
         }
         
@@ -847,6 +824,7 @@ public class DragConnectMode extends ConnectMode
             
             startDragLine(cell, x, y);            
             createDragBox(cell, 1);
+            update(cell);
         }        
 
         public TurnMode(Item item, Context ctx, ConnectMode connectMode, Runnable removeItem)
@@ -899,6 +877,7 @@ public class DragConnectMode extends ConnectMode
             
             startDragLine(cell, x, y);            
             createDragBox(cell, 1);
+            update(cell);
         }        
 
         public ColorBombMode(Item item, Context ctx, ConnectMode connectMode, Runnable removeItem)
@@ -1086,7 +1065,7 @@ public class DragConnectMode extends ConnectMode
             
             cell.explode(null, 1);
             if (cell.item == null)
-                m_state.addItem(cell, new Wild());
+                m_state.addItem(cell, new Wild(false));
             
             removeStartItem();
             process();
@@ -1104,6 +1083,7 @@ public class DragConnectMode extends ConnectMode
             
             startDragLine(cell, x, y);            
             createDragBox(cell, 1);
+            update(cell);
         }        
 
         public KeyMode(Item item, Context ctx, ConnectMode connectMode, Runnable removeItem)
@@ -1130,7 +1110,10 @@ public class DragConnectMode extends ConnectMode
         @Override
         public void done(Cell cell, boolean alwaysCancel)
         {
-            if (!cell.isLocked())
+            boolean canUnlock = cell.isLocked() && ((Unlockable) cell).canUnlock();
+            boolean isChest = !canUnlock && cell.item instanceof Chest;
+            
+            if (!canUnlock && !isChest)
             {
                 if (alwaysCancel)
                     cancel();
@@ -1143,7 +1126,10 @@ public class DragConnectMode extends ConnectMode
             
             Sound.DROP.play();
             
-            ((Door) cell).unlock();
+            if (canUnlock)
+                ((Unlockable) cell).unlock();
+            else
+                cell.openChest();
             
             removeStartItem();
             process();
@@ -1211,6 +1197,7 @@ public class DragConnectMode extends ConnectMode
             
             int n = ((Drop) m_item).getRadius();
             createDragBox(cell, n);
+            update(cell);
         }        
 
         public DropMode(Item item, Context ctx, ConnectMode connectMode, Runnable removeItem)
@@ -1282,6 +1269,7 @@ public class DragConnectMode extends ConnectMode
             
             int n = ((IcePick) m_item).getRadius();
             createDragBox(cell, n);
+            update(cell);
         }        
 
         public IcePickMode(Item item, Context ctx, ConnectMode connectMode, Runnable removeItem)
@@ -1317,7 +1305,26 @@ public class DragConnectMode extends ConnectMode
                     
                     Cell c = m_state.cell(col, row);
                     if (c.reduceIce(strength))
+                    {
                         melted = true;
+                    }
+                    else if (!c.isLocked())
+                    {
+                        if (c.item instanceof Mirror)
+                        {
+                            c.explode(null, 0);
+                            melted = true;
+                        }
+                        else if (c.item instanceof Egg)
+                        {
+                            Egg egg = (Egg) c.item;
+                            if (!egg.isCracked())
+                            {
+                                egg.crack();
+                                melted = true;
+                            }
+                        }
+                    }
                 }
             }
             

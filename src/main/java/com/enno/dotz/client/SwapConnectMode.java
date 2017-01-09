@@ -13,7 +13,6 @@ import com.ait.lienzo.client.core.event.NodeMouseOutHandler;
 import com.ait.lienzo.client.core.event.NodeMouseUpEvent;
 import com.ait.lienzo.client.core.event.NodeMouseUpHandler;
 import com.ait.lienzo.client.core.shape.Layer;
-import com.enno.dotz.client.GridState.GetSwapMatches;
 import com.enno.dotz.client.SoundManager.Sound;
 import com.enno.dotz.client.anim.Pt;
 import com.enno.dotz.client.item.Animal;
@@ -125,7 +124,7 @@ public class SwapConnectMode extends ConnectMode
                     return;
                 }
                 
-                if (flipMirror(cell) || fireRocket(cell) || reshuffle(cell))
+                if (isTriggeredBySingleClick(cell))
                     return;
                 
                 if (startSpecialMode(cell, event.getX(), event.getY()))

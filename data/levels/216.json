@@ -1,0 +1,171 @@
+{
+  "name": "Test Big and Busy",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Test",
+  "numColumns": 20,
+  "numRows": 10,
+  "grid": [
+    "...............+....",
+    "E..................E",
+    "E..................E",
+    "E..................E",
+    "E..................E",
+    "E...R..............E",
+    "E..................E",
+    "....................",
+    "....................",
+    ".............-......"
+  ],
+  "ice": [
+    ".......33333........",
+    "....................",
+    "....................",
+    "....................",
+    "....................",
+    "....................",
+    "....................",
+    "....................",
+    "....................",
+    "...................."
+  ],
+  "items": [
+    "?????????????????.??",
+    "????????????????????",
+    "????????????????????",
+    "?????????????????F??",
+    "????????????????????",
+    "????.????????????.??",
+    "??????.?????????????",
+    "??????????????????.?",
+    "????????????????????",
+    "??????.?????????.???"
+  ],
+  "teleporters": [
+    {"from":[15,0],"to":[13,9]}
+  ],
+  "doors": [
+    {"p":[7,3],"seq":"0,1"},
+    {"p":[11,4],"seq":"0,1"}
+  ],
+  "cages": [
+        {
+      "p": [
+        4,
+        3
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        12,
+        6
+      ],
+      "seq": "0,1"
+    },
+        {
+      "p": [
+        13,
+        6
+      ],
+      "seq": "0,1"
+    }
+  ],
+  "conveyors": [
+    {"p":[2,1],"turn":-1,"direction":"W"},
+    {"p":[3,1],"turn":0,"direction":"W"},
+    {"p":[4,1],"turn":0,"direction":"W"},
+    {"p":[5,1],"turn":0,"direction":"W"},
+    {"p":[6,1],"turn":0,"direction":"W"},
+    {"p":[7,1],"turn":0,"direction":"W"},
+    {"p":[8,1],"turn":0,"direction":"W"},
+    {"p":[9,1],"turn":0,"direction":"W"},
+    {"p":[10,1],"turn":0,"direction":"W"},
+    {"p":[11,1],"turn":0,"direction":"W"},
+    {"p":[12,1],"turn":0,"direction":"W"},
+    {"p":[13,1],"turn":0,"direction":"W"},
+    {"p":[14,1],"turn":0,"direction":"W"},
+    {"p":[15,1],"turn":-1,"direction":"N"},
+    {"p":[2,2],"turn":0,"direction":"S"},
+    {"p":[15,2],"turn":0,"direction":"N"},
+    {"p":[2,3],"turn":0,"direction":"S"},
+    {"p":[15,3],"turn":0,"direction":"N"},
+    {"p":[2,4],"turn":0,"direction":"S"},
+    {"p":[15,4],"turn":0,"direction":"N"},
+    {"p":[2,5],"turn":0,"direction":"S"},
+    {"p":[15,5],"turn":0,"direction":"N"},
+    {"p":[2,6],"turn":0,"direction":"S"},
+    {"p":[15,6],"turn":0,"direction":"N"},
+    {"p":[2,7],"turn":0,"direction":"S"},
+    {"p":[15,7],"turn":0,"direction":"N"},
+    {"p":[2,8],"turn":-1,"direction":"S"},
+    {"p":[3,8],"turn":0,"direction":"E"},
+    {"p":[4,8],"turn":0,"direction":"E"},
+    {"p":[5,8],"turn":0,"direction":"E"},
+    {"p":[6,8],"turn":0,"direction":"E"},
+    {"p":[7,8],"turn":0,"direction":"E"},
+    {"p":[8,8],"turn":0,"direction":"E"},
+    {"p":[9,8],"turn":0,"direction":"E"},
+    {"p":[10,8],"turn":0,"direction":"E"},
+    {"p":[11,8],"turn":0,"direction":"E"},
+    {"p":[12,8],"turn":0,"direction":"E"},
+    {"p":[13,8],"turn":0,"direction":"E"},
+    {"p":[14,8],"turn":0,"direction":"E"},
+    {"p":[15,8],"turn":-1,"direction":"E"}
+  ],
+  "lazySusans": [
+    {"p":[18,8],"clockwise":true},
+    {"p":[0,8],"clockwise":false}
+  ],
+  "dotBombs": [
+    {"p":[17,0],"color":0,"strength":35}
+  ],
+  "animals": [
+    {"p":[18,7],"strength":20,"color":3,"type":"Default"}
+  ],
+  "lasers": [
+    {"p":[6,9],"direction":"E"}
+  ],
+  "mirrors": [
+    {"p":[16,9],"flip":true}
+  ],
+  "rockets": [
+    {"p":[6,6],"direction":"E"}
+  ],
+  "turners": [
+    {"p":[17,5],"n":3}
+  ],
+  "generator": {
+    "generateLetters": false,
+    "swapMode": false,
+    "rollMode": false,
+    "diagonalMode": false,
+    "dominoMode": false,
+    "slipperyAnchors": false,
+    "minChainLength": 2,
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "maxDomino": 6,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "bombStrength": 9,
+    "blockerStrength": 2,
+    "animalType": "Default",
+    "freq": [
+      [20,"dot",0],
+      [20,"dot",1],
+      [20,"dot",2],
+      [20,"dot",3],
+      [20,"dot",4]
+    ]
+  },
+  "goals": {
+    "dots": {    }
+  },
+  "boosts": {  },
+  "id": 216,
+  "lastModified": "1481217101725"
+}

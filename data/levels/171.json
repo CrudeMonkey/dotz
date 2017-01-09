@@ -36,18 +36,6 @@
     "12.12.12",
     "24124124"
   ],
-  "teleporters": [  ],
-  "doors": [  ],
-  "conveyors": [  ],
-  "lazySusans": [  ],
-  "dots": [  ],
-  "bombs": [  ],
-  "animals": [  ],
-  "knights": [  ],
-  "clocks": [  ],
-  "lasers": [  ],
-  "mirrors": [  ],
-  "rockets": [  ],
   "generator": {
     "generateLetters": false,
     "swapMode": true,

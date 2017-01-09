@@ -3,7 +3,7 @@
   "name": "Word Up",
   "creator": "Enno",
   "description": "In levels with letters you must make words.<br>You can connect them diagonally and <br>they can be of different colors.",
-  "folder": "Intro",
+  "folder": "Intro\/Letters",
   "numColumns": 8,
   "numRows": 8,
   "grid": [
@@ -72,5 +72,5 @@
     },
     "maxMoves": 20
   },
-  "lastModified": "1445908770636"
+  "lastModified": "1481229389330"
 }

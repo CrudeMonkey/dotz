@@ -39,17 +39,6 @@
   "teleporters": [
     {"from":[7,4],"to":[5,3]}
   ],
-  "doors": [  ],
-  "conveyors": [  ],
-  "lazySusans": [  ],
-  "dots": [  ],
-  "bombs": [  ],
-  "animals": [  ],
-  "knights": [  ],
-  "clocks": [  ],
-  "lasers": [  ],
-  "mirrors": [  ],
-  "rockets": [  ],
   "generator": {
     "generateLetters": false,
     "swapMode": false,

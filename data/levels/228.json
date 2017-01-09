@@ -1,0 +1,76 @@
+{
+  "id": 228,
+  "name": "Test Toy Blast",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Test",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "????????",
+    "????????",
+    "????????",
+    "????????",
+    "????????",
+    "????????",
+    "????????",
+    "????????"
+  ],
+  "generator": {
+    "generateLetters": false,
+    "swapMode": false,
+    "clickMode": true,
+    "rollMode": false,
+    "diagonalMode": false,
+    "dominoMode": false,
+    "slipperyAnchors": false,
+    "minChainLength": 2,
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "maxDomino": 6,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "bombStrength": 9,
+    "blockerStrength": 2,
+    "animalType": "Default",
+    "animalAction": "Default",
+    "rewardStrategies": "c9,x7,S5",
+    "icePickRadius": 3,
+    "dropRadius": 3,
+    "freq": [
+      [20,"dot",0],
+      [20,"dot",1],
+      [20,"dot",2],
+      [20,"dot",3],
+      [20,"dot",4]
+    ]
+  },
+  "goals": {
+    "dots": {    }
+  },
+  "boosts": {  },
+  "lastModified": "1481498474611"
+}

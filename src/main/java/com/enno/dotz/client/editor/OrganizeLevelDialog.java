@@ -339,8 +339,6 @@ public class OrganizeLevelDialog extends MXWindow
             @Override
             public void onSuccess(NObject result)
             {
-                // TODO Auto-generated method stub
-                
             }
         });
     }

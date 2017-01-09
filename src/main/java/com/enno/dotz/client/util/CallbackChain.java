@@ -93,4 +93,30 @@ public class CallbackChain implements Runnable
         if (m_doneCallback != null)
             m_doneCallback.run();
     }
+    
+    public void setDoneCallback(Runnable cb)
+    {
+        m_doneCallback = cb;
+    }
+    
+    public Callback asCallback()
+    {
+        if (m_doneCallback != null)
+            throw new RuntimeException("can't use CallbackChain as a callback this way");
+        
+        return new Callback() {
+            @Override
+            public void run()
+            {
+                m_doneCallback = new Runnable() {
+                    @Override
+                    public void run()
+                    {
+                        doNext();
+                    }
+                };
+                CallbackChain.this.run();
+            }
+        };
+    }
 }

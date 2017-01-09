@@ -23,6 +23,7 @@ import com.enno.dotz.client.Cell.Slide;
 import com.enno.dotz.client.Cell.Teleport;
 import com.enno.dotz.client.Config;
 import com.enno.dotz.client.Context;
+import com.enno.dotz.client.Controller.Controllable;
 import com.enno.dotz.client.Conveyors;
 import com.enno.dotz.client.Conveyors.ConveyorException;
 import com.enno.dotz.client.Direction;
@@ -32,15 +33,22 @@ import com.enno.dotz.client.anim.Pt;
 import com.enno.dotz.client.editor.LoopDetector.LoopException;
 import com.enno.dotz.client.editor.ModePalette.Bombify;
 import com.enno.dotz.client.editor.ModePalette.ChangeIce;
+import com.enno.dotz.client.editor.ModePalette.Chestify;
 import com.enno.dotz.client.editor.ModePalette.DeleteItem;
 import com.enno.dotz.client.editor.ModePalette.DeleteSusan;
 import com.enno.dotz.client.editor.ModePalette.RotateItem;
+import com.enno.dotz.client.editor.ModePalette.SetController;
+import com.enno.dotz.client.editor.ModePalette.Stick;
 import com.enno.dotz.client.editor.TeleportConnections.Link;
 import com.enno.dotz.client.item.Animal;
+import com.enno.dotz.client.item.Blocker;
+import com.enno.dotz.client.item.Chest;
 import com.enno.dotz.client.item.Clock;
 import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.DotBomb;
+import com.enno.dotz.client.item.Drop;
+import com.enno.dotz.client.item.IcePick;
 import com.enno.dotz.client.item.Item;
 import com.enno.dotz.client.item.Knight;
 import com.enno.dotz.client.item.LazySusan;
@@ -188,6 +196,8 @@ public abstract class EditLayoutTab extends VLayout
         top.addMember(tabs);
         
         addMember(top);        
+        
+        m_cellPalette.selectFirstOption();
     }
     
     protected abstract boolean isLetterMode();
@@ -300,7 +310,7 @@ public abstract class EditLayoutTab extends VLayout
         m_levelPropPanel.setLevelID(id);
     }
     
-    public void keyPressed(int x, int y, char c)
+    public void keyPressed(int x, int y, char c, KeyPressEvent event)
     {
         GridState state = ctx.state;
         int col = state.col(x);
@@ -338,11 +348,41 @@ public abstract class EditLayoutTab extends VLayout
                         default: return;
                     }
                 }
-                Domino newDomino = new Domino(num[0], num[1], domino.vertical);
+                Domino newDomino = new Domino(num[0], num[1], domino.vertical, domino.isStuck());
                 removeItem(cell);
                 addItem(cell, newDomino);
             }
             return;
+        }
+        
+        if (c == ',' || c == '<' || c == '.' || c == '>')
+        {
+            int ds = c == ',' || c == '<' ? -1 : 1;
+            if (cell.canIncrementStrength())
+            {
+                cell.incrementStrength(ds);
+                return;
+            }
+        }
+        
+        // +/- increase strength of Animal/Blocker/Clock/Knight etc.
+        if (c == '+' || c == '-' || c == '=')   // = is same as + (it's on the same keyboard key!)
+        {
+            // Try Item first...
+            if (cell.item != null && cell.item.canIncrementStrength())
+            {
+                int ds = c == '-' ? -1 : 1;
+                cell.item.incrementStrength(ds);
+                ctx.dotLayer.draw();
+                return;
+            }
+            
+            // ... then Cell
+            if (cell.canIncrementStrength())
+            {
+                cell.incrementStrength(c == '-' ? -1 : 1);
+                return;
+            }
         }
         
         if (!isLetterMode())
@@ -360,7 +400,7 @@ public abstract class EditLayoutTab extends VLayout
             Dot dot = (Dot) cell.item;
             removeItem(cell);
             
-            Dot newDot = new Dot(dot.color, letter);
+            Dot newDot = dot.copy(letter);
             addItem(cell, newDot);
         }
         else if (cell.item instanceof DotBomb)
@@ -369,7 +409,7 @@ public abstract class EditLayoutTab extends VLayout
             Dot dot = bomb.getDot();
             removeItem(cell);
             
-            Dot newDot = new Dot(dot.color, letter);
+            Dot newDot = dot.copy(letter);
             bomb.setDot(newDot);
             addItem(cell, bomb);
         }
@@ -392,6 +432,12 @@ public abstract class EditLayoutTab extends VLayout
             Animal animal = (Animal) item;
             animal.setStrength(m_editorProps.getAnimalStrength());
             animal.setType(m_editorProps.getAnimalType());
+            animal.setAction(m_editorProps.getAnimalAction());
+        }
+        else if (item instanceof Blocker)
+        {
+            Blocker sg = (Blocker) item;
+            sg.setStrength(m_editorProps.getDoorStrength()); //TODO use different variable?
         }
         else if (item instanceof Knight)
         {
@@ -403,11 +449,21 @@ public abstract class EditLayoutTab extends VLayout
             Clock clock = (Clock) item;
             clock.setStrength(m_editorProps.getClockStrength());
         }
+        else if (item instanceof IcePick)
+        {
+            IcePick pick = (IcePick) item;
+            pick.setRadius(m_editorProps.getRadius());
+        }
+        else if (item instanceof Drop)
+        {
+            Drop drop = (Drop) item;
+            drop.setRadius(m_editorProps.getRadius());
+        }
         else if (isLetterMode() && item instanceof Dot)
         {
             Dot dot = (Dot) item;
-            if (dot.letter == null)
-                dot.letter = Generator.nextLetter(m_rnd);
+            if (!dot.isLetter())
+                dot.setLetter(Generator.nextLetter(m_rnd));
         }
         
         GridState state = ctx.state;
@@ -416,7 +472,8 @@ public abstract class EditLayoutTab extends VLayout
         item.addShapeToLayer(ctx.dotLayer);
         cell.item = item;
         ctx.dotLayer.draw();
-    }     
+    }
+    
     public interface LayoutMode
     {
         void start();
@@ -509,7 +566,7 @@ public abstract class EditLayoutTab extends VLayout
                 public void onKeyPress(KeyPressEvent event)
                 {
                     char c = event.getCharCode();
-                    keyPressed(m_x, m_y, c);
+                    keyPressed(m_x, m_y, c, event);
                 }
             });
         }
@@ -769,7 +826,7 @@ public abstract class EditLayoutTab extends VLayout
                 public void onKeyPress(KeyPressEvent event)
                 {
                     char c = event.getCharCode();
-                    keyPressed(m_x, m_y, c);
+                    keyPressed(m_x, m_y, c, event);
                 }
             });
         }
@@ -824,8 +881,31 @@ public abstract class EditLayoutTab extends VLayout
             {
                 if (cell.canContainItems())
                 {
-                    removeItem(cell);                    
-                    addItem(cell, ((Item) m_operation).copy());
+                    boolean sameItem = cell.item != null && cell.item.getClass() == m_operation.getClass();
+                    if (sameItem && cell.item instanceof Animal)
+                    {
+                        sameItem = false;
+                    }
+                    
+                    if (sameItem && cell.item.canRotate())
+                    {
+                        // E.g. clicking on a Mirror with another Mirror will rotate it.
+                        rotateItem(cell, shift);
+                    }
+                    else if (sameItem && cell.item instanceof Turner)
+                    {
+                        rotateTurner(cell);
+                    }
+                    else if (sameItem && cell.item.canIncrementStrength())
+                    {
+                        cell.item.incrementStrength(1);
+                        ctx.dotLayer.draw();
+                    }
+                    else
+                    {
+                        removeItem(cell);                    
+                        addItem(cell, ((Item) m_operation).copy());
+                    }
                 }
             }
             else if (m_operation instanceof ConveyorCell)
@@ -835,8 +915,39 @@ public abstract class EditLayoutTab extends VLayout
             }
             else if (m_operation instanceof Cell)
             {
+                boolean sameCell = cell.getClass() == m_operation.getClass();
+                if (sameCell && cell instanceof Slide)
+                {
+                    boolean left = ((Slide) cell).isToLeft();
+                    if (left == ((Slide) m_operation).isToLeft())
+                    {
+                        Slide newSlide = new Slide(!left); // toggle direction
+                        if (canHaveCell(col, row, newSlide))
+                        {
+                            changeCell(col, row, cell, newSlide);
+                        }
+                        return;
+                    }
+                }
+                
                 if (canHaveCell(col, row, (Cell) m_operation))
-                    changeCell(col, row, cell, ((Cell) m_operation).copy());
+                {
+                    if (sameCell && cell instanceof Door && !((Door) cell).isBlinking())
+                    {
+                        if (((Door) cell).hasDirection())
+                            ((Door) cell).rotate();
+                        else
+                            cell.incrementStrength(1);
+                    }
+                    else if (sameCell && cell instanceof Cage && !((Cage) cell).isBlinking())
+                    {
+                        cell.incrementStrength(1);
+                    }
+                    else
+                    {
+                        changeCell(col, row, cell, ((Cell) m_operation).copy());
+                    }
+                }
             }
             else if (m_operation instanceof LazySusan)
             {
@@ -847,6 +958,14 @@ public abstract class EditLayoutTab extends VLayout
             {
                 deleteSusan(col, row);
             }
+            else if (m_operation instanceof SetController)
+            {
+                setController(col, row);
+            }
+            else if (m_operation instanceof Stick)
+            {
+                stick(col, row);
+            }
             else if (m_operation instanceof ChangeIce)
             {
                 changeIce(col, row);
@@ -854,6 +973,10 @@ public abstract class EditLayoutTab extends VLayout
             else if (m_operation instanceof Bombify)
             {
                 bombify(col, row);
+            }
+            else if (m_operation instanceof Chestify)
+            {
+                chestify(col, row);
             }
         }
         
@@ -882,9 +1005,9 @@ public abstract class EditLayoutTab extends VLayout
                 // Check above
                 if (row > 0)
                 {
-                    // Can't be below other Slide or Teleport source
-                    Cell c = state.cell(col,  row - 1);
-                    if (c instanceof Slide || c.isTeleportSource())
+                    // Can't be below other Slide, Rock or Teleport source
+                    Cell c = state.cell(col, row - 1);
+                    if (c instanceof Slide || c.isTeleportSource() || c instanceof Rock)
                         return false;
                 }
                 
@@ -900,13 +1023,13 @@ public abstract class EditLayoutTab extends VLayout
                 if (left)
                 {
                     Cell neighbor = state.cell(col - 1, row);
-                    if (neighbor instanceof Slide)
+                    if (neighbor instanceof Slide || neighbor instanceof Rock)
                         return false;
                 }
                 else
                 {
                     Cell neighbor = state.cell(col + 1, row);
-                    if (neighbor instanceof Slide)
+                    if (neighbor instanceof Slide || neighbor instanceof Rock)
                         return false;
                 }
             }
@@ -959,6 +1082,17 @@ public abstract class EditLayoutTab extends VLayout
             }
         }
 
+        private void setController(int col, int row)
+        {
+            GridState state = ctx.state;
+            Cell cell = state.cell(col, row);
+            
+            if (cell == null || !cell.hasController())
+                SetControllerDialog.closeDialog();
+            else
+                SetControllerDialog.setControllable((Controllable) cell);
+        }
+
         private void changeIce(int col, int row)
         {
             GridState state = ctx.state;  
@@ -972,51 +1106,88 @@ public abstract class EditLayoutTab extends VLayout
             ctx.iceLayer.draw();
         }
 
+        private void stick(int col, int row)
+        {
+            GridState state = ctx.state;  
+            Cell cell = state.cell(col, row);
+            if (cell.item == null || !cell.item.canBeStuck())
+                return;
+            
+            Item newItem = cell.item.copy();
+            newItem.setStuck(!cell.item.isStuck());
+            removeItem(cell);
+            addItem(cell, newItem);
+        }
+        
         private void bombify(int col, int row)
         {
             GridState state = ctx.state;  
-            Cell cell = state.cell(col,  row);
+            Cell cell = state.cell(col, row);
             if (!(cell.item instanceof Dot || cell.item instanceof DotBomb))
                 return;
             try
             {
+                Debug.p("bombify");
                 
-            
-            Debug.p("bombify");
-            
-            int strength = m_editorProps.getBombStrength();
-            if (strength == 0)
-            {
-                if (cell.item instanceof Dot)
-                    return;
-                
-                DotBomb bomb = (DotBomb) cell.item;
-                Item dot = bomb.getDot().copy();
-                removeItem(cell);
-                addItem(cell, dot);                
-            }
-            else
-            {
-                if (cell.item instanceof DotBomb)
+                int strength = m_editorProps.getBombStrength();
+                if (strength == 0)
                 {
+                    if (cell.item instanceof Dot)
+                        return;
+                    
                     DotBomb bomb = (DotBomb) cell.item;
-                    bomb.setStrength(strength);
-                    bomb.updateStrength();
+                    Item dot = bomb.getDot().copy();
+                    removeItem(cell);
+                    addItem(cell, dot);                
                 }
                 else
                 {
-                    DotBomb bomb = new DotBomb((Dot) cell.item.copy(), strength);
-                    removeItem(cell);
-                    addItem(cell, bomb); 
+                    if (cell.item instanceof DotBomb)
+                    {
+                        DotBomb bomb = (DotBomb) cell.item;
+                        bomb.setStrength(strength);
+                        bomb.updateStrength();
+                    }
+                    else
+                    {
+                        DotBomb bomb = new DotBomb((Dot) cell.item.copy(), strength, cell.item.isStuck());
+                        removeItem(cell);
+                        addItem(cell, bomb); 
+                    }
                 }
-            }
-            
-            ctx.dotLayer.draw();
-            Debug.p("bombify done");
+                
+                ctx.dotLayer.draw();
+                Debug.p("bombify done");
             }
             catch (Exception e)
             {
                 Debug.p("bombify failed", e);
+            }
+        }
+        
+        private void chestify(int col, int row)
+        {
+            GridState state = ctx.state;  
+            Cell cell = state.cell(col,  row);
+            if (cell.item instanceof Chest)
+                return;
+            
+            try
+            {
+                Debug.p("chestify");
+                
+                int strength = m_editorProps.getDoorStrength();
+
+                Chest chest = new Chest(cell.item == null ? null : cell.item.copy(), strength);
+                removeItem(cell);
+                addItem(cell, chest); 
+                
+                ctx.dotLayer.draw();
+                Debug.p("chestify done");
+            }
+            catch (Exception e)
+            {
+                Debug.p("chestify failed", e);
             }
         }
         
@@ -1082,13 +1253,19 @@ public abstract class EditLayoutTab extends VLayout
             if (newCell instanceof Door)
             {
                 Door door = (Door) newCell;
-                door.setStrength(m_editorProps.getDoorStrength());
-                door.setRotationDirection(m_editorProps.getDoorRotation());
+                if (!door.isBlinking())
+                {
+                    door.setStrength(m_editorProps.getDoorStrength());
+                    door.setRotationDirection(m_editorProps.getDoorRotation());
+                }
             }
             else if (newCell instanceof Cage)
             {
                 Cage cage = (Cage) newCell;
-                cage.setStrength(m_editorProps.getDoorStrength());
+                if (!cage.isBlinking())
+                {
+                    cage.setStrength(m_editorProps.getDoorStrength());
+                }
             }
             
             newCell.init(ctx);
@@ -1107,10 +1284,7 @@ public abstract class EditLayoutTab extends VLayout
             {
                 if (cell.item instanceof Turner)
                 {
-                    int n = ((Turner) cell.item).n;
-                    Turner newItem = new Turner((n % 3) + 1);
-                    removeItem(cell);
-                    addItem(cell, newItem);
+                    rotateTurner(cell);
                     return;
                 }
                 
@@ -1120,7 +1294,18 @@ public abstract class EditLayoutTab extends VLayout
                     ctx.dotLayer.draw();
                     return;
                 }
+                
+//                if (cell.item instanceof Striped)
+//                {
+//                    Striped old = (Striped) cell.item;
+//                    Striped newItem = new Striped(old.color, !old.vertical);
+//                    removeItem(cell);
+//                    addItem(cell, newItem);
+//                    return;
+//                }
             }
+            
+            
             
             if (cell instanceof Door)
             {
@@ -1130,6 +1315,14 @@ public abstract class EditLayoutTab extends VLayout
             {
                 ((ConveyorCell) cell).rotate();
             }
+        }
+
+        protected void rotateTurner(Cell cell)
+        {
+            int n = ((Turner) cell.item).n;
+            Turner newItem = new Turner((n % 3) + 1, cell.item.isStuck());
+            removeItem(cell);
+            addItem(cell, newItem);
         }        
     }
 
@@ -1151,7 +1344,7 @@ public abstract class EditLayoutTab extends VLayout
                     Dot dot = (Dot) cell.item;
                     removeItem(cell);
                     
-                    Dot newDot = new Dot(dot.color, isLetterMode ? Generator.nextLetter(m_rnd) : null);
+                    Dot newDot = new Dot(dot.color, isLetterMode ? Generator.nextLetter(m_rnd) : null, false);
                     addItem(cell, newDot);
                 }
                 else if (cell.item instanceof DotBomb)
@@ -1160,8 +1353,8 @@ public abstract class EditLayoutTab extends VLayout
                     removeItem(cell);
                     
                     Dot dot = bomb.getDot();
-                    Dot newDot = new Dot(dot.color, isLetterMode ? Generator.nextLetter(m_rnd) : null);
-                    addItem(cell, new DotBomb(newDot, bomb.getStrength()));
+                    Dot newDot = new Dot(dot.color, isLetterMode ? Generator.nextLetter(m_rnd) : null, cell.item.isStuck());
+                    addItem(cell, new DotBomb(newDot, bomb.getStrength(), dot.isStuck()));
                 }
             }
         }

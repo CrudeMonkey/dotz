@@ -8,14 +8,18 @@ import com.enno.dotz.client.Config;
 
 public class Wild extends Item
 {
-    public Wild()
-    {        
+    public Wild(boolean stuck)
+    {
+        m_stuck = stuck;
     }
     
     @Override
     public IPrimitive<?> createShape(double size)
     {
         Group g = new Group();
+        
+        if (isStuck())
+            g.add(createStuckShape(size));
         
         Circle bg = new Circle(size / 4);
         bg.setFillColor(ColorName.WHITE);
@@ -56,7 +60,7 @@ public class Wild extends Item
     @Override
     protected Item doCopy()
     {
-        return new Wild();
+        return new Wild(m_stuck);
     }
 
     @Override

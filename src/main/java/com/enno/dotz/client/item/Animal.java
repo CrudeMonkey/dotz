@@ -12,6 +12,7 @@ import com.ait.lienzo.client.core.shape.Ellipse;
 import com.ait.lienzo.client.core.shape.Group;
 import com.ait.lienzo.client.core.shape.IPrimitive;
 import com.ait.lienzo.client.core.shape.Layer;
+import com.ait.lienzo.client.core.shape.MultiPath;
 import com.ait.lienzo.client.core.shape.Text;
 import com.ait.lienzo.shared.core.types.ColorName;
 import com.ait.lienzo.shared.core.types.IColor;
@@ -33,7 +34,8 @@ public class Animal extends Item
     {
         DEFAULT("Default", ColorName.WHITE, ColorName.BLACK),
         FOLLOW("Follow", ColorName.FIREBRICK, ColorName.WHITE),
-        SCARED("Scared", ColorName.LIGHTBLUE, ColorName.BLACK);
+        SCARED("Scared", ColorName.LIGHTBLUE, ColorName.BLACK),
+        FROZEN("Frozen", ColorName.WHITE, ColorName.BLACK);
         
         private String m_name;
         private IColor m_eyeColor;
@@ -82,10 +84,51 @@ public class Animal extends Item
         }
     };
     
+    /** What happens when Animal moves into new cell */
+    public enum Action
+    {
+        DEFAULT("Default"), // replace item with dot of Animal's color
+        BOMBIFY("Bombify"), // replace Dot wit DotBomb
+        SWAP("Swap");       // swap item with Animal
+        
+        private String m_name;
+
+        Action(String name)
+        {
+            m_name = name;
+        }
+        
+        public String getName()
+        {
+            return m_name;
+        }
+
+        public static Action fromName(String name)
+        {
+            for (Action type : values())
+            {
+                if (name.equals(type.getName()))
+                    return type;
+            }
+            return DEFAULT;
+        }
+
+        public static LinkedHashMap<String,String> getValueMap()
+        {
+            LinkedHashMap<String,String> map = new LinkedHashMap<String,String>();
+            for (Action type : values())
+            {
+                map.put(type.getName(), type.getName());
+            }
+            return map;
+        }
+    };
+    
     private int m_strength;
     private int m_color;
 
     private Type m_type = Type.FOLLOW;
+    private Action m_action = Action.DEFAULT;
     
     private Text m_text;
     private Ellipse[] m_eyes = new Ellipse[2];
@@ -100,11 +143,18 @@ public class Animal extends Item
     private long m_startBlink;
     private double m_eyeHeight;
     
-    public Animal(int color, int strength, Type type)
+    public Animal(int color, int strength, Type type, boolean stuck)
+    {
+        this(color, strength, type, Action.DEFAULT, stuck);
+    }
+    
+    public Animal(int color, int strength, Type type, Action action, boolean stuck)
     {
         m_strength = strength;
         m_color = color;
         m_type = type;
+        m_action = action;
+        m_stuck = stuck;
     }
 
     @Override
@@ -129,6 +179,24 @@ public class Animal extends Item
         m_strength = strength;
     }
     
+    @Override
+    public boolean canIncrementStrength()
+    {
+        return true;
+    }
+    
+    @Override
+    public void incrementStrength(int ds)
+    {
+        if (m_strength <= 1 && ds == -1)
+            return;
+        
+        m_strength += ds;
+        
+        if (m_text != null)
+            m_text.setText("" + m_strength);
+    }
+    
     public Type getType()
     {
         return m_type;
@@ -139,13 +207,29 @@ public class Animal extends Item
         m_type = type;
     }
     
+    public Action getAction()
+    {
+        return m_action;
+    }
+    
+    public void setAction(Action action)
+    {
+        m_action = action;
+    }
+    
     public boolean isStunned()
     {
+        if (m_type == Type.FROZEN)
+            return true;
+        
         return m_stunned;
     }
 
     public void setStunned(boolean stunned)
     {
+        if (m_type == Type.FROZEN)
+            return;
+        
         m_stunned = stunned;
     }
 
@@ -154,11 +238,64 @@ public class Animal extends Item
     {
         Group g = new Group();
         
+        if (isStuck())
+            g.add(createStuckShape(size));
+        
         double r = size * 0.4;
         Circle c = new Circle(r);
         c.setFillColor(cfg.drawColor(m_color));        
         g.add(c);
         
+        if (m_action == Action.SWAP)
+        {
+            // add Mickey ears
+            double r2 = r * 0.3;
+            double x = (r + r2/2) * Math.cos(Math.PI / 4);
+            double y = (r + r2/2) * Math.sin(Math.PI / 4);
+            
+            Circle c2 = new Circle(r2);
+            c2.setFillColor(cfg.drawColor(m_color));
+            c2.setX(x);
+            c2.setY(-y);
+            g.add(c2);
+            
+            c2 = new Circle(r2);
+            c2.setFillColor(cfg.drawColor(m_color));
+            c2.setX(-x);
+            c2.setY(-y);
+            g.add(c2);
+        }
+        else if (m_action == Action.BOMBIFY)
+        {
+            // add devil horns
+            double r2 = r * 0.8;
+            double x = 0;
+            double y = r2/2 - r;
+            double angle = Math.PI * 0.15;
+            
+            MultiPath horn = new MultiPath();
+            horn.M(x, y);
+            horn.A(r2*0.6, r2/2, 0, 0, 0, x, y - r2);
+            horn.A(r2*0.8, r2*0.8, 0, 0, 1, x, y);
+            horn.Z();
+            
+            horn.setFillColor(cfg.drawColor(m_color));
+            horn.setRotation(angle);
+            
+            g.add(horn);
+            
+            horn = new MultiPath();
+            horn.M(x, y);
+            horn.A(r2*0.6, r2/2, 0, 0, 1, x, y - r2);
+            horn.A(r2*0.8, r2*0.8, 0, 0, 0, x, y);
+            horn.Z();
+            
+            horn.setFillColor(cfg.drawColor(m_color));
+            horn.setRotation(-angle);
+            
+            g.add(horn);
+        }
+
         m_text = new Text("" + m_strength);
         m_text.setFillColor(ColorName.WHITE);
         m_text.setFontSize(7);
@@ -170,10 +307,17 @@ public class Animal extends Item
         
         m_pupilRadius = r * 0.25;
         m_eyeHeight = r * 0.7;
+        double eyeWidth = m_eyeHeight;
+        
+        if (m_type == Type.FROZEN)      // looks sleepy
+        {
+            m_eyeHeight *= 0.5;
+            m_pupilRadius *= 0.5;
+        }
         
         for (int i = 0; i < 2; i++)
         {
-            Ellipse eye = new Ellipse(m_eyeHeight, m_eyeHeight);
+            Ellipse eye = new Ellipse(eyeWidth, m_eyeHeight);
             eye.setFillColor(m_type.getEyeColor());
             
             double x = r * 0.5 * (i == 0 ? -1 : 1);
@@ -196,7 +340,6 @@ public class Animal extends Item
             g.add(pupil);
             m_pupils[i] = pupil;
         }
-        
         return g;
     }
     
@@ -215,7 +358,7 @@ public class Animal extends Item
     @Override
     protected Item doCopy()
     {
-        Animal a = new Animal(m_color, m_strength, m_type);
+        Animal a = new Animal(m_color, m_strength, m_type, m_action, m_stuck);
         a.lastDirection = lastDirection;
         a.m_stunned = m_stunned;
         return a;

@@ -10,8 +10,9 @@ import com.ait.lienzo.shared.core.types.LineCap;
 
 public class Key extends Item
 {
-    public Key()
-    {        
+    public Key(boolean stuck)
+    {
+        m_stuck = stuck;
     }
     
     @Override
@@ -58,6 +59,14 @@ public class Key extends Item
         
         g.setRotation(Math.PI / 4);
         
+        if (isStuck())
+        {
+            Group shape = new Group();
+            shape.add(createStuckShape(size));
+            shape.add(g);
+            return shape;
+        }
+
         return g;
     }
     
@@ -76,7 +85,7 @@ public class Key extends Item
     @Override
     protected Item doCopy()
     {
-        return new Key();
+        return new Key(m_stuck);
     }
 
     @Override

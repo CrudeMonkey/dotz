@@ -42,6 +42,11 @@
   <source path='client'/>
   <source path='shared'/>
 
+  
+  <!-- un-emulated JRE classes under com.enno.dotz.jre -->
+  <!-- 
+  <super-source path="jre"/>
+ -->
   <!-- allow Super Dev Mode -->
   <add-linker name="xsiframe"/>
 </module>

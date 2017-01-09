@@ -23,9 +23,10 @@ public class Laser extends Item
     
     private PolyLine m_beam;
     
-    public Laser(int direction)
+    public Laser(int direction, boolean stuck)
     {
         m_direction = direction;
+        m_stuck = stuck;
     }
 
     public int getDirection()
@@ -67,6 +68,14 @@ public class Laser extends Item
         group.add(p);
         
         updateRotation(group);
+        
+        if (isStuck())
+        {
+            Group shape = new Group();
+            shape.add(createStuckShape(size));
+            shape.add(group);
+            return shape;
+        }
         
         return group;
     }
@@ -255,7 +264,7 @@ public class Laser extends Item
     
     protected Item doCopy()
     {
-        return new Laser(m_direction);
+        return new Laser(m_direction, m_stuck);
     }
 
 //    @Override

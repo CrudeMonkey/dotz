@@ -10,6 +10,10 @@ import com.enno.dotz.client.Generator;
 import com.enno.dotz.client.Generator.ItemFrequency;
 import com.enno.dotz.client.item.Anchor;
 import com.enno.dotz.client.item.Animal;
+import com.enno.dotz.client.item.Blaster;
+import com.enno.dotz.client.item.Blocker;
+import com.enno.dotz.client.item.Bomb;
+import com.enno.dotz.client.item.Chest;
 import com.enno.dotz.client.item.Clock;
 import com.enno.dotz.client.item.ColorBomb;
 import com.enno.dotz.client.item.Domino;
@@ -24,6 +28,7 @@ import com.enno.dotz.client.item.Key;
 import com.enno.dotz.client.item.Knight;
 import com.enno.dotz.client.item.Laser;
 import com.enno.dotz.client.item.Mirror;
+import com.enno.dotz.client.item.RandomItem;
 import com.enno.dotz.client.item.Rocket;
 import com.enno.dotz.client.item.Turner;
 import com.enno.dotz.client.item.Wild;
@@ -105,6 +110,14 @@ public class FrequencySliderGroup extends HLayout
         m_list.add(pick);
         left.addMember(pick);
 
+        FrequencySlider bomb = createBombSlider(index++);
+        m_list.add(bomb);
+        left.addMember(bomb);
+
+        FrequencySlider chest = createChestSlider(index++);
+        m_list.add(chest);
+        left.addMember(chest);
+
         FrequencySlider knight = createKnightSlider(index++);
         m_list.add(knight);
         right.addMember(knight);
@@ -121,9 +134,9 @@ public class FrequencySliderGroup extends HLayout
         m_list.add(laser);
         right.addMember(laser);
         
-        FrequencySlider bomb = createBombSlider(index++);
-        m_list.add(bomb);
-        right.addMember(bomb);
+        FrequencySlider dotBomb = createDotBombSlider(index++);
+        m_list.add(dotBomb);
+        right.addMember(dotBomb);
         
         FrequencySlider domino = createDominoSlider(index++);
         m_list.add(domino);
@@ -136,6 +149,14 @@ public class FrequencySliderGroup extends HLayout
         FrequencySlider key = createKeySlider(index++);
         m_list.add(key);
         right.addMember(key);
+        
+        FrequencySlider blocker = createBlockerSlider(index++);
+        m_list.add(blocker);
+        right.addMember(blocker);
+        
+        FrequencySlider blaster = createBlasterSlider(index++);
+        m_list.add(blaster);
+        right.addMember(blaster);
         
         if (isNew)
         {
@@ -183,7 +204,7 @@ public class FrequencySliderGroup extends HLayout
                     else if (item instanceof Egg)
                         egg.initFrequency(freq);
                     else if (item instanceof DotBomb)
-                        bomb.initFrequency(freq);
+                        dotBomb.initFrequency(freq);
                     else if (item instanceof Domino)
                         domino.initFrequency(freq);
                     else if (item instanceof Turner)
@@ -196,6 +217,14 @@ public class FrequencySliderGroup extends HLayout
                         key.initFrequency(freq);
                     else if (item instanceof IcePick)
                         pick.initFrequency(freq);
+                    else if (item instanceof Blocker)
+                        blocker.initFrequency(freq);
+                    else if (item instanceof Bomb)
+                        bomb.initFrequency(freq);
+                    else if (item instanceof Blaster)
+                        blaster.initFrequency(freq);
+                    else if (item instanceof Chest)
+                        chest.initFrequency(freq);
                     else if (item instanceof Animal)
                     {
                         int color = ((Animal) item).getColor();                    
@@ -213,173 +242,163 @@ public class FrequencySliderGroup extends HLayout
     
     private FrequencySlider createWildSlider(int index)
     {
-        Wild dot = new Wild();
+        Wild dot = new Wild(false);
         dot.setContext(ctx);
-        return new FrequencySlider(index, dot, this) {
-            
-        };
+        return new FrequencySlider(index, dot, this);
     }
 
     private FrequencySlider createFireSlider(int index)
     {
-        Fire dot = new Fire();
+        Fire dot = new Fire(false);
         dot.setContext(ctx);
-        return new FrequencySlider(index, dot, this) {
-            
-        };
+        return new FrequencySlider(index, dot, this);
     }
 
     private FrequencySlider createMirrorSlider(int index)
     {
-        Mirror dot = new Mirror(false);
+        Mirror dot = new Mirror(false, false);
         dot.setContext(ctx);
-        return new FrequencySlider(index, dot, this) {
-            
-        };
+        return new FrequencySlider(index, dot, this);
     }
 
     private FrequencySlider createLaserSlider(int index)
     {
-        Laser dot = new Laser(Direction.EAST);
+        Laser dot = new Laser(Direction.EAST, false);
         dot.setContext(ctx);
-        return new FrequencySlider(index, dot, this) {
-            
-        };
+        return new FrequencySlider(index, dot, this);
     }
 
     private FrequencySlider createRocketSlider(int index)
     {
-        Rocket dot = new Rocket(Direction.EAST);
+        Rocket dot = new Rocket(Direction.EAST, false);
         dot.setContext(ctx);
-        return new FrequencySlider(index, dot, this) {
-            
-        };
+        return new FrequencySlider(index, dot, this);
     }
 
     protected FrequencySlider createDotSlider(int index, int color)
     {
         Dot dot = new Dot(color);
         dot.setContext(ctx);
-        return new FrequencySlider(index, dot, this) {
-            
-        };
+        return new FrequencySlider(index, dot, this);
     }
 
     protected FrequencySlider createAnimalSlider(int index, int color)
     {
-        Animal dot = new Animal(color, 10, Animal.Type.DEFAULT);
+        Animal dot = new Animal(color, 10, Animal.Type.DEFAULT, false);
         dot.setContext(ctx);
-        return new FrequencySlider(index, dot, this) {
-            
-        };
+        return new FrequencySlider(index, dot, this);
     }
     
     protected FrequencySlider createAnchorSlider(int index)
     {
-        Anchor dot = new Anchor();
+        Anchor dot = new Anchor(false);
         dot.setContext(ctx);
-        return new FrequencySlider(index, dot, this) {
-            
-        };
+        return new FrequencySlider(index, dot, this);
     }
 
     protected FrequencySlider createKnightSlider(int index)
     {
-        Knight dot = new Knight(1);
+        Knight dot = new Knight(1, false);
         dot.setContext(ctx);
-        return new FrequencySlider(index, dot, this) {
-            
-        };
+        return new FrequencySlider(index, dot, this);
+    }
+
+    protected FrequencySlider createChestSlider(int index)
+    {
+        Chest dot = new Chest(new RandomItem(), 1);
+        dot.setContext(ctx);
+        return new FrequencySlider(index, dot, this);
     }
 
     protected FrequencySlider createIcePickSlider(int index)
     {
         IcePick dot = new IcePick();
         dot.setContext(ctx);
-        return new FrequencySlider(index, dot, this) {
-            
-        };
+        return new FrequencySlider(index, dot, this);
     }
 
     protected FrequencySlider createClockSlider(int index)
     {
-        Clock dot = new Clock(1);
+        Clock dot = new Clock(1, false);
         dot.setContext(ctx);
-        return new FrequencySlider(index, dot, this) {
-            
-        };
+        return new FrequencySlider(index, dot, this);
     }
 
     protected FrequencySlider createYinYangSlider(int index)
     {
-        YinYang dot = new YinYang();
+        YinYang dot = new YinYang(false);
         dot.setContext(ctx);
-        return new FrequencySlider(index, dot, this) {
-            
-        };
+        return new FrequencySlider(index, dot, this);
     }
 
     protected FrequencySlider createEggSlider(int index)
     {
         Egg dot = new Egg();
         dot.setContext(ctx);
-        return new FrequencySlider(index, dot, this) {
-            
-        };
+        return new FrequencySlider(index, dot, this);
     }
 
     protected FrequencySlider createKeySlider(int index)
     {
-        Key dot = new Key();
+        Key dot = new Key(false);
         dot.setContext(ctx);
-        return new FrequencySlider(index, dot, this) {
-            
-        };
+        return new FrequencySlider(index, dot, this);
     }
 
-    protected FrequencySlider createBombSlider(int index)
+    protected FrequencySlider createBlockerSlider(int index)
     {
-        DotBomb dot = new DotBomb(new Dot(0), 9);
+        Blocker dot = new Blocker(1, false);
         dot.setContext(ctx);
-        return new FrequencySlider(index, dot, this) {
-            
-        };
+        return new FrequencySlider(index, dot, this);
+    }
+
+    protected FrequencySlider createDotBombSlider(int index)
+    {
+        DotBomb dot = new DotBomb(new Dot(0), 9, false);
+        dot.setContext(ctx);
+        return new FrequencySlider(index, dot, this);
     }
     
     protected FrequencySlider createColorBombSlider(int index)
     {
-        ColorBomb dot = new ColorBomb();
+        ColorBomb dot = new ColorBomb(false);
         dot.setContext(ctx);
-        return new FrequencySlider(index, dot, this) {
-            
-        };
+        return new FrequencySlider(index, dot, this);
     }
 
     protected FrequencySlider createDominoSlider(int index)
     {
-        Domino dot = new Domino(3, 6, true);
+        Domino dot = new Domino(3, 6, true, false);
         dot.setContext(ctx);
-        return new FrequencySlider(index, dot, this) {
-            
-        };
+        return new FrequencySlider(index, dot, this);
     }
 
     protected FrequencySlider createDropSlider(int index)
     {
         Drop dot = new Drop();
         dot.setContext(ctx);
-        return new FrequencySlider(index, dot, this) {
-            
-        };
+        return new FrequencySlider(index, dot, this);
     }
 
     protected FrequencySlider createTurnerSlider(int index)
     {
-        Turner dot = new Turner(1);
+        Turner dot = new Turner(1, false);
         dot.setContext(ctx);
-        return new FrequencySlider(index, dot, this) {
-            
-        };
+        return new FrequencySlider(index, dot, this);
+    }
+
+    protected FrequencySlider createBombSlider(int index)
+    {
+        Bomb dot = new Bomb();
+        dot.setContext(ctx);
+        return new FrequencySlider(index, dot, this);
+    }
+
+    protected FrequencySlider createBlasterSlider(int index)
+    {
+        Blaster dot = new Blaster(true, false);
+        dot.setContext(ctx);
+        return new FrequencySlider(index, dot, this);
     }
 
     public void setSliderValue(int index, double freq)

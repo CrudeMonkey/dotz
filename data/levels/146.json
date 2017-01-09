@@ -1,4 +1,5 @@
 {
+  "id": 146,
   "name": "Twisted",
   "creator": "Enno",
   "description": "",
@@ -6,12 +7,12 @@
   "numColumns": 8,
   "numRows": 8,
   "grid": [
-    ".L....R.",
-    "........",
-    "........",
+    ".LXXXXR.",
+    "...XX...",
+    "...XX...",
     "..R..L..",
     ".. .. ..",
-    "........",
+    "XX....XX",
     "........",
     "........"
   ],
@@ -31,24 +32,9 @@
     "???..???",
     "??.??.??",
     "??.??.??",
-    "????????",
+    "..????..",
     "????????",
     "????????"
-  ],
-  "teleporters": [  ],
-  "doors": [
-    {"p":[2,0],"strength":99},
-    {"p":[3,0],"strength":99},
-    {"p":[4,0],"strength":99},
-    {"p":[5,0],"strength":99},
-    {"p":[3,1],"strength":99},
-    {"p":[4,1],"strength":99},
-    {"p":[3,2],"strength":99},
-    {"p":[4,2],"strength":99},
-    {"p":[0,5],"strength":99},
-    {"p":[1,5],"strength":99},
-    {"p":[6,5],"strength":99},
-    {"p":[7,5],"strength":99}
   ],
   "conveyors": [
     {"p":[0,1],"turn":-1,"direction":"W"},
@@ -95,23 +81,29 @@
   "lazySusans": [
     {"p":[3,3],"clockwise":true}
   ],
-  "dots": [  ],
-  "animals": [  ],
-  "knights": [  ],
-  "clocks": [  ],
-  "lasers": [  ],
-  "mirrors": [  ],
-  "rockets": [  ],
   "generator": {
     "generateLetters": false,
+    "swapMode": false,
+    "clickMode": false,
+    "rollMode": false,
+    "diagonalMode": false,
+    "dominoMode": false,
+    "slipperyAnchors": false,
+    "minChainLength": 2,
     "seed": -1,
     "fireGrowthRate": 1,
     "maxAnchors": 3,
+    "maxDomino": 9,
     "initialDotsOnly": true,
     "animalStrength": 10,
     "knightStrength": 3,
     "clockStrength": 10,
+    "bombStrength": 9,
+    "blockerStrength": 2,
     "animalType": "Default",
+    "animalAction": "Default",
+    "icePickRadius": 3,
+    "dropRadius": 3,
     "freq": [
       [21.4,"dot",0],
       [21.4,"dot",1],
@@ -125,6 +117,6 @@
     "anchors": 6,
     "maxMoves": 30
   },
-  "id": 146,
-  "lastModified": "1446231797553"
+  "boosts": {  },
+  "lastModified": "1481927779831"
 }

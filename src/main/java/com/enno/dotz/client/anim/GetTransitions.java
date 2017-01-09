@@ -4,6 +4,7 @@ import static com.enno.dotz.client.DropDirection.DOWN;
 import static com.enno.dotz.client.DropDirection.LEFT;
 import static com.enno.dotz.client.DropDirection.NOT_ALLOWED;
 import static com.enno.dotz.client.DropDirection.RIGHT;
+import static com.enno.dotz.client.DropDirection.TELEPORT;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -15,6 +16,7 @@ import com.ait.lienzo.client.core.shape.Layer;
 import com.enno.dotz.client.Cell;
 import com.enno.dotz.client.Cell.ChangeColorCell;
 import com.enno.dotz.client.Cell.Hole;
+import com.enno.dotz.client.Cell.Rock;
 import com.enno.dotz.client.Cell.Slide;
 import com.enno.dotz.client.Cell.Teleport;
 import com.enno.dotz.client.Config;
@@ -27,6 +29,7 @@ import com.enno.dotz.client.item.Anchor;
 import com.enno.dotz.client.item.Clock;
 import com.enno.dotz.client.item.Item;
 import com.enno.dotz.client.item.TeleportClipBox;
+import com.enno.dotz.client.util.CallbackChain.Callback;
 
 public class GetTransitions
 {
@@ -67,7 +70,8 @@ public class GetTransitions
     
     private DropTransitionList m_list;
     
-    private boolean m_roll = true;
+    private boolean m_roll;
+    private boolean m_slipperyAnchors;
     
     public GetTransitions(Context ctx)
     {
@@ -76,6 +80,27 @@ public class GetTransitions
         this.state = ctx.state;
         
         m_roll = ctx.generator.rollMode;
+        m_slipperyAnchors = ctx.generator.slipperyAnchors;
+    }
+    
+    public Callback getCallback(final Layer layer, final double dropDuration)
+    {
+        return new Callback() {
+            @Override
+            public void run()
+            {
+                AnimList animList = get(layer, dropDuration);
+                
+                animList.setDoneCallback(new Runnable() {
+                    @Override
+                    public void run()
+                    {
+                        doNext();
+                    }
+                });
+                animList.run();
+            }
+        };
     }
     
     public AnimList get(Layer layer, double dropDuration)
@@ -98,18 +123,8 @@ public class GetTransitions
         {
             m_list = new DropTransitionList(layer, dropDuration);
 
-            for (int col = 0; col < cfg.numColumns; col++)
+            if (!checkSlipperyAnchorRolls())
             {
-                //Debug.p("start col=" + col);
-                
-                Pt p = new Pt(col, cfg.numRows - 1);
-                trail(p, DOWN, null);
-            }
-            
-            if (m_roll)
-            {
-                checkRolls();
-                
                 for (int col = 0; col < cfg.numColumns; col++)
                 {
                     //Debug.p("start col=" + col);
@@ -117,8 +132,21 @@ public class GetTransitions
                     Pt p = new Pt(col, cfg.numRows - 1);
                     trail(p, DOWN, null);
                 }
+                
+                if (m_roll)
+                {
+                    checkRolls();
+                    
+                    for (int col = 0; col < cfg.numColumns; col++)
+                    {
+                        //Debug.p("start col=" + col);
+                        
+                        Pt p = new Pt(col, cfg.numRows - 1);
+                        trail(p, DOWN, null);
+                    }
+                }
             }
-
+            
             if (m_list.getTransitions().size() > 0)
                 animList.add(m_list);
             else
@@ -126,6 +154,64 @@ public class GetTransitions
         }
         
         return animList;
+    }
+    
+    private boolean checkSlipperyAnchorRolls()
+    {
+        if (!m_slipperyAnchors)
+            return false;
+        
+        boolean slippy = false;
+        
+        for (int row = cfg.numRows - 1; row >= 0; row--)
+        {
+            for (int col = 0; col < cfg.numColumns; col++)
+            {
+                Cell cell = state.cell(col, row);
+                if (cell.isLocked() || !(cell.item instanceof Anchor))
+                    continue;
+                
+                if (m_list.containsItem(cell.item))
+                    continue;
+                
+                if (state.isValidCell(col, row + 1))
+                {
+                    Cell under = state.cell(col, row + 1);
+                    if (under.canBeFilled())
+                    {
+                        addDropDown(state.cell(col, row), under);
+                        slippy = true;
+                        continue;
+                    }
+                }
+                
+                if (isSolidBelow(col, row))  // bottom row or only holes/cages below
+                {
+                    int dx = m_lastDx == 0 ? 1 : -m_lastDx;                    
+                    if (isEmpty(col + dx, row) && checkRoll(col, row, dx))
+                    {
+                        m_lastDx = dx;
+                        slippy = true;
+                        continue;
+                    }
+                    if (isEmpty(col - dx, row) && checkRoll(col, row, -dx))
+                    {
+                        m_lastDx = -dx;
+                        slippy = true;
+                        continue;
+                    }
+                }
+            }
+        }
+        return slippy;
+    }
+
+    private boolean isEmpty(int col, int row)
+    {
+        if (!state.isValidCell(col, row))
+            return false;
+        
+        return state.cell(col, row).item == null;
     }
     
     private static int m_lastDx = 0;
@@ -143,7 +229,7 @@ public class GetTransitions
                 if (m_list.containsItem(cell.item))
                     continue;
                 
-                if (isSolidBelow(col, row))  // bottom row or only holes/cages below
+                if (isSolidBelow(col, row) && !cell.isTeleportSource())  // bottom row or only holes/cages below
                 {
                     int dx = m_lastDx == 0 ? 1 : -m_lastDx;                    
                     if (checkRoll(col, row, dx))
@@ -191,7 +277,7 @@ public class GetTransitions
     
     protected boolean isSolidBelow(int col, int row)
     {
-        Cell c  = state.cell(col,  row);
+        Cell c  = state.cell(col, row);
         if (c.isTeleportSource())
         {
             Teleport src = (Teleport) c;
@@ -242,11 +328,14 @@ public class GetTransitions
         {
             if (src.isTeleportSource())
             {
-                Teleport tsrc = (Teleport) src;                                
-                    
-                Cell target = state.cell(tsrc.getOtherCol(), tsrc.getOtherRow());
-                if (target.canBeFilled())
-                    addTeleport(src, target);
+                if (dir == TELEPORT)
+                {
+                    Teleport tsrc = (Teleport) src;                                
+                        
+                    Cell target = state.cell(tsrc.getOtherCol(), tsrc.getOtherRow());
+                    if (target.canBeFilled())
+                        addTeleport(src, target);
+                }
             }
             else if (nearBottom(p.col, p.row))  // bottom row or only holes/cages below
             {
@@ -254,7 +343,7 @@ public class GetTransitions
                 if (src.item.canDropFromBottom())
                     addDropOut(src);
             }
-            else
+            else if (prev != null)
             {
                 Cell target = state.cell(prev.col, prev.row);
                 if (target.canBeFilled())
@@ -266,7 +355,7 @@ public class GetTransitions
         {
             List<Pt> slideSources = getSlideSources(p);
             DropDirection fillDir = NOT_ALLOWED;
-            if (!didCell(src) && src.canBeFilled())
+            if (!didCell(src) && src.canBeFilled()) // NOTE: didCell() applies to rolls only
             {
                 // who's gonna fill?
                 List<Pt> fillers = getSlideFillers(slideSources);
@@ -291,21 +380,32 @@ public class GetTransitions
         else
         {
             // If it's a Teleport target, also check above it.
-            if (p.row > 0 && state.cell(p.col, p.row).isTeleportTarget())
-            {
-                Cell aboveSrc = state.cell(p.col, p.row - 1);
-                if (!(aboveSrc.isTeleportTarget() || aboveSrc instanceof Slide))
-                {
-                    trail(new Pt(p.col, p.row - 2), DOWN, new Pt(p.col, p.row - 1));
-                }
-            }
+            boolean isTeleportTarget = state.cell(p.col, p.row).isTeleportTarget();
             
             // only possible source is up
             Pt above = getSourceAbove(p);
-            if (above == null)
-                return;
-            
-            trail(above, DOWN, p);
+            if (above != null)
+            {
+                trail(above, isTeleportTarget ? TELEPORT : DOWN, p);    
+                
+                if (p.row > 0 && isTeleportTarget)
+                {
+                    Cell aboveSrc = state.cell(p.col, p.row - 1);
+                    if (!(aboveSrc.isTeleportSource() || aboveSrc instanceof Slide))
+                        trail(new Pt(p.col, p.row - 1), DOWN, null);
+                }
+            }
+            else
+            {
+                //Debug.p("nothing above " + p);
+                // Experimental - see Candy Crush 77 - when no source above (and above is a Hole, then spawn there)
+//                if (state.cell(p.col, p.row - 1) instanceof Hole)
+//                {
+//                    Cell target = state.cell(p.col, p.row);
+//                    if (target.canBeFilled())
+//                        addSpawn(new Pt(p.col, p.row - 1), p);
+//                }
+            }
         }
     }
 
@@ -407,16 +507,17 @@ public class GetTransitions
     protected void addTeleport(Cell src, Cell target)
     {
         //Debug.p("teleport from " + src + " to " + target);
-        m_list.add(new DropTransition(state.x(src.col), state.y(src.row), state.x(src.col), state.y(src.row + 1), src.item));
         
         final Item clone = src.item.copy();
         clone.init(ctx);
         final Item origItem = src.item;
+
+        m_list.add(new DropTransition(state.x(src.col), state.y(src.row), state.x(src.col), state.y(src.row + 1), clone));
+
+        final TeleportClipBox fromBox = new TeleportClipBox(clone.shape, src, ctx);
+        final TeleportClipBox toBox = new TeleportClipBox(origItem.shape, target, ctx);
         
-        final TeleportClipBox fromBox = new TeleportClipBox(origItem.shape, src, ctx);
-        final TeleportClipBox toBox = new TeleportClipBox(clone.shape, target, ctx);
-        
-        m_list.add(new DropTransition(state.x(target.col), state.y(target.row - 1), state.x(target.col), state.y(target.row), clone) {
+        m_list.add(new DropTransition(state.x(target.col), state.y(target.row - 1), state.x(target.col), state.y(target.row), origItem) {
             public void afterStart()
             {
                 clone.addShapeToLayer(ctx.dotLayer);
@@ -428,11 +529,11 @@ public class GetTransitions
             {
                 fromBox.done();
                 toBox.done();
-                origItem.removeShapeFromLayer(ctx.dotLayer);
+                clone.removeShapeFromLayer(ctx.dotLayer);
             }
         });
         
-        target.item = clone; 
+        target.item = origItem; 
         src.item = null;
     }
     
@@ -503,7 +604,7 @@ public class GetTransitions
     
     protected boolean endOfLine(Cell c)
     {
-        return c instanceof Slide || c.isTeleportSource();
+        return c instanceof Slide || c.isTeleportSource() || c instanceof Rock;
     }
     
     protected boolean nextToSlide(Pt p)

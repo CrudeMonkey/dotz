@@ -2,7 +2,7 @@
   "id": 9,
   "name": "Default Animals",
   "creator": "Logan",
-  "folder": "Animals",
+  "folder": "Logan",
   "numColumns": 8,
   "numRows": 8,
   "grid": [
@@ -64,5 +64,6 @@
       "2": 20
     },
     "animals": 5
-  }
+  },
+  "lastModified": "1481928273982"
 }

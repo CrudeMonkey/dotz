@@ -14,9 +14,10 @@ public class Rocket extends Item
     public int m_direction;
     private Point2D m_ignitionPoint;
             
-    public Rocket(int direction)
+    public Rocket(int direction, boolean stuck)
     {
         m_direction = direction;
+        m_stuck = stuck;
     }
 
     public void setDirection(int direction)
@@ -33,6 +34,9 @@ public class Rocket extends Item
     public IPrimitive<?> createShape(double size)
     {
         Group group = new Group();
+        
+        if (isStuck())
+            group.add(createStuckShape(size));
         
         double sz = size * 0.8;
         
@@ -150,7 +154,7 @@ public class Rocket extends Item
     @Override
     protected Item doCopy()
     {
-        return new Rocket(m_direction);
+        return new Rocket(m_direction, m_stuck);
     }
 
 //    @Override

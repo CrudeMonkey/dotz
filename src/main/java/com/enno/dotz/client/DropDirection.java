@@ -5,6 +5,7 @@ public enum DropDirection
     LEFT,
     RIGHT,
     DOWN,
+    TELEPORT,
     NOT_ALLOWED;
 
     /**

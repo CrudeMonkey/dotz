@@ -1,15 +1,19 @@
 package com.enno.dotz.client;
 
+import com.enno.dotz.client.Cell.Bubble;
 import com.enno.dotz.client.Cell.Cage;
 import com.enno.dotz.client.Cell.Door;
 import com.enno.dotz.client.item.Anchor;
 import com.enno.dotz.client.item.Animal;
+import com.enno.dotz.client.item.Blocker;
+import com.enno.dotz.client.item.Chest;
 import com.enno.dotz.client.item.Clock;
 import com.enno.dotz.client.item.Fire;
 import com.enno.dotz.client.item.Item;
 import com.enno.dotz.client.item.Knight;
 import com.enno.dotz.client.item.Laser;
 import com.enno.dotz.client.item.Mirror;
+import com.enno.dotz.client.item.RandomItem;
 import com.enno.dotz.client.item.Rocket;
 
 public class Score
@@ -37,6 +41,9 @@ public class Score
     private int m_initialDoorCount;
     private int m_explodedDoors;
     
+    private int m_initialBubbleCount;
+    private int m_explodedBubbles;
+    
     private int m_initialCageCount;
     private int m_explodedCages;
 
@@ -56,12 +63,29 @@ public class Score
     private int m_rocketsInGrid;
     private int m_explodedRockets;
     
+    private int m_blockersInGrid;
+    private int m_explodedBlockers;
+
+    private int m_chestsInGrid;
+    private int m_openedChests;
+    
     private int m_explodedDominoes;
     
     private int m_birds;
 
     private int m_score;
     private int m_moves;    
+    private int m_wordCount;
+    
+    public void foundWord()
+    {
+        m_wordCount++;
+    }
+    
+    public int getWordCount()
+    {
+        return m_wordCount;
+    }
     
     public void explodedIce()
     {
@@ -78,6 +102,11 @@ public class Score
     public void explodedDoor()
     {
         m_explodedDoors++;     // NOTE: 0 points
+    }
+
+    public void explodedBubble()
+    {
+        m_explodedBubbles++;
     }
 
     public void explodedCage()
@@ -164,6 +193,13 @@ public class Score
         m_rocketsInGrid--;
     }
     
+    public void explodedBlocker()
+    {
+        m_explodedBlockers++;
+        m_blockersInGrid--;
+        addPoints(10);
+    }
+    
     public void explodedAnchor()
     {
         m_explodedAnchors++;
@@ -174,6 +210,12 @@ public class Score
     {
         m_explodedDominoes++;
         addPoints(1);
+    }
+    
+    public void openedChest()
+    {
+        m_openedChests++;
+        //TODO addPoints
     }
 
     public void addBird()
@@ -199,6 +241,11 @@ public class Score
     public int getMoves()
     {
         return m_moves;
+    }
+    
+    public int getChests()
+    {
+        return m_chestsInGrid;
     }
     
     public void addMove()
@@ -236,6 +283,11 @@ public class Score
         return m_explodedCages;
     }
     
+    public int getExplodedBubbles()
+    {
+        return m_explodedBubbles;
+    }
+    
     public int getExplodedCircuits()
     {
         return m_explodedCircuits;
@@ -270,6 +322,11 @@ public class Score
     {
         return m_explodedRockets;
     }
+     
+    public int getExplodedBlockers()
+    {
+        return m_explodedBlockers;
+    }
     
     public int getDroppedAnchors()
     {
@@ -279,6 +336,11 @@ public class Score
     public int getDroppedClocks()
     {
         return m_droppedClocks;
+    }
+    
+    public int getOpenedChests()
+    {
+        return m_openedChests;
     }
     
     public void generatedAnchor()
@@ -321,6 +383,16 @@ public class Score
         m_rocketsInGrid++;
     }
 
+    public void generatedBlocker()
+    {
+        m_blockersInGrid++;
+    }
+
+    public void generatedChest()
+    {
+        m_chestsInGrid++;
+    }
+
     public int getAnchorsInGrid()
     {
         return m_anchorsInGrid;
@@ -346,6 +418,11 @@ public class Score
         return m_initialDoorCount - m_explodedDoors;
     }
 
+    public int getBubblesInGrid()
+    {
+        return m_initialBubbleCount - m_explodedBubbles;
+    }
+    
     public int getCagesInGrid()
     {
         return m_initialCageCount - m_explodedCages;
@@ -371,6 +448,11 @@ public class Score
         return m_rocketsInGrid;
     }
 
+    public int getBlockersInGrid()
+    {
+        return m_blockersInGrid;
+    }
+
     public int getInitialIce()
     {
         return m_initialIceCount;
@@ -379,6 +461,11 @@ public class Score
     public int getInitialDoors()
     {
         return m_initialDoorCount;
+    }
+
+    public int getInitialBubbles()
+    {
+        return m_initialBubbleCount;
     }
 
     public int getInitialCages()
@@ -398,46 +485,19 @@ public class Score
             for (int col = 0; col < state.numColumns; col++)
             {
                 Cell cell = state.cell(col, row);
-                if (cell.item instanceof Anchor)
-                {
-                    m_anchorsInGrid++;
-                }
-                else if (cell.item instanceof Animal)
-                {
-                    m_animalsInGrid++;
-                }
-                else if (cell.item instanceof Knight)
-                {
-                    m_knightsInGrid++;
-                }
-                else if (cell.item instanceof Fire)
-                {
-                    m_fireInGrid++;
-                }
-                else if (cell.item instanceof Clock)
-                {
-                    m_clocksInGrid++;
-                }
-                else if (cell.item instanceof Laser)
-                {
-                    m_lasersInGrid++;
-                }
-                else if (cell.item instanceof Mirror)
-                {
-                    m_mirrorsInGrid++;
-                }
-                else if (cell.item instanceof Rocket)
-                {
-                    m_rocketsInGrid++;
-                }
+                countItem(cell.item);
                 
-                if (cell instanceof Door)
+                if (cell instanceof Door && !((Door) cell).isBlinking())
                 {
                     m_initialDoorCount++;
                 }
-                else if (cell instanceof Cage)
+                else if (cell instanceof Cage && !((Cage) cell).isBlinking())
                 {
                     m_initialCageCount++;
+                }
+                else if (cell instanceof Bubble)
+                {
+                    m_initialBubbleCount++;
                 }
                 
                 if (cell.ice > 0)
@@ -449,6 +509,54 @@ public class Score
         m_initialCircuitCount = state.getCircuitCount();
     }
 
+    protected void countItem(Item item)
+    {
+        if (item instanceof Anchor)
+        {
+            m_anchorsInGrid++;
+        }
+        else if (item instanceof Animal)
+        {
+            m_animalsInGrid++;
+        }
+        else if (item instanceof Knight)
+        {
+            m_knightsInGrid++;
+        }
+        else if (item instanceof Fire)
+        {
+            m_fireInGrid++;
+        }
+        else if (item instanceof Clock)
+        {
+            m_clocksInGrid++;
+        }
+        else if (item instanceof Laser)
+        {
+            m_lasersInGrid++;
+        }
+        else if (item instanceof Mirror)
+        {
+            m_mirrorsInGrid++;
+        }
+        else if (item instanceof Rocket)
+        {
+            m_rocketsInGrid++;
+        }
+        else if (item instanceof Blocker)
+        {
+            m_blockersInGrid++;
+        }
+        else if (item instanceof Chest)
+        {
+            m_chestsInGrid++;
+            
+            Chest chest = (Chest) item;
+            if (!(chest.getItem() instanceof RandomItem))
+                countItem(chest.getItem());
+        }
+    }
+    
     /** Fire or Animal ate something */
     public void ate(Item item)
     {

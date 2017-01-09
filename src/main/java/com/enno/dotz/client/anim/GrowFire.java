@@ -89,7 +89,7 @@ public class GrowFire
     {
         Cell from = m_from.get(index);
         final Cell to = m_to.get(index);
-        final Fire newFire = new Fire();
+        final Fire newFire = new Fire(((Fire) from.item).isStuck());
         newFire.init(ctx);
         
         return new GrowFireTransition(state.x(from.col), state.y(from.row), state.x(to.col), state.y(to.row), newFire)

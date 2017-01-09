@@ -49,16 +49,6 @@
     {"p":[4,3],"strength":99},
     {"p":[2,5],"strength":99}
   ],
-  "conveyors": [  ],
-  "lazySusans": [  ],
-  "dots": [  ],
-  "bombs": [  ],
-  "animals": [  ],
-  "knights": [  ],
-  "clocks": [  ],
-  "lasers": [  ],
-  "mirrors": [  ],
-  "rockets": [  ],
   "generator": {
     "generateLetters": false,
     "swapMode": false,

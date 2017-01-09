@@ -1,11 +1,14 @@
 package com.enno.dotz.client;
 
+import java.util.Random;
+
 import com.ait.lienzo.client.core.animation.LayerRedrawManager;
 import com.ait.lienzo.client.core.event.NodeMouseDownHandler;
 import com.ait.lienzo.client.core.event.NodeMouseMoveHandler;
 import com.ait.lienzo.client.core.event.NodeMouseOutHandler;
 import com.ait.lienzo.client.core.event.NodeMouseUpHandler;
 import com.ait.lienzo.client.core.shape.Layer;
+import com.enno.dotz.client.Cell.Bubble;
 import com.enno.dotz.client.DragConnectMode.ColorBombMode;
 import com.enno.dotz.client.DragConnectMode.DropMode;
 import com.enno.dotz.client.DragConnectMode.ExplodyMode;
@@ -16,7 +19,15 @@ import com.enno.dotz.client.DragConnectMode.SpecialMode;
 import com.enno.dotz.client.DragConnectMode.TurnMode;
 import com.enno.dotz.client.DragConnectMode.WildCardMode;
 import com.enno.dotz.client.SoundManager.Sound;
+import com.enno.dotz.client.anim.AnimList;
+import com.enno.dotz.client.anim.Transition.DropTransition;
+import com.enno.dotz.client.anim.TransitionList;
+import com.enno.dotz.client.item.Blaster;
+import com.enno.dotz.client.item.Bomb;
 import com.enno.dotz.client.item.ColorBomb;
+import com.enno.dotz.client.item.Domino;
+import com.enno.dotz.client.item.Dot;
+import com.enno.dotz.client.item.DotBomb;
 import com.enno.dotz.client.item.Drop;
 import com.enno.dotz.client.item.Explody;
 import com.enno.dotz.client.item.IcePick;
@@ -80,6 +91,16 @@ public abstract class ConnectMode
         LayerRedrawManager.get().schedule(m_layer);
     }
     
+    protected boolean isTriggeredBySingleClick(Cell cell)
+    {
+        return isTriggeredBySingleClick2(cell) || igniteBlaster(cell) || igniteBomb(cell);
+    }
+    
+    protected boolean isTriggeredBySingleClick2(Cell cell)
+    {
+        return flipMirror(cell) || fireRocket(cell) || reshuffle(cell);
+    }
+
     protected boolean reshuffle(Cell cell)
     {
         if (!cell.isLocked() && cell.item instanceof YinYang)
@@ -129,6 +150,64 @@ public abstract class ConnectMode
         return false;
     }
     
+    protected boolean igniteBlaster(Cell cell)
+    {
+        if (!cell.isLocked() && cell.item instanceof Blaster)
+        {
+            ctx.state.activateLasers(false);
+            popBubble(cell);
+            ((Blaster) cell.item).arm();
+            Sound.FLIP_MIRROR.play(); //TODO sound
+            ctx.dotLayer.draw();
+            ctx.state.activateLasers(true);
+            
+            stop();
+            
+            m_state.processChain(new Runnable() {
+                public void run()
+                {
+                    start(); // next move
+                }
+            });
+            
+            return true;
+        }
+        return false;
+    }
+
+    protected boolean igniteBomb(Cell cell)
+    {
+        if (!cell.isLocked() && cell.item instanceof Bomb)
+        {
+            ctx.state.activateLasers(false);
+            popBubble(cell);
+            ((Bomb) cell.item).arm();
+            Sound.FLIP_MIRROR.play(); //TODO sound
+            ctx.dotLayer.draw();
+            ctx.state.activateLasers(true);
+            
+            stop();
+            
+            m_state.processChain(new Runnable() {
+                public void run()
+                {
+                    start(); // next move
+                }
+            });
+            
+            return true;
+        }
+        return false;
+    }
+
+    protected void popBubble(Cell cell)
+    {
+        if (cell instanceof Bubble && !((Bubble) cell).isPopped())
+        {
+            cell.explode(null, 0);
+        }
+    }
+    
     protected boolean fireRocket(Cell cell)
     {
         if (!cell.isLocked() && cell.item instanceof Rocket)
@@ -147,7 +226,7 @@ public abstract class ConnectMode
 
     protected boolean startSpecialMode(Cell cell, int x, int y)
     {
-        if (cell.isLocked() || cell.item == null)
+        if (cell.isLocked() || cell.isUnpoppedBubble() || cell.item == null)
             return false;
         
         if (cell.item instanceof Turner)
@@ -175,8 +254,336 @@ public abstract class ConnectMode
             m_specialMode = new ColorBombMode(cell, x, y, ctx, this);
             return true;
         }
+        else if (cell.item instanceof ColorBomb && this instanceof ClickConnectMode)
+        {
+            m_specialMode = new ColorBombMode(cell, x, y, ctx, this);
+            return true;
+        }
         
         return false;
+    }
+    
+    protected boolean isTriggeredMerge(Cell cell)
+    {
+        return new ClickMerge(ctx, m_state) {
+            @Override
+            protected void preMerge()
+            {
+                stop();
+                ctx.state.activateLasers(false);                
+            }
+            
+            @Override
+            protected void postMerge()
+            {
+                ctx.state.activateLasers(true);
+            }
+            
+            @Override
+            protected Runnable process()
+            {
+                return new Runnable() {
+                    @Override
+                    public void run()
+                    {
+                        m_state.processChain(new Runnable() {
+                            public void run()
+                            {
+                                start(); // next move
+                            }
+                        });
+                    }
+                };
+            }
+        }.isTriggeredMerge(cell);
+    }
+    
+    public abstract static class ClickMerge
+    {
+        private Context ctx;
+        private GridState m_state;
+        
+        public ClickMerge(Context ctx, GridState state)
+        {
+            this.ctx = ctx;
+            m_state = state;
+        }
+
+        protected abstract void preMerge();
+        protected abstract void postMerge();
+        protected abstract Runnable process();
+        
+        public boolean isTriggeredMerge(final Cell cell)
+        {
+            final Item originItem = cell.item;
+            if (cell.item instanceof ColorBomb)
+            {
+                final Cell neighbor = findSpecialNeighbor(cell);
+                if (neighbor == null)
+                    return false;
+                final Item neighborItem = neighbor.item;
+                
+                mergeCells(cell, neighbor, new Runnable() {
+                    public void run()
+                    {
+                        if (neighborItem instanceof ColorBomb)
+                        {
+                            GetSwapMatches.animateTotalBomb(m_state, process());
+                        }
+                        else
+                        {
+                            replace(cell, neighborItem);
+                        }
+                    }
+                });
+                return true;
+            }
+            if (cell.item instanceof Blaster)
+            {
+                final Cell neighbor = findSpecialNeighbor(cell);
+                if (neighbor == null)
+                    return false;
+                final Item neighborItem = neighbor.item;
+                
+                mergeCells(cell, neighbor, new Runnable() {
+                    public void run()
+                    {
+                        if (neighborItem instanceof ColorBomb)
+                        {
+                            replace(cell, originItem);
+                        }
+                        else if (neighborItem instanceof Bomb)
+                        {
+                            Blaster b = (Blaster) originItem;
+                            
+                            Blaster newBlaster = new Blaster(b.isVertical(), false);
+                            newBlaster.arm();
+                            newBlaster.setWide(true);
+                            newBlaster.init(ctx);
+                            newBlaster.addShapeToLayer(ctx.dotLayer);   
+                            newBlaster.moveShape(m_state.x(cell.col), m_state.y(cell.row));
+                            cell.item = newBlaster;
+                            process().run();
+                        }
+                        else if (neighborItem instanceof Blaster)
+                        {
+                            Blaster b = (Blaster) originItem;
+                            
+                            Blaster newBlaster = new Blaster(b.isVertical(), false);
+                            newBlaster.arm();
+                            newBlaster.setBothWays(true);
+                            newBlaster.init(ctx);
+                            newBlaster.addShapeToLayer(ctx.dotLayer);   
+                            newBlaster.moveShape(m_state.x(cell.col), m_state.y(cell.row));
+                            cell.item = newBlaster;
+                            process().run();
+                        }
+                    }
+                });
+                return true;
+            }
+            if (cell.item instanceof Bomb)
+            {
+                final Cell neighbor = findSpecialNeighbor(cell);
+                if (neighbor == null)
+                    return false;
+                final Item neighborItem = neighbor.item;
+                
+                mergeCells(cell, neighbor, new Runnable() {
+                    public void run()
+                    {
+                        if (neighborItem instanceof ColorBomb)
+                        {
+                            replace(cell, originItem);
+                        }
+                        else if (neighborItem instanceof Bomb)
+                        {
+                            Bomb bomb = new Bomb(2, false); // 2: 5x5
+                            bomb.arm();
+                            bomb.init(ctx);
+                            bomb.addShapeToLayer(ctx.dotLayer);   
+                            bomb.moveShape(m_state.x(cell.col), m_state.y(cell.row));
+                            cell.item = bomb;
+                            process().run();
+                        }
+                        else if (neighborItem instanceof Blaster)
+                        {
+                            Blaster b = (Blaster) neighborItem;
+                            
+                            Blaster newBlaster = new Blaster(b.isVertical(), false);
+                            newBlaster.arm();
+                            newBlaster.setWide(true);
+                            newBlaster.init(ctx);
+                            newBlaster.addShapeToLayer(ctx.dotLayer);   
+                            newBlaster.moveShape(m_state.x(cell.col), m_state.y(cell.row));
+                            cell.item = newBlaster;
+                            process().run();
+                        }
+                    }
+                });
+                return true;
+            }
+            
+            return false;
+        }
+        
+        private void replace(final Cell origin, Item item)
+        {
+            CellList cells = new CellList();
+            for (int i = 0; i < 10; i++)    // TODO how many?
+            {
+                Cell cell = getRandomCell(cells);
+                if (cell == null)
+                    break;
+            }
+            
+            AnimList list = new AnimList();
+            for (final Cell cell : cells)
+            {
+                final Item newItem = item.copy();
+                if (newItem instanceof Blaster)
+                {
+                    Blaster blaster = (Blaster) newItem;
+                    blaster.arm();
+                    blaster.setVertical(ctx.generator.getRandom().nextBoolean());
+                }
+                else if (newItem instanceof Bomb)
+                {
+                    ((Bomb) newItem).arm();
+                }
+                
+                newItem.init(ctx);
+                
+                list.addTransition("replaceOne", ctx.nukeLayer, 100, new DropTransition(m_state.x(origin.col), m_state.y(origin.row), m_state.x(cell.col), m_state.y(cell.row), newItem) {
+                    @Override
+                    public void afterStart()
+                    {
+                        //Debug.p("replaceOne start");
+                        newItem.addShapeToLayer(ctx.nukeLayer);
+                        ctx.nukeLayer.setVisible(true);
+                        
+                        Sound.WOOSH.play(); //TODO sound
+                    }
+                    
+                    @Override
+                    public void afterEnd()
+                    {
+                        //Debug.p("replaceOne end");
+                        cell.explode(null, 0);
+                        newItem.removeShapeFromLayer(ctx.nukeLayer);
+                        newItem.addShapeToLayer(ctx.dotLayer);
+                        cell.item = newItem;
+                        
+                        ctx.nukeLayer.setVisible(false);
+                    }
+                });
+            }
+            list.animate(process());
+        }
+        
+        private Cell getRandomCell(CellList list)
+        {
+            Random rnd = ctx.generator.getRandom();
+            for (int i = 0; i < 200; i++)
+            {
+                int col = rnd.nextInt(m_state.numColumns);
+                int row = rnd.nextInt(m_state.numRows);
+                if (list.containsCell(col, row))
+                    continue;
+                
+                Cell c = m_state.cell(col, row);
+                if (!isReplacableDot(c.item))
+                    continue;
+                
+                list.add(c);
+                return c;
+            }
+            return null; // took too long
+        }
+        
+        private boolean isReplacableDot(Item item)
+        {
+            if (item == null)
+                return false;
+            
+            return item instanceof Dot || item instanceof DotBomb || item instanceof Wild || item instanceof Domino;
+        }
+
+        private void mergeCells(final Cell cell, final Cell neighbor, final Runnable callback)
+        {
+            preMerge();
+            
+            final Item item = neighbor.item;
+            TransitionList list = new TransitionList("merge", ctx.nukeLayer, 500);
+            list.add(new DropTransition(m_state.x(neighbor.col), m_state.y(neighbor.row), m_state.x(cell.col), m_state.y(cell.row), item) {
+                @Override
+                public void afterStart()
+                {
+                    //Debug.p("spawn " + src);
+                    item.removeShapeFromLayer(ctx.dotLayer);
+                    item.addShapeToLayer(ctx.nukeLayer);
+                    ctx.nukeLayer.setVisible(true);
+                    
+                    Sound.WOOSH.play(); //TODO sound
+                }
+                
+                @Override
+                public void afterEnd()
+                {
+                    item.removeShapeFromLayer(ctx.nukeLayer);
+                    neighbor.item = null;
+                    
+                    cell.item.removeShapeFromLayer(ctx.dotLayer);
+                    cell.item = null;
+                    
+//                    LayerRedrawManager.get().schedule(ctx.dotLayer);
+//                    LayerRedrawManager.get().schedule(ctx.nukeLayer);
+
+                    ctx.nukeLayer.setVisible(false);
+                    postMerge();
+                    
+                    callback.run();
+                }
+            });
+            list.run();
+        }
+    
+        protected Cell findSpecialNeighbor(Cell cell)
+        {
+            Cell cell2;
+            // Look for ColorBomb first
+            if ((cell2 = canBeMatched(cell.col - 1, cell.row)) != null && cell2.item instanceof ColorBomb)
+                return cell2;
+            if ((cell2 = canBeMatched(cell.col + 1, cell.row)) != null && cell2.item instanceof ColorBomb)
+                return cell2;
+            if ((cell2 = canBeMatched(cell.col, cell.row - 1)) != null && cell2.item instanceof ColorBomb)
+                return cell2;
+            if ((cell2 = canBeMatched(cell.col, cell.row + 1)) != null && cell2.item instanceof ColorBomb)
+                return cell2;
+            
+            if ((cell2 = canBeMatched(cell.col - 1, cell.row)) != null && (cell2.item instanceof Blaster || cell2.item instanceof Bomb))
+                return cell2;
+            if ((cell2 = canBeMatched(cell.col + 1, cell.row)) != null && (cell2.item instanceof Blaster || cell2.item instanceof Bomb))
+                return cell2;
+            if ((cell2 = canBeMatched(cell.col, cell.row - 1)) != null && (cell2.item instanceof Blaster || cell2.item instanceof Bomb))
+                return cell2;
+            if ((cell2 = canBeMatched(cell.col, cell.row + 1)) != null && (cell2.item instanceof Blaster || cell2.item instanceof Bomb))
+                return cell2;
+            
+            return null;
+        }
+        
+        private Cell canBeMatched(int col, int row)
+        {
+            if (!m_state.isValidCell(col, row))
+                return null;
+            
+            Cell cell = m_state.cell(col, row);
+            if (cell.item == null || cell.isLocked())
+                return null;
+            
+            return cell;
+        }
     }
     
     public void startBoostMode(Item item, Runnable removeItem)

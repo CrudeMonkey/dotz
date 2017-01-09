@@ -1,0 +1,164 @@
+{
+  "id": 214,
+  "name": "Zoo",
+  "creator": "Enno",
+  "description": "Let me out!",
+  "folder": "Work",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "????????",
+    "????????",
+    "????????",
+    "??....??",
+    "??....??",
+    "????????",
+    "????????",
+    "????????"
+  ],
+  "cages": [
+        {
+      "p": [
+        2,
+        3
+      ],
+      "strength": 2
+    },
+        {
+      "p": [
+        3,
+        3
+      ],
+      "strength": 2
+    },
+        {
+      "p": [
+        4,
+        3
+      ],
+      "strength": 2
+    },
+        {
+      "p": [
+        5,
+        3
+      ],
+      "strength": 2
+    },
+        {
+      "p": [
+        2,
+        4
+      ],
+      "strength": 2
+    },
+        {
+      "p": [
+        3,
+        4
+      ],
+      "strength": 2
+    },
+        {
+      "p": [
+        4,
+        4
+      ],
+      "strength": 2
+    },
+        {
+      "p": [
+        5,
+        4
+      ],
+      "strength": 2
+    }
+  ],
+  "conveyors": [
+    {"p":[1,2],"turn":-1,"direction":"W"},
+    {"p":[2,2],"turn":0,"direction":"W"},
+    {"p":[3,2],"turn":0,"direction":"W"},
+    {"p":[4,2],"turn":0,"direction":"W"},
+    {"p":[5,2],"turn":0,"direction":"W"},
+    {"p":[6,2],"turn":-1,"direction":"N"},
+    {"p":[1,3],"turn":0,"direction":"S"},
+    {"p":[6,3],"turn":0,"direction":"N"},
+    {"p":[1,4],"turn":0,"direction":"S"},
+    {"p":[6,4],"turn":0,"direction":"N"},
+    {"p":[1,5],"turn":-1,"direction":"S"},
+    {"p":[2,5],"turn":0,"direction":"E"},
+    {"p":[3,5],"turn":0,"direction":"E"},
+    {"p":[4,5],"turn":0,"direction":"E"},
+    {"p":[5,5],"turn":0,"direction":"E"},
+    {"p":[6,5],"turn":-1,"direction":"E"}
+  ],
+  "lazySusans": [
+    {"p":[2,3],"clockwise":true},
+    {"p":[4,3],"clockwise":false}
+  ],
+  "animals": [
+    {"p":[2,3],"strength":10,"color":0,"type":"Default"},
+    {"p":[3,3],"strength":10,"color":2,"type":"Default"},
+    {"p":[4,3],"strength":10,"color":0,"type":"Default"},
+    {"p":[5,3],"strength":10,"color":2,"type":"Default"},
+    {"p":[2,4],"strength":10,"color":1,"type":"Default"},
+    {"p":[3,4],"strength":10,"color":4,"type":"Default"},
+    {"p":[4,4],"strength":10,"color":1,"type":"Default"},
+    {"p":[5,4],"strength":10,"color":4,"type":"Default"}
+  ],
+  "generator": {
+    "generateLetters": false,
+    "swapMode": false,
+    "rollMode": false,
+    "diagonalMode": false,
+    "dominoMode": false,
+    "slipperyAnchors": false,
+    "minChainLength": 2,
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "maxDomino": 6,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "bombStrength": 9,
+    "blockerStrength": 2,
+    "animalType": "Default",
+    "freq": [
+      [20.8,"dot",0],
+      [20.8,"dot",1],
+      [20.8,"dot",2],
+      [20.8,"dot",4],
+      [6.9,"dotBomb"],
+      [9.8,"blocker"]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "animals": -1,
+    "maxMoves": 25
+  },
+  "boosts": {  },
+  "lastModified": "1481059210292"
+}

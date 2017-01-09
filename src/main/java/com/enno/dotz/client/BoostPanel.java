@@ -64,19 +64,19 @@ public class BoostPanel extends MXHBox
             
             int col = 0;
             if (boosts.turners > 0)
-                addButton(boosts.turners, new Turner(1), col++, 0);
+                addButton(boosts.turners, new Turner(1, false), col++, 0);
             if (boosts.drops > 0)
                 addButton(boosts.drops, new Drop(), col++, 0);
             if (boosts.colorBombs > 0)
-                addButton(boosts.colorBombs, new ColorBomb(), col++, 0);
+                addButton(boosts.colorBombs, new ColorBomb(false), col++, 0);
             if (boosts.explodies > 0)
                 addButton(boosts.explodies, new Explody(), col++, 0);
             if (boosts.wildCards > 0)
-                addButton(boosts.wildCards, new Wild(), col++, 0);
+                addButton(boosts.wildCards, new Wild(false), col++, 0);
             if (boosts.reshuffles > 0)
-                addButton(boosts.reshuffles, new YinYang(), col++, 0);
+                addButton(boosts.reshuffles, new YinYang(false), col++, 0);
             if (boosts.keys > 0)
-                addButton(boosts.keys, new Key(), col++, 0);
+                addButton(boosts.keys, new Key(false), col++, 0);
             if (boosts.picks > 0)
                 addButton(boosts.picks, new IcePick(), col++, 0);
         }
@@ -92,9 +92,10 @@ public class BoostPanel extends MXHBox
             {
                 if (selectedButton.getItem() instanceof Turner)
                 {
-                    int n = ((Turner) selectedButton.getItem()).n;
+                    Turner turner = (Turner) selectedButton.getItem();
+                    int n = turner.n;
                     n = (n % 3) + 1;
-                    ((BoostButton) selectedButton).swapItem(new Turner(n));
+                    ((BoostButton) selectedButton).swapItem(new Turner(n, turner.isStuck()));
                     if (n == 1)
                     {
                         selectedButton = null;
@@ -157,6 +158,8 @@ public class BoostPanel extends MXHBox
             {
                 BoostButton m = (BoostButton) m_list.get(i);
                 m.setX((i + 0.5) * m_size);
+                m.decrementColumn();
+                i++;
             }
         }
         

@@ -10,7 +10,7 @@ import com.enno.dotz.client.box.LienzoPopup;
 import com.enno.dotz.client.editor.EditLevelDialog;
 import com.enno.dotz.client.editor.EditSetDialog;
 import com.enno.dotz.client.editor.NewLevelDialog;
-import com.enno.dotz.client.editor.OrganizeLevelDialog;
+import com.enno.dotz.client.editor.OrganizeLevelDialog2;
 import com.enno.dotz.client.editor.SelectLevelDialog;
 import com.enno.dotz.client.editor.SelectSetDialog;
 import com.enno.dotz.client.io.ClientRequest;
@@ -18,7 +18,6 @@ import com.enno.dotz.client.io.MAsyncCallback;
 import com.enno.dotz.client.io.ServiceCallback;
 import com.enno.dotz.client.ui.MXLabel;
 import com.enno.dotz.client.ui.MXNotification;
-import com.enno.dotz.client.util.Matrix;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -48,10 +47,13 @@ public class MainPanel extends VLayout
     private EndOfLevel m_endOfLevel;
     private ModeManager m_modeManager;
     private EditLevelDialog m_editLevelDialog;
-
+    private RecentLevelTracker m_recentLevelTracker;
+    
     public MainPanel()
     {
-        Matrix.test();
+//        Matrix.test();
+        
+        m_recentLevelTracker = new RecentLevelTracker();
         
         m_modeManager = new ModeManager();
         
@@ -142,6 +144,17 @@ public class MainPanel extends VLayout
             }
         });
 
+        MenuItem recentLevels = m_modeManager.createMenuItem(Mode.NONE, Mode.EDIT, Mode.PLAY);
+        recentLevels.setTitle("Recent Level Edits");
+        recentLevels.addClickHandler(new ClickHandler()
+        {            
+            @Override
+            public void onClick(MenuItemClickEvent event)
+            {
+                showRecentLevels();
+            }
+        });
+
         MenuItem organizeLevels = new MenuItem();
         organizeLevels.setTitle("Organize Levels");
         organizeLevels.addClickHandler(new ClickHandler()
@@ -149,38 +162,11 @@ public class MainPanel extends VLayout
             @Override
             public void onClick(MenuItemClickEvent event)
             {
-                new OrganizeLevelDialog()
-                {
-                    @Override
-                    public void playLevel(final int levelId)
-                    {
-                        m_modeManager.askSaveLevel(new Runnable()
-                        {                                            
-                            @Override
-                            public void run()
-                            {
-                                MainPanel.this.playLevel(levelId);
-                            }
-                        });
-                    }
-                    
-                    @Override
-                    public void editLevel(final int levelId)
-                    {
-                        m_modeManager.askSaveLevel(new Runnable()
-                        {                                            
-                            @Override
-                            public void run()
-                            {
-                                MainPanel.this.editLevel(levelId);
-                            }
-                        });
-                    }
-                };
+                organizeLevels();
             }
         });
 
-        levelMenu.setItems(playLevel, newLevel, editLevel, copyLevel, cancelLevel, retryLevel, organizeLevels);
+        levelMenu.setItems(playLevel, newLevel, editLevel, copyLevel, cancelLevel, retryLevel, organizeLevels, recentLevels);
                 
         // Set menu
         Menu setMenu = new Menu();
@@ -424,7 +410,21 @@ public class MainPanel extends VLayout
                 skipLevel();
             }
         });
-        toolStrip.addButton(skip);  
+        toolStrip.addButton(skip);
+        
+        ToolStripButton edit = m_modeManager.createToolStripButton(Mode.PLAY, Mode.TEST);
+        edit.setIcon("edit.gif");
+        edit.setPrompt("Edit Level");
+        edit.setActionType(SelectionType.BUTTON);  
+        edit.addClickHandler(new com.smartgwt.client.widgets.events.ClickHandler()
+        {            
+            @Override
+            public void onClick(ClickEvent event)
+            {
+                editLevel();
+            }
+        });
+        toolStrip.addButton(edit);  
         
         HLayout stripContainer = new HLayout();
         stripContainer.setWidth("150px");
@@ -441,14 +441,43 @@ public class MainPanel extends VLayout
     
     public void init()
     {
+        showRecentLevels();
+    }
+        
+    protected void showRecentLevels()    
+    {
+        ClientRequest.loadRecentLevels(new ServiceCallback() 
+        {
+            @Override
+            public void onSuccess(NObject result)
+            {
+                NArray levels = result.getAsArray("data");
+                m_recentLevelTracker.setRecentLevels(levels);
+                
+                new SelectLevelDialog(levels) {
+                    @Override
+                    public void selected(int levelId)
+                    {
+                        ClientRequest.loadLevel(levelId, new MAsyncCallback<Config>() {
+                            @Override
+                            public void onSuccess(Config level)
+                            {
+                                showEditLevelDialog(false, level);
+                            }            
+                        });
+                    }
+                    
+                    @Override
+                    public void createNewLevel()
+                    {
+                        MainPanel.this.createNewLevel();
+                    }
+                };
+            }
+        });
+        
         //playLevel(0);
         
-        Config level = new Config();
-        level.numColumns = 8;
-        level.numRows = 8;
-        level.creator = UserSettings.INSTANCE.userName;
-        
-        showEditLevelDialog(true, level);
     }
     
     protected void cancelLevel()
@@ -469,6 +498,12 @@ public class MainPanel extends VLayout
     {
         if (m_endOfLevel != null)
             m_endOfLevel.skip();
+    }
+    
+    protected void editLevel()
+    {
+        if (m_endOfLevel != null)
+            m_endOfLevel.editLevel();
     }
 
     protected void playSet(int setId, final int levelIndex)
@@ -535,6 +570,23 @@ public class MainPanel extends VLayout
             }
             
             @Override
+            public void editLevel()
+            {
+                ask("Edit Level", "Are you sure?", new BooleanCallback() 
+                {
+                    @Override
+                    public void execute(Boolean ok)
+                    {
+                        if (ok)
+                        {
+                            killLevel();
+                            MainPanel.this.editLevel(levelId);
+                        }
+                    }
+                });
+            }
+            
+            @Override
             public void retry()
             {
                 ask("Retry Level", "Are you sure?", new BooleanCallback() {
@@ -568,21 +620,27 @@ public class MainPanel extends VLayout
         });
     }
     
-    protected void playLevel(Config level, Mode mode, EndOfLevel endOfLevel)
+    protected void playLevel(final Config level, final Mode mode, final EndOfLevel endOfLevel)
     {
-        Context ctx = new Context();
-        ctx.cfg = level;
-        
-        killLevel();
-        
-        m_modeManager.setMode(mode);
-        
-        m_endOfLevel = endOfLevel;
-        
-        m_playPanel = new PlayLevelPanel(ctx, endOfLevel);
-        m_gridContainer.addMember(m_playPanel);
-        
-        m_playPanel.play();
+        WordList.loadWordList(level.generator.generateLetters, new Runnable() {            
+            @Override
+            public void run()
+            {
+                Context ctx = new Context();
+                ctx.cfg = level;
+                
+                killLevel();
+                
+                m_modeManager.setMode(mode);
+                
+                m_endOfLevel = endOfLevel;
+                
+                m_playPanel = new PlayLevelPanel(ctx, endOfLevel);
+                m_gridContainer.addMember(m_playPanel);
+                
+                m_playPanel.play();
+            }
+        });
     }
     
     public static class GridContainer extends VLayout
@@ -691,6 +749,7 @@ public class MainPanel extends VLayout
                 }
                 m_index++;
                 
+                final int finalLevelId = levelId;
                 playLevel(levelId, new EndOfLevel() {
                     @Override
                     public void goalReached(int time, int score, int moves, int levelId)
@@ -757,6 +816,23 @@ public class MainPanel extends VLayout
                                 {
                                     killLevel();
                                     //goto start screen
+                                }
+                            }
+                        });
+                    }
+                    
+                    @Override
+                    public void editLevel()
+                    {
+                        ask("Edit Level", "Are you sure?", new BooleanCallback() 
+                        {
+                            @Override
+                            public void execute(Boolean ok)
+                            {
+                                if (ok)
+                                {
+                                    killLevel();
+                                    MainPanel.this.editLevel(finalLevelId);
                                 }
                             }
                         });
@@ -892,6 +968,8 @@ public class MainPanel extends VLayout
             
             m_score.setGoals(ctx.cfg.goals);
             m_statsPanel.setGoals(ctx.cfg.goals);
+            
+            ctx.prepareWords();
             
             Runnable startTimer = new Runnable() {
                 @Override
@@ -1035,6 +1113,9 @@ public class MainPanel extends VLayout
             @Override
             public void testLevel(final Config level)
             {
+                if (level.id != Config.UNDEFINED_ID)
+                    m_recentLevelTracker.testing(level.id);
+                
                 playLevel(level, Mode.TEST, new EndOfLevel() {
                     @Override
                     public void goalReached(int time, int score, int moves, int levelId)
@@ -1080,6 +1161,12 @@ public class MainPanel extends VLayout
                     }
                     
                     @Override
+                    public void editLevel()
+                    {
+                        cancel();
+                    }
+                    
+                    @Override
                     public void retry()
                     {
                         killLevel();
@@ -1111,6 +1198,51 @@ public class MainPanel extends VLayout
                         
                         showEditLevelDialog(false, level);
                     }            
+                });
+            }
+        };
+    }
+
+    protected void organizeLevels()
+    {
+        new OrganizeLevelDialog2()
+        {
+            @Override
+            public void playLevel(final int levelId)
+            {
+                m_modeManager.askSaveLevel(new Runnable()
+                {                                            
+                    @Override
+                    public void run()
+                    {
+                        MainPanel.this.playLevel(levelId);
+                    }
+                });
+            }
+            
+            @Override
+            public void editLevel(final int levelId)
+            {
+                m_modeManager.askSaveLevel(new Runnable()
+                {                                            
+                    @Override
+                    public void run()
+                    {
+                        MainPanel.this.editLevel(levelId);
+                    }
+                });
+            }
+            
+            @Override
+            public void playSet(final int setId, final int firstLevel)
+            {
+                m_modeManager.askSaveLevel(new Runnable()
+                {                                            
+                    @Override
+                    public void run()
+                    {
+                        MainPanel.this.playSet(setId, firstLevel);
+                    }
                 });
             }
         };

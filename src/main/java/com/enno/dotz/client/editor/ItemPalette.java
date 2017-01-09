@@ -7,7 +7,11 @@ import com.enno.dotz.client.Context;
 import com.enno.dotz.client.Direction;
 import com.enno.dotz.client.item.Anchor;
 import com.enno.dotz.client.item.Animal;
+import com.enno.dotz.client.item.Blaster;
+import com.enno.dotz.client.item.Blocker;
+import com.enno.dotz.client.item.Bomb;
 import com.enno.dotz.client.item.Clock;
+import com.enno.dotz.client.item.Cog;
 import com.enno.dotz.client.item.ColorBomb;
 import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
@@ -41,34 +45,38 @@ public class ItemPalette extends Palette<Object>
         add(ctx.dotLayer);                
         
         addButton(new RandomItem(), 0, 0);
-        addButton(new Wild(), 1, 0);
-        addButton(new Fire(), 2, 0);
-        addButton(new Anchor(), 3, 0);
-        addButton(new Knight(1), 4, 0);
-        addButton(new Rocket(Direction.EAST), 5, 0);
+        addButton(new Wild(false), 1, 0);
+        addButton(new Fire(false), 2, 0);
+        addButton(new Anchor(false), 3, 0);
+        addButton(new Knight(1, false), 4, 0);
+        addButton(new Rocket(Direction.EAST, false), 5, 0);
         
         for (int i = 0; i < Config.MAX_COLORS; i++)
         {
             addButton(new Dot(i), i, 1);
-            addButton(new Animal(i, 0, Animal.Type.DEFAULT), i, 2);
+            addButton(new Animal(i, 0, Animal.Type.DEFAULT, false), i, 2);
         }        
         
         addButton(new LazySusan(0, 0, true), 0, 3);
         addButton(new LazySusan(0, 0, false), 1, 3);
-        addButton(new Clock(11), 2, 3);
-        addButton(new Laser(Direction.EAST), 3, 3);
-        addButton(new Mirror(false), 4, 3);        
-        addButton(new YinYang(), 5, 3);
+        addButton(new Clock(11, false), 2, 3);
+        addButton(new Laser(Direction.EAST, false), 3, 3);
+        addButton(new Mirror(false, false), 4, 3);        
+        addButton(new YinYang(false), 5, 3);
 
         addButton(new Egg(), 0, 4);
         addButton(new Domino(), 1, 4);
-        addButton(new Turner(3), 2, 4);
+        addButton(new Turner(3, false), 2, 4);
         addButton(new Drop(), 3, 4);
-        addButton(new ColorBomb(), 4, 4);
-        addButton(new Key(), 5, 4);
+        addButton(new ColorBomb(false), 4, 4);
+        addButton(new Key(false), 5, 4);
         
         addButton(new IcePick(), 0, 5);
         addButton(new Striped(0, false), 1, 5);
+        addButton(new Blocker(1, false), 2, 5);
+        addButton(new Cog(), 3, 5);
+        addButton(new Blaster(true, false), 4, 5);
+        addButton(new Bomb(), 5, 5);
     }
     
     private void addButton(Object cell, int col, int row)

@@ -50,14 +50,15 @@ public class Domino extends Item
     public boolean vertical;
     private boolean flip;
     
-    public Domino(int top, int bottom, boolean vertical)
+    public Domino(int top, int bottom, boolean vertical, boolean stuck)
     {
         num[0] = top;
         num[1] = bottom;
         this.vertical = vertical;
+        m_stuck = stuck;
     }
     
-    public Domino(int top, int bottom, int direction)
+    public Domino(int top, int bottom, int direction, boolean stuck)
     {
         if (direction == Direction.NORTH || direction == Direction.EAST)
         {
@@ -70,11 +71,12 @@ public class Domino extends Item
             num[0] = bottom;
         }
         vertical = direction == Direction.EAST || direction == Direction.WEST;
+        m_stuck = stuck;
     }
     
     public Domino()
     {
-        this(2, 1, true);
+        this(2, 1, true, false);
     }
 
     public boolean isDouble()
@@ -86,6 +88,9 @@ public class Domino extends Item
     public IPrimitive<?> createShape(double size)
     {
         Group g = new Group();
+        
+        if (isStuck())
+            g.add(createStuckShape(size));
         
         double sz = size * 0.4;
         Rectangle r = new Rectangle(sz, sz);
@@ -191,7 +196,7 @@ public class Domino extends Item
     @Override
     protected Item doCopy()
     {
-        return new Domino(num[0], num[1], vertical);
+        return new Domino(num[0], num[1], vertical, m_stuck);
     }
 
     @Override

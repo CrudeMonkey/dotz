@@ -1,0 +1,278 @@
+{
+  "id": 213,
+  "name": "Clock Blockers",
+  "creator": "Enno",
+  "description": "Blockers can be quite annoying!",
+  "folder": "Intro",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "????????",
+    "????????",
+    "????????",
+    ".??????.",
+    "..????..",
+    "...??...",
+    "........",
+    "........"
+  ],
+  "doors": [
+    {"p":[0,7],"strength":1},
+    {"p":[7,7],"strength":1}
+  ],
+  "clocks": [
+        {
+      "p": [
+        0,
+        7
+      ],
+      "strength": 26
+    },
+        {
+      "p": [
+        7,
+        7
+      ],
+      "strength": 26
+    }
+  ],
+  "blockers": [
+        {
+      "p": [
+        0,
+        3
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        7,
+        3
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        0,
+        4
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        1,
+        4
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        6,
+        4
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        7,
+        4
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        0,
+        5
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        1,
+        5
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        2,
+        5
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        5,
+        5
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        6,
+        5
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        7,
+        5
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        0,
+        6
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        1,
+        6
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        2,
+        6
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        3,
+        6
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        4,
+        6
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        5,
+        6
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        6,
+        6
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        7,
+        6
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        1,
+        7
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        2,
+        7
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        3,
+        7
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        4,
+        7
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        5,
+        7
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        6,
+        7
+      ],
+      "strength": 1
+    }
+  ],
+  "generator": {
+    "generateLetters": false,
+    "swapMode": false,
+    "rollMode": false,
+    "diagonalMode": false,
+    "dominoMode": false,
+    "slipperyAnchors": false,
+    "minChainLength": 2,
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "maxDomino": 6,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "bombStrength": 9,
+    "blockerStrength": 1,
+    "animalType": "Default",
+    "freq": [
+      [23.8,"dot",0],
+      [23.8,"dot",1],
+      [23.8,"dot",3],
+      [23,"dot",5],
+      [5.6,"blocker"]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "clocks": -1,
+    "maxMoves": 25,
+    "doors": -1
+  },
+  "boosts": {  },
+  "lastModified": "1480961569673"
+}

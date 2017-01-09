@@ -15,9 +15,10 @@ public class Clock extends Item
     private Line m_time;
     private double m_handle;
     
-    public Clock(int strength)
+    public Clock(int strength, boolean stuck)
     {
         m_strength = strength;
+        m_stuck = stuck;
     }
     
     public int getStrength()
@@ -31,9 +32,28 @@ public class Clock extends Item
     }
     
     @Override
+    public boolean canIncrementStrength()
+    {
+        return true;
+    }
+    
+    @Override
+    public void incrementStrength(int ds)
+    {
+        if (m_strength <= 1 && ds == -1)
+            return;
+        
+        m_strength += ds;
+        updateHandle();
+    }
+    
+    @Override
     public IPrimitive<?> createShape(double sz)
     {
         Group shape = new Group();
+        
+        if (isStuck())
+            shape.add(createStuckShape(sz));
         
         double r = sz * 0.36;
         
@@ -79,7 +99,7 @@ public class Clock extends Item
     @Override
     protected Item doCopy()
     {
-        return new Clock(m_strength);
+        return new Clock(m_strength, m_stuck);
     }
         
     @Override
@@ -111,6 +131,9 @@ public class Clock extends Item
     
     protected void updateHandle()
     {
+        if (m_time == null)
+            return;
+        
         double a = ((m_strength + 3) % 12) * Math.PI / 6;
         
         Point2DArray pts = m_time.getPoints();

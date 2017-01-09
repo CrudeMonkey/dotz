@@ -1,0 +1,152 @@
+{
+  "id": 244,
+  "name": "Test Chest",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Test",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    ".?????.?",
+    "????????",
+    "11???111",
+    ".???1.??",
+    "????1??.",
+    "??????11",
+    ".???????",
+    "???.???."
+  ],
+  "doors": [
+    {"p":[3,7],"strength":1}
+  ],
+  "rockets": [
+    {"direction":"E","p":[0,0]},
+    {"direction":"N","p":[0,6]}
+  ],
+  "chests": [
+        {
+      "strength": 1,
+      "item": {
+        "class": "random"
+      },
+      "p": [
+        6,
+        0
+      ]
+    },
+        {
+      "strength": 1,
+      "item": {
+        "vertical": true,
+        "class": "blaster"
+      },
+      "p": [
+        0,
+        3
+      ]
+    },
+        {
+      "strength": 2,
+      "item": {
+        "color": 2,
+        "class": "dot"
+      },
+      "p": [
+        5,
+        3
+      ]
+    },
+        {
+      "strength": 2,
+      "item": {
+        "strength": 5,
+        "color": 0,
+        "type": "Default",
+        "class": "animal"
+      },
+      "p": [
+        7,
+        4
+      ]
+    },
+        {
+      "strength": 1,
+      "item": {
+        "class": "random"
+      },
+      "p": [
+        3,
+        7
+      ]
+    },
+        {
+      "strength": 1,
+      "item": {
+        "class": "fire"
+      },
+      "p": [
+        7,
+        7
+      ]
+    }
+  ],
+  "generator": {
+    "generateLetters": false,
+    "swapMode": false,
+    "clickMode": false,
+    "rollMode": false,
+    "diagonalMode": false,
+    "dominoMode": false,
+    "slipperyAnchors": false,
+    "minChainLength": 2,
+    "seed": 123,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "maxDomino": 9,
+    "initialDotsOnly": false,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "bombStrength": 9,
+    "blockerStrength": 2,
+    "animalType": "Default",
+    "animalAction": "Default",
+    "icePickRadius": 3,
+    "dropRadius": 3,
+    "freq": [
+      [17.8,"dot",0],
+      [17.8,"dot",1],
+      [17.8,"dot",2],
+      [17.8,"dot",3],
+      [17.8,"dot",4],
+      [11,"wild"]
+    ]
+  },
+  "goals": {
+    "dots": {    }
+  },
+  "boosts": {
+    "keys": 7
+  },
+  "lastModified": "1482979741160"
+}

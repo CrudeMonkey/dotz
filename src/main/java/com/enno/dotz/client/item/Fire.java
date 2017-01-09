@@ -1,5 +1,6 @@
 package com.enno.dotz.client.item;
 
+import com.ait.lienzo.client.core.shape.Group;
 import com.ait.lienzo.client.core.shape.IPrimitive;
 import com.ait.lienzo.client.core.shape.Layer;
 import com.ait.lienzo.client.core.shape.Star;
@@ -7,8 +8,11 @@ import com.ait.lienzo.shared.core.types.ColorName;
 
 public class Fire extends Item
 {
-    public Fire()
-    {        
+    private Star m_rotateShape;
+
+    public Fire(boolean stuck)
+    {
+        m_stuck = stuck;
     }
     
     @Override
@@ -19,12 +23,23 @@ public class Fire extends Item
         star.setStrokeColor(ColorName.RED);
         star.setStrokeWidth(1);
         star.setFillColor(ColorName.YELLOW);
+
+        m_rotateShape = star;
+
+        if (isStuck())
+        {
+            Group shape = new Group();
+            shape.add(createStuckShape(size));
+            shape.add(star);
+            return shape;
+        }
+        
         return star;
     }
     
     protected Item doCopy()
     {
-        return new Fire();
+        return new Fire(m_stuck);
     }
 
     public boolean canExplodeNextTo()
@@ -56,6 +71,6 @@ public class Fire extends Item
     {
         long speed = 4000;
         double rot = (t % speed) * Math.PI * 2 / speed;
-        shape.setRotation(rot);
+        m_rotateShape.setRotation(rot);
     }
 }

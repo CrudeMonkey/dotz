@@ -113,6 +113,6 @@ public abstract class SelectSetDialog extends MXWindow
         m_grid.setData(MXRecordList.toRecordArray(sets));
     }
     
-    public abstract void selected(int levelId);
+    public abstract void selected(int setId);
 
 }

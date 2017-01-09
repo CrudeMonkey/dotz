@@ -8,6 +8,9 @@ import com.ait.lienzo.shared.core.types.IColor;
 import com.enno.dotz.client.anim.Pt;
 import com.enno.dotz.client.item.Anchor;
 import com.enno.dotz.client.item.Animal;
+import com.enno.dotz.client.item.Blaster;
+import com.enno.dotz.client.item.Blocker;
+import com.enno.dotz.client.item.Chest;
 import com.enno.dotz.client.item.Clock;
 import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
@@ -30,6 +33,8 @@ public class Generator
     public static final int DOMINO_MODE = 1;
     public static final int LETTER_MODE = 2;
     public static final int SWAP_MODE = 3;
+    public static final int DIAGONAL_MODE = 4;
+    public static final int CLICK_MODE = 5;
     
     public static final long RANDOM_SEED = -1;
 
@@ -42,24 +47,40 @@ public class Generator
     protected double m_dotsOnlyScale;
     protected Random m_rnd;
 
-    public int         fireGrowthRate = 1;                  // default: 1 fire per turn
-    public int         animalStrength = 10;
-    public Animal.Type animalType     = Animal.Type.DEFAULT;
-    public int         maxAnchors     = 3;
-    public int         knightStrength = 3;
-    public int         bombStrength   = 9;
-    public Integer     clockStrength  = 10;
-    public boolean     initialDotsOnly = false;
-    public boolean     generateLetters = false;
-    public boolean     swapMode        = false;
-    public boolean     rollMode        = false;
-    public boolean     dominoMode      = false;
-    public int         maxDomino       = 9;
+    public int           fireGrowthRate   = 1;                  // default: 1 fire per turn
+    public int           animalStrength   = 10;
+    public Animal.Type   animalType       = Animal.Type.DEFAULT;
+    public Animal.Action animalAction     = Animal.Action.DEFAULT;
+    public int           maxAnchors       = 3;
+    public int           knightStrength   = 3;
+    public int           blockerStrength  = 2;
+    public int           bombStrength     = 9;
+    public Integer       clockStrength    = 10;
+    public Integer       chestStrength    = 1;
+    public boolean       initialDotsOnly  = false;
+    public boolean       generateLetters  = false;
+    public boolean       swapMode         = false;
+    public boolean       rollMode         = false;
+    public boolean       diagonalMode     = false;
+    public boolean       dominoMode       = false;
+    public boolean       clickMode        = false;
+    public int           maxDomino        = 9;
+    public boolean       slipperyAnchors  = false;
+    public int           minChainLength   = 2;
+    public String        rewardStrategies = "";
+    public int           icePickRadius    = 3;
+    public int           dropRadius       = 3;
     
-    private int        m_excludeDotColor = -1; // when user makes a square, that color is not generated
+    // Word Mode settings
+    public boolean       removeLetters    = true;
+    public boolean       findWords        = false;
+    public int           maxWordLength    = 9;
+    
+    private int          m_excludeDotColor = -1; // when user makes a square, that color is not generated
 
-    private int m_numDotColors;
-
+    private int          m_numDotColors;
+    private boolean      m_noChest = false;
+    
     private DominoGenerator m_dominoGenerator;
 
     public Generator()
@@ -74,6 +95,10 @@ public class Generator
             return SWAP_MODE;
         if (generateLetters)
             return LETTER_MODE;
+        if (diagonalMode)
+            return DIAGONAL_MODE;
+        if (clickMode)
+            return CLICK_MODE;
         
         return DOT_MODE;
     }
@@ -124,16 +149,29 @@ public class Generator
         g.setSeed(m_seed);
         g.animalStrength = animalStrength;
         g.animalType = animalType;
+        g.animalAction = animalAction;
         g.fireGrowthRate = fireGrowthRate;
         g.maxAnchors = maxAnchors;
         g.knightStrength = knightStrength;
+        g.blockerStrength = blockerStrength;
         g.clockStrength = clockStrength;
+        g.chestStrength = chestStrength;
         g.bombStrength = bombStrength;
         g.generateLetters = generateLetters;
         g.swapMode = swapMode;
         g.rollMode = rollMode;
+        g.diagonalMode = diagonalMode;
+        g.clickMode = clickMode;
         g.dominoMode = dominoMode;
         g.maxDomino = maxDomino;
+        g.slipperyAnchors = slipperyAnchors;
+        g.minChainLength = minChainLength;
+        g.rewardStrategies = rewardStrategies;
+        g.icePickRadius = icePickRadius;
+        g.dropRadius = dropRadius;
+        g.removeLetters = removeLetters;
+        g.findWords = findWords;
+        g.maxWordLength = maxWordLength;
         
         for (ItemFrequency f : m_list)
         {
@@ -205,6 +243,12 @@ public class Generator
         }
     }
     
+    public int getNextDotColor()
+    {
+        ItemFrequency dot = getNextDot();
+        return ((Dot) dot.item).color;
+    }
+    
     public Item getNextItem(Context ctx, boolean initial)
     {
         if (initial && dominoMode)
@@ -235,6 +279,9 @@ public class Generator
                     continue;
                 if (item instanceof IcePick && ctx.score.getIceInGrid() == 0)                    
                     continue;
+                
+                if (m_noChest && item instanceof Chest)
+                    continue;
             }
             
             if (item instanceof DotBomb)
@@ -248,6 +295,14 @@ public class Generator
                 while (m_excludeDotColor != -1 && m_numDotColors > 1 && dot.color == m_excludeDotColor);
                 
                 ((DotBomb) item).setDot(dot);
+            }
+            else if (item instanceof Chest)
+            {
+                Chest chest = (Chest) item;
+                m_noChest = true;   // prevent chest inside chest
+                chest.setItem(getNextItem(ctx, initial));
+                m_noChest = false;
+                ctx.score.generatedChest();
             }
             else if (item instanceof Anchor)
             {
@@ -276,6 +331,10 @@ public class Generator
             else if (item instanceof Rocket)
             {
                 ctx.score.generatedRocket();
+            }
+            else if (item instanceof Blocker)
+            {
+                ctx.score.generatedBlocker();
             }
             break;
         }        
@@ -314,7 +373,7 @@ public class Generator
         
         if (oldItem instanceof DotBomb)
         {
-            DotBomb bomb = new DotBomb((Dot) item, ((DotBomb) oldItem).getStrength());
+            DotBomb bomb = new DotBomb((Dot) item, ((DotBomb) oldItem).getStrength(), oldItem.isStuck());
             bomb.init(ctx);
             return bomb;
         }
@@ -342,6 +401,36 @@ public class Generator
         return list;
     }
 
+    public static int getLetterPoints(String letter)
+    {
+        switch (letter.charAt(0))
+        {
+            case 'Q': 
+            case 'Z':   return 10;
+            
+            case 'J': 
+            case 'X':   return 8;
+            
+            case 'K':   return 5;
+                
+            case 'F': 
+            case 'H': 
+            case 'V': 
+            case 'W': 
+            case 'Y':   return 4;
+                
+            case 'B': 
+            case 'C': 
+            case 'M': 
+            case 'P':   return 3;
+            
+            case 'D': 
+            case 'G':   return 2;
+            
+            default:    return 1;
+        }
+    }
+    
     public static FrequencyGenerator<String> createLetterGenerator()
     {
         FrequencyGenerator<String> f = new FrequencyGenerator<String>();
@@ -400,6 +489,7 @@ public class Generator
                 Animal animal = (Animal) item;
                 animal.setStrength(ctx.generator.animalStrength);
                 animal.setType(ctx.generator.animalType);
+                animal.setAction(ctx.generator.animalAction);
             }
             else if (item instanceof Knight)
             {
@@ -410,6 +500,16 @@ public class Generator
             {
                 Clock clock = (Clock) item;
                 clock.setStrength(ctx.generator.clockStrength + 1); // when it drops in, it loses 1
+            }
+            else if (item instanceof Blocker)
+            {
+                Blocker blocker = (Blocker) item;
+                blocker.setStrength(ctx.generator.blockerStrength);
+            }
+            else if (item instanceof Chest)
+            {
+                Chest chest = (Chest) item;
+                chest.setStrength(ctx.generator.chestStrength);
             }
             else if (item instanceof Laser)
             {
@@ -431,14 +531,29 @@ public class Generator
                 Turner turner = (Turner) item;
                 turner.n = 1 + ctx.generator.getRandom().nextInt(3);
             }
+            else if (item instanceof IcePick)
+            {
+                IcePick pick = (IcePick) item;
+                pick.setRadius(ctx.generator.icePickRadius);
+            }
+            else if (item instanceof Drop)
+            {
+                Drop drop = (Drop) item;
+                drop.setRadius(ctx.generator.dropRadius);
+            }
             else if (item instanceof DotBomb)
             {
                 DotBomb bomb = (DotBomb) item;
-                bomb.setStrength(ctx.generator.bombStrength);
+                bomb.setStrength(ctx.generator.bombStrength); //TODO generate letter bombs?
+            }
+            else if (item instanceof Blaster)
+            {
+                Blaster blaster = (Blaster) item;
+                blaster.setVertical(ctx.generator.getRandom().nextBoolean());
             }
             else if (item instanceof Dot && letterGenerator != null)
             {
-                ((Dot) item).letter = letterGenerator.next(ctx.generator.getRandom());
+                ((Dot) item).setLetter(letterGenerator.next(ctx.generator.getRandom()));
             }
             else if (item instanceof Domino)
             {
@@ -464,7 +579,7 @@ public class Generator
         public Domino nextDomino(Random rnd)
         {
             Pt pt = next(rnd);
-            return new Domino(pt.col, pt.row, Direction.randomDirection(rnd));
+            return new Domino(pt.col, pt.row, Direction.randomDirection(rnd), false);
         }
     }
 }

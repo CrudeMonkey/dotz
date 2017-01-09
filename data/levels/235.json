@@ -1,0 +1,133 @@
+{
+  "name": "Test Blaster",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Test",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "????????",
+    "????????",
+    "?.???.??",
+    "????????",
+    "???.????",
+    "?.????.?",
+    "??.?.???",
+    "????.???"
+  ],
+  "blockers": [
+        {
+      "p": [
+        1,
+        2
+      ],
+      "vertical": false
+    },
+        {
+      "p": [
+        5,
+        2
+      ],
+      "vertical": false
+    },
+        {
+      "p": [
+        3,
+        4
+      ],
+      "vertical": true
+    },
+        {
+      "p": [
+        1,
+        5
+      ],
+      "vertical": true
+    },
+        {
+      "p": [
+        6,
+        5
+      ],
+      "vertical": false
+    },
+        {
+      "p": [
+        2,
+        6
+      ],
+      "vertical": true
+    },
+        {
+      "p": [
+        4,
+        6
+      ],
+      "vertical": false
+    },
+        {
+      "p": [
+        4,
+        7
+      ],
+      "vertical": false
+    }
+  ],
+  "generator": {
+    "generateLetters": false,
+    "swapMode": false,
+    "clickMode": false,
+    "rollMode": false,
+    "diagonalMode": false,
+    "dominoMode": false,
+    "slipperyAnchors": false,
+    "minChainLength": 2,
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "maxDomino": 9,
+    "initialDotsOnly": false,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "bombStrength": 9,
+    "blockerStrength": 2,
+    "animalType": "Default",
+    "animalAction": "Default",
+    "icePickRadius": 3,
+    "dropRadius": 3,
+    "freq": [
+      [20,"dot",0],
+      [20,"dot",1],
+      [20,"dot",2],
+      [20,"dot",3],
+      [20,"dot",4]
+    ]
+  },
+  "goals": {
+    "dots": {    }
+  },
+  "boosts": {  },
+  "id": 235,
+  "lastModified": "1482013167981"
+}

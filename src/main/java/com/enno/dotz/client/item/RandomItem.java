@@ -15,10 +15,18 @@ public class RandomItem extends Item
     {
     }
     
+    public RandomItem(boolean stuck)
+    {
+        m_stuck = stuck;
+    }
+    
     @Override
     public IPrimitive<?> createShape(double size)
     {
         Group g = new Group();
+        
+        if (isStuck())
+            g.add(createStuckShape(size));
         
         Circle bg = new Circle(size / 4);
         bg.setFillColor(ColorName.WHITE);
@@ -44,7 +52,7 @@ public class RandomItem extends Item
     @Override
     protected Item doCopy()
     {
-        return new RandomItem();
+        return new RandomItem(m_stuck);
     }
 
     @Override

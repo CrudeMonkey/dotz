@@ -36,18 +36,6 @@
     "..?...A?",
     "...00..?"
   ],
-  "teleporters": [  ],
-  "doors": [  ],
-  "conveyors": [  ],
-  "lazySusans": [  ],
-  "dots": [  ],
-  "bombs": [  ],
-  "animals": [  ],
-  "knights": [  ],
-  "clocks": [  ],
-  "lasers": [  ],
-  "mirrors": [  ],
-  "rockets": [  ],
   "generator": {
     "generateLetters": false,
     "swapMode": false,

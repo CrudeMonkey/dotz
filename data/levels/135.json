@@ -3,7 +3,7 @@
   "name": "Word To Ya Motha",
   "creator": "Enno",
   "description": "In Word Mode animals act as wild cards,<br>but you can't have more than one color in a chain with animals.<br>And you can't have more than 5 wild cards.",
-  "folder": "Intro",
+  "folder": "Intro\/Letters",
   "numColumns": 8,
   "numRows": 8,
   "grid": [
@@ -73,5 +73,5 @@
     "dots": {    },
     "animals": -1
   },
-  "lastModified": "1445963343943"
+  "lastModified": "1481229389368"
 }

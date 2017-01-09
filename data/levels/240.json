@@ -1,0 +1,93 @@
+{
+  "id": 240,
+  "name": "Test Fixed Words",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Test",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    ".......?",
+    "????????",
+    "????????",
+    "????.???",
+    "?.??????",
+    "????????",
+    "??????.?",
+    "????????"
+  ],
+  "dots": [
+    {"p":[0,0],"color":0,"letter":"A"},
+    {"p":[1,0],"color":0,"letter":"Qu"},
+    {"p":[2,0],"color":0,"letter":"A"},
+    {"p":[3,0],"color":0,"letter":"R"},
+    {"p":[4,0],"color":0,"letter":"I"},
+    {"p":[5,0],"color":3,"letter":"U"},
+    {"p":[6,0],"color":3,"letter":"M"}
+  ],
+  "dotBombs": [
+    {"p":[4,3],"color":2,"letter":"N","strength":9},
+    {"p":[1,4],"color":2,"letter":"S","strength":9},
+    {"p":[6,6],"color":4,"letter":"N","strength":9}
+  ],
+  "generator": {
+    "generateLetters": true,
+    "swapMode": false,
+    "clickMode": false,
+    "rollMode": false,
+    "diagonalMode": false,
+    "dominoMode": false,
+    "slipperyAnchors": false,
+    "minChainLength": 3,
+    "seed": 123,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "maxDomino": 9,
+    "initialDotsOnly": false,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "bombStrength": 9,
+    "blockerStrength": 2,
+    "animalType": "Default",
+    "animalAction": "Default",
+    "icePickRadius": 3,
+    "dropRadius": 3,
+    "removeLetters": false,
+    "findWords": false,
+    "maxWordLength": 9,
+    "freq": [
+      [20,"dot",0],
+      [20,"dot",1],
+      [20,"dot",2],
+      [20,"dot",3],
+      [20,"dot",4]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "words": 20
+  },
+  "boosts": {  },
+  "lastModified": "1482602851154"
+}

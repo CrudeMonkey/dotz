@@ -2,7 +2,6 @@ package com.enno.dotz.client.editor;
 
 import com.ait.tooling.nativetools.client.NObject;
 import com.enno.dotz.client.Config;
-import com.enno.dotz.client.Generator;
 import com.enno.dotz.client.ShowScoresDialog;
 import com.enno.dotz.client.io.ClientRequest;
 import com.enno.dotz.client.io.ServiceCallback;
@@ -34,17 +33,12 @@ public abstract class EditLevelDialog extends MXWindow
         setTitle("Level Editor");
         setIsModal(false);
         
-        if (isNew)
-        {
-            level.generator = new Generator();
-        }
-        
         m_level = level;
         
         addItem(createPane(isNew, level));
         
         setWidth(1000);
-        setHeight(875);
+        setHeight(900);
         
         setTop(30);
         
@@ -83,7 +77,7 @@ public abstract class EditLevelDialog extends MXWindow
         m_generator = new EditGeneratorTab(isNew, level);
         m_tabs.addTab("Generator Frequencies", m_generator);                
         
-        m_props = new GeneratorPropertiesPanel(isNew, level)
+        m_props = new GeneratorPropertiesPanel(level)
         {
             @Override
             protected void setLetterMode(boolean isLetterMode)
@@ -93,7 +87,7 @@ public abstract class EditLevelDialog extends MXWindow
         };
         m_tabs.addTab("Generator Settings", m_props); 
         
-        m_goals = new EditGoalsTab(isNew, level);
+        m_goals = new EditGoalsTab(level);
         m_tabs.addTab("Goals", m_goals);
         
         m_buttons = new MXButtonsPanel();
@@ -184,6 +178,7 @@ public abstract class EditLevelDialog extends MXWindow
     public void closeWindow()
     {
         //TODO check if anything changed
+        SetControllerDialog.closeDialog();
         
         exitEditMode();
         super.closeWindow();
@@ -214,7 +209,7 @@ public abstract class EditLevelDialog extends MXWindow
     
     protected boolean validate(boolean save)
     {
-        if (!m_layout.validate(save) || !m_generator.validate() || !m_goals.validate() || !m_props.validate())            
+        if (!m_layout.validate(save) || !m_generator.validate() || !m_props.validate() || !m_goals.validate(m_generator))            
         {
             return false;
         }

@@ -18,11 +18,13 @@ import com.ait.lienzo.shared.core.types.Color;
 import com.ait.lienzo.shared.core.types.ColorName;
 import com.ait.lienzo.shared.core.types.TextAlign;
 import com.ait.lienzo.shared.core.types.TextBaseLine;
+import com.enno.dotz.client.Cell.Bubble;
 import com.enno.dotz.client.Cell.Cage;
 import com.enno.dotz.client.Cell.CircuitCell;
 import com.enno.dotz.client.Cell.Door;
 import com.enno.dotz.client.item.Anchor;
 import com.enno.dotz.client.item.Animal;
+import com.enno.dotz.client.item.Blocker;
 import com.enno.dotz.client.item.Clock;
 import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
@@ -121,6 +123,15 @@ public class ScorePanel extends LienzoPanel
         draw();
     }
     
+    public void madeChain(int length, int color)
+    {
+        for (GoalItem g : m_list)
+        {
+            if (!g.isCompleted())
+                g.madeChain(length, color);
+        }
+    }
+    
     public void update()
     {
         for (GoalItem g : m_list)
@@ -188,9 +199,17 @@ public class ScorePanel extends LienzoPanel
         if (need != 0)
             m_list.add(new CageGoal(need, ctx));
         
+        need = goal.getBubbles();
+        if (need != 0)
+            m_list.add(new BubbleGoal(need, ctx));
+        
         need = goal.getCircuits();
         if (need != 0)
             m_list.add(new CircuitGoal(need, ctx));
+        
+        need = goal.getBlockers();
+        if (need != 0)
+            m_list.add(new BlockerGoal(need, ctx));
         
         need = goal.getLasers();
         if (need != 0)
@@ -216,6 +235,14 @@ public class ScorePanel extends LienzoPanel
         if (need != 0)
             m_list.add(new ScoreGoal(need, ctx));
 
+        need = goal.getWords();
+        if (need != 0)
+            m_list.add(new WordsGoal(need, ctx));
+
+        ChainGoal combi = goal.getChainGoal();
+        if (combi != null)
+            m_list.add(ChainGoalItem.createChainGoal(combi, ctx));
+        
         // Layout the GoalItems
         int cols = Math.max(8, ctx.cfg.numColumns);
         int rows = m_list.size() > cols ? 2 : 1;
@@ -280,6 +307,11 @@ public class ScorePanel extends LienzoPanel
             this.ctx = ctx;            
         }
         
+        public void madeChain(int length, int color)
+        {
+            // override
+        }
+
         public boolean isCompleted()
         {
             return m_completed;
@@ -347,6 +379,83 @@ public class ScorePanel extends LienzoPanel
         }
     }
     
+    public static class ChainGoalItem extends GoalItem
+    {
+        private int m_curr = 0;
+        private int[] m_combiLengths;
+        private int[] m_colors;
+        
+        private Group m_group;
+        
+        public static ChainGoalItem createChainGoal(ChainGoal ch, Context ctx)
+        {
+            return new ChainGoalItem(ch.getChainLengths(), ch.getColors(), ctx);
+        }
+        
+        public ChainGoalItem(int[] combiLengths, int[] colors, Context ctx)
+        {
+            super(ctx);
+            m_combiLengths = combiLengths;
+            m_colors = colors;
+        }
+
+        @Override
+        public void madeChain(int length, int color)
+        {
+            if (length < m_combiLengths[m_curr] || color != m_colors[m_curr])
+                return;
+            
+            m_curr++;
+            if (m_curr >= m_colors.length)
+            {
+                setCompleted();
+            }
+            else
+            {
+                updateDots();
+            }
+        }
+        
+        @Override
+        protected IPrimitive<?> createShape()
+        {
+            m_group = new Group();
+            
+            updateDots();
+            
+            return m_group;
+        }
+
+        protected void updateDots()
+        {
+            m_group.removeAll();
+            
+            double sz = SHAPE_SIZE / 2;
+            double s = sz / 4;
+            
+            for (int i = 0; i < 3; i++)
+            {
+                Dot dot = new Dot(m_colors[m_curr]);
+                dot.setContext(ctx);
+                
+                int dx = (i & 1) == 1 ? 1 : -1;
+                int dy = (i & 2) == 2 ? 1 : -1;
+                IPrimitive<?> shape = dot.createShape(sz);
+                shape.setX(dx * s);
+                shape.setY(dy * s);
+                
+                m_group.add(shape);
+            }
+        }
+        
+        @Override
+        protected void updateText()
+        {
+            if (!isCompleted())
+                setText("" + m_combiLengths[m_curr]);
+        }
+    }
+    
     public static class DotGoal extends GoalItem
     {
         private int m_color;
@@ -390,7 +499,7 @@ public class ScorePanel extends LienzoPanel
         
         protected IPrimitive<?> createShape()
         {
-            Anchor anchor = new Anchor();
+            Anchor anchor = new Anchor(false);
             anchor.setContext(ctx);
             return anchor.createShape(SHAPE_SIZE);
         }
@@ -429,7 +538,7 @@ public class ScorePanel extends LienzoPanel
         
         protected IPrimitive<?> createShape()
         {
-            Knight knight = new Knight(1);
+            Knight knight = new Knight(1, false);
             knight.setContext(ctx);
             return knight.createShape(SHAPE_SIZE);
         }
@@ -468,7 +577,7 @@ public class ScorePanel extends LienzoPanel
         
         protected IPrimitive<?> createShape()
         {
-            Clock clock = new Clock(1);
+            Clock clock = new Clock(1, false);
             clock.setContext(ctx);
             return clock.createShape(SHAPE_SIZE);
         }
@@ -507,7 +616,7 @@ public class ScorePanel extends LienzoPanel
         
         protected IPrimitive<?> createShape()
         {
-            Animal animal = new Animal(0, 0, Animal.Type.DEFAULT);
+            Animal animal = new Animal(0, 0, Animal.Type.DEFAULT, false);
             animal.setContext(ctx);
             return animal.createShape(SHAPE_SIZE * 0.8);
         }
@@ -632,6 +741,57 @@ public class ScorePanel extends LienzoPanel
         }
     }
     
+    
+    public static class WordsGoal extends GoalItem
+    {
+        private int m_goal;
+        
+        public WordsGoal(int need, Context ctx)
+        {
+            super(ctx);
+            
+            m_goal = need;
+        }
+        
+        protected IPrimitive<?> createShape()
+        {
+            Group g = new Group();
+            
+            double h = SHAPE_SIZE * 0.65;
+            double w = SHAPE_SIZE;
+            Rectangle rect = new Rectangle(w, h);
+            rect.setX(-w / 2);
+            rect.setY(-h / 2); 
+            
+            int r = 255 - 3 * 20;
+            if (r < 0) r = 0;
+            rect.setFillColor(new Color(r, r, r));
+            g.add(rect);
+            
+            Text txt = new Text("WORDS");
+            txt.setFontSize(7);
+            txt.setFontStyle("bold");
+            txt.setFillColor(ColorName.BLACK);
+            txt.setTextBaseLine(TextBaseLine.MIDDLE);
+            txt.setTextAlign(TextAlign.CENTER);
+            
+            g.add(txt);
+            
+            return g;            
+        }
+        
+        protected void updateText()
+        {
+            int goal = m_goal;
+            int got = ctx.score.getWordCount();
+            
+            if (got >= goal)
+                setCompleted();
+            else
+                setText(got + " / " + goal);
+        }
+    }
+    
     public static class DoorGoal extends GoalItem
     {
         private int m_goal;
@@ -670,6 +830,44 @@ public class ScorePanel extends LienzoPanel
         }
     }
     
+    public static class BlockerGoal extends GoalItem
+    {
+        private int m_goal;
+        
+        public BlockerGoal(int need, Context ctx)
+        {
+            super(ctx);
+            
+            m_goal = need;
+        }
+        
+        protected IPrimitive<?> createShape()
+        {
+            Blocker sg = new Blocker(1, false);
+            sg.setContext(ctx);
+            return sg.createShape(SHAPE_SIZE * 0.8); 
+        }
+
+        protected void updateText()
+        {
+            if (m_goal == Goal.ALL)
+            {
+                int gen = ctx.score.getBlockersInGrid();
+                if (gen > 0)
+                    setText("" + gen);
+                else 
+                    setCompleted();
+            }
+            else
+            {
+                int got = ctx.score.getExplodedBlockers();
+                if (got >= m_goal)
+                    setCompleted();
+                else
+                    setText(got + " / " + m_goal);
+            }
+        }
+    }    
     
     public static class CageGoal extends GoalItem
     {
@@ -701,6 +899,45 @@ public class ScorePanel extends LienzoPanel
         {
             int goal = m_goal == Goal.ALL ? ctx.score.getInitialCages() : m_goal;
             int got = ctx.score.getExplodedCages();
+            
+            if (got >= goal)
+                setCompleted();
+            else
+                setText(got + " / " + goal);
+        }
+    }
+    
+    
+    public static class BubbleGoal extends GoalItem
+    {
+        private int m_goal;
+        
+        public BubbleGoal(int need, Context ctx)
+        {
+            super(ctx);
+            
+            m_goal = need;
+        }
+        
+        protected IPrimitive<?> createShape()
+        {
+            Bubble animal = new Bubble();
+            double sz = SHAPE_SIZE * 0.6;
+            
+            Group wrap = new Group();
+            
+            Group shape = animal.createShape(sz);
+            shape.setX(-sz/2);
+            shape.setY(-sz/2);
+            
+            wrap.add(shape);
+            return wrap;
+        }
+        
+        protected void updateText()
+        {
+            int goal = m_goal == Goal.ALL ? ctx.score.getInitialBubbles() : m_goal;
+            int got = ctx.score.getExplodedBubbles();
             
             if (got >= goal)
                 setCompleted();
@@ -760,7 +997,7 @@ public class ScorePanel extends LienzoPanel
         
         protected IPrimitive<?> createShape()
         {
-            Laser laser = new Laser(Direction.EAST);
+            Laser laser = new Laser(Direction.EAST, false);
             laser.setContext(ctx);
             return laser.createShape(SHAPE_SIZE * 0.8);           
         }
@@ -828,7 +1065,7 @@ public class ScorePanel extends LienzoPanel
         
         protected IPrimitive<?> createShape()
         {
-            Domino domino = new Domino(1, 2, true);
+            Domino domino = new Domino(1, 2, true, false);
             domino.setContext(ctx);
             return domino.createShape(SHAPE_SIZE * 0.8);           
         }
@@ -858,7 +1095,7 @@ public class ScorePanel extends LienzoPanel
         
         protected IPrimitive<?> createShape()
         {
-            Fire animal = new Fire();
+            Fire animal = new Fire(false);
             animal.setContext(ctx);
             return animal.createShape(SHAPE_SIZE);
         }
@@ -897,7 +1134,7 @@ public class ScorePanel extends LienzoPanel
         
         protected IPrimitive<?> createShape()
         {
-            Mirror animal = new Mirror(false);
+            Mirror animal = new Mirror(false, false);
             animal.setContext(ctx);
             return animal.createShape(SHAPE_SIZE);
         }
@@ -936,7 +1173,7 @@ public class ScorePanel extends LienzoPanel
         
         protected IPrimitive<?> createShape()
         {
-            Rocket animal = new Rocket(Direction.EAST);
+            Rocket animal = new Rocket(Direction.EAST, false);
             animal.setContext(ctx);
             return animal.createShape(SHAPE_SIZE);
         }

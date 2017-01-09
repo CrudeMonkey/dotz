@@ -1,5 +1,6 @@
 {
-  "name": "Freaky Dominoes, Egs and Lasers",
+  "id": 182,
+  "name": "Freaky Dominoes, Eggs and Lasers",
   "creator": "Enno",
   "description": "",
   "folder": "Work",
@@ -35,8 +36,6 @@
     "????????",
     "????????"
   ],
-  "teleporters": [  ],
-  "doors": [  ],
   "conveyors": [
     {"p":[0,2],"turn":-1,"direction":"W"},
     {"p":[1,2],"turn":-1,"direction":"N"},
@@ -73,21 +72,14 @@
     {"p":[5,7],"turn":0,"direction":"E"},
     {"p":[6,7],"turn":-1,"direction":"E"}
   ],
-  "lazySusans": [  ],
-  "dots": [  ],
-  "bombs": [  ],
-  "animals": [  ],
-  "knights": [  ],
-  "clocks": [  ],
-  "lasers": [  ],
-  "mirrors": [  ],
-  "rockets": [  ],
-  "dominoes": [  ],
   "generator": {
     "generateLetters": false,
     "swapMode": false,
     "rollMode": false,
+    "diagonalMode": false,
     "dominoMode": true,
+    "slipperyAnchors": false,
+    "minChainLength": 2,
     "seed": -1,
     "fireGrowthRate": 1,
     "maxAnchors": 3,
@@ -109,6 +101,6 @@
   "goals": {
     "dots": {    }
   },
-  "id": 182,
-  "lastModified": "1447638554961"
+  "boosts": {  },
+  "lastModified": "1480906525138"
 }

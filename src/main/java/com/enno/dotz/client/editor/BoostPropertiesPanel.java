@@ -17,7 +17,7 @@ public class BoostPropertiesPanel extends VLayout
     private SpinnerItem m_reshuffles;
     private SpinnerItem m_keys;
     
-    public BoostPropertiesPanel(boolean isNew, Config level)
+    public BoostPropertiesPanel(Config level)
     {
         setMargin(10);
         
@@ -82,18 +82,15 @@ public class BoostPropertiesPanel extends VLayout
         
         form.setFields(m_turners, m_drops, m_picks, m_colorBombs, m_wildCards, m_explodies, m_reshuffles, m_keys);
         
-        if (!isNew)
-        {
-            Boosts b = level.boosts;
-            m_turners.setValue(b.turners);
-            m_drops.setValue(b.drops);
-            m_picks.setValue(b.picks);
-            m_colorBombs.setValue(b.colorBombs);
-            m_wildCards.setValue(b.wildCards);
-            m_explodies.setValue(b.explodies);
-            m_reshuffles.setValue(b.reshuffles);
-            m_keys.setValue(b.keys);
-        }
+        Boosts b = level.boosts;
+        m_turners.setValue(b.turners);
+        m_drops.setValue(b.drops);
+        m_picks.setValue(b.picks);
+        m_colorBombs.setValue(b.colorBombs);
+        m_wildCards.setValue(b.wildCards);
+        m_explodies.setValue(b.explodies);
+        m_reshuffles.setValue(b.reshuffles);
+        m_keys.setValue(b.keys);
         
         addMember(form);
     }

@@ -13,6 +13,8 @@ public class Striped extends Item
     public int color;
     public boolean vertical;
     public boolean armed;
+    private boolean m_wide;
+    private boolean m_bothWays;
     
     public Striped(int color, boolean vertical)
     {
@@ -20,10 +22,33 @@ public class Striped extends Item
         this.vertical = vertical;
     }
     
+    public void setWide(boolean wide)
+    {
+        m_wide = wide;
+    }
+    
+    public boolean isWide()
+    {
+        return m_wide;
+    }
+    
+    public void setBothWays(boolean bothWays)
+    {
+        m_bothWays = bothWays;
+    }
+    
+    public boolean isBothWays()
+    {
+        return m_bothWays;
+    }
+
     @Override
     public IPrimitive<?> createShape(double size)
     {
         Group g = new Group();
+        
+        if (isStuck())
+            g.add(createStuckShape(size));
         
         double s = size / 4;
         Circle c = new Circle(size / 4);
@@ -33,36 +58,29 @@ public class Striped extends Item
         
         double w = 3;
         double dx = w * 2;
-        if (vertical)
+        for (double x = -s; x < s; x += dx)
         {
-            for (double x = -s; x < s; x += dx)
-            {
-                double a = Math.asin(x / s);
-                double y = Math.cos(a) * s;
-                Line line = new Line(x, y, x, -y);
-                line.setStrokeColor(ColorName.WHITE);
-                line.setStrokeWidth(w);
-                g.add(line);
-            }
-        }
-        else
-        {
-            for (double y = 2-s; y < s; y += dx)
-            {
-                double a = Math.asin(y / s);
-                double x = Math.cos(a) * s;
-                Line line = new Line(x, y, -x, y);
-                line.setStrokeColor(ColorName.WHITE);
-                line.setStrokeWidth(w);
-                g.add(line);
-            }
+            double a = Math.asin(x / s);
+            double y = Math.cos(a) * s;
+            Line line = new Line(x, y, x, -y);
+            line.setStrokeColor(ColorName.WHITE);
+            line.setStrokeWidth(w);
+            g.add(line);
         }
         
         c = new Circle(size / 4);
         c.setStrokeColor(fillColor);
         g.add(c);
         
+        if (!vertical)
+            g.setRotationDegrees(90);
+        
         return g;
+    }
+    
+    public boolean isVertical()
+    {
+        return vertical;
     }
     
     @Override
@@ -94,7 +112,20 @@ public class Striped extends Item
     {
         return true;
     }
+    
+    @Override
+    public boolean canRotate()
+    {
+        return true;
+    }
 
+    @Override
+    public void rotate(int n) // ignore n
+    {
+        vertical = !vertical;
+        shape.setRotationDegrees(vertical ? 0 : 90);
+    }
+    
     @Override
     public boolean isArmed()
     {

@@ -8,8 +8,9 @@ import com.enno.dotz.client.Config;
 
 public class ColorBomb extends Item
 {   
-    public ColorBomb()
+    public ColorBomb(boolean stuck)
     {
+        m_stuck = stuck;
     }
 
     @Override
@@ -35,6 +36,9 @@ public class ColorBomb extends Item
     {
         Group g = new Group();
         
+        if (isStuck())
+            g.add(createStuckShape(size));
+        
         int n = Config.MAX_COLORS;
         
         double da = Math.PI * 2 / n;
@@ -52,7 +56,7 @@ public class ColorBomb extends Item
     @Override
     protected Item doCopy()
     {
-        return new ColorBomb();
+        return new ColorBomb(m_stuck);
     }
 
     @Override

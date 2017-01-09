@@ -1,0 +1,99 @@
+{
+  "id": 227,
+  "name": "Test Rewards",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Test",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "????????",
+    "????????",
+    "????????",
+    "????????",
+    "????????",
+    "????????",
+    "????????",
+    "????????"
+  ],
+  "conveyors": [
+    {"p":[4,2],"turn":-1,"direction":"W"},
+    {"p":[5,2],"turn":0,"direction":"W"},
+    {"p":[6,2],"turn":0,"direction":"W"},
+    {"p":[7,2],"turn":-1,"direction":"N"},
+    {"p":[3,3],"turn":-1,"direction":"W"},
+    {"p":[4,3],"turn":1,"direction":"S"},
+    {"p":[7,3],"turn":0,"direction":"N"},
+    {"p":[2,4],"turn":-1,"direction":"W"},
+    {"p":[3,4],"turn":1,"direction":"S"},
+    {"p":[7,4],"turn":0,"direction":"N"},
+    {"p":[2,5],"turn":0,"direction":"S"},
+    {"p":[7,5],"turn":0,"direction":"N"},
+    {"p":[2,6],"turn":-1,"direction":"S"},
+    {"p":[3,6],"turn":0,"direction":"E"},
+    {"p":[4,6],"turn":1,"direction":"E"},
+    {"p":[6,6],"turn":1,"direction":"N"},
+    {"p":[7,6],"turn":-1,"direction":"E"},
+    {"p":[4,7],"turn":-1,"direction":"S"},
+    {"p":[5,7],"turn":0,"direction":"E"},
+    {"p":[6,7],"turn":-1,"direction":"E"}
+  ],
+  "lazySusans": [
+    {"p":[0,0],"clockwise":true}
+  ],
+  "generator": {
+    "generateLetters": false,
+    "swapMode": false,
+    "clickMode": false,
+    "rollMode": false,
+    "diagonalMode": false,
+    "dominoMode": false,
+    "slipperyAnchors": false,
+    "minChainLength": 2,
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "maxDomino": 6,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "bombStrength": 9,
+    "blockerStrength": 2,
+    "animalType": "Default",
+    "animalAction": "Default",
+    "rewardStrategies": "S5,r4",
+    "icePickRadius": 3,
+    "dropRadius": 3,
+    "freq": [
+      [33.3,"dot",0],
+      [33.3,"dot",1],
+      [33.3,"dot",4]
+    ]
+  },
+  "goals": {
+    "dots": {    }
+  },
+  "boosts": {  },
+  "lastModified": "1481497373860"
+}

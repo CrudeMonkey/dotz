@@ -1,0 +1,135 @@
+{
+  "id": 215,
+  "name": "Test Blinking Cages",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Test",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "X.X.....",
+    "X.X.....",
+    "X.X....."
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "????????",
+    "????????",
+    "????????",
+    "????????",
+    "????????",
+    ".?.?????",
+    ".?.?????",
+    ".?.?????"
+  ],
+  "doors": [
+    {"p":[1,5],"seq":"0,1"},
+    {"p":[5,6],"strength":1,"direction":"E","rotate":1},
+    {"p":[6,6],"strength":1,"direction":"E","rotate":-1}
+  ],
+  "cages": [
+        {
+      "p": [
+        0,
+        3
+      ],
+      "strength": 1
+    },
+        {
+      "p": [
+        2,
+        3
+      ],
+      "seq": "1,+0,1"
+    },
+        {
+      "p": [
+        3,
+        3
+      ],
+      "seq": "0,1"
+    },
+        {
+      "p": [
+        4,
+        3
+      ],
+      "seq": "1,+0,1"
+    },
+        {
+      "p": [
+        5,
+        3
+      ],
+      "seq": "0,1"
+    },
+        {
+      "p": [
+        6,
+        3
+      ],
+      "seq": "1,+0,1"
+    },
+        {
+      "p": [
+        0,
+        4
+      ],
+      "strength": 1
+    }
+  ],
+  "lazySusans": [
+    {"p":[6,2],"clockwise":true}
+  ],
+  "generator": {
+    "generateLetters": false,
+    "swapMode": false,
+    "rollMode": false,
+    "diagonalMode": false,
+    "dominoMode": false,
+    "slipperyAnchors": false,
+    "minChainLength": 2,
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "maxDomino": 6,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "bombStrength": 9,
+    "blockerStrength": 2,
+    "animalType": "Default",
+    "freq": [
+      [20,"dot",0],
+      [20,"dot",1],
+      [20,"dot",2],
+      [20,"dot",3],
+      [20,"dot",4]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "doors": -1,
+    "cages": -1
+  },
+  "boosts": {
+    "explodies": 8,
+    "keys": 8
+  },
+  "lastModified": "1481210479950"
+}

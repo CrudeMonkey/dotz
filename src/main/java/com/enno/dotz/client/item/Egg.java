@@ -3,12 +3,13 @@ package com.enno.dotz.client.item;
 import com.ait.lienzo.client.core.shape.Group;
 import com.ait.lienzo.client.core.shape.IPrimitive;
 import com.ait.lienzo.client.core.shape.SVGPath;
-import com.ait.lienzo.client.core.shape.Text;
-import com.ait.lienzo.client.core.types.Transform;
 import com.ait.lienzo.shared.core.types.ColorName;
-import com.ait.lienzo.shared.core.types.TextBaseLine;
-import com.google.gwt.dom.client.Style.FontWeight;
 
+/**
+ * Inspired by eggs in Farm Club
+ * 
+ * @author Enno
+ */
 public class Egg extends Item
 {
     private boolean m_cracked;
@@ -18,9 +19,10 @@ public class Egg extends Item
     {
     }
     
-    public Egg(boolean cracked)
+    public Egg(boolean cracked, boolean stuck)
     {
         m_cracked = cracked;
+        m_stuck = stuck;
     }
     
     public boolean isCracked()
@@ -33,10 +35,18 @@ public class Egg extends Item
         m_cracked = cracked;
     }
     
+    public void crack()
+    {
+        setCracked(true);
+        m_crack.setVisible(true);
+    }
+    
     @Override
     public IPrimitive<?> createShape(double sz)
     {
         Group shape = new Group();
+        if (isStuck())
+            shape.add(createStuckShape(sz));
         
         double scale = sz * 0.08 / 50;
         
@@ -58,6 +68,7 @@ public class Egg extends Item
         g.add(m_crack);
         
         shape.add(g);
+        
         return shape;
     }
 
@@ -77,7 +88,7 @@ public class Egg extends Item
     @Override
     protected Item doCopy()
     {
-        return new Egg(m_cracked);
+        return new Egg(m_cracked, m_stuck);
     }
 
     @Override

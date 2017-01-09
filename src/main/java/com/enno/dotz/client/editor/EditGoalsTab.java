@@ -3,6 +3,8 @@ package com.enno.dotz.client.editor;
 import com.ait.lienzo.client.core.shape.IPrimitive;
 import com.ait.lienzo.client.core.shape.Layer;
 import com.ait.lienzo.client.widget.LienzoPanel;
+import com.enno.dotz.client.ChainGoal;
+import com.enno.dotz.client.ChainGoal.EditChainGoalDialog;
 import com.enno.dotz.client.Config;
 import com.enno.dotz.client.Context;
 import com.enno.dotz.client.Goal;
@@ -14,37 +16,44 @@ import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.VerticalAlignment;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
+import com.smartgwt.client.widgets.form.fields.ButtonItem;
 import com.smartgwt.client.widgets.form.fields.CanvasItem;
 import com.smartgwt.client.widgets.form.fields.FormItem;
 import com.smartgwt.client.widgets.form.fields.RadioGroupItem;
 import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
+import com.smartgwt.client.widgets.form.fields.events.ClickEvent;
+import com.smartgwt.client.widgets.form.fields.events.ClickHandler;
 import com.smartgwt.client.widgets.layout.VLayout;
 
 public class EditGoalsTab extends VLayout
 {
-    private Num m_moves;
-    private Num m_score;
-    private TimeItem m_time;
-    private All  m_circuits;
-    private All m_ice;
-    private All m_fire;
-    private All m_animals;
-    private All m_knights;
-    private All m_anchors;
-    private All m_clocks;
-    private All m_doors;
-    private All m_cages;
-    private All m_mirrors;
-    private All m_rockets;
-    private Num m_lasers;
-    private Num m_birds;
-    private Num m_dominoes;
+    private Num           m_moves;
+    private Num           m_score;
+    private TimeItem      m_time;
+    private All           m_circuits;
+    private All           m_ice;
+    private All           m_fire;
+    private All           m_animals;
+    private All           m_knights;
+    private All           m_anchors;
+    private All           m_clocks;
+    private All           m_bubbles;
+    private All           m_doors;
+    private All           m_cages;
+    private All           m_mirrors;
+    private All           m_rockets;
+    private All           m_blockers;
+    private Num           m_lasers;
+    private Num           m_birds;
+    private Num           m_dominoes;
+    private Num           m_words;
+    private ChainGoalItem m_chainGoal;
 
-    private DotAll[] m_dots = new DotAll[Config.MAX_COLORS];
+    private DotAll[]   m_dots = new DotAll[Config.MAX_COLORS];
     private FormItem[] m_fields;
 
-    public EditGoalsTab(boolean isNew, Config level)
+    public EditGoalsTab(Config level)
     {
         m_moves = new Num("Moves") {
             @Override
@@ -98,6 +107,19 @@ public class EditGoalsTab extends VLayout
             public void initGoal(Goal goal)
             {
                 val(goal.getBirds());
+            }
+        };
+        m_words = new Num("Words") {
+            @Override
+            public void prepareSave(Goal goal)
+            {
+                goal.setWords(val());
+            }
+
+            @Override
+            public void initGoal(Goal goal)
+            {
+                val(goal.getWords());
             }
         };
         m_circuits = new All("Circuits") {
@@ -156,6 +178,19 @@ public class EditGoalsTab extends VLayout
             }
         };
             
+        m_bubbles = new All("Bubbles"){
+            @Override
+            public void prepareSave(Goal goal)
+            {
+                goal.setBubbles(val());
+            }
+
+            @Override
+            public void initGoal(Goal goal)
+            {
+                val(goal.getBubbles());
+            }};
+            
         m_doors = new All("Doors"){
             @Override
             public void prepareSave(Goal goal)
@@ -168,7 +203,7 @@ public class EditGoalsTab extends VLayout
             {
                 val(goal.getDoors());
             }};
-            
+                
         m_cages = new All("Cages"){
             @Override
             public void prepareSave(Goal goal)
@@ -252,6 +287,20 @@ public class EditGoalsTab extends VLayout
             }
         };
 
+        m_blockers = new All("Blockers"){
+            @Override
+            public void prepareSave(Goal goal)
+            {
+                goal.setBlockers(val());
+            }
+
+            @Override
+            public void initGoal(Goal goal)
+            {
+                val(goal.getBlockers());
+            }
+        };
+
         m_dominoes = new Num("Dominoes"){
             @Override
             public void prepareSave(Goal goal)
@@ -266,6 +315,8 @@ public class EditGoalsTab extends VLayout
             }
         };
 
+        m_chainGoal = new ChainGoalItem();
+        
         for (int i = 0; i < Config.MAX_COLORS; i++)
         {
             m_dots[i] = new DotAll(i);
@@ -285,35 +336,32 @@ public class EditGoalsTab extends VLayout
                 new DotImageItem(4, ctx), m_dots[4], m_fire,     m_clocks,
                 new DotImageItem(5, ctx), m_dots[5], m_circuits, m_rockets,
                 m_moves, m_cages, m_mirrors,
-                m_time, m_score
+                m_time, m_score, m_blockers,
+                m_chainGoal, m_words, m_bubbles
         };
         
         form.setFields(m_fields);
         
         addMember(form);
         
-        if (!isNew)
+        Goal goal = level.goals;
+        for (int i = 0; i < m_fields.length; i++)
         {
-            Goal goal = level.goals;
+            if (!(m_fields[i] instanceof GoalField))
+                continue;
             
-            for (int i = 0; i < m_fields.length; i++)
-            {
-                if (!(m_fields[i] instanceof GoalField))
-                    continue;
-                
-                ((GoalField) m_fields[i]).initGoal(goal);
-            }
+            ((GoalField) m_fields[i]).initGoal(goal);
         }
     }
 
-    public boolean validate()
+    public boolean validate(EditGeneratorTab generator)
     {
         for (int i = 0; i < m_fields.length; i++)
         {
             if (!(m_fields[i] instanceof GoalField))
                 continue;
                 
-            if (!((GoalField) m_fields[i]).validateGoal())
+            if (!((GoalField) m_fields[i]).validateGoal(generator))
                 return false;
         }
         return true;
@@ -337,7 +385,7 @@ public class EditGoalsTab extends VLayout
     public interface GoalField
     {
         public void initGoal(Goal goal);
-        public boolean validateGoal();
+        public boolean validateGoal(EditGeneratorTab generator);
         public void prepareSave(Goal goal);
     }
 
@@ -350,7 +398,7 @@ public class EditGoalsTab extends VLayout
         }
         
         @Override
-        public boolean validateGoal()
+        public boolean validateGoal(EditGeneratorTab generator)
         {
             return true;
         }
@@ -440,7 +488,7 @@ public class EditGoalsTab extends VLayout
         }
         
         @Override
-        public boolean validateGoal()
+        public boolean validateGoal(EditGeneratorTab generator)
         {
             if (m_all.getValueAsString().equals("All"))
             {
@@ -462,6 +510,73 @@ public class EditGoalsTab extends VLayout
                 SC.warn("Invalid goal " + getTitle());
                 return false;
             }
+        }
+    }
+    
+    public static class ChainGoalItem extends CanvasItem implements GoalField
+    {
+        private MXTextInput m_text;
+
+        public ChainGoalItem()
+        {
+            setTitle("Chains");
+            
+            MXForm form = new MXForm();
+            
+            m_text = new MXTextInput();
+            m_text.setShowTitle(false);
+            m_text.setWidth(150);
+            m_text.setPrompt("E.g. '0=3,1=4' means: first a chain of 3 for color 0, then 4 for color 1");
+            
+            ButtonItem edit = new ButtonItem();
+            edit.setTitle("Edit");
+            edit.setStartRow(false);
+            edit.setEndRow(false);
+            edit.addClickHandler(new ClickHandler()
+            {
+                @Override
+                public void onClick(ClickEvent event)
+                {
+                    editChainGoal();
+                }
+            });
+            form.setFields(m_text, edit);
+            
+            setCanvas(form);
+        }
+        
+        protected void editChainGoal()
+        {
+            String goal = m_text.getValueAsString();
+            new EditChainGoalDialog(goal) {
+                @Override
+                public void saveGoal(ChainGoal g)
+                {
+                    m_text.setValue(g.toString());
+                }
+            };
+        }
+        @Override
+        public void initGoal(Goal goal)
+        {
+            ChainGoal g = goal.getChainGoal();
+            m_text.setValue(g == null ? "" : g.toString());
+        }
+
+        @Override
+        public boolean validateGoal(EditGeneratorTab generator)
+        {            
+            return true; // TODO check against generated colors
+        }
+
+        @Override
+        public void prepareSave(Goal goal)
+        {
+            String g = m_text.getValueAsString();
+            if (g == null || g.length() == 0)
+                goal.setChainGoal(null);
+            else 
+                goal.setChainGoal(new ChainGoal(g));
         }
     }
     
@@ -497,7 +612,7 @@ public class EditGoalsTab extends VLayout
         }
         
         @Override
-        public boolean validateGoal()
+        public boolean validateGoal(EditGeneratorTab generator)
         {
             String s = getValueAsString();
             if (s == null || s.equals(""))
@@ -563,7 +678,7 @@ public class EditGoalsTab extends VLayout
         }
         
         @Override
-        public boolean validateGoal()
+        public boolean validateGoal(EditGeneratorTab generator)
         {
             try
             {

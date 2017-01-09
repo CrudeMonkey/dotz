@@ -16,8 +16,10 @@ public class EditorPropertiesPanel extends VLayout
     private SpinnerItem m_doorStrength;
     private SpinnerItem m_clockStrength;
     private MXSelectItem m_animalType;
+    private MXSelectItem m_animalAction;
     private MXSelectItem m_doorRotation;
     private SpinnerItem m_bombStrength;
+    private RadiusCombo m_radius;
 
     public EditorPropertiesPanel()
     {
@@ -57,12 +59,19 @@ public class EditorPropertiesPanel extends VLayout
         m_animalType.setValue(Animal.Type.DEFAULT.getName());
         m_animalType.setWidth(70);
         
+        m_animalAction = new MXSelectItem();
+        m_animalAction.setTitle("Animal Action");
+        m_animalAction.setValueMap(Animal.Action.getValueMap());
+        m_animalAction.setValue(Animal.Action.DEFAULT.getName());
+        m_animalAction.setWidth(70);
+        
         m_doorStrength = new SpinnerItem();
         m_doorStrength.setWidth(70);
         m_doorStrength.setTitle("Door Strength");
         m_doorStrength.setMin(1);
         m_doorStrength.setStep(1);
         m_doorStrength.setValue(1);
+        m_doorStrength.setPrompt("Strength of Door, Cage, Chest");
         
         LinkedHashMap<String,String> rotMap = new LinkedHashMap<String,String>();
         rotMap.put("0", "None");
@@ -80,6 +89,8 @@ public class EditorPropertiesPanel extends VLayout
         m_bombStrength.setMin(0);
         m_bombStrength.setStep(1);
         m_bombStrength.setValue(9);
+        
+        m_radius = new RadiusCombo("Drop/Pick Radius");
 
         MXForm form = new MXForm();
         form.setNumCols(4);
@@ -87,8 +98,9 @@ public class EditorPropertiesPanel extends VLayout
         
         form.setFields(m_iceStrength, m_animalStrength, 
                 m_doorStrength, m_animalType, 
-                m_doorRotation, m_knightStrength, 
-                m_clockStrength, m_bombStrength);
+                m_doorRotation, m_animalAction, 
+                m_clockStrength, m_bombStrength,
+                m_knightStrength, m_radius);
         
         addMember(form);
     }
@@ -118,6 +130,11 @@ public class EditorPropertiesPanel extends VLayout
         return Animal.Type.fromName(m_animalType.getValueAsString());
     }
 
+    public Animal.Action getAnimalAction()
+    {
+        return Animal.Action.fromName(m_animalAction.getValueAsString());
+    }
+
     public int getKnightStrength()
     {
         return Integer.parseInt(m_knightStrength.getValueAsString());
@@ -131,5 +148,10 @@ public class EditorPropertiesPanel extends VLayout
     public int getDoorRotation()
     {
         return Integer.parseInt(m_doorRotation.getValueAsString());
+    }
+
+    public int getRadius()
+    {
+        return m_radius.getRadius();
     }
 }

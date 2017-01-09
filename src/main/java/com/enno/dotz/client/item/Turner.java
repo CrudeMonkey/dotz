@@ -12,16 +12,19 @@ import com.enno.dotz.client.Config;
 public class Turner extends Item
 {
     public int n; // 1, 2, 3
+    private Group m_rotateShape;
     
-    public Turner(int n)
+    public Turner(int n, boolean stuck)
     {        
         this.n = n;
+        m_stuck = stuck;
     }
     
     @Override
     public IPrimitive<?> createShape(double size)
     {
         Group g = new Group();
+        
         
         double r = size * 0.3;
         Circle bg = new Circle(r);
@@ -51,6 +54,16 @@ public class Turner extends Item
         center.setFillColor(ColorName.DARKBLUE);
         g.add(center);
         
+        m_rotateShape = g;
+        
+        if (isStuck())
+        {
+            Group g2 = new Group();
+            g2.add(createStuckShape(size));
+            g2.add(g);
+            return g2;
+        }
+
         return g;
     }
 
@@ -75,7 +88,7 @@ public class Turner extends Item
     @Override
     protected Item doCopy()
     {
-        return new Turner(n);
+        return new Turner(n, m_stuck);
     }
 
     @Override
@@ -91,6 +104,6 @@ public class Turner extends Item
         double rot = (t % speed) * Math.PI * 2 / speed;
         if (n == 3)
             rot = -rot;
-        shape.setRotation(rot);
+        m_rotateShape.setRotation(rot);
     }
 }

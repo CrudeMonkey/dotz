@@ -9,18 +9,29 @@ import com.ait.lienzo.shared.core.types.LineCap;
 
 public class IcePick extends Item
 {
+    private int m_radius;
+    
     public IcePick()
     {
+        this(3, false);
     }
     
+    public IcePick(int radius, boolean stuck)
+    {
+        m_radius = radius;
+        m_stuck = stuck;
+    }
+    
+    public void setRadius(int radius)
+    {
+        m_radius = radius;
+    }
     
     @Override
     public IPrimitive<?> createShape(double sz)
     {
         Group g = new Group();
-        
         double scale = sz / 65;
-        
         g.setScale(scale);
         
         Line line = new Line(3, -15, -10, 16);
@@ -35,6 +46,13 @@ public class IcePick extends Item
         p.setStrokeWidth(1 / scale);
         g.add(p);
         
+        if (isStuck())
+        {
+            Group shape = new Group();
+            shape.add(createStuckShape(sz));
+            shape.add(g);
+            return shape;
+        }
         return g;
     }
 
@@ -53,7 +71,7 @@ public class IcePick extends Item
     @Override
     protected Item doCopy()
     {
-        return new IcePick();
+        return new IcePick(m_radius, m_stuck);
     }
 
     @Override
@@ -64,7 +82,7 @@ public class IcePick extends Item
     
     public int getRadius()
     {
-        return 3;
+        return m_radius;
     }
     
     public int getStrength()

@@ -21,9 +21,12 @@ import com.enno.dotz.client.Cell.Hole;
 import com.enno.dotz.client.Cell.Rock;
 import com.enno.dotz.client.Cell.Slide;
 import com.enno.dotz.client.Circuits.Circuit;
+import com.enno.dotz.client.Controller.Controllable;
 import com.enno.dotz.client.Conveyors.Conveyor;
 import com.enno.dotz.client.Conveyors.ConveyorException;
 import com.enno.dotz.client.DotzGridPanel.EndOfLevel;
+import com.enno.dotz.client.Rewards.Reward;
+import com.enno.dotz.client.Rewards.RewardStrategy;
 import com.enno.dotz.client.SoundManager.Sound;
 import com.enno.dotz.client.anim.AnimList;
 import com.enno.dotz.client.anim.Explosions;
@@ -36,27 +39,22 @@ import com.enno.dotz.client.anim.ShowDescription;
 import com.enno.dotz.client.anim.ShowWordCallback;
 import com.enno.dotz.client.anim.Transition.DropTransition;
 import com.enno.dotz.client.anim.TransitionList;
-import com.enno.dotz.client.item.Anchor;
 import com.enno.dotz.client.item.Animal;
-import com.enno.dotz.client.item.Bird;
+import com.enno.dotz.client.item.Bomb;
 import com.enno.dotz.client.item.Clock;
 import com.enno.dotz.client.item.ColorBomb;
 import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.DotBomb;
-import com.enno.dotz.client.item.Egg;
 import com.enno.dotz.client.item.Explody;
 import com.enno.dotz.client.item.Fire;
 import com.enno.dotz.client.item.Item;
 import com.enno.dotz.client.item.Knight;
 import com.enno.dotz.client.item.Laser;
 import com.enno.dotz.client.item.LazySusan;
-import com.enno.dotz.client.item.Mirror;
 import com.enno.dotz.client.item.RandomItem;
 import com.enno.dotz.client.item.Rocket;
-import com.enno.dotz.client.item.Striped;
 import com.enno.dotz.client.item.Wild;
-import com.enno.dotz.client.item.WrappedDot;
 import com.enno.dotz.client.item.YinYang;
 import com.enno.dotz.client.util.CallbackChain;
 import com.enno.dotz.client.util.CallbackChain.Callback;
@@ -80,6 +78,7 @@ public class GridState
     private List<LazySusan> m_lazySusans = new ArrayList<LazySusan>();
     private Circuits m_circuits;
     private Conveyors m_conveyors;
+    private List<RewardStrategy> m_rewardStrategies;
     
     public EndOfLevel endOfLevel;
     
@@ -114,13 +113,13 @@ public class GridState
                             Dot dot = (Dot) c.item;
                             if (ctx.generator.generateLetters)
                             {
-                                if (dot.letter == null)
-                                    dot.letter = ctx.generator.nextLetter();                                
+                                if (!dot.isLetter())
+                                    dot.setLetter(ctx.generator.nextLetter());                                
                             }
                             else
                             {
-                                if (dot.letter != null)
-                                    dot.letter = null;
+                                if (dot.isLetter())
+                                    dot.setLetter(null);
                             }
                         }
                         c.item.init(ctx);
@@ -145,6 +144,8 @@ public class GridState
         {
             Debug.p("unexpected conveyor problem", e);
         }
+        
+        m_rewardStrategies = RewardStrategy.parseStrategies(ctx.generator.rewardStrategies);
     }
 
     public int getCircuitCount()
@@ -226,35 +227,35 @@ public class GridState
         if (ctx.generator.swapMode)
             processSwapChain(null, nextMoveCallback);
         else
-            processChain(new ArrayList<Cell>(), false, false, false, false, null, null, nextMoveCallback);
+            processChain(new UserAction(), nextMoveCallback);
     }
     
-    public void processChain(final List<Cell> cells, final boolean is_square, final boolean isKnightMode, final boolean isWordMode, final boolean isEggMode, final String word, final Integer color, final Runnable nextMoveCallback)
+    public void processChain(final UserAction action, final Runnable nextMoveCallback)
     {
-        if (isWordMode)
+        if (action.isWordMode) // && !ctx.generator.findWords)
         {
-            new ShowWordCallback(ctx, word, color)
+            new ShowWordCallback(ctx, action.word, action.wordPoints, action.color)
             {
                 @Override
                 protected void done()
                 {
-                    processChain2(cells, is_square, isKnightMode, isWordMode, word, color, nextMoveCallback);
+                    processChain2(action, nextMoveCallback);
                 }
             };
         }
-        else if (isEggMode)
+        else if (action.isEggMode)
         {
-            GetSwapMatches.doEggs(ctx, cells, new Runnable() {
+            GetSwapMatches.doEggs(ctx, action.cells, new Runnable() {
                 @Override
                 public void run()
                 {
-                    cells.clear(); // don't explode these cells - already merged eggs
-                    processChain2(cells, is_square, isKnightMode, isWordMode, word, color, nextMoveCallback);
+                    action.cells.clear(); // don't explode these cells - already merged eggs
+                    processChain2(action, nextMoveCallback);
                 }
             });
         }
         else
-            processChain2(cells, is_square, isKnightMode, isWordMode, word, color, nextMoveCallback);
+            processChain2(action, nextMoveCallback);
     }
     
     private Callback explodeLoop(boolean checkClocks, boolean isEndOfLevel)
@@ -262,30 +263,58 @@ public class GridState
         return new ExplodeLoop(checkClocks, isEndOfLevel);
     }
     
-    private void processChain2(List<Cell> cells, boolean is_square, boolean isKnightMode, boolean isWordMode, String word, Integer color, final Runnable nextMoveCallback)
+    private void processChain2(UserAction action, final Runnable nextMoveCallback)
     {
         ctx.score.addMove();
         
         m_lastExplodedFire = ctx.score.getExplodedFire();
         clearStunnedAnimals();
         activateLasers(false);
-        if (is_square)
-            ctx.generator.excludeDotColor(color);
         
-        final Collection<Cell> area = is_square ?  getArea(cells) : null;
-        //TransitionList nukes = area == null ? null : animateNuke(area, ctx.nukeLayer);
+        Collection<Cell> area = null;
+        if (action.is_square)
+        {
+            ctx.generator.excludeDotColor(action.color);
+            area = getArea(action.cells);
+        }
         
-        explodeCells(cells, area, is_square, isKnightMode, color);        
+        boolean hasBubbles = action.cells.containsBubble();
         
-        if (cells.size() > 0)
-            Sound.DROP.play(); // could be a mirror flip
+        Rewards rewards = new Rewards(m_rewardStrategies);
+        explodeCells(action, area, rewards);
+        
+        if (action.cells.size() > 0)   // could be a mirror flip
+        {
+            if (hasBubbles)
+                Sound.BUBBLE.play();
+            else
+                Sound.DROP.play();
+            
+            ctx.scorePanel.madeChain(action.cells.size(), action.color);
+            if (action.isWordMode)
+            {
+                // already added N points for the word
+                ctx.score.addPoints(action.wordPoints - action.cells.size());
+                if (ctx.generator.findWords)
+                {
+                    if (ctx.findWordList.foundWord(action.word))
+                        ctx.score.foundWord();
+                }
+                else
+                    ctx.score.foundWord();
+            }
+        }
         
         ctx.dotLayer.draw();
         updateScore();
         
-        AnimList list = new GetTransitions(ctx).get(ctx.dotLayer, cfg.dropDuration);        
+        AnimList list = new AnimList();
+        if (rewards != null && rewards.hasRewards())
+            rewards.addAnimations(list, this);
         
+        list.add(new GetTransitions(ctx).getCallback(ctx.dotLayer, cfg.dropDuration));        
         list.add(explodeLoop(false, false)); // don't check clocks
+        list.add(activateControllers());
         list.add(moveBeasts());
         list.add(moveSusans());
         list.add(transitions());             // susans can leave empty cells
@@ -338,6 +367,7 @@ public class GridState
         AnimList list = new GetTransitions(ctx).get(ctx.dotLayer, cfg.dropDuration);        
         
         list.add(explodeLoop(false, false)); // don't check clocks
+        list.add(activateControllers());
         list.add(moveBeasts());
         list.add(moveSusans());
         list.add(transitions());             // susans can leave empty cells
@@ -359,6 +389,28 @@ public class GridState
             }
         });
         list.run();
+    }
+    
+    public Callback activateControllers()
+    {
+        return new Callback() {
+            @Override
+            public void run()
+            {
+                for (int row = 0; row < numRows; row++)
+                {
+                    for (int col = 0; col < numColumns; col++)
+                    {
+                        Cell c = cell(col, row);
+                        if (c instanceof Controllable)
+                            ((Controllable) c).tick();
+                    }
+                }
+                ctx.doorLayer.draw();
+                
+                doNext();
+            }
+        };
     }
     
     public void fireRocket(Cell cell, Runnable nextMoveCallback)
@@ -431,12 +483,15 @@ public class GridState
                 {
                     if (!ctx.killed)
                     {
-                        Cell c = getRandomCell();
-                        c.explode(null, 0);
-                        addExplody(c);
-                        
-                        ctx.score.addMove();
-                        updateScore();
+                        Cell c = getRandomCellForFinalExplosion();
+                        if (c != null)
+                        {
+                            c.explode(null, 0);
+                            addExplody(c);
+                            
+                            ctx.score.addMove();
+                            updateScore();
+                        }
                     }
                     doNext();
                 }
@@ -447,17 +502,38 @@ public class GridState
         list.animate(done);
     }
     
-    protected Cell getRandomCell()
+    protected Cell getRandomCellForFinalExplosion()
     {
-        Random r = new Random();
-        while (true)
+        Random r = ctx.generator.getRandom();
+        int i = 0;
+        while (i < 200)
         {
             int col = r.nextInt(numColumns);
             int row = r.nextInt(numRows);
             Cell c = cell(col, row);
             if (!c.isLocked() && (c.item instanceof Dot || c.item instanceof Wild || c.item instanceof Domino))
                 return c;
+            
+            i++;
         }
+        return null;
+    }
+
+    public Cell getRandomDotCell()
+    {
+        int i = 0;
+        Random rnd = ctx.generator.getRandom();
+        while (i < 200)
+        {
+            int col = rnd.nextInt(numColumns);
+            int row = rnd.nextInt(numRows);
+            Cell c = cell(col, row);
+            if (!c.isLocked() && c.item instanceof Dot)
+                return c;
+            
+            i++;
+        }
+        return null;
     }
     
     public void activateLasers(boolean active)
@@ -482,7 +558,7 @@ public class GridState
             {
                 Cell c = cell(col, row);
                 if (c instanceof Door)
-                    ((Door) c).tick();
+                    ((Door) c).tickRotateDoor();
             }
         }
         ctx.doorLayer.draw();
@@ -1006,6 +1082,7 @@ public class GridState
         public static final int EGG = 11;
         public static final int CRACKED_EGG = 12;
         public static final int STRIPED_BOMB = 13;
+        public static final int WIDE_STRIPED = 14;
 
         private int m_type;
         private Cell m_special;
@@ -1153,843 +1230,6 @@ public class GridState
         public boolean isVertical()
         {
             return m_vertical;
-        }
-    }
-    
-    public static class GetSwapMatches
-    {
-        private Context ctx;
-        private GridState m_state;
-        
-        private List<Cell> m_explosions = new ArrayList<Cell>();
-        private List<SwapCombo> m_hcombos = new ArrayList<SwapCombo>();
-        private List<SwapCombo> m_vcombos = new ArrayList<SwapCombo>();
-        private List<SwapCombo> m_combos = new ArrayList<SwapCombo>();
-        private List<SwapCombo> m_eggCombos = new ArrayList<SwapCombo>();
-        
-        private boolean m_swapped;
-        private Cell[] m_swaps = new Cell[2];
-        private Random rnd;
-        
-        public GetSwapMatches(Context ctx)
-        {
-            this.ctx = ctx;
-            rnd = ctx.generator.getRandom();
-            m_state = ctx.state;
-        }
-        
-        public static void doEggs(Context ctx, List<Cell> cells, Runnable whenDone)
-        {
-            Boolean cracked = null;
-            for (Cell c : cells)
-            {
-                if (c.item instanceof Egg)
-                {
-                    Egg egg = (Egg) c.item;
-                    cracked = egg.isCracked();
-                    break;
-                }
-            }
-            
-            GetSwapMatches g = new GetSwapMatches(ctx);
-            SwapCombo combo = new SwapCombo();
-            combo.addAll(cells);
-            combo.setSpecial(cells.get(cells.size() - 1));
-            combo.setType(cracked ? SwapCombo.CRACKED_EGG : SwapCombo.EGG);
-            g.m_eggCombos.add(combo);
-            g.animate(whenDone);
-        }
-        
-        public void animate(final Runnable whenDone)
-        {
-            if (!m_swapped)
-            {
-                animate2(whenDone);
-            }
-            else
-            {
-                TransitionList list = new TransitionList("swap", ctx.dotLayer, 250) {
-                    @Override
-                    public void done()
-                    {
-                        animate2(whenDone);
-                    }
-                };
-                
-                double x1 = m_state.x(m_swaps[0].col);
-                double y1 = m_state.y(m_swaps[0].row);
-                double x2 = m_state.x(m_swaps[1].col);
-                double y2 = m_state.y(m_swaps[1].row);
-                list.add(new DropTransition(x1, y1, x2, y2, m_swaps[1].item));
-                list.add(new DropTransition(x2, y2, x1, y1, m_swaps[0].item));
-                
-                list.run();
-            }
-        }
-        
-        public boolean hasEggCombos()
-        {
-            return m_eggCombos.size() > 0;
-        }
-        
-        protected void animate2(final Runnable whenDone)
-        {
-            if (hasEggCombos())
-            {
-                TransitionList list = new TransitionList("eggs", ctx.dotLayer, 300) {
-                    @Override
-                    public void done()
-                    {
-                        whenDone.run();
-                    }
-                };
-                
-                boolean playCrack = false;
-                boolean playBird = false;
-                for (final SwapCombo combo : m_eggCombos)
-                {
-                    if (combo.getType() == SwapCombo.EGG)
-                        playCrack = true;
-                    else
-                        playBird = true;
-                    
-                    final Cell special = combo.getSpecial();
-                    double x = m_state.x(special.col);
-                    double y = m_state.y(special.row);
-                    boolean first = true;
-                    for (final Cell c : combo)
-                    {
-                        if (c != special)
-                        {
-                            final boolean theFirst = first;
-                            first = false;
-                            
-                            list.add(new DropTransition(m_state.x(c.col), m_state.y(c.row), x, y, c.item) {
-                                @Override
-                                public void afterEnd()
-                                {
-                                    c.item.removeShapeFromLayer(ctx.dotLayer);
-                                    c.item = null;
-                                    
-                                    if (theFirst)
-                                    {
-                                        if (combo.getType() == SwapCombo.EGG)
-                                        {
-                                            special.item.removeShapeFromLayer(ctx.dotLayer);
-                                            addItem(special, new Egg(true));
-                                        }
-                                        else
-                                        {
-                                            special.item.removeShapeFromLayer(ctx.dotLayer);
-                                            special.item = null;
-                                            ctx.score.addBird();
-                                            //TODO animate bird
-
-                                            new Bird().animate(special.col, special.row, ctx, null);
-                                        }
-                                    }
-                                }
-                            });
-                        }
-                    }
-                }
-                
-                if (playBird)
-                {
-                    Sound.CHICKEN.play();
-                }
-                if (playCrack)
-                    Sound.EGG_CRACK.play();
-                
-                list.run();
-                
-                return;
-            }
-            else
-                animate3(whenDone);
-        }
-        
-        protected void animate3(Runnable whenDone)
-        {
-            switch (m_combos.get(0).getType())
-            {
-                case SwapCombo.COLOR_BOMB:
-                    animateColorBomb(whenDone);
-                    return;
-                case SwapCombo.TOTAL_BOMB:
-                    animateTotalBomb(whenDone);
-                    return;
-                case SwapCombo.WRAP_BOMB:
-                    animateWrapBomb(whenDone);
-                    return;
-                case SwapCombo.STRIPED_BOMB:
-                    animateStripedBomb(whenDone);
-                    return;
-            }
-            
-            Set<Cell> exploded = new HashSet<Cell>();           
-            Set<Cell> explodies = new HashSet<Cell>();
-            
-            Sound sound = Sound.DROP;
-            for (SwapCombo combo : m_combos)
-            {
-                for (Cell cell : combo)
-                {
-                    if (!exploded.contains(cell))
-                    {
-                        explode(cell, null, exploded, explodies); // or pass color?
-                    }
-                }
-            }
-            
-            for (SwapCombo combo : m_combos)
-            {
-                switch (combo.getType())
-                {
-                    case SwapCombo.TEE:
-                    {
-                        Cell special = combo.getSpecial();
-                        if (special.item == null)
-                        {
-                            WrappedDot dot = new WrappedDot(combo.getColor());
-                            addItem(special, dot);
-                        }
-                        break;
-                    }
-                    case SwapCombo.FIVE:
-                    {
-                        Cell special = combo.getSpecial();
-                        if (special.item == null)
-                        {
-                            addItem(special, new ColorBomb());
-                        }
-                        break;
-                    }
-                    case SwapCombo.FOUR:
-                    {
-                        Cell special = combo.getSpecial();
-                        if (special.item == null)
-                        {
-                            addItem(special, new Striped(combo.getColor(), combo.isVertical())); // new Wild());
-                        }
-                        break;
-                    }
-                    case SwapCombo.EXPLODY_5:
-                    {
-                        for (Cell special : combo)
-                        {
-                            if (special.item == null)
-                            {
-                                addItem(special, new Explody(2));
-                            }
-                        }
-                        break;
-                    }
-                }
-            }
-            sound.play();
-            
-            m_state.explodeNeighbors(exploded);
-            
-            for (Cell explody : explodies)
-            {
-                if (explody.item == null)
-                    m_state.addExplody(explody);
-            }
-            
-            whenDone.run();
-        }
-
-        protected void animateColorBomb(Runnable whenDone)
-        {
-            SwapCombo combo = m_combos.get(0);
-            int color = combo.getColor();
-            
-            Sound.DROP.play();
-            
-            Set<Cell> exploded = new HashSet<Cell>();
-            Set<Cell> explodies = new HashSet<Cell>();
-            
-            exploded.add(m_swaps[0]);
-            m_swaps[0].explode(color, 1);
-            exploded.add(m_swaps[1]);
-            m_swaps[1].explode(color, 1);
-            
-            for (int row = 0; row < m_state.numRows; row++)
-            {
-                for (int col = 0; col < m_state.numColumns; col++)
-                {
-                    Cell cell = m_state.cell(col, row);
-                    Item item = cell.item;
-                    if (item != null && !exploded.contains(cell) && cell.canExplode(color))
-                    {
-                        explode(cell, color, exploded, explodies);
-                    }
-                }
-            }
-            
-            m_state.explodeNeighbors(exploded);
-            
-            for (Cell explody : explodies)
-            {
-                if (explody.item == null)
-                    m_state.addExplody(explody);
-            }
-            
-            whenDone.run();
-        }
-        
-
-        protected void animateStripedBomb(Runnable whenDone)
-        {
-            SwapCombo combo = m_combos.get(0);
-            int color = combo.getColor();
-            
-            Sound.DROP.play();
-            
-            Set<Cell> exploded = new HashSet<Cell>();
-            
-            exploded.add(m_swaps[0]);
-            m_swaps[0].explode(color, 1);
-            exploded.add(m_swaps[1]);
-            m_swaps[1].explode(color, 1);
-            
-            for (int row = 0; row < m_state.numRows; row++)
-            {
-                for (int col = 0; col < m_state.numColumns; col++)
-                {
-                    Cell cell = m_state.cell(col, row);
-                    Item item = cell.item;
-                    if (item != null && !exploded.contains(cell) && cell.canExplode(color) && !cell.isLocked())
-                    {
-                        if (cell.item instanceof Dot)
-                        {
-                            Striped striped = new Striped(((Dot) cell.item).color, rnd.nextBoolean());
-                            striped.armed = true;
-
-                            cell.item.removeShapeFromLayer(ctx.dotLayer);
-                            addItem(cell, striped);
-                        }
-                        else if (cell.item instanceof Striped)
-                        {
-                            ((Striped) cell.item).armed = true;
-                        }
-                    }
-                }
-            }
-            
-            m_state.explodeNeighbors(exploded);
-            
-            whenDone.run();
-        }
-        
-        protected void animateWrapBomb(Runnable whenDone)
-        {
-            SwapCombo combo = m_combos.get(0);
-            int color = combo.getColor();
-            
-            Sound.DROP.play();
-            
-            Set<Cell> exploded = new HashSet<Cell>();
-            Set<Cell> explodies = new HashSet<Cell>();
-            
-            exploded.add(m_swaps[0]);
-            m_swaps[0].explode(color, 1);
-            explodies.add(m_swaps[0]);
-
-            exploded.add(m_swaps[1]);
-            m_swaps[1].explode(color, 1);
-            explodies.add(m_swaps[1]);
-            
-            for (int row = 0; row < m_state.numRows; row++)
-            {
-                for (int col = 0; col < m_state.numColumns; col++)
-                {
-                    Cell cell = m_state.cell(col, row);
-                    Item item = cell.item;
-                    if (item != null && !exploded.contains(cell) && cell.canExplode(color))
-                    {
-                        cell.explode(color, 1);
-                        exploded.add(cell);
-                        explodies.add(cell);
-                    }
-                }
-            }
-            
-            m_state.explodeNeighbors(exploded);
-            
-            for (Cell explody : explodies)
-            {
-                if (explody.item == null)
-                    m_state.addExplody(explody);
-            }
-            
-            whenDone.run();
-        }
-        
-        protected void animateTotalBomb(Runnable whenDone)
-        {
-            Sound.DROP.play();
-            
-            for (int row = 0; row < m_state.numRows; row++)
-            {
-                for (int col = 0; col < m_state.numColumns; col++)
-                {
-                    Cell cell = m_state.cell(col, row);
-                    Item item = cell.item;
-                    if (item != null && cell.canBeNuked())
-                    {
-                        cell.explode(null, 1);
-                    }
-                }
-            }            
-            
-            whenDone.run();
-        }
-        
-        private void explode(Cell cell, Integer color, Set<Cell> exploded, Set<Cell> explodies)
-        {
-            if (cell.item instanceof WrappedDot)
-                explodies.add(cell);            
-            
-            exploded.add(cell);
-            cell.explode(color, 1);
-        }
-        
-        private void addItem(Cell cell, Item item)
-        {
-            m_state.addItem(cell, item);
-        }
-
-        public static boolean isSwapStart(Cell a)
-        {
-            if (a.item == null || a.isLocked())
-                return false;
-            
-            return isColorDot(a.item) || a.item instanceof ColorBomb || a.item instanceof Anchor || a.item instanceof Egg;
-        }
-                
-        public boolean canSwap(Cell a, Cell b)
-        {
-            // Assumes 'a' can be swapped
-            if (b.item == null || b.isLocked())
-                return false;
-            
-            if (!(isColorDot(b.item) || b.item instanceof ColorBomb || b.item instanceof Anchor || b.item instanceof Mirror || b.item instanceof Egg))
-                return false;
-            
-            if (!validSwap(a.item, b.item) && !validSwap(b.item, a.item))
-                return false;
-            
-            Item x = a.item;
-            a.item = b.item;
-            b.item = x;
-            
-            m_swapped = true;
-            m_swaps[0] = a;
-            m_swaps[1] = b;
-            
-            findCombos();
-            findEggCombos();
-            if (m_combos.size() == 0 && m_eggCombos.size() == 0)
-            {
-                x = a.item;
-                a.item = b.item;
-                b.item = x;
-                
-                return false;
-            }
-            
-            if (b.item instanceof Knight)
-            {
-                SwapCombo combo = new SwapCombo();
-                combo.add(b);
-                combo.setType(SwapCombo.KNIGHT);
-                m_combos.add(combo);
-            }
-            
-            return true;
-        }
-        
-        private boolean validSwap(Item a, Item b)
-        {
-            if (a instanceof Wild && b instanceof ColorBomb)
-                return false;
-            
-            return true;
-        }
-
-        protected static boolean isColorDot(Item item)
-        {
-            return item instanceof Dot || item instanceof DotBomb || item instanceof WrappedDot || item instanceof Wild || item instanceof Striped;
-        }
-        
-        public boolean getTransitions()
-        {
-            findCombos();
-            findEggCombos();
-            return m_combos.size() > 0 || m_eggCombos.size() > 0;
-        }
-        
-        protected void findCombos()
-        {
-            try
-            {
-            if (m_swapped)
-            {
-                if (specialSwap(m_swaps[0], m_swaps[1]))
-                    return;
-                if (specialSwap(m_swaps[1], m_swaps[0]))
-                    return;
-            }
-            
-            // Horizontal combo            
-            for (int row = 0; row < m_state.numRows; row++)
-            {
-                for (int col = 0; col < m_state.numColumns; col++)
-                {
-                    Cell c = m_state.cell(col, row);
-                    if (!canStart(c))
-                        continue;
-
-                    SwapCombo combo = new SwapCombo();
-                    combo.add(c);
-                    
-                    for (int col2 = col + 1; col2 < m_state.numColumns; col2++)                        
-                    {
-                        Cell c2 = m_state.cell(col2, row);
-                        if (!canConnect(c2, combo))
-                            break;
-                        
-                        combo.add(c2);
-                    }
-                    
-                    if (combo.size() >= 3 && !combo.isAllWild())
-                    {
-                        m_hcombos.add(combo);
-                        col += combo.size() - 1;
-                    }
-                }
-            }
-            
-            // Vertical combos
-            for (int col = 0; col < m_state.numColumns; col++)
-            {
-                for (int row = 0; row < m_state.numRows; row++)
-                {
-                    Cell c = m_state.cell(col, row);
-                    if (!canStart(c))
-                        continue;
-                    
-                    SwapCombo combo = new SwapCombo();
-                    combo.add(c);
-                    
-                    for (int row2 = row + 1; row2 < m_state.numRows; row2++)                        
-                    {
-                        Cell c2 = m_state.cell(col, row2);
-                        if (!canConnect(c2, combo))
-                            break;
-                        
-                        combo.add(c2);
-                    }
-                    
-                    if (combo.size() >= 3 && !combo.isAllWild())
-                    {
-                        m_vcombos.add(combo);
-                        row += combo.size() - 1;
-                    }                    
-                }
-            }
-            findLength(5, m_hcombos);
-            findLength(5, m_vcombos);
-            findLength(4, m_hcombos);
-            findLength(4, m_vcombos);
-            mergeTriples(m_hcombos);
-            mergeTriples(m_vcombos);
-            addLT();
-            addTriples(m_hcombos);
-            addTriples(m_vcombos);
-            }
-            catch (Exception e)
-            {
-                Debug.p("findCombos", e);
-            }
-        }
-        
-        public void findEggCombos()
-        {
-            // Horizontal combo            
-            for (int row = 0; row < m_state.numRows; row++)
-            {
-                for (int col = 0; col < m_state.numColumns; col++)
-                {
-                    Cell c = m_state.cell(col, row);
-                    if (c.isLocked() || !(c.item instanceof Egg || c.item instanceof Wild)) //TODO cage
-                        continue;
-                    
-                    Boolean cracked = null;
-                    if (c.item instanceof Egg)
-                    {
-                        Egg egg = (Egg) c.item;
-                        cracked = egg.isCracked();
-                    }
-
-                    SwapCombo combo = new SwapCombo();
-                    combo.add(c);
-                    
-                    for (int col2 = col + 1; col2 < m_state.numColumns; col2++)                        
-                    {
-                        Cell c2 = m_state.cell(col2, row);
-                        if (c2.isLocked() || !(c2.item instanceof Egg || c2.item instanceof Wild))
-                            break;
-                        
-                        if (c2.item instanceof Egg)
-                        {
-                            Egg egg2 = (Egg) c2.item;
-                            if (cracked == null)
-                            {
-                                cracked = egg2.isCracked();
-                            }
-                            else if (egg2.isCracked() != cracked)
-                                break;
-                        }
-                        
-                        combo.add(c2);
-                    }
-                    
-                    if (combo.size() >= 3)
-                    {
-                        identify(combo);
-                        combo.setType(cracked ? SwapCombo.CRACKED_EGG : SwapCombo.EGG);
-                        m_eggCombos.add(combo);
-                        col += combo.size() - 1;
-                    }
-                }
-            }
-            
-            // Vertical combos
-            for (int col = 0; col < m_state.numColumns; col++)
-            {
-                for (int row = 0; row < m_state.numRows; row++)
-                {
-                    Cell c = m_state.cell(col, row);
-                    if (eggCombosContain(c) || c.isLocked() || !(c.item instanceof Egg || c.item instanceof Wild))
-                        continue;
-                    
-                    Boolean cracked = null;
-                    if (c.item instanceof Egg)
-                    {
-                        Egg egg = (Egg) c.item;
-                        cracked = egg.isCracked();
-                    }
-
-                    SwapCombo combo = new SwapCombo();
-                    combo.add(c);
-                    
-                    for (int row2 = row + 1; row2 < m_state.numRows; row2++)                        
-                    {
-                        Cell c2 = m_state.cell(col, row2);
-                        if (c2.isLocked() || !(c2.item instanceof Egg || c2.item instanceof Wild))
-                            break;
-                        
-                        if (c2.item instanceof Egg)
-                        {
-                            Egg egg2 = (Egg) c2.item;
-                            if (cracked == null)
-                            {
-                                cracked = egg2.isCracked();
-                            }
-                            else if (egg2.isCracked() != cracked)
-                                break;
-                        }
-                        
-                        combo.add(c2);
-                    }
-                    
-                    if (combo.size() >= 3)
-                    {
-                        identify(combo);
-                        combo.setType(cracked ? SwapCombo.CRACKED_EGG : SwapCombo.EGG);
-                        m_eggCombos.add(combo);
-                        row += combo.size() - 1;
-                    }                    
-                }
-            }
-        }
-        
-        protected boolean eggCombosContain(Cell c)
-        {
-            for (SwapCombo combo : m_eggCombos)
-            {
-                if (combo.contains(c))
-                    return true;
-            }
-            return false;
-        }
-        
-        protected boolean specialSwap(Cell a, Cell b)
-        {
-            if (a.item instanceof ColorBomb)
-            {
-                if (b.item instanceof ColorBomb)
-                {
-                    return addCombo(SwapCombo.TOTAL_BOMB);
-                }
-                else if (b.item instanceof WrappedDot)
-                {
-                    return addCombo(SwapCombo.WRAP_BOMB);
-                }
-                else if (b.item instanceof Dot || b.item instanceof DotBomb)
-                {
-                    return addCombo(SwapCombo.COLOR_BOMB);
-                }
-                else if (b.item instanceof Striped)
-                {
-                    return addCombo(SwapCombo.STRIPED_BOMB);
-                }
-            }
-            else if (a.item instanceof WrappedDot)
-            {
-                if (b.item instanceof WrappedDot)
-                {
-                    return addCombo(SwapCombo.EXPLODY_5);
-                }
-            }
-            return false;
-        }
-        
-        protected boolean addCombo(int type)
-        {
-            SwapCombo combo = new SwapCombo();
-            combo.add(m_swaps[0]);
-            combo.add(m_swaps[1]);
-            combo.setType(type);
-            m_combos.add(combo);
-            return true;
-        }
-        
-        protected void findLength(int length, List<SwapCombo> combos)
-        {
-            for (int i = combos.size() - 1; i >= 0; i--)
-            {
-                SwapCombo c = combos.get(i);
-                if (c.size() >= length)
-                {
-                    combos.remove(i);
-                    c.setType(length > 5 ? 5 : length);
-                    identify(c);
-                    m_combos.add(c);
-                }
-            }
-        }
-        
-        protected void mergeTriples(List<SwapCombo> combos)
-        {
-            COMBO: for (int i = combos.size() - 1; i >= 0; i--)
-            {
-                SwapCombo c = combos.get(i);
-                for (SwapCombo c2 : m_combos)
-                {
-                    if (c2.overlaps(c))
-                    {
-                        combos.remove(i);
-                        c2.merge(c);
-                        continue COMBO; // beware: it could overlap 2 combos
-                    }
-                }
-            }
-        }
-        
-        protected void addLT()
-        {
-            COMBI: for (int i = m_hcombos.size() - 1; i >= 0; i--)
-            {
-                SwapCombo c = m_hcombos.get(i);
-                
-                for (int j = m_vcombos.size() - 1; j >= 0; j--)
-                {
-                    SwapCombo c2 = m_vcombos.get(j);
-                    if (c.mergeTL(c2))
-                    {
-                        m_hcombos.remove(i);
-                        m_vcombos.remove(j);
-                        m_combos.add(c);
-                        continue COMBI;
-                    }
-                }
-            }
-        }
-        
-        protected void addTriples(List<SwapCombo> combos)
-        {
-            for (SwapCombo c : combos)
-            {
-                c.setType(3);
-                m_combos.add(c);
-            }
-        }
-
-        private void identify(SwapCombo combo)
-        {
-            for (Cell c : combo)
-            {
-                if (c == m_swaps[0] || c == m_swaps[1])
-                {
-                    combo.setSpecial(c);
-                    return;
-                }                
-            }
-            
-            Cell c;
-            int i = 0;
-            do
-            {
-                c = combo.get(rnd.nextInt(combo.size()));
-                i++;
-                if (i < 50)
-                {
-                    c = combo.get(0);
-                    Debug.p("can't find uncaged special"); // should never happen
-                    break;
-                }
-            }
-            while (c.isLockedCage());
-            
-            combo.setSpecial(c);
-            
-            if (combo.size() == 4)
-            {
-                if (m_swaps[0] == null)
-                    combo.setVertical(rnd.nextBoolean());
-                else
-                    combo.setVertical(m_swaps[0].col == m_swaps[1].col);
-            }
-        }
-
-        private boolean canStart(Cell c)
-        {
-            if (c.item == null || c.isLockedDoor() || m_explosions.contains(c))
-                return false;
-            
-            //TODO specials
-            return isColorDot(c.item) || c.item instanceof Animal;
-        }
-
-        private boolean canConnect(Cell c, SwapCombo combo)
-        {
-            if (c.item == null || c.isLockedDoor() || m_explosions.contains(c))
-                return false;
-            
-            if (isColorDot(c.item) || c.item instanceof Animal)
-            {
-                Integer color = c.item.getColor();
-                if (combo.matchesColor(color))
-                    return true;
-            }
-            //TODO specials
-            
-            
-            return false;
         }
     }
     
@@ -2143,25 +1383,34 @@ public class GridState
         }
     }
     
-    public void explodeCells(List<Cell> chain, Collection<Cell> area, boolean is_square, boolean isKnightMode, Integer color)
+    public void explodeCells(UserAction action, Collection<Cell> area, Rewards rewards)
     {
-        Set<Cell> exploded = new HashSet<Cell>();
-
+        CellList chain = action.cells;
         // How many to subtract from Animals
         int chainSize = chain.size();
-        if (is_square)
+        if (action.is_square)
             chainSize--;
         
+        rewards.addChainSizeReward(chain, chainSize);
+        
+        if (action.isWordMode && !ctx.generator.removeLetters)
+        {
+            debombify(chain);
+            explodeNeighbors(chain);
+            return;
+        }
+        
+        Set<Cell> exploded = new HashSet<Cell>();
         for (Cell cell : chain)
         {
             if (!exploded.contains(cell))
             {
                 exploded.add(cell);
-                cell.explode(color, chainSize);
+                cell.explode(action.color, chainSize);
             }
         }
 
-        if (isKnightMode)
+        if (action.isKnightMode)
         {
             Cell knightCell = chain.get(0);
             if (knightCell.item != null)
@@ -2177,7 +1426,7 @@ public class GridState
                 }
             }
         }        
-        else if (is_square)
+        else if (action.is_square)
         {            
             // Explode other cells with the same color
             for (int row = 0; row < numRows; row++)
@@ -2186,10 +1435,10 @@ public class GridState
                 {
                     Cell cell = cell(col, row);
                     Item item = cell.item;
-                    if (item != null && !exploded.contains(cell) && cell.canExplode(color))
+                    if (item != null && !exploded.contains(cell) && cell.canExplode(action.color))
                     {
                         exploded.add(cell);
-                        cell.explode(color, chainSize);
+                        cell.explode(action.color, chainSize);
                     }
                 }
             }
@@ -2201,7 +1450,7 @@ public class GridState
                     if (!exploded.contains(cell) && cell.canBeNuked())
                     {
                         exploded.add(cell);
-                        cell.explode(color, chainSize); // count wildcards as selected color
+                        cell.explode(action.color, chainSize); // count wildcards as selected color
                     }
                     
                     if (cell.canBeFilled())
@@ -2215,6 +1464,26 @@ public class GridState
         explodeNeighbors(exploded);
     }
     
+    private void debombify(CellList chain)
+    {
+        for (Cell cell : chain)
+            debombify(cell);
+    }
+
+    private void debombify(Cell cell)
+    {
+        if (cell.item instanceof DotBomb)
+        {
+            DotBomb bomb = (DotBomb) cell.item;
+            bomb.removeShapeFromLayer(ctx.dotLayer);
+            
+            Dot dot = bomb.getDot();
+            dot.init(ctx);
+            dot.moveShape(x(cell.col), y(cell.row));
+            dot.addShapeToLayer(ctx.dotLayer);            
+        }
+    }
+
     private void clearStunnedAnimals()
     {
         for (int row = 0; row < numRows; row++)
@@ -2613,7 +1882,7 @@ public class GridState
             if (contains(c) || m_cells.contains(c))
                 return;
             
-            if (c instanceof Hole || c instanceof Slide || c instanceof Rock || c.isLockedCage())
+            if (c instanceof Hole || c instanceof Slide || c instanceof Rock)// || c.isLockedCage())
                 return;
             
             //Debug.p("add neighbor " + c);
@@ -2701,7 +1970,10 @@ public class GridState
                         }
                         else if (a.item.isArmed())
                         {
-                            armed.add(a);
+                            if (a.item instanceof Bomb)
+                                explodies.add(a); //TODO .................. is this right?
+                            else
+                                armed.add(a);
                         }
                     }
                 }
@@ -2729,7 +2001,64 @@ public class GridState
             }
         };
     }
-
+    
+    public void addRewardAnimation(AnimList list, final Reward reward)
+    {
+        TransitionList t = new TransitionList("reward", ctx.nukeLayer, 300)
+        {
+            public void init()
+            {
+                //Debug.p("reward");
+                final Cell c;
+                final Item item;
+                if (reward.isRandom())
+                {
+                    c = getRandomDotCell();
+                    if (c == null)
+                        return;
+                }
+                else
+                {
+                    c = reward.cell;
+                }
+                item = reward.upgrade(c.item, ctx);
+                item.init(ctx);
+                
+                int cx = c.col < numColumns / 2 ? numColumns - 1 : 0; 
+                int cy = c.row < numRows / 2 ? numRows - 1 : 0; 
+                
+                add(new DropTransition(x(cx), y(cy), x(c.col), y(c.row), item) {
+                    @Override
+                    public void afterStart()
+                    {
+                        //Debug.p("spawn " + src);
+                        item.addShapeToLayer(ctx.nukeLayer);
+                        ctx.nukeLayer.setVisible(true);
+                        
+                        Sound.WOOSH.play();
+                    }
+                    
+                    @Override
+                    public void afterEnd()
+                    {
+                        item.removeShapeFromLayer(ctx.nukeLayer);
+                        if (c.item != null)
+                        {
+                            c.item.explode(null, 0);
+                            c.item.removeShapeFromLayer(ctx.dotLayer);
+                        }
+                        
+                        item.addShapeToLayer(ctx.dotLayer);
+                        c.item = item;
+                        ctx.nukeLayer.setVisible(false);
+                        //Debug.p("reward added");
+                    }
+                });
+            }
+        };
+        list.add(t);
+    }
+    
     public void add(LazySusan s)
     {
         m_lazySusans.add(s);

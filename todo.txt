@@ -5,12 +5,36 @@
   - prepareSave: check if goals are attainable
   - Copy Level button
 * Connect Mode
-  - can you connect thru transporters?
+  - should you be able to connect thru transporters? you can now
   - fire goes thru transporter
+* New Goal: sequence of chains, e.g. first 3 red, then 5 green, then 8 blue etc.
+* change Striped color in Editor
+* add Wrapped Dot in Editor
+* when extinguishing Fire with a Drop, it still grows
+* unarmed explodies - triggered by clicking
+* DONE: ClickConnectMode: activate explodies and Color bombs, Blasters
+* DONE: Toy Blast - combine Blaster, Bomb, ColorBomb when next to each other
+* Turner can it rotate doors?
+* animate ColorBomb in ClickConnectMode
+* Animal.Bombify - variations: every N, only if dot is animal.color, random, varying bomb strength
+* negative Rewards when chain is too short, e.g. DotBomb
+* option: only straight connections
+* should fire ignore rockets? or maybe ignite them?
+* DONE: row/column Blaster - similar to wrapped explosion, but triggered by clicking - as in Toy Blast
+* Jelly Splash: ignite Wrapped Dot at end of chain
+* option: Show Grid Lines
+* change Animal chaining in Word Mode 
+  - When first item is an Animal, only wild cards and dots of the same color can be connected (and there must be at least 5).
+  - Animal 
+  - This is too hard. Note that it hard to find a word of length 5, let alone the same color.
+  - How about same color and len > 4 OR len > 6
+
+TEST
+* rockets, wrapped dots, blasters, explodies: armed, see class Explosions
 
 BUGS
 - Hole or Cage next to Slide - above Slide doesn't refill (GetTransitions.getSourceAbove skips holes)
-
+- (minor) see 'Goal Level' - too many goals don't fit
   
 NEW STUFF
 ---------
@@ -21,6 +45,14 @@ NEW STUFF
 * another RandomItem that only generates dots
 * Extra Moves item
 * Extra Time item
+* Treasure Chest - when unlocked, reveals Boost or other cool item
+
+* Trap Door 
+- temporarily opens and closes
+- or maybe blinking/activating on/off
+* Blinking cage
+- sequence: 1,0,{1,1,0}+    -- 1,0 is initially on,off, followed by on,on,off repeating
+* Ability to (de)activate devices, e.g. Lazy Susan, Conveyer
 
 = Farm Club
 * egss, 3 eggs is hatching egg, 3 hatching eggs is bird

@@ -1,7 +1,10 @@
 package com.enno.dotz.client.item;
 
+import com.ait.lienzo.client.core.shape.Group;
 import com.ait.lienzo.client.core.shape.IPrimitive;
 import com.ait.lienzo.client.core.shape.Layer;
+import com.ait.lienzo.client.core.shape.Line;
+import com.ait.lienzo.shared.core.types.ColorName;
 import com.enno.dotz.client.Config;
 import com.enno.dotz.client.Context;
 
@@ -11,6 +14,7 @@ public abstract class Item
     {
         REMOVE,
         EXPLODY,
+        OPEN,   // Chest
         NONE
     };
     
@@ -22,6 +26,8 @@ public abstract class Item
 
     public IPrimitive<?> shape;
 
+    protected boolean m_stuck;
+    
     protected Item()
     {
         id = s_counter++;
@@ -40,6 +46,41 @@ public abstract class Item
     {
         setContext(ctx);
         shape = createShape(cfg.size);
+    }
+    
+    public static Group createStuckShape(double sz)
+    {
+        Group g = new Group();
+        
+        double s = sz / 2;
+        Line l = new Line(-s, -s, s, s);
+        l.setStrokeWidth(2);
+        l.setStrokeColor(ColorName.DARKGRAY);
+        l.setDashArray(2, 2);
+        g.add(l);
+        
+        l = new Line(-s, s, s, -s);
+        l.setStrokeWidth(2);
+        l.setStrokeColor(ColorName.DARKGRAY);
+        l.setDashArray(2, 2);
+        g.add(l);
+        
+        return g;
+    }
+    
+    public boolean isStuck()
+    {
+        return m_stuck;
+    }
+    
+    public void setStuck(boolean stuck)
+    {
+        m_stuck = stuck;
+    }
+    
+    public boolean canBeStuck()
+    {
+        return true;
     }
     
     public Integer getColor()
@@ -77,6 +118,11 @@ public abstract class Item
         return true;
     }
     
+    public boolean canDrop()
+    {
+        return !isStuck();
+    }
+
     public boolean canChangeColor()
     {
         return false;
@@ -89,7 +135,13 @@ public abstract class Item
 
     public boolean isArmed()
     {
-        return false; // overriden by Striped with armed=true
+        return false; // overriden by Striped with armed=true, and Blaster when triggered
+    }
+    
+    // overriden by Striped and Blaster
+    public boolean isVertical()
+    {
+        return false;
     }
     
     /** Used by layout editor to rotate Mirror and Laser */
@@ -97,7 +149,7 @@ public abstract class Item
     {
         return false;
     }
-    
+
     /** Used by layout editor to rotate Mirror and Laser */
     public void rotate(int n)
     {
@@ -124,6 +176,24 @@ public abstract class Item
 
     public void dropFromBottom()
     {        
+    }
+    
+
+    /**
+     * @return  Whether +/- keys can modify the strength in the Level Editor.
+     */
+    public boolean canIncrementStrength()
+    {
+        return false;
+    }
+
+    /**
+     * Override for items that can increment/decrement strength in the layout editor (with +/-)
+     * 
+     * @param ds    {1, -1}
+     */
+    public void incrementStrength(int ds)
+    {
     }
     
     /**

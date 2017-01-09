@@ -4,6 +4,7 @@ import com.ait.tooling.nativetools.client.NArray;
 import com.ait.tooling.nativetools.client.NObject;
 import com.enno.dotz.client.Boosts;
 import com.enno.dotz.client.Cell;
+import com.enno.dotz.client.Cell.Bubble;
 import com.enno.dotz.client.Cell.Cage;
 import com.enno.dotz.client.Cell.ChangeColorCell;
 import com.enno.dotz.client.Cell.CircuitCell;
@@ -14,15 +15,21 @@ import com.enno.dotz.client.Cell.ItemCell;
 import com.enno.dotz.client.Cell.Rock;
 import com.enno.dotz.client.Cell.Slide;
 import com.enno.dotz.client.Cell.Teleport;
+import com.enno.dotz.client.ChainGoal;
 import com.enno.dotz.client.Config;
 import com.enno.dotz.client.Direction;
 import com.enno.dotz.client.Generator;
 import com.enno.dotz.client.Generator.ItemFrequency;
 import com.enno.dotz.client.Goal;
 import com.enno.dotz.client.GridState;
+import com.enno.dotz.client.LetterMultiplier;
 import com.enno.dotz.client.anim.Pt;
 import com.enno.dotz.client.item.Anchor;
 import com.enno.dotz.client.item.Animal;
+import com.enno.dotz.client.item.Blaster;
+import com.enno.dotz.client.item.Blocker;
+import com.enno.dotz.client.item.Bomb;
+import com.enno.dotz.client.item.Chest;
 import com.enno.dotz.client.item.Clock;
 import com.enno.dotz.client.item.ColorBomb;
 import com.enno.dotz.client.item.Domino;
@@ -100,15 +107,24 @@ public class LevelParser
                 {
                     NObject row = t.getAsObject(i);
                     Pt pt = pt(row.getAsArray("p"));
-                    int strength = row.getAsInteger("strength");
-                    int direction = parseDirection(row.getAsString("direction"));                    
                     
-                    int rotDir = 0;
-                    if (row.isInteger("rotate"))
-                        rotDir = row.getAsInteger("rotate");
-                    
-                    Door c = new Door(strength, direction, rotDir);
-                    grid.setCell(pt.col, pt.row, c);
+                    Door door;
+                    if (row.isDefined("seq"))
+                    {
+                        door = new Door(row.getAsString("seq"));
+                    }
+                    else
+                    {
+                        int strength = row.getAsInteger("strength");
+                        int direction = parseDirection(row.getAsString("direction"));                    
+                        
+                        int rotDir = 0;
+                        if (row.isInteger("rotate"))
+                            rotDir = row.getAsInteger("rotate");
+                        
+                        door = new Door(strength, direction, rotDir);
+                    }
+                    grid.setCell(pt.col, pt.row, door);
                 }
             }
             if (p.isArray("cages"))
@@ -118,10 +134,19 @@ public class LevelParser
                 {
                     NObject row = t.getAsObject(i);
                     Pt pt = pt(row.getAsArray("p"));
-                    int strength = row.getAsInteger("strength");                  
                     
-                    Cage c = new Cage(strength);
-                    grid.setCell(pt.col, pt.row, c);
+                    Cage cage;
+                    if (row.isDefined("strength"))
+                    {
+                        int strength = row.getAsInteger("strength");
+                        cage = new Cage(strength);
+                    }
+                    else
+                    {
+                        String seq = row.getAsString("seq");
+                        cage = new Cage(seq);
+                    }
+                    grid.setCell(pt.col, pt.row, cage);
                 }
             }
             if (p.isArray("conveyors"))
@@ -143,207 +168,30 @@ public class LevelParser
             if (ice != null)
                 parseIce(cfg.grid, ice);
             
-            if (p.isArray("animals"))
-            {
-                NArray t = p.getAsArray("animals");
-                for (int i = 0, n = t.size(); i < n; i++)
-                {
-                    NObject row = t.getAsObject(i);
-                    Pt pt = pt(row.getAsArray("p"));
-                    int strength = row.getAsInteger("strength");
-                    int color = row.getAsInteger("color");
-                    String type = row.getAsString("type");
-                    
-                    Cell c = grid.cell(pt.col, pt.row);
-                    c.item = new Animal(color, strength, Animal.Type.fromName(type));
-                }
-            }
-            if (p.isArray("lasers"))
-            {
-                NArray t = p.getAsArray("lasers");
-                for (int i = 0, n = t.size(); i < n; i++)
-                {
-                    NObject row = t.getAsObject(i);
-                    Pt pt = pt(row.getAsArray("p"));
-                    int direction = parseDirection(row.getAsString("direction"));
-                    
-                    Cell c = grid.cell(pt.col, pt.row);
-                    c.item = new Laser(direction);
-                }
-            }
-            if (p.isArray("rockets"))
-            {
-                NArray t = p.getAsArray("rockets");
-                for (int i = 0, n = t.size(); i < n; i++)
-                {
-                    NObject row = t.getAsObject(i);
-                    Pt pt = pt(row.getAsArray("p"));
-                    int direction = parseDirection(row.getAsString("direction"));
-                    
-                    Cell c = grid.cell(pt.col, pt.row);
-                    c.item = new Rocket(direction);
-                }
-            }
-            if (p.isArray("mirrors"))
-            {
-                NArray t = p.getAsArray("mirrors");
-                for (int i = 0, n = t.size(); i < n; i++)
-                {
-                    NObject row = t.getAsObject(i);
-                    Pt pt = pt(row.getAsArray("p"));
-                    boolean flip = row.getAsBoolean("flip");
-                    
-                    Cell c = grid.cell(pt.col, pt.row);
-                    c.item = new Mirror(flip);
-                }
-            }
-            if (p.isArray("knights"))
-            {
-                NArray t = p.getAsArray("knights");
-                for (int i = 0, n = t.size(); i < n; i++)
-                {
-                    NObject row = t.getAsObject(i);
-                    Pt pt = pt(row.getAsArray("p"));
-                    int strength = row.getAsInteger("strength");
-                    
-                    Cell c = grid.cell(pt.col, pt.row);
-                    c.item = new Knight(strength);
-                }
-            }
-            if (p.isArray("clocks"))
-            {
-                NArray t = p.getAsArray("clocks");
-                for (int i = 0, n = t.size(); i < n; i++)
-                {
-                    NObject row = t.getAsObject(i);
-                    Pt pt = pt(row.getAsArray("p"));
-                    int strength = row.getAsInteger("strength");
-                    
-                    Cell c = grid.cell(pt.col, pt.row);
-                    c.item = new Clock(strength);
-                }
-            }
-            if (p.isArray("drops"))
-            {
-                NArray t = p.getAsArray("drops");
-                for (int i = 0, n = t.size(); i < n; i++)
-                {
-                    NObject row = t.getAsObject(i);
-                    Pt pt = pt(row.getAsArray("p"));
-                    //int strength = row.getAsInteger("strength");
-                    
-                    Cell c = grid.cell(pt.col, pt.row);
-                    c.item = new Drop();
-                }
-            }
-            if (p.isArray("picks"))
-            {
-                NArray t = p.getAsArray("picks");
-                for (int i = 0, n = t.size(); i < n; i++)
-                {
-                    NObject row = t.getAsObject(i);
-                    Pt pt = pt(row.getAsArray("p"));
-                    
-                    Cell c = grid.cell(pt.col, pt.row);
-                    c.item = new IcePick();
-                }
-            }
-            if (p.isArray("colorBombs"))
-            {
-                NArray t = p.getAsArray("colorBombs");
-                for (int i = 0, n = t.size(); i < n; i++)
-                {
-                    NObject row = t.getAsObject(i);
-                    Pt pt = pt(row.getAsArray("p"));
-                    //int strength = row.getAsInteger("strength");
-                    
-                    Cell c = grid.cell(pt.col, pt.row);
-                    c.item = new ColorBomb();
-                }
-            }
-            if (p.isArray("dominoes"))
-            {
-                NArray t = p.getAsArray("dominoes");
-                for (int i = 0, n = t.size(); i < n; i++)
-                {
-                    NObject row = t.getAsObject(i);
-                    Pt pt = pt(row.getAsArray("p"));
-                    Pt num = pt(row.getAsArray("num"));
-                    boolean vertical = row.getAsBoolean("vertical");                                        
-                    
-                    Cell c = grid.cell(pt.col, pt.row);
-                    c.item = new Domino(num.col, num.row, vertical);
-                }
-            }
-            if (p.isArray("dots"))
-            {
-                NArray t = p.getAsArray("dots");
-                for (int i = 0, n = t.size(); i < n; i++)
-                {
-                    NObject row = t.getAsObject(i);
-                    Pt pt = pt(row.getAsArray("p"));
-                    int color = row.getAsInteger("color");
-                    String letter = row.getAsString("letter");
-                    
-                    Cell c = grid.cell(pt.col, pt.row);
-                    c.item = new Dot(color, letter);
-                }
-            }
-            if (p.isArray("bombs"))
-            {
-                NArray t = p.getAsArray("bombs");
-                for (int i = 0, n = t.size(); i < n; i++)
-                {
-                    NObject row = t.getAsObject(i);
-                    Pt pt = pt(row.getAsArray("p"));
-                    int color = row.getAsInteger("color");
-                    String letter = null;
-                    if (row.isString("letter"))
-                        letter = row.getAsString("letter");
-                    int strength = row.getAsInteger("strength");
-                    
-                    Cell c = grid.cell(pt.col, pt.row);
-                    c.item = new DotBomb(new Dot(color, letter), strength);
-                }
-            }
-            if (p.isArray("turners"))
-            {
-                NArray t = p.getAsArray("turners");
-                for (int i = 0, n = t.size(); i < n; i++)
-                {
-                    NObject row = t.getAsObject(i);
-                    Pt pt = pt(row.getAsArray("p"));
-                    int turn = row.getAsInteger("n");
-                    
-                    Cell c = grid.cell(pt.col, pt.row);
-                    c.item = new Turner(turn);
-                }
-            }
-            if (p.isArray("keys"))
-            {
-                NArray t = p.getAsArray("keys");
-                for (int i = 0, n = t.size(); i < n; i++)
-                {
-                    NObject row = t.getAsObject(i);
-                    Pt pt = pt(row.getAsArray("p"));
-                    
-                    Cell c = grid.cell(pt.col, pt.row);
-                    c.item = new Key();
-                }
-            }
-            if (p.isArray("eggs"))
-            {
-                NArray t = p.getAsArray("eggs");
-                for (int i = 0, n = t.size(); i < n; i++)
-                {
-                    NObject row = t.getAsObject(i);
-                    Pt pt = pt(row.getAsArray("p"));
-                    boolean cracked = row.isBoolean("cracked");
-                    
-                    Cell c = grid.cell(pt.col, pt.row);
-                    c.item = new Egg(cracked);
-                }
-            }
+            addItems("animal", p, grid);
+            addItems("laser", p, grid);
+            addItems("rocket", p, grid);
+            addItems("blocker", p, grid);
+            addItems("blaster", p, grid);
+            addItems("bomb", p, grid);
+            addItems("mirror", p, grid);
+            addItems("knight", p, grid);
+            addItems("clock", p, grid);
+            addItems("drop", p, grid);
+            addItems("pick", p, grid);
+            addItems("colorBomb", p, grid);
+            addItems("dominoes", "domino", p, grid);
+            addItems("dot", p, grid);
+            addItems("dotBomb", p, grid);
+            addItems("turner", p, grid);
+            addItems("key", p, grid);
+            addItems("egg", p, grid);
+            addItems("chest", p, grid);
+            addItems("fire", p, grid);
+            addItems("wild", p, grid);
+            addItems("anchor", p, grid);
+            addItems("yinyang", p, grid);
+            addItems("random", p, grid);
             
             NArray itemStr = p.getAsArray("items");            
             parseItems(cfg.grid, itemStr);
@@ -380,6 +228,174 @@ public class LevelParser
         }
     }
 
+    private void addItems(String singularType, NObject p, GridState grid)
+    {
+        addItems(singularType + "s", singularType, p, grid);
+    }
+    
+    private void addItems(String pluralType, String singularType, NObject p, GridState grid)
+    {
+        if (p.isArray(pluralType))
+        {
+            NArray t = p.getAsArray(pluralType);
+            for (int i = 0, n = t.size(); i < n; i++)
+            {
+                NObject row = t.getAsObject(i);
+                Pt pt = pt(row.getAsArray("p"));                
+                
+                Cell c = grid.cell(pt.col, pt.row);
+                c.item = getItem(singularType, row);
+            }
+        }
+    }
+    
+    private Item getItem(String itemClass, NObject row)
+    {
+        boolean stuck = row.isBoolean("stuck") ? row.getAsBoolean("stuck") : false;
+        
+        if (itemClass.equals("animal"))
+        {
+            int strength = row.getAsInteger("strength");
+            int color = row.getAsInteger("color");
+            String type = row.getAsString("type");
+            String action = row.getAsString("action");
+            return action == null ? new Animal(color, strength, Animal.Type.fromName(type), stuck) 
+                    : new Animal(color, strength, Animal.Type.fromName(type), Animal.Action.fromName(action), stuck);
+        }
+        if (itemClass.equals("laser"))
+        {
+            int direction = parseDirection(row.getAsString("direction"));
+            return new Laser(direction, stuck);
+        }
+        if (itemClass.equals("rocket"))
+        {
+            int direction = parseDirection(row.getAsString("direction"));
+            return new Rocket(direction, stuck);
+        }
+        if (itemClass.equals("blocker"))
+        {
+            int strength = row.getAsInteger("strength");
+            return new Blocker(strength, stuck);
+        }
+        if (itemClass.equals("blaster"))
+        {
+            boolean vertical = row.getAsBoolean("vertical");
+            return new Blaster(vertical, stuck);
+        }
+        if (itemClass.equals("bomb"))
+        {
+            int radius = row.getAsInteger("radius");
+            return new Bomb(radius, stuck);
+        }
+        if (itemClass.equals("mirror"))
+        {
+            boolean flip = row.getAsBoolean("flip");
+            return new Mirror(flip, stuck);
+        }
+        if (itemClass.equals("knight"))
+        {
+            int strength = row.getAsInteger("strength");
+            return new Knight(strength, stuck);
+        }
+        if (itemClass.equals("clock"))
+        {
+            int strength = row.getAsInteger("strength");
+            return new Clock(strength, stuck);
+        }
+        if (itemClass.equals("drop"))
+        {
+            int radius = row.isDefined("radius") ? row.getAsInteger("radius") : 3;
+            return new Drop(radius, stuck);
+        }
+        if (itemClass.equals("pick"))
+        {
+            int radius = row.isDefined("radius") ? row.getAsInteger("radius") : 3;
+            return new IcePick(radius, stuck);
+        }
+        if (itemClass.equals("colorBomb"))
+        {
+            return new ColorBomb(stuck);
+        }
+        if (itemClass.equals("domino"))
+        {
+            Pt num = pt(row.getAsArray("num"));
+            boolean vertical = row.getAsBoolean("vertical");
+            return new Domino(num.col, num.row, vertical, stuck);
+        }
+        if (itemClass.equals("dot"))
+        {
+            int color = row.getAsInteger("color");
+            String letter = row.getAsString("letter");
+
+            Dot dot = new Dot(color, letter, stuck);
+
+            NObject mult = row.getAsObject("mult");
+            if (mult != null)
+                dot.setLetterMultiplier(LetterMultiplier.fromJson(mult));
+
+            return dot;
+        }
+        if (itemClass.equals("dotBomb"))
+        {
+            int color = row.getAsInteger("color");
+            String letter = null;
+            if (row.isString("letter"))
+                letter = row.getAsString("letter");
+            int strength = row.getAsInteger("strength");
+
+            Dot dot = new Dot(color, letter, stuck);
+            NObject mult = row.getAsObject("mult");
+            if (mult != null)
+                dot.setLetterMultiplier(LetterMultiplier.fromJson(mult));
+
+            return new DotBomb(dot, strength, stuck);
+        }
+        if (itemClass.equals("turner"))
+        {
+            int turn = row.getAsInteger("n");
+            return new Turner(turn, stuck);
+        }
+        if (itemClass.equals("key"))
+        {
+            return new Key(stuck);
+        }
+        if (itemClass.equals("egg"))
+        {
+            boolean cracked = row.isBoolean("cracked");
+            return new Egg(cracked, stuck);
+        }
+        if (itemClass.equals("fire"))
+        {
+            return new Fire(stuck);
+        }
+        if (itemClass.equals("wild"))
+        {
+            return new Wild(stuck);
+        }
+        if (itemClass.equals("anchor"))
+        {
+            return new Anchor(stuck);
+        }
+        if (itemClass.equals("yinyang"))
+        {
+            return new YinYang(stuck);
+        }
+        if (itemClass.equals("random"))
+        {
+            return new RandomItem(stuck);
+        }
+        if (itemClass.equals("chest"))
+        {
+            int strength = row.getAsInteger("strength");
+                        
+            NObject itemObj = row.getAsObject("item");
+            Item item = itemObj == null ? null : getItem(itemObj.getAsString("class"), itemObj); // chest can be empty
+            return new Chest(item, strength, stuck);
+        }
+        //TODO striped, wrappedDot, explody, RandomItem?
+        return null; // should never happen
+    }
+    
     private Boosts parseBoosts(NObject json)
     {
         Boosts boosts = new Boosts();
@@ -449,6 +465,9 @@ public class LevelParser
         if (json.isInteger("cages"))
             goal.setCages(json.getAsInteger("cages"));
 
+        if (json.isInteger("bubbles"))
+            goal.setBubbles(json.getAsInteger("bubbles"));
+
         if (json.isInteger("circuits"))
             goal.setCircuits(json.getAsInteger("circuits"));
 
@@ -467,12 +486,21 @@ public class LevelParser
         if (json.isInteger("rockets"))
             goal.setRockets(json.getAsInteger("rockets"));
 
+        if (json.isInteger("blockers"))
+            goal.setBlockers(json.getAsInteger("blockers"));
+
         if (json.isInteger("score"))
             goal.setScore(json.getAsInteger("score"));
+        
+        if (json.isInteger("words"))
+            goal.setWords(json.getAsInteger("words"));
         
         if (json.isInteger("time"))
             goal.setTime(json.getAsInteger("time"));
 
+        if (json.isObject("chainGoal"))
+            goal.setChainGoal(new ChainGoal(json.getAsObject("chainGoal")));
+        
         return goal;
     }
 
@@ -517,6 +545,7 @@ public class LevelParser
                     case '+': cell = new Teleport(true); grid.setCell(col, row, cell); break;
                     case 'C': cell = new ChangeColorCell(); grid.setCell(col, row, cell); break;
                     case 'E': cell = new CircuitCell(); grid.setCell(col, row, cell); break;
+                    case 'B': cell = new Bubble(); grid.setCell(col, row, cell); break;
                     default:  cell = new ItemCell(); grid.setCell(col, row, cell); break;
                 }
             }
@@ -537,11 +566,11 @@ public class LevelParser
                 Item item = null;
                 switch (c)
                 {
-                    case 'W': item = new Wild(); break;
-                    case 'F': item = new Fire(); break;
-                    case 'A': item = new Anchor(); break;
-                    case 'Y': item = new YinYang(); break;
-                    case '?': item = new RandomItem(); break;
+                    case 'W': item = new Wild(false); break;
+                    case 'F': item = new Fire(false); break;
+                    case 'A': item = new Anchor(false); break;
+                    case 'Y': item = new YinYang(false); break;
+                    case '?': item = new RandomItem(false); break;
                     default: 
                         if (Character.isDigit(c))
                         {
@@ -585,12 +614,24 @@ public class LevelParser
         if (p.isBoolean("swapMode"))
             g.swapMode = p.getAsBoolean("swapMode");
 
+        if (p.isBoolean("clickMode"))
+            g.clickMode = p.getAsBoolean("clickMode");
+
         if (p.isBoolean("rollMode"))
             g.rollMode = p.getAsBoolean("rollMode");
 
+        if (p.isBoolean("diagonalMode"))
+            g.diagonalMode = p.getAsBoolean("diagonalMode");
+
         if (p.isBoolean("dominoMode"))
             g.dominoMode = p.getAsBoolean("dominoMode");
+        
+        if (p.isBoolean("slipperyAnchors"))
+            g.slipperyAnchors = p.getAsBoolean("slipperyAnchors");
 
+        if (p.isInteger("minChainLength"))
+            g.minChainLength = p.getAsInteger("minChainLength");
+        
         if (p.isInteger("fireGrowthRate"))
             g.fireGrowthRate = p.getAsInteger("fireGrowthRate");
         
@@ -603,20 +644,47 @@ public class LevelParser
         if (p.isInteger("animalStrength"))
             g.animalStrength = p.getAsInteger("animalStrength");
         
-        if (p.isInteger("animalStrength"))
-            g.animalStrength = p.getAsInteger("animalStrength");
+//        if (p.isInteger("animalStrength"))
+//            g.animalStrength = p.getAsInteger("animalStrength");
         
         if (p.isInteger("clockStrength"))
             g.clockStrength = p.getAsInteger("clockStrength");
         
+        if (p.isInteger("chestStrength"))
+            g.chestStrength = p.getAsInteger("chestStrength");
+        
         if (p.isInteger("bombStrength"))
             g.bombStrength = p.getAsInteger("bombStrength");
+        
+        if (p.isInteger("blockerStrength"))
+            g.blockerStrength = p.getAsInteger("blockerStrength");
         
         if (p.isBoolean("initialDotsOnly"))
             g.initialDotsOnly = p.getAsBoolean("initialDotsOnly");
         
         if (p.isString("animalType"))
             g.animalType = Animal.Type.fromName((p.getAsString("animalType")));
+        
+        if (p.isString("animalAction"))
+            g.animalAction = Animal.Action.fromName((p.getAsString("animalAction")));
+        
+        if (p.isString("rewardStrategies"))
+            g.rewardStrategies = p.getAsString("rewardStrategies");
+        
+        if (p.isInteger("icePickRadius"))
+            g.icePickRadius = p.getAsInteger("icePickRadius");
+
+        if (p.isInteger("dropRadius"))
+            g.dropRadius = p.getAsInteger("dropRadius");
+
+        if (p.isBoolean("removeLetters"))
+            g.removeLetters = p.getAsBoolean("removeLetters");
+
+        if (p.isBoolean("findWords"))
+            g.findWords = p.getAsBoolean("findWords");
+
+        if (p.isInteger("maxWordLength"))
+            g.maxWordLength = p.getAsInteger("maxWordLength");
         
         NArray freq = p.getAsArray("freq");
         for (int i = 0, n = freq.size(); i < n; i++)
@@ -644,15 +712,15 @@ public class LevelParser
                 }
                 else if (item.equals("fire"))
                 {
-                    g.add(new ItemFrequency(new Fire(), f));
+                    g.add(new ItemFrequency(new Fire(false), f));
                 }
                 else if (item.equals("anchor"))
                 {
-                    g.add(new ItemFrequency(new Anchor(), f));
+                    g.add(new ItemFrequency(new Anchor(false), f));
                 }
                 else if (item.equals("yinyang"))
                 {
-                    g.add(new ItemFrequency(new YinYang(), f));
+                    g.add(new ItemFrequency(new YinYang(false), f));
                 }
                 else if (item.equals("egg"))
                 {
@@ -664,17 +732,29 @@ public class LevelParser
                 }
                 else if (item.equals("wild"))
                 {
-                    g.add(new ItemFrequency(new Wild(), f));
+                    g.add(new ItemFrequency(new Wild(false), f));
+                }
+                else if (item.equals("dotBomb")) //TODO use getItem
+                {
+                    g.add(new ItemFrequency(new DotBomb(new Dot(0), g.bombStrength, false), f));
+                }
+                else if (item.equals("blocker"))
+                {
+                    g.add(new ItemFrequency(new Blocker(g.blockerStrength, false), f));
+                }
+                else if (item.equals("blaster"))
+                {
+                    g.add(new ItemFrequency(new Blaster(true, false), f));
                 }
                 else if (item.equals("bomb"))
                 {
-                    g.add(new ItemFrequency(new DotBomb(new Dot(0), g.bombStrength), f));
+                    g.add(new ItemFrequency(new Bomb(), f));
                 }
                 else if (item.equals("animal"))
                 {
                     if (a.isInteger(2))
                     {
-                        g.add(new ItemFrequency(new Animal(a.getAsInteger(2), g.animalStrength, g.animalType), f));
+                        g.add(new ItemFrequency(new Animal(a.getAsInteger(2), g.animalStrength, g.animalType, g.animalAction, false), f));
                     }
                     else if (a.isArray(2))
                     {
@@ -682,17 +762,17 @@ public class LevelParser
                         for (int j = 0; j < colors.size(); j++)
                         {
                             int color = colors.getAsInteger(j);
-                            g.add(new ItemFrequency(new Animal(color, g.animalStrength, g.animalType), f));
+                            g.add(new ItemFrequency(new Animal(color, g.animalStrength, g.animalType, g.animalAction, false), f));
                         }
                     }
                 }
                 else if (item.equals("knight"))
                 {
-                    g.add(new ItemFrequency(new Knight(g.knightStrength), f));
+                    g.add(new ItemFrequency(new Knight(g.knightStrength, false), f));
                 }
                 else if (item.equals("clock"))
                 {
-                    g.add(new ItemFrequency(new Clock(g.clockStrength), f));
+                    g.add(new ItemFrequency(new Clock(g.clockStrength, false), f));
                 }
                 else if (item.equals("drop"))
                 {
@@ -704,27 +784,31 @@ public class LevelParser
                 }
                 else if (item.equals("colorBomb"))
                 {
-                    g.add(new ItemFrequency(new ColorBomb(), f));
+                    g.add(new ItemFrequency(new ColorBomb(false), f));
                 }
                 else if (item.equals("mirror"))
                 {
-                    g.add(new ItemFrequency(new Mirror(false), f));
+                    g.add(new ItemFrequency(new Mirror(false, false), f));
                 }
                 else if (item.equals("laser"))
                 {
-                    g.add(new ItemFrequency(new Laser(Direction.EAST), f));
+                    g.add(new ItemFrequency(new Laser(Direction.EAST, false), f));
                 }
                 else if (item.equals("rocket"))
                 {
-                    g.add(new ItemFrequency(new Rocket(Direction.EAST), f));
+                    g.add(new ItemFrequency(new Rocket(Direction.EAST, false), f));
                 }
                 else if (item.equals("turner"))
                 {
-                    g.add(new ItemFrequency(new Turner(1), f));
+                    g.add(new ItemFrequency(new Turner(1, false), f));
                 }
                 else if (item.equals("key"))
                 {
-                    g.add(new ItemFrequency(new Key(), f));
+                    g.add(new ItemFrequency(new Key(false), f));
+                }
+                else if (item.equals("chest"))
+                {
+                    g.add(new ItemFrequency(new Chest(new RandomItem(), 1), f));
                 }
             }
         }
@@ -762,11 +846,20 @@ public class LevelParser
         NArray lasers = new NArray();
         NArray rockets = new NArray();
         NArray dots = new NArray();
-        NArray bombs = new NArray();
+        NArray dotBombs = new NArray();
         NArray dominoes = new NArray();
         NArray turners = new NArray();
         NArray keys = new NArray();
         NArray eggs = new NArray();
+        NArray blockers = new NArray();
+        NArray blasters = new NArray();
+        NArray bombs = new NArray();
+        NArray chests = new NArray();
+        NArray wilds = new NArray();
+        NArray fires = new NArray();
+        NArray anchors = new NArray();
+        NArray yinyangs = new NArray();
+        NArray randoms = new NArray();
         
         for (int row = 0; row < c.numRows; row++)
         {
@@ -793,6 +886,10 @@ public class LevelParser
                 {
                     gridLine += "E";
                 }
+                else if (cell instanceof Bubble)
+                {
+                    gridLine += "B";
+                }
                 else if (cell instanceof Slide)
                 {
                     Slide slide = (Slide) cell;
@@ -816,18 +913,26 @@ public class LevelParser
                     Door b = (Door) cell;
                     NObject a = new NObject();
                     a.put("p", pt(col, row));
-                    a.put("strength", b.getStrength());
-                    
-                    setDirection(a, b.getDirection());
-                    
-                    if (b.getDirection() != Direction.NONE)
+                    if (b.isBlinking())
                     {
-                        int rotDir = b.getRotationDirection();
-                        if (rotDir != 0)
+                        a.put("seq", b.getSequence());
+                    }
+                    else
+                    {
+                        a.put("strength", b.getStrength());
+                        
+                        setDirection(a, b.getDirection());
+                        
+                        if (b.getDirection() != Direction.NONE)
                         {
-                            a.put("rotate", rotDir);
+                            int rotDir = b.getRotationDirection();
+                            if (rotDir != 0)
+                            {
+                                a.put("rotate", rotDir);
+                            }
                         }
                     }
+                    
                     gridLine += '.';
                     doors.push(a);
                 }
@@ -836,7 +941,11 @@ public class LevelParser
                     Cage b = (Cage) cell;
                     NObject a = new NObject();
                     a.put("p", pt(col, row));
-                    a.put("strength", b.getStrength());
+                    
+                    if (b.isBlinking())
+                        a.put("seq", b.getSequence());
+                    else
+                        a.put("strength", b.getStrength());
                     
                     gridLine += '.';
                     cages.push(a);
@@ -860,145 +969,100 @@ public class LevelParser
                 char ch = '.';
                 if (cell.item instanceof Animal)
                 {
-                    Animal an = (Animal) cell.item;
-                    NObject a = new NObject();
-                    a.put("p", pt(col, row));
-                    a.put("strength", an.getStrength());
-                    a.put("color", an.getColor());
-                    a.put("type", an.getType().getName());
-                    animals.push(a);
+                    animals.push(toJson(cell.item, col, row));
                 }
                 else if (cell.item instanceof Knight)
                 {
-                    Knight an = (Knight) cell.item;
-                    NObject a = new NObject();
-                    a.put("p", pt(col, row));
-                    a.put("strength", an.getStrength());
-                    knights.push(a);
+                    knights.push(toJson(cell.item, col, row));
                 }
                 else if (cell.item instanceof Clock)
                 {
-                    Clock an = (Clock) cell.item;
-                    NObject a = new NObject();
-                    a.put("p", pt(col, row));
-                    a.put("strength", an.getStrength());
-                    clocks.push(a);
+                    clocks.push(toJson(cell.item, col, row));
                 }
                 else if (cell.item instanceof Drop)
                 {
-                    Drop an = (Drop) cell.item;
-                    NObject a = new NObject();
-                    a.put("p", pt(col, row));
-                    drops.push(a);
+                    drops.push(toJson(cell.item, col, row));
                 }
                 else if (cell.item instanceof IcePick)
                 {
-                    NObject a = new NObject();
-                    a.put("p", pt(col, row));
-                    picks.push(a);
+                    picks.push(toJson(cell.item, col, row));
                 }
                 else if (cell.item instanceof ColorBomb)
                 {
-                    NObject a = new NObject();
-                    a.put("p", pt(col, row));
-                    colorBombs.push(a);
+                    colorBombs.push(toJson(cell.item, col, row));
                 }
                 else if (cell.item instanceof Rocket)
                 {
-                    Rocket an = (Rocket) cell.item;
-                    NObject a = new NObject();
-                    a.put("p", pt(col, row));
-                    setDirection(a, an.getDirection());
-                    rockets.push(a);
+                    rockets.push(toJson(cell.item, col, row));
+                }
+                else if (cell.item instanceof Blocker)
+                {
+                    blockers.push(toJson(cell.item, col, row));
+                }
+                else if (cell.item instanceof Blaster)
+                {
+                    blasters.push(toJson(cell.item, col, row));
                 }
                 else if (cell.item instanceof Laser)
                 {
-                    Laser an = (Laser) cell.item;
-                    NObject a = new NObject();
-                    a.put("p", pt(col, row));
-                    setDirection(a, an.getDirection());
-                    lasers.push(a);
+                    lasers.push(toJson(cell.item, col, row));
                 }
                 else if (cell.item instanceof Mirror)
                 {
-                    Mirror an = (Mirror) cell.item;
-                    NObject a = new NObject();
-                    a.put("p", pt(col, row));
-                    a.put("flip", an.isFlipped());
-                    mirrors.push(a);
+                    mirrors.push(toJson(cell.item, col, row));
                 }
                 else if (cell.item instanceof Domino)
                 {
-                    Domino an = (Domino) cell.item;
-                    NObject a = new NObject();
-                    a.put("p", pt(col, row));
-                    a.put("num", pt(an.num[0], an.num[1]));
-                    a.put("vertical", an.vertical);
-                    dominoes.push(a);
+                    dominoes.push(toJson(cell.item, col, row));
                 }
                 else if (cell.item instanceof Turner)
                 {
-                    Turner an = (Turner) cell.item;
-                    NObject a = new NObject();
-                    a.put("p", pt(col, row));
-                    a.put("n", an.n);
-                    turners.push(a);
+                    turners.push(toJson(cell.item, col, row));
+                }
+                else if (cell.item instanceof Bomb)
+                {
+                    bombs.push(toJson(cell.item, col, row));
                 }
                 else if (cell.item instanceof Key)
                 {
-                    NObject a = new NObject();
-                    a.put("p", pt(col, row));
-                    keys.push(a);
+                    keys.push(toJson(cell.item, col, row));
                 }
                 else if (cell.item instanceof Egg)
                 {
-                    Egg an = (Egg) cell.item;
-                    NObject a = new NObject();
-                    a.put("p", pt(col, row));
-                    if (an.isCracked())
-                        a.put("cracked", true);
-                    eggs.push(a);
+                    eggs.push(toJson(cell.item, col, row));
                 }
-                else if (cell.item instanceof Dot)
+                else if (cell.item instanceof Chest)
                 {
-                    Dot dot = (Dot) cell.item;
-                    if (dot.letter == null)
-                    {
-                        ch = (char) ('0' + dot.color);
-                    }
-                    else
-                    {
-                        NObject a = new NObject();
-                        a.put("p", pt(col, row));
-                        a.put("color", dot.color);
-                        a.put("letter", dot.letter);
-                        dots.push(a);
-                    }
+                    chests.push(toJson(cell.item, col, row));
                 }
                 else if (cell.item instanceof DotBomb)
                 {
-                    DotBomb bomb = (DotBomb) cell.item;
-                    Dot dot = bomb.getDot();
-                    
-                    NObject a = new NObject();
-                    a.put("p", pt(col, row));
-                    a.put("color", dot.color);
-                    if (dot.letter != null)
-                        a.put("letter", dot.letter);
-                    a.put("strength", bomb.getStrength());
-                    bombs.push(a);                    
+                    dotBombs.push(toJson(cell.item, col, row));                  
+                }
+                else if (cell.item instanceof Dot)
+                {
+                    dots.push(toJson(cell.item, col, row));
                 }
                 else if (cell.item instanceof Fire)
-                    ch = 'F';
+                {
+                    fires.push(toJson(cell.item, col, row));                  
+                }
                 else if (cell.item instanceof Wild)
-                    ch = 'W';
+                {
+                    wilds.push(toJson(cell.item, col, row));                  
+                }
                 else if (cell.item instanceof Anchor)
-                    ch = 'A';
+                {
+                    anchors.push(toJson(cell.item, col, row));                  
+                }
                 else if (cell.item instanceof RandomItem)
-                    ch = '?';
+                {
+                    randoms.push(toJson(cell.item, col, row));                  
+                }
                 else if (cell.item instanceof YinYang)
-                    ch = 'Y';
-                
+                {
+                    yinyangs.push(toJson(cell.item, col, row));                  
+                }
                 itemLine += ch;                
                 
                 iceLine += cell.ice == 0 ? '.' : (char) ('0' + cell.ice);
@@ -1026,7 +1090,7 @@ public class LevelParser
         add(p, "conveyors", conveyors);
         add(p, "lazySusans", lazySusans);
         add(p, "dots", dots);
-        add(p, "bombs", bombs);
+        add(p, "dotBombs", dotBombs);
         add(p, "animals", animals);
         add(p, "knights", knights);
         add(p, "clocks", clocks);
@@ -1040,11 +1104,217 @@ public class LevelParser
         add(p, "turners", turners);
         add(p, "keys", keys);
         add(p, "eggs", eggs);
+        add(p, "chests", chests);
+        add(p, "blockers", blockers);
+        add(p, "blasters", blasters);
+        add(p, "bombs", bombs);
+        add(p, "fires", fires);
+        add(p, "wilds", wilds);
+        add(p, "anchors", anchors);
+        add(p, "yinyangs", yinyangs);
+        add(p, "randoms", randoms);
+        
         p.put("generator", generator(c.generator));        
         p.put("goals", goal(c.goals));
         p.put("boosts", boosts(c.boosts));
         
         return p;
+    }
+
+    protected static NObject toJson(Item item, int col, int row)
+    {
+        NObject a = toJson(item, false);
+        a.put("p", pt(col, row));
+        return a;
+    }
+    
+    protected static NObject toJson(Item item, boolean addClass)
+    {
+        NObject a = new NObject();
+        if (item.isStuck())
+            a.put("stuck", true);
+        
+        if (item instanceof Animal)
+        {
+            Animal an = (Animal) item;
+            a.put("strength", an.getStrength());
+            a.put("color", an.getColor());
+            a.put("type", an.getType().getName());
+            if (an.getAction() != Animal.Action.DEFAULT)
+                a.put("action", an.getAction().getName());
+            if (addClass)
+                a.put("class", "animal");
+        }
+        else if (item instanceof Knight)
+        {
+            Knight an = (Knight) item;
+            a.put("strength", an.getStrength());
+            if (addClass)
+                a.put("class", "knight");
+        }
+        else if (item instanceof Clock)
+        {
+            Clock an = (Clock) item;
+            a.put("strength", an.getStrength());
+            if (addClass)
+                a.put("class", "clock");
+        }
+        else if (item instanceof Drop)
+        {
+            Drop an = (Drop) item;
+            a.put("radius", an.getRadius());
+            if (addClass)
+                a.put("class", "drop");
+        }
+        else if (item instanceof IcePick)
+        {
+            IcePick an = (IcePick) item;
+            a.put("radius", an.getRadius());
+            if (addClass)
+                a.put("class", "pick");
+        }
+        else if (item instanceof ColorBomb)
+        {
+            if (addClass)
+                a.put("class", "colorBomb");
+        }
+        else if (item instanceof Rocket)
+        {
+            Rocket an = (Rocket) item;
+            setDirection(a, an.getDirection());
+            if (addClass)
+                a.put("class", "rocket");
+        }
+        else if (item instanceof Blocker)
+        {
+            Blocker an = (Blocker) item;
+            a.put("strength", an.getStrength());
+            if (addClass)
+                a.put("class", "blocker");
+        }
+        else if (item instanceof Blaster)
+        {
+            Blaster an = (Blaster) item;
+            a.put("vertical", an.isVertical());
+            if (addClass)
+                a.put("class", "blaster");
+        }
+        else if (item instanceof Laser)
+        {
+            Laser an = (Laser) item;
+            setDirection(a, an.getDirection());
+            if (addClass)
+                a.put("class", "laser");
+        }
+        else if (item instanceof Mirror)
+        {
+            Mirror an = (Mirror) item;
+            a.put("flip", an.isFlipped());
+            if (addClass)
+                a.put("class", "mirror");
+        }
+        else if (item instanceof Domino)
+        {
+            Domino an = (Domino) item;
+            a.put("num", pt(an.num[0], an.num[1]));
+            a.put("vertical", an.vertical);
+            if (addClass)
+                a.put("class", "domino");
+        }
+        else if (item instanceof Turner)
+        {
+            Turner an = (Turner) item;
+            a.put("n", an.n);
+            if (addClass)
+                a.put("class", "turner");
+        }
+        else if (item instanceof Bomb)
+        {
+            Bomb an = (Bomb) item;
+            a.put("radius", an.getRadius());
+            if (addClass)
+                a.put("class", "bomb");
+        }
+        else if (item instanceof Key)
+        {
+            if (addClass)
+                a.put("class", "key");
+        }
+        else if (item instanceof Egg)
+        {
+            Egg an = (Egg) item;
+            if (an.isCracked())
+                a.put("cracked", true);
+            if (addClass)
+                a.put("class", "egg");
+        }
+        else if (item instanceof Chest)
+        {
+            Chest an = (Chest) item;
+            a.put("strength", an.getStrength());
+            if (an.getItem() != null)
+                a.put("item", toJson(an.getItem(), true));
+            if (addClass)
+                a.put("class", "chest");
+        }
+        else if (item instanceof Dot)
+        {
+            Dot dot = (Dot) item;
+            a.put("color", dot.color);
+            if (addClass)
+                a.put("class", "dot");
+
+            if (dot.isLetter())
+            {
+                a.put("letter", dot.getLetter());
+                LetterMultiplier m = dot.getLetterMultiplier();
+                if (m != null)
+                    a.put("mult", m.toJson());
+            }
+        }
+        else if (item instanceof DotBomb)
+        {
+            DotBomb bomb = (DotBomb) item;
+            Dot dot = bomb.getDot();
+            
+            a.put("color", dot.color);
+            if (dot.isLetter())
+            {
+                a.put("letter", dot.getLetter());
+                LetterMultiplier m = dot.getLetterMultiplier();
+                if (m != null)
+                    a.put("mult", m.toJson());
+            }
+            a.put("strength", bomb.getStrength());
+            if (addClass)
+                a.put("class", "dotBomb");               
+        }
+        else if (item instanceof Fire)
+        {
+            if (addClass)
+                a.put("class", "fire");
+        }
+        else if (item instanceof Wild)
+        {
+            if (addClass)
+                a.put("class", "wild");
+        }
+        else if (item instanceof Anchor)
+        {
+            if (addClass)
+                a.put("class", "anchor");
+        }
+        else if (item instanceof RandomItem)
+        {
+            if (addClass)
+                a.put("class", "random");
+        }
+        else if (item instanceof YinYang)
+        {
+            if (addClass)
+                a.put("class", "yinyang");
+        }
+        return a;
     }
     
     protected static void add(NObject p, String name, NArray ar)
@@ -1134,6 +1404,9 @@ public class LevelParser
         if (g.getRockets() != 0)
             p.put("rockets", g.getRockets());
         
+        if (g.getBlockers() != 0)
+            p.put("blockers", g.getBlockers());
+        
         if (g.getMaxMoves() != 0)
             p.put("maxMoves", g.getMaxMoves());
         
@@ -1146,12 +1419,22 @@ public class LevelParser
         if (g.getCages() != 0)
             p.put("cages", g.getCages());
         
+        if (g.getBubbles() != 0)
+            p.put("bubbles", g.getBubbles());
+        
         if (g.getScore() != 0)
             p.put("score", g.getScore());
 
         if (g.getTime() != 0)
             p.put("time", g.getTime());
-                
+        
+        if (g.getWords() != 0)
+            p.put("words", g.getWords());
+        
+        ChainGoal ch = g.getChainGoal();
+        if (ch != null)
+            p.put("chainGoal", ch.toNObject());
+        
         return p;
     }
     
@@ -1160,8 +1443,12 @@ public class LevelParser
         NObject p = new NObject();
         p.put("generateLetters", g.generateLetters);
         p.put("swapMode", g.swapMode);
+        p.put("clickMode", g.clickMode);
         p.put("rollMode", g.rollMode);
+        p.put("diagonalMode", g.diagonalMode);
         p.put("dominoMode", g.dominoMode);
+        p.put("slipperyAnchors", g.slipperyAnchors);
+        p.put("minChainLength", g.minChainLength);
         p.put("seed", g.getSeed());
         p.put("fireGrowthRate", g.fireGrowthRate);
         p.put("maxAnchors", g.maxAnchors);
@@ -1170,8 +1457,25 @@ public class LevelParser
         p.put("animalStrength", g.animalStrength);
         p.put("knightStrength", g.knightStrength);
         p.put("clockStrength", g.clockStrength);
+        p.put("chestStrength", g.chestStrength);
         p.put("bombStrength", g.bombStrength);
+        p.put("blockerStrength", g.blockerStrength);
         p.put("animalType", g.animalType.getName());
+        p.put("animalAction", g.animalAction.getName());
+        
+        String rewards = g.rewardStrategies;
+        if (rewards != null && rewards.length() > 0)
+            p.put("rewardStrategies", rewards);
+        
+        p.put("icePickRadius", g.icePickRadius);
+        p.put("dropRadius", g.dropRadius);
+        
+        if (g.generateLetters)
+        {
+            p.put("removeLetters", g.removeLetters);
+            p.put("findWords", g.findWords);
+            p.put("maxWordLength", g.maxWordLength);
+        }
         
         NArray freq = new NArray();
         for (ItemFrequency f : g.getFrequencies())
@@ -1223,9 +1527,17 @@ public class LevelParser
         else if (item instanceof Egg)
             a.push("egg");
         else if (item instanceof DotBomb)
+            a.push("dotBomb");
+        else if (item instanceof Blocker)
+            a.push("blocker");
+        else if (item instanceof Bomb)
             a.push("bomb");
+        else if (item instanceof Blaster)
+            a.push("blaster");
         else if (item instanceof Domino)
             a.push("domino");
+        else if (item instanceof Chest)
+            a.push("chest");
         else if (item instanceof Dot)
         {
             a.push("dot");

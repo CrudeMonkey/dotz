@@ -36,8 +36,6 @@
     "????????",
     "????????"
   ],
-  "teleporters": [  ],
-  "doors": [  ],
   "conveyors": [
     {"p":[1,2],"turn":-1,"direction":"W"},
     {"p":[2,2],"turn":-1,"direction":"N"},
@@ -66,15 +64,6 @@
     {"p":[3,7],"turn":-1,"direction":"S"},
     {"p":[4,7],"turn":-1,"direction":"E"}
   ],
-  "lazySusans": [  ],
-  "dots": [  ],
-  "bombs": [  ],
-  "animals": [  ],
-  "knights": [  ],
-  "clocks": [  ],
-  "lasers": [  ],
-  "mirrors": [  ],
-  "rockets": [  ],
   "generator": {
     "generateLetters": false,
     "swapMode": false,

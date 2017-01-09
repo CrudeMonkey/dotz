@@ -1,0 +1,101 @@
+{
+  "id": 229,
+  "name": "Test Toy Blast 2",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Test",
+  "numColumns": 9,
+  "numRows": 9,
+  "grid": [
+    "  .....  ",
+    ". ..... .",
+    "  .....  ",
+    ". ..... .",
+    "  .....  ",
+    ". ..... .",
+    "  .....  ",
+    ". ..... .",
+    "  .....  "
+  ],
+  "ice": [
+    ".........",
+    "2.......2",
+    ".........",
+    "2.......2",
+    ".........",
+    "2.......2",
+    ".........",
+    "2.......2",
+    "........."
+  ],
+  "items": [
+    "..?????..",
+    "?.?????.?",
+    "..?????..",
+    "?.???.?.?",
+    "...????..",
+    "?.?????.?",
+    "..?????..",
+    "?.???.?.?",
+    "..?????.."
+  ],
+  "colorBombs": [
+        {
+      "p": [
+        5,
+        3
+      ]
+    },
+        {
+      "p": [
+        2,
+        4
+      ]
+    },
+        {
+      "p": [
+        5,
+        7
+      ]
+    }
+  ],
+  "generator": {
+    "generateLetters": false,
+    "swapMode": false,
+    "clickMode": true,
+    "rollMode": false,
+    "diagonalMode": false,
+    "dominoMode": false,
+    "slipperyAnchors": false,
+    "minChainLength": 2,
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "maxDomino": 6,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "bombStrength": 9,
+    "blockerStrength": 2,
+    "animalType": "Default",
+    "animalAction": "Default",
+    "rewardStrategies": "S5,W7,c9",
+    "icePickRadius": 3,
+    "dropRadius": 3,
+    "freq": [
+      [22.4,"dot",0],
+      [22.4,"dot",1],
+      [22.4,"dot",2],
+      [22.4,"dot",4],
+      [10.5,"wild"]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "maxMoves": 55,
+    "ice": -1
+  },
+  "boosts": {  },
+  "lastModified": "1481504819185"
+}

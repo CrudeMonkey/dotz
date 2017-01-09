@@ -1,0 +1,97 @@
+{
+  "id": 232,
+  "name": "Open Sesame",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Done",
+  "numColumns": 8,
+  "numRows": 8,
+  "grid": [
+    "..+..+..",
+    "........",
+    "....R.L.",
+    "....X.X.",
+    "....X.X.",
+    "R...X.X.",
+    " R-LX.X-",
+    "........"
+  ],
+  "ice": [
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
+  ],
+  "items": [
+    "????????",
+    "????????",
+    "????.?.?",
+    "????.?.?",
+    "????.?.?",
+    ".???.?.?",
+    "..?..?.?",
+    ".....?.?"
+  ],
+  "teleporters": [
+    {"from":[2,0],"to":[7,6]},
+    {"from":[5,0],"to":[2,6]}
+  ],
+  "doors": [
+    {"p":[5,3],"seq":"1,0,0,0"},
+    {"p":[5,4],"seq":"1,1,0,0"},
+    {"p":[5,5],"seq":"1,1,1,0"}
+  ],
+  "conveyors": [
+    {"p":[0,7],"turn":0,"direction":"E"},
+    {"p":[1,7],"turn":0,"direction":"E"},
+    {"p":[2,7],"turn":0,"direction":"E"},
+    {"p":[3,7],"turn":0,"direction":"E"},
+    {"p":[4,7],"turn":0,"direction":"E"},
+    {"p":[5,7],"turn":0,"direction":"E"},
+    {"p":[6,7],"turn":0,"direction":"E"},
+    {"p":[7,7],"turn":0,"direction":"E"}
+  ],
+  "generator": {
+    "generateLetters": false,
+    "swapMode": false,
+    "clickMode": false,
+    "rollMode": false,
+    "diagonalMode": false,
+    "dominoMode": false,
+    "slipperyAnchors": false,
+    "minChainLength": 2,
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "maxDomino": 6,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "bombStrength": 9,
+    "blockerStrength": 2,
+    "animalType": "Default",
+    "animalAction": "Default",
+    "icePickRadius": 3,
+    "dropRadius": 3,
+    "freq": [
+      [22.3,"dot",0],
+      [22.3,"dot",1],
+      [22.3,"dot",3],
+      [22.3,"dot",4],
+      [9.4,"anchor"],
+      [1.5,"rocket"]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "anchors": 3,
+    "maxMoves": 30
+  },
+  "boosts": {  },
+  "lastModified": "1481917214169"
+}

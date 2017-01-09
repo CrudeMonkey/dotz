@@ -52,6 +52,9 @@ public class WrappedDot extends Item
     {
         Group g = new Group();
         
+        if (isStuck())
+            g.add(createStuckShape(size));
+        
         Circle c = new Circle(size / 4);
         IColor fillColor = cfg == null ? Config.COLORS[0] : cfg.drawColor(color);
         c.setFillColor(fillColor);       // cfg is null in ModePalette  

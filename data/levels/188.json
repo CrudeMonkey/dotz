@@ -40,7 +40,7 @@
     {"p":[7,1],"strength":1,"direction":"N"},
     {"p":[7,7],"strength":1,"direction":"W","rotate":1}
   ],
-  "bombs": [
+  "dotBombs": [
     {"p":[3,1],"color":2,"strength":9},
     {"p":[0,4],"color":2,"strength":9}
   ],

@@ -8,14 +8,18 @@ import com.ait.lienzo.shared.core.types.ColorName;
 
 public class Anchor extends Item
 {
-    public Anchor()
-    {        
+    public Anchor(boolean stuck)
+    {
+        m_stuck = stuck;
     }
     
     @Override
     public IPrimitive<?> createShape(double size)
     {
         Group group = new Group();
+        
+        if (isStuck())
+            group.add(createStuckShape(size));
         
         Circle outer = new Circle(size / 4 - 1);  // minus half the strokeWidth
 //        outer.setStrokeColor(ColorName.BLACK);
@@ -56,7 +60,7 @@ public class Anchor extends Item
     @Override
     protected Item doCopy()
     {
-        return new Anchor();
+        return new Anchor(m_stuck);
     }
 
     @Override

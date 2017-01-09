@@ -5,6 +5,8 @@ import java.util.Random;
 import com.ait.tooling.nativetools.client.NArray;
 import com.ait.tooling.nativetools.client.NObject;
 import com.enno.dotz.client.Cell;
+import com.enno.dotz.client.Cell.Bubble;
+import com.enno.dotz.client.Cell.Cage;
 import com.enno.dotz.client.Cell.ChangeColorCell;
 import com.enno.dotz.client.Cell.CircuitCell;
 import com.enno.dotz.client.Cell.Door;
@@ -14,11 +16,14 @@ import com.enno.dotz.client.Cell.Slide;
 import com.enno.dotz.client.Cell.Teleport;
 import com.enno.dotz.client.Config;
 import com.enno.dotz.client.Context;
+import com.enno.dotz.client.Controller;
 import com.enno.dotz.client.Direction;
 import com.enno.dotz.client.GridState;
 import com.enno.dotz.client.item.Anchor;
 import com.enno.dotz.client.item.Animal;
+import com.enno.dotz.client.item.Animal.Action;
 import com.enno.dotz.client.item.Animal.Type;
+import com.enno.dotz.client.item.Blocker;
 import com.enno.dotz.client.item.Clock;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.Fire;
@@ -41,13 +46,16 @@ public class RandomGridGenerator
         boolean x_symmetry();
         boolean y_symmetry();
         boolean isReplace();
+        int cageStrength();
         int doorStrength();
         int doorRotation();
         int animalStrength();
         Animal.Type animalType();
+        Animal.Action animalAction();
         int clockStrength();
         int knightStrength();
         int iceStrength();
+        int blockerStrength();
         boolean isInteractive();
     }
     
@@ -79,6 +87,12 @@ public class RandomGridGenerator
         }
 
         @Override
+        public Action animalAction()
+        {
+            return m_panel.getAnimalAction();
+        }
+
+        @Override
         public int clockStrength()
         {
             return m_panel.getClockStrength();
@@ -94,6 +108,18 @@ public class RandomGridGenerator
         public int iceStrength()
         {
             return m_panel.getIceStrength();
+        }
+        
+        @Override
+        public int blockerStrength()
+        {
+            return doorStrength();
+        }
+        
+        @Override
+        public int cageStrength()
+        {
+            return doorStrength();
         }
         
         @Override
@@ -124,8 +150,13 @@ public class RandomGridGenerator
     private static final int LASER_ID = 19;
     private static final int MIRROR_ID = 20;
     private static final int ROCKET_ID = 21;
+    private static final int CAGE_ID = 22;
+    private static final int BLINKING_CAGE_ID = 23;
+    private static final int BLINKING_DOOR_ID = 24;
+    private static final int BLOCKER_ID = 25;
+    private static final int BUBBLE_ID = 26;
     
-    private static final int LAST_ID = ROCKET_ID;
+    private static final int LAST_ID = BUBBLE_ID;
     
     private Context ctx;
     private GridState state;
@@ -214,9 +245,29 @@ public class RandomGridGenerator
                 new DoorFeature(false).gen(props);
                 break;                
             }
+            case BUBBLE_ID: 
+            {
+                new BubbleFeature().gen(props);
+                break;                
+            }
             case DIRECTED_DOOR_ID: 
             {
                 new DoorFeature(true).gen(props);
+                break;                
+            }
+            case CAGE_ID: 
+            {
+                new CageFeature().gen(props);
+                break;                
+            }
+            case BLINKING_CAGE_ID: 
+            {
+                new BlinkingCageFeature().gen(props);
+                break;                
+            }
+            case BLINKING_DOOR_ID: 
+            {
+                new BlinkingDoorFeature().gen(props);
                 break;                
             }
             case SLIDE_ID: 
@@ -252,6 +303,11 @@ public class RandomGridGenerator
             case FIRE_ID: 
             {
                 new FireFeature().gen(props);
+                break;                
+            }
+            case BLOCKER_ID: 
+            {
+                new BlockerFeature().gen(props);
                 break;                
             }
             case ICE_ID: 
@@ -323,6 +379,10 @@ public class RandomGridGenerator
         f.add(10, LASER_ID);
         f.add(10, MIRROR_ID);
         f.add(10, ROCKET_ID);        
+        f.add(30, BLOCKER_ID);        
+        f.add(30, CAGE_ID);
+        f.add(10, BLINKING_CAGE_ID);
+        f.add(10, BLINKING_DOOR_ID);
         return f;
     }
     
@@ -1117,12 +1177,77 @@ public class RandomGridGenerator
             return new Door(m_doorStrength, dir, x_sym == y_sym ? m_doorRotation : -m_doorRotation);
         }
     }
+
+    public class BubbleFeature extends CellFeature
+    {
+        public BubbleFeature()
+        {
+            super(1, 3, false, false, 3, 1);
+        }
+        
+        @Override
+        protected Cell createCell(boolean x_sym, boolean y_sym)
+        {
+            return new Bubble();
+        }
+    }
+    
+    public class BlinkingDoorFeature extends CellFeature
+    {
+        public BlinkingDoorFeature()
+        {
+            super(1, 3, false, false, 3, 1);
+        }
+        
+        @Override
+        protected Cell createCell(boolean x_sym, boolean y_sym)
+        {
+            return new Door(Controller.ON_OFF);
+        }
+    }
+    
+    public class CageFeature extends CellFeature
+    {
+        private int m_cageStrength;
+        
+        public CageFeature()
+        {
+            super(1, 3, false, false, 4, 2);
+        }
+        
+        public void gen(Properties props)
+        {
+            m_cageStrength = props.cageStrength();
+            super.gen(props);
+        }
+        
+        @Override
+        protected Cell createCell(boolean x_sym, boolean y_sym)
+        {
+            return new Cage(m_cageStrength);
+        }
+    }
+    
+    public class BlinkingCageFeature extends CellFeature
+    {
+        public BlinkingCageFeature()
+        {
+            super(1, 3, false, false, 3, 1);
+        }
+        
+        @Override
+        protected Cell createCell(boolean x_sym, boolean y_sym)
+        {
+            return new Cage(Controller.ON_OFF);
+        }
+    }
     
     public abstract class ItemFeature extends PatternFeature
     {
         protected int m_color;
         protected Properties m_props;
-
+        protected boolean m_stuck;
+        
         protected ItemFeature(int min, int max, int maxWide, int maxHigh)
         {
             super(min, max, true, true, maxWide, maxHigh);
@@ -1176,7 +1301,7 @@ public class RandomGridGenerator
         @Override
         protected Item createItem(boolean x_sym, boolean y_sym)
         {
-            return new Dot(m_color);
+            return new Dot(m_color, null, m_stuck);
         }
     }
     
@@ -1190,7 +1315,7 @@ public class RandomGridGenerator
         @Override
         protected Item createItem(boolean x_sym, boolean y_sym)
         {
-            return new Wild();
+            return new Wild(m_stuck);
         }
     }
     
@@ -1205,7 +1330,7 @@ public class RandomGridGenerator
         @Override
         protected Item createItem(boolean x_sym, boolean y_sym)
         {
-            return new Anchor();
+            return new Anchor(m_stuck);
         }
     }
     
@@ -1219,7 +1344,21 @@ public class RandomGridGenerator
         @Override
         protected Item createItem(boolean x_sym, boolean y_sym)
         {
-            return new Fire();
+            return new Fire(m_stuck);
+        }
+    }
+    
+    public class BlockerFeature extends ItemFeature
+    {
+        public BlockerFeature()
+        {
+            super(1, 3, 4, 2);
+        }
+
+        @Override
+        protected Item createItem(boolean x_sym, boolean y_sym)
+        {
+            return new Blocker(m_props.blockerStrength(), m_stuck);
         }
     }
     
@@ -1234,7 +1373,7 @@ public class RandomGridGenerator
         @Override
         protected Item createItem(boolean x_sym, boolean y_sym)
         {
-            return new Clock(m_props.clockStrength());
+            return new Clock(m_props.clockStrength(), m_stuck);
         }
     }
     
@@ -1249,7 +1388,7 @@ public class RandomGridGenerator
         @Override
         protected Item createItem(boolean x_sym, boolean y_sym)
         {
-            return new Knight(m_props.knightStrength());
+            return new Knight(m_props.knightStrength(), m_stuck);
         }
     }
     
@@ -1264,7 +1403,7 @@ public class RandomGridGenerator
         @Override
         protected Item createItem(boolean x_sym, boolean y_sym)
         {
-            return new Animal(m_color, m_props.animalStrength(), m_props.animalType());
+            return new Animal(m_color, m_props.animalStrength(), m_props.animalType(), m_props.animalAction(), m_stuck);
         }
     }
     
@@ -1283,7 +1422,7 @@ public class RandomGridGenerator
         protected Item createItem(boolean x_sym, boolean y_sym)
         {
             int dir = mirrorDirection(m_direction, x_sym, y_sym);
-            return new Laser(dir);
+            return new Laser(dir, m_stuck);
         }
     }
     
@@ -1302,7 +1441,7 @@ public class RandomGridGenerator
         protected Item createItem(boolean x_sym, boolean y_sym)
         {
             boolean flipped = x_sym == y_sym ? m_flipped : !m_flipped;
-            return new Mirror(flipped);
+            return new Mirror(flipped, m_stuck);
         }
     }
     
@@ -1321,7 +1460,7 @@ public class RandomGridGenerator
         protected Item createItem(boolean x_sym, boolean y_sym)
         {
             int dir = mirrorDirection(m_direction, x_sym, y_sym);
-            return new Rocket(dir);
+            return new Rocket(dir, m_stuck);
         }
     }
     
@@ -1423,8 +1562,12 @@ public class RandomGridGenerator
         NArray a = new NArray();
         a.push(new NObject("id", HOLE_ID).put("name", "Holes"));
         a.push(new NObject("id", SLIDE_ID).put("name", "Slides"));
+        a.push(new NObject("id", BUBBLE_ID).put("name", "Bubbles"));
         a.push(new NObject("id", DOOR_ID).put("name", "Simple Doors"));
         a.push(new NObject("id", DIRECTED_DOOR_ID).put("name", "Directed Doors"));
+        a.push(new NObject("id", BLINKING_DOOR_ID).put("name", "Blinking Doors"));
+        a.push(new NObject("id", CAGE_ID).put("name", "Cages"));
+        a.push(new NObject("id", BLINKING_CAGE_ID).put("name", "Blinking Cages"));
         a.push(new NObject("id", TELEPORT_ID).put("name", "Teleporters"));
         a.push(new NObject("id", CIRCUIT_ID).put("name", "Circuits"));
         a.push(new NObject("id", CHANGE_COLOR_ID).put("name", "Color Changers"));
@@ -1449,6 +1592,7 @@ public class RandomGridGenerator
         a.push(new NObject("id", LASER_ID).put("name", "Lasers"));
         a.push(new NObject("id", MIRROR_ID).put("name", "Mirrors"));
         a.push(new NObject("id", ROCKET_ID).put("name", "Rockets"));
+        a.push(new NObject("id", BLOCKER_ID).put("name", "Blockers"));
         return a;
     }
 }

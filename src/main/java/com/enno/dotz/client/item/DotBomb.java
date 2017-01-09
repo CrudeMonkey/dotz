@@ -26,10 +26,11 @@ public class DotBomb extends Item
     private Random rnd = new Random();
     private Line[] m_lines = new Line[N];
     
-    public DotBomb(Dot dot, int strength)
+    public DotBomb(Dot dot, int strength, boolean stuck)
     {
         m_strength = strength;
         m_dot = dot;
+        m_stuck = stuck;
     }
     
     @Override
@@ -67,6 +68,9 @@ public class DotBomb extends Item
     {
         Group g = new Group();
         
+        if (isStuck())
+            g.add(createStuckShape(size));
+        
         g.add(m_dot.createShape(size));
         
         double r = size * 0.16;
@@ -92,6 +96,13 @@ public class DotBomb extends Item
         Group fuse = new Group();
         fuse.setRotation(Math.PI / 4);
         g.add(fuse);
+        
+        if (m_dot.isLetter())
+        {
+            double s = size * 0.13;
+            fuse.setX(s);
+            fuse.setY(-s);
+        }
         
         double y = -size * 0.18;
         double y2 = -size * 0.30;
@@ -149,11 +160,29 @@ public class DotBomb extends Item
         }
     }
     
-    public void updateStrength()
+    @Override
+    public boolean canIncrementStrength()
     {
-        m_text.setText("" + m_strength);
+        return true;
     }
     
+    @Override
+    public void incrementStrength(int ds)
+    {
+        if (ds == -1 && m_strength <= 1)
+            return;
+        
+        m_strength += ds;
+        updateStrength();
+    }
+    
+    public void updateStrength()
+    {
+        if (m_text != null)
+            m_text.setText("" + m_strength);
+    }
+    
+    @Override
     public void setContext(Context ctx)
     {
         super.setContext(ctx);
@@ -163,7 +192,7 @@ public class DotBomb extends Item
     @Override
     protected Item doCopy()
     {
-        return new DotBomb((Dot) m_dot.copy(), m_strength);
+        return new DotBomb((Dot) m_dot.copy(), m_strength, m_stuck);
     }
 
     @Override

@@ -78,6 +78,8 @@ public class StatsPanel extends LienzoPanel
                 new Picture("images/domino.png"),
                 new Picture("images/blue_dot_T.png"),
                 new Picture("images/refresh.png"),
+                new Picture("images/diagonal_mode.png"),
+                new Picture("images/click_mode.gif"),
         };
     }
 

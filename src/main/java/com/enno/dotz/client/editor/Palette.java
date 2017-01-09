@@ -41,19 +41,28 @@ public abstract class Palette<T> extends LienzoPanel
                 int col = event.getX() / m_buttonSize;
                 int row = event.getY() / m_buttonSize;
                 
-                PaletteButton<T> selected = null;
-                for (PaletteButton<T> b : m_list)
-                {
-                    if (b.selected(col, row))
-                        selected = b;
-                }
-                ctx.backgroundLayer.draw();   // redraw button borders
-                
-                selected(selected);
+                selectOption(col, row);
             }
         });
     }
     
+    protected void selectOption(int col, int row)
+    {
+        PaletteButton<T> selected = null;
+        for (PaletteButton<T> b : m_list)
+        {
+            if (b.selected(col, row))
+                selected = b;
+        }
+        ctx.backgroundLayer.draw();   // redraw button borders
+        
+        selected(selected);
+    }
+
+    public void selectFirstOption()
+    {
+        selectOption(0, 0);
+    }
     
     protected void selected(PaletteButton<T> selected)
     {
@@ -75,7 +84,7 @@ public abstract class Palette<T> extends LienzoPanel
         }
         draw();
     }
-    
+
     public abstract static class PaletteButton<T> extends Group
     {
         private int m_col, m_row, m_numColumns, m_numRows;
@@ -130,6 +139,11 @@ public abstract class Palette<T> extends LienzoPanel
             boolean selected = (col >= m_col && col < m_col + m_numColumns && row >= m_row && row < m_row + m_numRows);
             setSelected(selected);
             return selected;
+        }
+        
+        public void decrementColumn()
+        {
+            m_col--;
         }
     }
 }

@@ -13,19 +13,23 @@ import com.ait.lienzo.shared.core.types.TextAlign;
 import com.ait.lienzo.shared.core.types.TextBaseLine;
 import com.enno.dotz.client.Config;
 import com.enno.dotz.client.Context;
+import com.enno.dotz.client.Context.FindWordList;
 import com.google.gwt.dom.client.Style.FontWeight;
 
 public abstract class ShowWordCallback implements IAnimationCallback 
 {
     private Text m_text;
     private Layer m_layer;
-
-    public ShowWordCallback(Context ctx, String word, int color)
+    private FindWordList m_findWordList;
+    
+    public ShowWordCallback(Context ctx, String word, int wordPoints, int color)
     {
+        m_findWordList = ctx.findWordList;
+        
         double width = ctx.cfg.numColumns * ctx.cfg.size;
         m_layer = ctx.nukeLayer;
     
-        m_text = new Text(word);
+        m_text = new Text(word + " (" + wordPoints + ")");
         //m_text.setFillColor(ColorName.BLACK);
         m_text.setFillColor(color == Config.WILD_ID ? ColorName.BLACK : Config.COLORS[color]);
         m_text.setFontSize(30);
@@ -46,6 +50,9 @@ public abstract class ShowWordCallback implements IAnimationCallback
     @Override
     public void onStart(IAnimation animation, IAnimationHandle handle)
     {
+        if (m_findWordList != null)
+            m_findWordList.setVisible(false);
+        
         m_layer.add(m_text);
         m_layer.setVisible(true);
         redraw();
@@ -75,6 +82,9 @@ public abstract class ShowWordCallback implements IAnimationCallback
     {
         m_layer.setVisible(false);
         m_layer.remove(m_text);
+        
+        if (m_findWordList != null)
+            m_findWordList.setVisible(true);
     }
 
     public void redraw()

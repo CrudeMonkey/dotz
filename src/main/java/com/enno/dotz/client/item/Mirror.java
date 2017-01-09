@@ -9,15 +9,19 @@ public class Mirror extends Item
 {
     public boolean m_flipped; // false: \    true: /
             
-    public Mirror(boolean flipped)
+    public Mirror(boolean flipped, boolean stuck)
     {
         m_flipped = flipped;
+        m_stuck = stuck;
     }
     
     @Override
     public IPrimitive<?> createShape(double size)
     {
         Group group = new Group();
+        
+        if (isStuck())
+            group.add(createStuckShape(size));
         
         double sz = size * 0.6;
         double sz2 = sz / 2;
@@ -68,7 +72,7 @@ public class Mirror extends Item
     @Override
     protected Item doCopy()
     {
-        return new Mirror(m_flipped);
+        return new Mirror(m_flipped, m_stuck);
     }
 
 //    @Override

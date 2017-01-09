@@ -36,20 +36,9 @@
     "???.?WW.",
     "....?..."
   ],
-  "teleporters": [  ],
-  "doors": [  ],
-  "conveyors": [  ],
-  "lazySusans": [  ],
-  "dots": [  ],
-  "bombs": [  ],
   "animals": [
     {"p":[7,4],"strength":20,"color":2,"type":"Default"}
   ],
-  "knights": [  ],
-  "clocks": [  ],
-  "lasers": [  ],
-  "mirrors": [  ],
-  "rockets": [  ],
   "dominoes": [
         {
       "p": [

@@ -18,6 +18,7 @@ class LevelDB
     
     private String m_levelDirectory
     private String m_deletedLevelDirectory
+    private String m_deletedSetDirectory
     private String m_setDirectory
     private String m_statsDirectory
     
@@ -30,6 +31,7 @@ class LevelDB
         
         m_levelDirectory        = "$m_dataDirectory/levels"
         m_deletedLevelDirectory = "$m_dataDirectory/deleted"
+        m_deletedSetDirectory   = "$m_dataDirectory/deletedSets"
         m_setDirectory          = "$m_dataDirectory/sets"
         m_statsDirectory        = "$m_dataDirectory/stats"
     }
@@ -54,7 +56,17 @@ class LevelDB
         
         return file.renameTo(new File(m_deletedLevelDirectory, file.getName()))
     }
+    
+    public boolean deleteSet(int setId)
+    {
+        String resource = m_setDirectory + "/" + setId + ".json"
+        File file = new File(resource)
         
+        new File(m_deletedSetDirectory).mkdirs()
+        
+        return file.renameTo(new File(m_deletedSetDirectory, file.getName()))
+    }
+
     public JSONObject loadSet(int setId)
     {
         String resource = m_setDirectory + "/" + setId + ".json"
@@ -88,7 +100,7 @@ class LevelDB
         
         String json = new PrettyPrinter(['teleporters', 'conveyors', 'lazySusans', 'doors', 'animals', 
             'freq', 'lasers', 'mirrors', 'knights', 'dots', 'bombs', 'rockets', 'turners', 'eggs',
-            'dominoes', 'drops']).toString(level)
+            'dominoes', 'drops', 'dotBombs', 'blasters', 'blockers']).toString(level)
         //String json = level.toJSONString()
         
         File file = new File(resource)
@@ -293,6 +305,36 @@ class LevelDB
                 saveLevel(lev)
             }
         }
+    }
+    
+    public void saveRecentLevels(List<Integer> levelIds)
+    {
+        File f = new File("$m_dataDirectory/recentLevels.txt")
+        f.delete()
+        f << levelIds.join(",")
+    }
+    
+    public List loadRecentLevels()
+    {
+        File f = new File("$m_dataDirectory/recentLevels.txt")
+        if (!f.isFile())
+            return []
+            
+        String[] levelIds = f.text.split(",")
+        List list = []
+        levelIds.each{ String levelId ->
+            try
+            {
+                int id = levelId as int
+                Map level = loadLevel(id)
+                list << level
+            }
+            catch (e)
+            {
+                // skip - level could've been deleted
+            }
+        }
+        return list
     }
     
     protected JSONObject loadResource(String resource)

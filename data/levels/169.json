@@ -36,20 +36,9 @@
     "????????",
     "????????"
   ],
-  "teleporters": [  ],
-  "doors": [  ],
-  "conveyors": [  ],
-  "lazySusans": [  ],
-  "dots": [  ],
-  "bombs": [
+  "dotBombs": [
     {"p":[1,3],"color":0,"strength":9}
   ],
-  "animals": [  ],
-  "knights": [  ],
-  "clocks": [  ],
-  "lasers": [  ],
-  "mirrors": [  ],
-  "rockets": [  ],
   "generator": {
     "generateLetters": false,
     "seed": -1,
@@ -67,7 +56,7 @@
       [19,"dot",2],
       [18,"dot",3],
       [18.8,"dot",4],
-      [6.6,"bomb"]
+      [6.6,"dotBomb"]
     ]
   },
   "goals": {

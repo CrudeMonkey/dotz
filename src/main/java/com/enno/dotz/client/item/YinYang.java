@@ -8,6 +8,12 @@ import com.ait.lienzo.shared.core.types.ColorName;
 
 public class YinYang extends Item
 {
+    private Group m_rotateShape;
+
+    public YinYang(boolean stuck)
+    {
+        m_stuck = stuck;
+    }
 
     @Override
     public IPrimitive<?> createShape(double size)
@@ -51,6 +57,16 @@ public class YinYang extends Item
         c.setFillColor(ColorName.BLACK);
         g.add(c);
         
+        m_rotateShape = g;
+        
+        if (isStuck())
+        {
+            Group g2 = new Group();
+            g2.add(createStuckShape(size));
+            g2.add(g);
+            return g2;
+        }
+        
         return g;
     }
     
@@ -63,7 +79,7 @@ public class YinYang extends Item
     @Override
     protected Item doCopy()
     {
-        return new YinYang();
+        return new YinYang(m_stuck);
     }
 
     @Override
@@ -71,13 +87,12 @@ public class YinYang extends Item
     {
         long speed = 4000;
         double rot = (t % speed) * Math.PI * 2 / speed;
-        shape.setRotation(rot);
+        m_rotateShape.setRotation(rot);
     }
     
     @Override
     public ExplodeAction explode(Integer color, int chainSize)
     {
-        // TODO Auto-generated method stub
         return ExplodeAction.REMOVE;
     }
 }

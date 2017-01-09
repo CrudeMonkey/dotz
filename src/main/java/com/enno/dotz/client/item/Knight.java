@@ -16,14 +16,36 @@ public class Knight extends Item
     private Text m_text;
     private int m_strength;
     
-    public Knight(int strength)
+    public Knight(int strength, boolean stuck)
     {
         m_strength = strength;
+        m_stuck = stuck;
     }
     
     public int getStrength()
     {
         return m_strength;
+    }
+    
+    @Override
+    public boolean canIncrementStrength()
+    {
+        return true;
+    }
+    
+    @Override
+    public void incrementStrength(int ds)
+    {
+        if (m_strength <= 1 && ds == -1)
+            return;
+        
+        m_strength += ds;
+        
+        if (m_text != null)
+        {
+            m_text.setVisible(m_strength > 1);
+            m_text.setText("" + m_strength);
+        }
     }
     
     public void setStrength(int strength)
@@ -35,6 +57,9 @@ public class Knight extends Item
     public IPrimitive<?> createShape(double sz)
     {
         Group shape = new Group();
+        
+        if (isStuck())
+            shape.add(createStuckShape(sz));
         
         Group g = new Group();
         g.setX(-sz / 2);
@@ -89,7 +114,7 @@ public class Knight extends Item
     @Override
     protected Item doCopy()
     {
-        return new Knight(m_strength);
+        return new Knight(m_strength, m_stuck);
     }
 
     @Override

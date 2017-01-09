@@ -15,6 +15,7 @@ import com.enno.dotz.client.GridState;
 import com.enno.dotz.client.MainPanel.GridContainer;
 import com.enno.dotz.client.ScorePanel;
 import com.enno.dotz.client.editor.TeleportConnections.Link;
+import com.enno.dotz.client.ui.MXLabel;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.widgets.layout.VLayout;
 
@@ -53,7 +54,12 @@ public class PreviewLevelPanel extends VLayout
         
         m_boostPanel = new BoostPanel(ctx);
         ctx.boostPanel = m_boostPanel;
-        addMember(m_boostPanel);        
+        addMember(m_boostPanel); 
+        
+        MXLabel desc = new MXLabel(ctx.cfg.description == null ? "" : ctx.cfg.description);
+        desc.setWidth100();
+        desc.setHeight(40);
+        addMember(desc);
         
         m_grid.init(false);
         initItemGraphics();
@@ -63,7 +69,7 @@ public class PreviewLevelPanel extends VLayout
         m_grid.add(m_connectionLayer);
         initTeleportInfo();
         
-        m_grid.draw();        
+        m_grid.draw();
         
         m_score.setGoals(ctx.cfg.goals);        
     }

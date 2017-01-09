@@ -4,6 +4,7 @@ import com.ait.lienzo.client.core.shape.Layer;
 import com.ait.lienzo.client.core.shape.Rectangle;
 import com.ait.lienzo.shared.core.types.ColorName;
 import com.enno.dotz.client.Cell;
+import com.enno.dotz.client.Cell.Bubble;
 import com.enno.dotz.client.Cell.Cage;
 import com.enno.dotz.client.Cell.ChangeColorCell;
 import com.enno.dotz.client.Cell.CircuitCell;
@@ -15,13 +16,14 @@ import com.enno.dotz.client.Cell.Rock;
 import com.enno.dotz.client.Cell.Slide;
 import com.enno.dotz.client.Cell.Teleport;
 import com.enno.dotz.client.Context;
+import com.enno.dotz.client.Controller;
 import com.enno.dotz.client.Direction;
 
 public class CellPalette extends Palette<Cell>
 {
     public CellPalette()
     {
-        super(30, CellButton.SIZE, 6, 3);
+        super(30, CellButton.SIZE, 7, 3);
         
         ctx.backgroundLayer = new Layer();
         add(ctx.backgroundLayer);        
@@ -35,6 +37,7 @@ public class CellPalette extends Palette<Cell>
         addButton(new Door(1, Direction.EAST, 0), 3, 0);
         addButton(new Door(1, Direction.SOUTH, 0), 4, 0);
         addButton(new Door(1, Direction.WEST, 0), 5, 0);
+        addButton(new Door(Controller.ON_OFF), 6, 0);
         
         addButton(new Slide(false), 0, 1);
         addButton(new Slide(true), 1, 1);
@@ -42,6 +45,7 @@ public class CellPalette extends Palette<Cell>
         addButton(new Teleport(false), 3, 1);
         addButton(new Teleport(true), 4, 1);
         addButton(new ChangeColorCell(), 5, 1);        
+        addButton(new Bubble(), 6, 1);        
 
         addButton(new CircuitCell(), 0, 2);
         addButton(new ConveyorCell(Direction.NORTH, -1), 1, 2);
@@ -49,6 +53,7 @@ public class CellPalette extends Palette<Cell>
         addButton(new ConveyorCell(Direction.NORTH, 1), 3, 2);
         addButton(new Rock(), 4, 2);
         addButton(new Cage(1), 5, 2);
+        addButton(new Cage(Controller.ON_OFF), 6, 2);
     }
     
     private void addButton(Cell cell, int col, int row)

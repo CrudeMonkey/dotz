@@ -111,7 +111,8 @@ public class DotzGridPanel extends LienzoPanel
     {
         m_state.endOfLevel = m_endOfLevel;
         
-        m_connectMode = ctx.generator.swapMode ? new SwapConnectMode(ctx, m_connectLayer) : new DragConnectMode(ctx, m_connectLayer);        
+        m_connectMode = ctx.generator.swapMode ? new SwapConnectMode(ctx, m_connectLayer) : 
+            (ctx.generator.clickMode ? new ClickConnectMode(ctx, m_connectLayer) : new DragConnectMode(ctx, m_connectLayer));        
         ctx.boostPanel.setConnectMode(m_connectMode);
         
         startItemAnimation();
@@ -168,6 +169,7 @@ public class DotzGridPanel extends LienzoPanel
                     
                 LayerRedrawManager.get().schedule(m_dotLayer);
                 LayerRedrawManager.get().schedule(ctx.laserLayer);
+                LayerRedrawManager.get().schedule(ctx.doorLayer); // TODO optimize - only needed if we have blinking Doors/Cages
             }
         }).run();
     }
@@ -179,5 +181,6 @@ public class DotzGridPanel extends LienzoPanel
         public void cancel();
         public void retry();
         public void skip();
+        public void editLevel();
     }
 }

@@ -10,6 +10,8 @@ import com.enno.dotz.client.Context;
 import com.enno.dotz.client.GridState;
 import com.enno.dotz.client.anim.Transition.BlastTransition;
 import com.enno.dotz.client.anim.Transition.ExplosionTransition;
+import com.enno.dotz.client.item.Blaster;
+import com.enno.dotz.client.item.Bomb;
 import com.enno.dotz.client.item.Explody;
 import com.enno.dotz.client.item.Striped;
 
@@ -33,41 +35,78 @@ public class Explosions
         for (Cell c : armed)
         {
             final List<Cell> blasted = new ArrayList<Cell>();
-            boolean vertical = ((Striped) c.item).vertical;
-            if (vertical)
+            boolean vertical = c.item.isVertical(); // Blaster or Striped
+            boolean bothWays = false;
+            boolean isWide = false;
+            
+            if (c.item instanceof Blaster)
+            {
+                Blaster blaster = (Blaster) c.item;
+                bothWays = blaster.isBothWays();
+                isWide = blaster.isWide();
+            }
+            else if (c.item instanceof Striped)
+            {
+                Striped blaster = (Striped) c.item;
+                bothWays = blaster.isBothWays();
+                isWide = blaster.isWide();
+            }
+            
+            double x = state.x(c.col);
+            double y = state.y(c.row);
+
+            if (vertical || bothWays)
             {
                 for (int row = 0; row < nr; row++)
                 {
                     if (row != c.row)
                         addBlasted(blasted, c.col, row);
+                    
+                    if (isWide)
+                    {
+                        if (c.col > 0)
+                            addBlasted(blasted, c.col - 1, row);
+                        if (c.col < ctx.cfg.numColumns - 1)
+                            addBlasted(blasted, c.col + 1, row);
+                    }
                 }
+                
+                double y2 = y + state.numRows * ctx.cfg.size;
+                explosions.add(new BlastTransition(x, y, x, y2, isWide, ctx) {
+                    public void afterEnd()
+                    {
+                        super.afterEnd();
+                        for (Cell to : blasted)
+                            to.zap();           
+                    }
+                });
             }
-            else
+            if (!vertical || bothWays)
             {
                 for (int col = 0; col < nc; col++)
                 {
                     if (col != c.col)
                         addBlasted(blasted, col, c.row);
+
+                    if (isWide)
+                    {
+                        if (c.row > 0)
+                            addBlasted(blasted, col, c.row - 1);
+                        if (c.row < ctx.cfg.numRows - 1)
+                            addBlasted(blasted, col, c.row + 1);
+                    }
                 }
+                
+                double x2 = x + state.numColumns * ctx.cfg.size;
+                explosions.add(new BlastTransition(x, y, x2, y, isWide, ctx) {
+                    public void afterEnd()
+                    {
+                        super.afterEnd();
+                        for (Cell to : blasted)
+                            to.zap();           
+                    }
+                });
             }
-            
-            double x = state.x(c.col);
-            double y = state.y(c.row);
-            double x2 = x;
-            double y2 = y;
-            if (vertical)
-                y2 += state.numRows * ctx.cfg.size;
-            else
-                x2 += state.numColumns * ctx.cfg.size;
-            
-            explosions.add(new BlastTransition(x, y, x2, y2, ctx) {
-                public void afterEnd()
-                {
-                    super.afterEnd();
-                    for (Cell to : blasted)
-                        to.zap();           
-                }
-            });
         }
         
         for (Cell c : explodies)
@@ -91,7 +130,13 @@ public class Explosions
         
         for (Cell c : explodies)
         {
-            if (((Explody) c.item).getRadius() == 2)
+            int r = 1;
+            if (c.item instanceof Explody)
+                r = ((Explody) c.item).getRadius();
+            else if (c.item instanceof Bomb)
+                r = ((Bomb) c.item).getRadius();
+            
+            if (r > 1)
             {
                 int col = c.col;
                 int row = c.row;

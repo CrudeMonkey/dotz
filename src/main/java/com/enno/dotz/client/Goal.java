@@ -21,10 +21,25 @@ public class Goal
     protected int m_rockets;
     protected int m_birds;
     protected int m_dominoes;
+    protected int m_blockers;
+    protected int m_bubbles;
     
     protected int m_score;
     protected int m_time;
-  
+    protected int m_words;      // must find N words
+
+    protected ChainGoal m_chainGoal;
+    
+    public int getWords()
+    {
+        return m_words;
+    }
+    
+    public void setWords(int words)
+    {
+        m_words = words;
+    }
+    
     public int getFire()
     {
         return m_fire;
@@ -95,6 +110,16 @@ public class Goal
         m_anchors = anchors;
     }
 
+    public int getBubbles()
+    {
+        return m_bubbles;
+    }
+
+    public void setBubbles(int bubbles)
+    {
+        m_bubbles = bubbles;
+    }
+
     public int getDoors()
     {
         return m_doors;
@@ -155,6 +180,16 @@ public class Goal
         return m_circuits;
     }
 
+    public void setBlockers(int goal)
+    {
+        m_blockers = goal;
+    }
+    
+    public int getBlockers()
+    {
+        return m_blockers;
+    }
+
     public void setLasers(int goal)
     {
         m_lasers = goal;
@@ -208,5 +243,15 @@ public class Goal
     public void setDominoes(int goal)
     {
         m_dominoes = goal;
+    }
+
+    public ChainGoal getChainGoal()
+    {
+        return m_chainGoal;
+    }
+
+    public void setChainGoal(ChainGoal chainGoal)
+    {
+        m_chainGoal = chainGoal;
     }
 }

@@ -1,0 +1,378 @@
+- Introduction
+
+ice Strength uses ice.
+
+- Modes
+
+-- Dot Mode
+
+* Minimum Chain Length (default: 2) - determines how many dots should be connected at least.
+
+--- Making squares @[tags: ['squares', 'square']]
+
+--- Diagonal Mode
+
+* Determines whether items can be connected diagonally.
+* Can't make squares. (Goal: emulate Jelly Splash.)
+
+-- Swap Mode
+
+* Similar to Candy Crush.
+
+-- Word Mode
+
+* In Word Mode dots are replaced with [[Letters]].
+* Letters can have a bomb attached, just like a Dot Bomb. We call this a [[Letter Bomb]].
+* The following items can be connected to make a word: Letter, Wild Card, Animal, and Letter Bomb.
+* When the first item is an Animal, the word length must be at least 5. The Animal counts as a wild card. The Animal must be the first letter of the word.
+
+-- Domino Mode @[tags: ['domino', 'dominoes']]
+
+* To connect two dominoes, the number of pips of the two dominoes of the adjacent sides must be the same.
+* When making longer chains, each side of a domino can be used only once. E.g. if a domino with (2,5) is connected to (5,4), you can't connect the (5,4) to e.g. (5,1), because the 5 was already used when connecting to the (2,5) domino. 
+* Wild cards can be used to connect unrelated chains.
+* The [[Maximum Domino]] option determines the maximum number of pips that will be generated on each side of a domino.
+
+- Click Mode
+
+* Similar to Toy Blast.
+
+- Mode Options
+
+-- Roll Mode
+
+Affects how items fall down. Normally items only falls straight down, and they don't fall off of Rocks.
+But in Roll Mode, items can roll sideways off of each other or off Rocks.
+
+-- Minimum Chain Length (default: 2) @[tags: ['minimum chain length']]
+
+* N/A to Swap Mode
+
+-- Mode Indicator
+
+* When playing a level, the Mode Indicator tells you which mode it is.
+
+========================================
+
+- Goals
+
+-- All vs. Specific Number
+
+-- Number of Moves
+
+-- Points
+
+-- Free Dots or Dominoes
+
+-- Free Animals
+
+-- Drop Anchors or Clocks
+
+-- Open Doors or Cages
+
+-- Melt Ice
+
+-- Extinguish Fire
+
+-- Timed Level
+
+-- Free Birds
+
+-- Connect Lasers
+
+-- Deactivate Circuits
+
+-- Free Knights
+
+-- Fire Rockets
+
+-- Explode Mirrors or Blockers
+
+-- Chains
+
+
+========================================
+
+- Boosts
+
+Most of the boosts work the same as the associated item.
+
+* Turner - rotate something 90 degrees clockwise
+* Water Drop - extinguish fire in a 3x3 region
+* Ice Pick - melt region of ice
+* Color Bomb - remove all dots of a color
+* Wild Card - change a dot into a wild card
+* Explody - change a dot into an Explody and explode
+* Yin Yang - reshuffle dots and wild cards (TODO; verify)
+* Key - open Door
+
+========================================
+
+- Cells
+
+-- Regular Cell
+
+-- Hole
+
+-- Rock
+
+-- Slide
+
+Slides can not be placed:
+* Above/below another slide
+* Below a teleport source or rock
+* Next to (i.e left or right of) another slide, unless they're back-to-back
+* Next to the edge of the grid, such that items would slide out of the grid
+* Next to a rock, such that items would slide into the rock
+
+-- Door
+
+A Door is a cell that may hold an item. The item will not be released until the door is opened.
+
+There are 3 types:
+* [[Regular Door]] - can be opened on all 4 sides
+* [[Directional Door]] - can only be opened on one side
+* [[Blinking Door]] - can't be opened
+
+Regular Doors and Directional Doors:
+* Can be opened by removing a dot next to it. 
+* The [[Door Strength]] indicates how many times it will take to open it.
+* Can also be opened by making squares or explosions. These actions reduce their strength, ultimately causing the Door to be removed.
+* Can also be opened with Keys, which will open (remove) the Door immediately.
+
+* Directional Doors can optionally rotate clockwise or counter clockwise after each move. This is set with the [[Door Rotation]].
+* Blinking Doors can not be damaged or removed, but the item inside can.
+* Blinking Doors blink on and off in a specific Sequence.
+* A locked Door won't let any items drop thru it, whereas a locked Cage will.
+
+-- Cage
+
+-- Change Color Cell
+
+-- Circuit
+
+-- Conveyer Belt
+
+* A conveyer belt that ends at the edge of the grid, wraps around, and comes in on the opposite side.
+
+-- Lazy Susan
+
+-- Teleport
+
+-- Ice
+
+* Ice can be removed with explosions or by connecting dots.
+* The [[Ice Strength]] determines how many times you need to do this. The darker the ice, the stronger it is.
+* Ice can be removed with an Ice Pick.
+
+-- Controller
+
+* A controller may change the state of a cell after each turn
+* E.g Blinking Door, Blinking Cage
+* The controller's [[Sequence]] is basically an unending list of zeroes and ones, where 0 turns a feature off and 1 turns it on
+
+
+========================================
+
+- Items
+
+-- Dot
+
+-- Wild Card
+
+-- Dot Bomb @[tags: ['bomb', 'bombs', 'dot bomb', 'dot bombs']]
+
+* Dots can have a bomb associated with it. 
+* The bomb will detonate after a certain number of turns, unless it is removed. When it detonates, the level is lost.
+* The [[Bomb Strength]] determines how many turns it tkaes before it detonates.
+
+-- Animal
+
+[[Animal Types]]:
+* Default (Random movement)
+* Scared
+* Follow
+* Frozen (Doesn't move)
+
+[[Animal Actions]] - when moving to a new cell:
+* Default - leaves colored dots behind
+* Swap - simply changes place with the item
+* Bombify - changes dots into Dot Bombs
+
+Swap animals have Mickey ears.
+Bombify animals have devil horns.
+
+In Word Mode, when the first item is an Animal, the word length must be at least 5. 
+The Animal counts as a wild card. The Animal must be the first letter of the word.
+
+-- Anchor
+
+* Drop out at the bottom of the grid.
+* [[Maximum Anchors In Level]] determines how many anchors can exist at any time.
+* [[Slippery Anchors]]
+
+
+-- Fire
+
+* Can be extinguished with explosions or by making chains or combos next to it.
+* If no fire is extinguished during a turn, fire will grow at the end of the turn.
+* The [[Fire Growth Rate]] determines how many fires are added each turn (default: 1 fire per turn.)
+
+-- Laser and Mirror @[tags: ['laser', 'lasers', 'mirror', 'mirrors']]
+
+* The [[Ice Pick]] can be used to remove mirrors.
+
+-- Blocker
+
+-- Clock
+
+* Clocks automatically detonate after a certain number of turns, depending on the [[Clock Strength]]. 
+* The hour hand indicates how many turns it will take until it detonates (at 12 o'clock).
+* Clocks drop out at the bottom of the grid.
+* When clocks are part of the goals, they need to drop out at the bottom of the grid (similar to anchors) before they detonate.
+
+-- Egg
+
+* An Ice Pick can be used to crack an egg.
+
+-- Explody
+
+-- Knight
+
+* In Dot Mode, start a chain with a Knight and jump knight-like to dots of the same color.
+* In Swap Mode, swap it with a dot (or wild card) to create a 3-in-a-row combo.
+* In Word Mode, start a word with a Knight and jump knight-like to the following letters. The knight acts like a wild card.
+* Domino Mode ??
+* The [[Knight Strength]] determines how many times you can use (or explode) the knight.
+
+-- Rocket
+
+-- Color Bomb
+
+* In Domino Mode, drag it onto a double (e.g. double six) to remove all dominoes that have that number on at least one side.
+
+-- Striped Dot @[tags: ['striped', 'striped dot', 'striped dots']]
+
+-- Wrapped Dot @[tags: ['wrapped', 'wrapped dot', 'wrapped dots']]
+
+-- Blaster
+
+-- Turner
+
+The Turner can rotate the following items and cells: Mirror, Laser, Rocket, Domino, Egg (?)
+
+-- Key
+
+Keys can unlock Regular Doors, Directional Doors, Regular Cages and Directional Cages.
+
+-- Ice Pick
+
+* Removes ice and mirrors and cracks eggs.
+
+-- Water Drop
+
+* Extinguishes fire.
+
+-- Yin Yang
+
+-- Domino
+
+-- Letter Dot @[tags: ['letter', 'letters', 'letter dot', 'letter dots']]
+
+* Used in Word Mode.
+* Connect letters to make words. Uses the 'enable1.txt' dictionary.
+* It's possible to make squares, e.g. connecting the "R" back to itself with "RIPER".
+* Colors don't matter, except when a square is made.
+
+========================================
+
+- Level Editor
+
+-- Layout tab
+
+--- Keyboard keys
+
+* Use '+' and '-' to adjust the strength of items (e.g. Animal, Knight, Dot Bomb, Blocker, Clock.)
+** If the cell doesn't have one of these items, it will try to adjust the cell.
+** The '=' key works as '+' (for your convenience.)
+* Use '<' and '>' to adjust the strength of cells (e.g. Door, Cage)
+** The ',' and '.' keys work as the '<' and '>' keys (for your convenience.)
+* In Word Mode, typing a letter key will change the Letter Dot's letter.
+* In Domino Mode, typing 0-9 will change the left or top pips of a domino. Use the shift key to change the right or bottom pips.
+
+--- Cells Mode
+
+Places the selected cell type.
+To draw a continuous Conveyer track, simply hold and drag the left mouse button.
+
+--- Items Mode
+
+* Places the selected item when clicking the mouse on the grid.
+* Random Item (?) - is filled with a random item by the generator when the level starts. 
+** The [[Initial Dots Only]] option determines whether only dots are used initially, or anything that the generator might generate.
+
+--- Special Mode
+
+* [[Place Ice]] - in a Regular Cell using [Ice Strength]
+* [[Delete Item]]
+* [[Remove Lazy Susan]]
+* [[Connect Transporters]]
+* [[Rotate Clockwise]] - Rocket, Laser, Mirror, Directional Door, Conveyer Section, Domino, Striped, Turner
+* Set Controller
+
+--- Settings
+
+* Ice Strength
+* Door Strength - applies to Doors, Cages and Blockers
+* Door Rotation - None, Clockwise or Counter Clockwise (CCW), only applies to Directional Doors
+* Clock Strength
+* Animal Strength
+* Animal Type - Default (Random), Scared or Follow
+* Knight Strength
+* Bomb Strength
+
+-- Generator Frequencies tab
+
+Specifies which items will be generated at the top of the grid and in what (relative) percentages.
+
+-- Generator Settings tab
+
+* Mode
+* Roll Mode
+* Diagonal Mode (only works with Dot Mode)
+* Random Seed / Seed - initialize the random number generator with a fixed value, or with a random value each time. The Gen button can be used to generate a fixed value.
+* Minimum Chain Length - how many dots much be chained at least (default: 2)
+* Animal Strength / Type - what kind of animals should be generated (if any)
+* Fire Growth Rate - how many fires will be added at the end of a move (unless fire was extinguished or there is no fire)
+* Knight Strength
+* Clock Strength
+* Bomb Strength
+* Blocker Strength
+* Maximum Anchors In Level - the generator won't generate any anchors if the level already contains this many
+* Initial Dots Only - when filling the initial screen, should the random items be filled with dots only, or with whatever the generator can generate.
+* Slippery Anchors - anchors will drop before other items, potentially slipping in between (similar to Jelly Splash - this makes it easier)
+* Maximum Domino - in Domino Mode, what is the maximum number of pips
+
+--- Rewards
+
+Conditions:
+* Chain Length Reward - awarded when a chain of a certain length is made
+
+Rewards:
+* Change Dot into Striped
+
+-- Goals tab
+
+See [Goals]
+
+-- Random Level Generator
+
+
+========================================
+
+- Organizing Levels and Sets
+
+
+========================================
+
+========================================

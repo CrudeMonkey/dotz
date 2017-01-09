@@ -1,0 +1,92 @@
+{
+  "id": 222,
+  "name": "Jelly Splash 20",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Jelly Splash",
+  "numColumns": 7,
+  "numRows": 9,
+  "grid": [
+    ".......",
+    ".......",
+    "...  . ",
+    ". .... ",
+    ".......",
+    ". .... ",
+    "...  . ",
+    ".......",
+    "......."
+  ],
+  "ice": [
+    ".......",
+    ".......",
+    ".......",
+    ".......",
+    ".......",
+    ".......",
+    ".......",
+    ".......",
+    "......."
+  ],
+  "items": [
+    "???????",
+    "???????",
+    "???..?.",
+    "?.????.",
+    "???????",
+    "?.??.?.",
+    "???..?.",
+    "???????",
+    "???????"
+  ],
+  "doors": [
+    {"p":[2,1],"strength":1},
+    {"p":[4,1],"strength":1},
+    {"p":[6,1],"strength":1},
+    {"p":[1,2],"strength":1},
+    {"p":[5,3],"strength":1},
+    {"p":[0,4],"strength":1},
+    {"p":[5,5],"strength":1},
+    {"p":[1,6],"strength":1},
+    {"p":[2,7],"strength":1},
+    {"p":[4,7],"strength":1},
+    {"p":[6,7],"strength":1}
+  ],
+  "animals": [
+    {"p":[4,5],"strength":30,"color":2,"type":"Default"}
+  ],
+  "generator": {
+    "generateLetters": false,
+    "swapMode": false,
+    "rollMode": true,
+    "diagonalMode": true,
+    "dominoMode": false,
+    "slipperyAnchors": true,
+    "minChainLength": 3,
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "maxDomino": 6,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "bombStrength": 9,
+    "blockerStrength": 2,
+    "animalType": "Default",
+    "rewardStrategies": "s6",
+    "freq": [
+      [25,"dot",1],
+      [25,"dot",2],
+      [25,"dot",3],
+      [25,"dot",4]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "animals": -1,
+    "maxMoves": 16
+  },
+  "boosts": {  },
+  "lastModified": "1481234685119"
+}

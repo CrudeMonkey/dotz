@@ -33,7 +33,9 @@ public class SoundManager
         BIRD("170811__esperar__bird-2-c_clipped.wav"),
         DRIP("25879__acclivity__drip1.wav"),
         AXE("322171__liamg-sfx__axe-impact-gore.wav"),
-        ZAP("268168__shaun105__laser.wav");
+        ZAP("268168__shaun105__laser.wav"),
+        WOOSH("216675_2549002-lq.mp3"),
+        BUBBLE("89534__cgeffex__very-fast-bubble-pop1.mp3");
 //        BLIP("blip.wav");
         
         private Audio m_audio;

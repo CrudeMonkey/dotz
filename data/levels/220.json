@@ -1,0 +1,61 @@
+{
+  "id": 220,
+  "name": "Jelly Splash 1",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Jelly Splash",
+  "numColumns": 6,
+  "numRows": 5,
+  "grid": [
+    "......",
+    "......",
+    "......",
+    "......",
+    "......"
+  ],
+  "ice": [
+    "......",
+    "......",
+    "......",
+    "......",
+    "......"
+  ],
+  "items": [
+    "??????",
+    "??????",
+    "??????",
+    "??????",
+    "??????"
+  ],
+  "generator": {
+    "generateLetters": false,
+    "swapMode": false,
+    "rollMode": false,
+    "diagonalMode": true,
+    "dominoMode": false,
+    "slipperyAnchors": true,
+    "minChainLength": 3,
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "maxDomino": 6,
+    "initialDotsOnly": true,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "bombStrength": 9,
+    "blockerStrength": 2,
+    "animalType": "Default",
+    "freq": [
+      [33.3,"dot",0],
+      [33.3,"dot",2],
+      [33.3,"dot",4]
+    ]
+  },
+  "goals": {
+    "dots": {    },
+    "score": 50
+  },
+  "boosts": {  },
+  "lastModified": "1481233097099"
+}

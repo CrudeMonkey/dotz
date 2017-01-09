@@ -5,6 +5,7 @@ import java.util.Random;
 
 import com.enno.dotz.client.Config;
 import com.enno.dotz.client.Generator;
+import com.enno.dotz.client.Rewards.RewardEditor;
 import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.ui.MXAccordion;
 import com.enno.dotz.client.ui.MXCheckBox;
@@ -24,27 +25,41 @@ import com.smartgwt.client.widgets.layout.VLayout;
 public abstract class GeneratorPropertiesPanel extends VLayout
 {
     private static final String DOTS_MODE = "Dots Mode";
-    private static final String LETTER_MODE = "Letter Mode";
+    private static final String WORD_MODE = "Word Mode";
     private static final String SWAP_MODE = "Swap Mode";
     private static final String DOMINO_MODE = "Domino Mode";
+    private static final String CLICK_MODE = "Click Mode";
     
     private MXTextInput m_seed;
     private SpinnerItem m_animalStrength;
     private MXCheckBox m_randomSeed;
     private MXCheckBox m_initialDotsOnly;
     private MXCheckBox m_rollMode;
+    private MXCheckBox m_diagonalMode;
+    private MXCheckBox m_slipperyAnchors;
     private SpinnerItem m_fireGrowthRate;
     private MXSelectItem m_animalType;
+    private MXSelectItem m_animalAction;
     private SpinnerItem m_maxAnchors;
     private SpinnerItem m_maxDomino;
     private SpinnerItem m_knightStrength;
     private SpinnerItem m_bombStrength;
+    private SpinnerItem m_blockerStrength;
     private SpinnerItem m_clockStrength;
     private ButtonItem m_genSeed;
     private MXComboBoxItem m_mode;
     private BoostPropertiesPanel m_boostProps;
+    private MXComboBoxItem m_minChainLength;
+    private MXTextInput m_rewardStrategies;
+    private RadiusCombo m_icePickRadius;
+    private RadiusCombo m_dropRadius;
+    private ButtonItem m_editRewards;
+    private MXCheckBox m_removeLetters;
+    private MXCheckBox m_findWords;
+    private SpinnerItem m_maxWordLength;
+    private SpinnerItem m_chestStrength;
 
-    public GeneratorPropertiesPanel(boolean isNew, Config level)
+    public GeneratorPropertiesPanel(Config level)
     {
         setMargin(10);
         setMembersMargin(10);
@@ -68,12 +83,24 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         m_rollMode.setTitle("Roll Mode");
         m_rollMode.setLabelAsTitle(true);
         m_rollMode.setValue(false);
- 
+        
+        m_diagonalMode = new MXCheckBox();
+        m_diagonalMode.setTitle("Diagonal Mode");
+        m_diagonalMode.setLabelAsTitle(true);
+        m_diagonalMode.setValue(false);
+        
+        m_slipperyAnchors = new MXCheckBox();
+        m_slipperyAnchors.setTitle("Slippery Anchors");
+        m_slipperyAnchors.setLabelAsTitle(true);
+        m_slipperyAnchors.setValue(false);
+        m_slipperyAnchors.setPrompt("Anchors slip through (in roll mode), similar to Jelly Splash diamonds");
+        
         LinkedHashMap<String,String> modeMap = new LinkedHashMap<String,String>();
         modeMap.put(DOTS_MODE, DOTS_MODE);
-        modeMap.put(LETTER_MODE, LETTER_MODE);
+        modeMap.put(WORD_MODE, WORD_MODE);
         modeMap.put(SWAP_MODE, SWAP_MODE);
         modeMap.put(DOMINO_MODE, DOMINO_MODE);
+        modeMap.put(CLICK_MODE, CLICK_MODE);
         
         m_mode = new MXComboBoxItem();
         m_mode.setTitle("Mode");
@@ -87,6 +114,17 @@ public abstract class GeneratorPropertiesPanel extends VLayout
                 setLetterMode(isLetterMode());
             }
         });
+        
+        LinkedHashMap<String,String> lenMap = new LinkedHashMap<String,String>();
+        lenMap.put("2", "2");
+        lenMap.put("3", "3");
+        lenMap.put("4", "4");
+        lenMap.put("5", "5");
+        
+        m_minChainLength = new MXComboBoxItem();
+        m_minChainLength.setTitle("Min Chain Length");
+        m_minChainLength.setValueMap(lenMap);
+        m_minChainLength.setValue("2");
         
         m_seed = new MXTextInput();
         m_seed.setTitle("Seed");  
@@ -104,6 +142,19 @@ public abstract class GeneratorPropertiesPanel extends VLayout
                 m_seed.setValue("" + Math.abs(new Random().nextInt()));
             }
         });
+
+        m_editRewards = new ButtonItem();
+        m_editRewards.setTitle("Edit");
+        m_editRewards.setStartRow(false);
+        m_editRewards.setEndRow(false);
+        m_editRewards.addClickHandler(new ClickHandler()
+        {
+            @Override
+            public void onClick(ClickEvent event)
+            {
+                editRewards();
+            }
+        });
         
         m_animalStrength = new SpinnerItem();
         m_animalStrength.setTitle("Animal Strength");
@@ -117,6 +168,12 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         m_animalType.setValueMap(Animal.Type.getValueMap());
         m_animalType.setValue(Animal.Type.DEFAULT.getName());
         m_animalType.setWidth(70);
+        
+        m_animalAction = new MXSelectItem();
+        m_animalAction.setTitle("Animal Action");
+        m_animalAction.setValueMap(Animal.Action.getValueMap());
+        m_animalAction.setValue(Animal.Action.DEFAULT.getName());
+        m_animalAction.setWidth(70);
         
         m_fireGrowthRate = new SpinnerItem();
         m_fireGrowthRate.setTitle("Fire Growth Rate");
@@ -161,16 +218,64 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         m_bombStrength.setValue(9);
         m_bombStrength.setWidth(70);
         
+        m_blockerStrength = new SpinnerItem();
+        m_blockerStrength.setTitle("Blocker Strength");
+        m_blockerStrength.setMin(1);
+        m_blockerStrength.setStep(1);
+        m_blockerStrength.setValue(2);
+        m_blockerStrength.setWidth(70);
+        
+        m_chestStrength = new SpinnerItem();
+        m_chestStrength.setTitle("Chest Strength");
+        m_chestStrength.setMin(1);
+        m_chestStrength.setStep(1);
+        m_chestStrength.setValue(1);
+        m_chestStrength.setWidth(70);
+        
+        m_rewardStrategies = new MXTextInput();
+        m_rewardStrategies.setTitle("Rewards");
+        m_rewardStrategies.setPrompt("E.g. 's4,s8' means: upgrade a Dot to Striped when chain length >= 4 and >= 8");
+        
+        m_icePickRadius = new RadiusCombo("Ice Pick Radius");
+        m_dropRadius = new RadiusCombo("Drop Radius");
+        
+        m_removeLetters = new MXCheckBox();
+        m_removeLetters.setTitle("Remove Letters");
+        m_removeLetters.setLabelAsTitle(true);
+        m_removeLetters.setValue(false);
+        m_removeLetters.setPrompt("Whether to remove letters after chain is made in Word Mode");
+        
+        m_findWords = new MXCheckBox();
+        m_findWords.setTitle("Find Words");
+        m_findWords.setLabelAsTitle(true);
+        m_findWords.setValue(false);
+        m_findWords.setPrompt("Whether user should find specific (generated) words in Word Mode");
+        
+        m_maxWordLength = new SpinnerItem();
+        m_maxWordLength.setTitle("Max Word Length");
+        m_maxWordLength.setMin(3);
+        m_maxWordLength.setStep(1);
+        m_maxWordLength.setValue(6);
+        m_maxWordLength.setWidth(70);
+        m_maxWordLength.setPrompt("When finding specific (generated) words in Word Mode");
+        
         m_randomSeed.setColSpan(2);
         m_rollMode.setColSpan(2);
         m_mode.setColSpan(2);
+        m_diagonalMode.setColSpan(2);
+        m_minChainLength.setColSpan(2);
+        m_removeLetters.setColSpan(2);
         m_initialDotsOnly.setColSpan(2);
         
         form.setFields(
-                m_mode, m_animalStrength, m_knightStrength,
-                m_rollMode, m_animalType, m_fireGrowthRate, 
-                m_randomSeed, m_maxAnchors, m_clockStrength,
-                m_seed, m_genSeed, m_maxDomino, m_bombStrength,
+                m_mode, m_chestStrength, m_knightStrength,
+                m_rollMode, m_animalStrength, m_fireGrowthRate, 
+                m_diagonalMode, m_animalType, m_clockStrength,
+                m_randomSeed, m_animalAction, m_maxDomino, 
+                m_seed, m_genSeed, m_slipperyAnchors, m_bombStrength,
+                m_minChainLength, m_maxAnchors, m_blockerStrength,
+                m_rewardStrategies, m_editRewards, m_icePickRadius, m_dropRadius,
+                m_removeLetters, m_findWords, m_maxWordLength,
                 m_initialDotsOnly);
         
         m_seed.setDisabled(true);
@@ -188,32 +293,42 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         
         addMember(form);
         
-        if (!isNew)
-        {
-            Generator g = level.generator;
-            m_fireGrowthRate.setValue(g.fireGrowthRate);
-            m_knightStrength.setValue(g.knightStrength);
-            m_clockStrength.setValue(g.clockStrength);
-            m_animalStrength.setValue(g.animalStrength);
-            m_bombStrength.setValue(g.bombStrength);
-            m_animalType.setValue(g.animalType.getName());
-            m_maxAnchors.setValue(g.maxAnchors);
-            m_maxDomino.setValue(g.maxDomino);
-            m_initialDotsOnly.setValue(g.initialDotsOnly);
-            m_rollMode.setValue(g.rollMode);
-                        
-            m_mode.setValue(g.generateLetters ? LETTER_MODE : (g.swapMode ? SWAP_MODE : (g.dominoMode ? DOMINO_MODE : DOTS_MODE)));
-            
-            if (g.getSeed() != Generator.RANDOM_SEED)
-            {
-                m_randomSeed.setValue(false);
-                m_seed.setValue("" + g.getSeed());
-                m_seed.setDisabled(false);
-                m_genSeed.setDisabled(false);
-            }
-        }
+        Generator g = level.generator;
+        m_fireGrowthRate.setValue(g.fireGrowthRate);
+        m_knightStrength.setValue(g.knightStrength);
+        m_clockStrength.setValue(g.clockStrength);
+        m_animalStrength.setValue(g.animalStrength);
+        m_bombStrength.setValue(g.bombStrength);
+        m_chestStrength.setValue(g.chestStrength);
+        m_blockerStrength.setValue(g.blockerStrength);
+        m_animalType.setValue(g.animalType.getName());
+        m_animalAction.setValue(g.animalAction.getName());
+        m_maxAnchors.setValue(g.maxAnchors);
+        m_maxDomino.setValue(g.maxDomino);
+        m_initialDotsOnly.setValue(g.initialDotsOnly);
+        m_rollMode.setValue(g.rollMode);
+        m_diagonalMode.setValue(g.diagonalMode);
+        m_slipperyAnchors.setValue(g.slipperyAnchors);
+        m_minChainLength.setValue("" + g.minChainLength);
+        m_rewardStrategies.setValue(g.rewardStrategies);
+        m_icePickRadius.setRadius(g.icePickRadius); 
+        m_dropRadius.setRadius(g.dropRadius);
         
-        m_boostProps = new BoostPropertiesPanel(isNew, level);
+        m_removeLetters.setValue(g.removeLetters);
+        m_findWords.setValue(g.findWords);
+        m_maxWordLength.setValue(g.maxWordLength);
+        
+        m_mode.setValue(g.generateLetters ? WORD_MODE : (g.swapMode ? SWAP_MODE : (g.dominoMode ? DOMINO_MODE : (g.clickMode ? CLICK_MODE : DOTS_MODE))));
+        
+        if (g.getSeed() != Generator.RANDOM_SEED)
+        {
+            m_randomSeed.setValue(false);
+            m_seed.setValue("" + g.getSeed());
+            m_seed.setDisabled(false);
+            m_genSeed.setDisabled(false);
+            }
+        
+        m_boostProps = new BoostPropertiesPanel(level);
         MXAccordion acc = MXAccordion.createAccordion("Boosts", m_boostProps);
         addMember(acc);
     }
@@ -241,6 +356,16 @@ public abstract class GeneratorPropertiesPanel extends VLayout
             }
         }
         
+        if (isLetterMode())
+        {
+            if (m_findWords.isChecked() && m_removeLetters.isChecked())
+            {
+                SC.warn("When findWords is selected, removeLetters can't be selected");
+                return false;
+            }
+            //TODO goal.words must be > 0
+        }
+        
         return true;
     }
 
@@ -255,24 +380,64 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         g.maxDomino = Integer.parseInt(m_maxDomino.getValueAsString());
         g.animalStrength = Integer.parseInt(m_animalStrength.getValueAsString());
         g.bombStrength = Integer.parseInt(m_bombStrength.getValueAsString());
+        g.chestStrength = Integer.parseInt(m_chestStrength.getValueAsString());
         g.knightStrength = Integer.parseInt(m_knightStrength.getValueAsString());
+        g.blockerStrength = Integer.parseInt(m_blockerStrength.getValueAsString());
         g.clockStrength = Integer.parseInt(m_clockStrength.getValueAsString());
         g.animalType = Animal.Type.fromName(m_animalType.getValueAsString());
+        g.animalAction = Animal.Action.fromName(m_animalAction.getValueAsString());
         g.initialDotsOnly = m_initialDotsOnly.isChecked();
+        
         g.generateLetters = isLetterMode();
-        g.swapMode = SWAP_MODE.equals(m_mode.getValueAsString());
-        g.dominoMode = DOMINO_MODE.equals(m_mode.getValueAsString());
+        g.swapMode = isSwapMode();
+        g.dominoMode = isDominoMode();
+        g.clickMode = isClickMode();
+        
         g.rollMode = m_rollMode.isChecked();
+        g.diagonalMode = m_diagonalMode.isChecked();
+        g.slipperyAnchors = m_slipperyAnchors.isChecked();
+        g.minChainLength = Integer.parseInt(m_minChainLength.getValueAsString());
+        g.icePickRadius = m_icePickRadius.getRadius();
+        g.dropRadius = m_dropRadius.getRadius();
+        g.findWords = m_findWords.isChecked();
+        g.removeLetters = m_removeLetters.isChecked();
+        g.maxWordLength = Integer.parseInt(m_maxWordLength.getValueAsString());
+        
+        g.rewardStrategies = m_rewardStrategies.getValueAsString();
+        if (g.rewardStrategies == null)
+            g.rewardStrategies = "";
     }
 
+    protected void editRewards()
+    {
+        String rewards = m_rewardStrategies.getValueAsString();
+        new RewardEditor(rewards) {
+            @Override
+            public void saveRewards(String rewards)
+            {
+                m_rewardStrategies.setValue(rewards);
+            }
+        };
+    }
+    
     public boolean isLetterMode()
     {
-        return LETTER_MODE.equals(m_mode.getValueAsString());
+        return WORD_MODE.equals(m_mode.getValueAsString());
     }
 
     public boolean isDominoMode()
     {
         return DOMINO_MODE.equals(m_mode.getValueAsString());
+    }
+    
+    public boolean isSwapMode()
+    {
+        return SWAP_MODE.equals(m_mode.getValueAsString());
+    }
+    
+    public boolean isClickMode()
+    {
+        return CLICK_MODE.equals(m_mode.getValueAsString());
     }
     
     protected abstract void setLetterMode(boolean isLetterMode);

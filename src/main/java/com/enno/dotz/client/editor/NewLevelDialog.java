@@ -2,6 +2,7 @@ package com.enno.dotz.client.editor;
 
 import com.enno.dotz.client.Config;
 import com.enno.dotz.client.UserSettings;
+import com.enno.dotz.client.editor.Preset.PresetSelector;
 import com.enno.dotz.client.ui.MXButtonsPanel;
 import com.enno.dotz.client.ui.MXForm;
 import com.enno.dotz.client.ui.MXTextInput;
@@ -10,12 +11,15 @@ import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
+import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
+import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.layout.VLayout;
 
 public abstract class NewLevelDialog extends MXWindow
 {
     private MXTextInput m_cols;
     private MXTextInput m_rows;
+    private PresetSelector m_preset;
 
     public NewLevelDialog()
     {
@@ -24,7 +28,7 @@ public abstract class NewLevelDialog extends MXWindow
         addItem(createPane());
         
         setWidth(220);
-        setHeight(160);
+        setHeight(180);
         
         setLeft(50);
         setTop(50);
@@ -45,6 +49,19 @@ public abstract class NewLevelDialog extends MXWindow
         MXForm form = new MXForm();
         form.setColWidths(100, 100);
         
+        m_preset = new PresetSelector();
+        m_preset.setWidth("100%");
+        m_preset.addChangedHandler(new ChangedHandler()
+        {
+            @Override
+            public void onChanged(ChangedEvent event)
+            {
+                Config cfg = m_preset.getPresetConfig();
+                m_cols.setValue("" + cfg.numColumns);
+                m_rows.setValue("" + cfg.numRows);
+            }
+        });
+        
         m_cols = new MXTextInput();
         m_cols.setTitle("Columns");
         m_cols.setValue("8");
@@ -55,7 +72,7 @@ public abstract class NewLevelDialog extends MXWindow
         m_rows.setValue("8");
         m_rows.setWidth("100%");
         
-        form.setFields(m_cols, m_rows);
+        form.setFields(m_cols, m_rows, m_preset);
         pane.addMember(form);
         
         MXButtonsPanel buttons = new MXButtonsPanel();
@@ -64,7 +81,10 @@ public abstract class NewLevelDialog extends MXWindow
             @Override
             public void onClick(ClickEvent event)
             {
-                Config cfg = new Config();
+                Config cfg = m_preset.getPresetConfig();
+                if (cfg == null)
+                    cfg = new Config();
+                
                 try
                 {
                     cfg.numColumns = Integer.parseInt(m_cols.getValueAsString());

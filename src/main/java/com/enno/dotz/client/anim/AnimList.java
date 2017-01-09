@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.ait.lienzo.client.core.animation.IAnimationCallback;
+import com.ait.lienzo.client.core.shape.Layer;
 import com.enno.dotz.client.util.CallbackChain;
 
 public class AnimList extends CallbackChain
@@ -19,6 +20,13 @@ public class AnimList extends CallbackChain
         m_doneCallback = doneCallback;
        
         run();
+    }
+    
+    public void addTransition(String name, Layer layer, double duration, Transition trans)
+    {
+        TransitionList list = new TransitionList(name, layer, duration);
+        list.add(trans);
+        add(list);
     }
     
     public void addBounce()
