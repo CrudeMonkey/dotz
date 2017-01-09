@@ -47,20 +47,11 @@ public class GetTransitions
             m_sounds.add(sound);
         }
         
+        @Override
         public void done()
         {
             for (Sound s : m_sounds)
                 s.play();
-        }
-        
-        public boolean containsItem(Item item)
-        {
-            for (IAnimationCallback cb : m_list)
-            {
-                if (cb instanceof Transition && ((Transition) cb).containsItem(item))
-                    return true;
-            }
-            return false;
         }
     }
     
@@ -125,6 +116,7 @@ public class GetTransitions
 
             PtList ptList = new PtList();
             boolean found = false;
+            
             if (m_slipperyAnchors)
             {
                 found = checkDrops(true, ptList);   // check slippery anchors
@@ -253,7 +245,7 @@ public class GetTransitions
                         {
                             if (above.row == -1)
                             {
-                                // Entire row of holes or locked cages - nothing to drop
+                                // Entire column of holes or locked cages - nothing to drop
                             }
                             else 
                             {
@@ -314,7 +306,7 @@ public class GetTransitions
                             {
                                 if (!anchorsOnly)
                                 {
-                                    // Drop from top
+                                    // Spawn new item at the top
                                     addSpawn(above, p);
                                     found = true;
                                     droppedInto.add(p);
@@ -346,7 +338,7 @@ public class GetTransitions
         return added > 0;
     }
     
-    private boolean checkAnchor(Cell c, boolean anchorsOnly)
+    private static boolean checkAnchor(Cell c, boolean anchorsOnly)
     {
         return !anchorsOnly || c.item instanceof Anchor;
     }
@@ -460,6 +452,7 @@ public class GetTransitions
     {
         Item item = ctx.generator.getNextItem(ctx, false);
         m_list.add(new DropTransition(state.x(src.col), state.y(src.row), state.x(target.col), state.y(target.row), item) {
+            @Override
             public void afterStart()
             {
                 //Debug.p("spawn " + src);
@@ -477,6 +470,7 @@ public class GetTransitions
             m_list.addSound(Sound.DROPPED_CLOCK);
         
         m_list.add(new DropTransition(state.x(src.col), state.y(src.row), state.x(src.col), state.y(src.row + 1), src.item) {
+            @Override
             public void afterEnd()
             {
                 item.removeShapeFromLayer(ctx.dotLayer);
@@ -500,6 +494,7 @@ public class GetTransitions
         final TeleportClipBox toBox = new TeleportClipBox(origItem.shape, target, ctx);
         
         m_list.add(new DropTransition(state.x(target.col), state.y(target.row - 1), state.x(target.col), state.y(target.row), origItem) {
+            @Override
             public void afterStart()
             {
                 clone.addShapeToLayer(ctx.dotLayer);
@@ -507,6 +502,7 @@ public class GetTransitions
                 toBox.init();
             }
             
+            @Override
             public void afterEnd()
             {
                 fromBox.done();
@@ -567,24 +563,7 @@ public class GetTransitions
         return list;
     }
     
-    private List<Pt> getSlideFillers(List<Pt> sources)
-    {
-        List<Pt> list = new ArrayList<Pt>();
-        for (Pt p : sources)
-        {
-            if (p.row == -1)
-                list.add(p);
-            else
-            {
-                Cell c = state.cell(p.col, p.row);
-                if (c.canDrop())
-                    list.add(p);
-            }
-        }
-        return list;
-    }
-    
-    protected List<Pt> getSlideFillers(List<Pt> sources, boolean anchorsOnly, PtList droppedInto)
+    private List<Pt> getSlideFillers(List<Pt> sources, boolean anchorsOnly, PtList droppedInto)
     {
         List<Pt> list = new ArrayList<Pt>();
         for (Pt p : sources)
@@ -601,12 +580,12 @@ public class GetTransitions
         return list;
     }
     
-    protected boolean endOfLine(Cell c)
+    private boolean endOfLine(Cell c)
     {
         return c instanceof Slide || c.isTeleportSource() || c instanceof Rock;
     }
     
-    protected boolean nextToSlide(Pt p)
+    private boolean nextToSlide(Pt p)
     {
         if (p.col > 0)
         {
@@ -621,35 +600,5 @@ public class GetTransitions
                 return true; // slide to the left 
         }
         return false;
-    }
-    
-    protected boolean nearBottom(int col, int row)
-    {
-        while (row < cfg.numRows)
-        {
-            if (row == cfg.numRows - 1)
-                return true; // bottom row
-            
-            Cell c = state.cell(col, row + 1);
-            if (! (c instanceof Hole || c.isLockedCage()))
-                return false;
-            
-            row++;
-        }
-        return false; // never gets here
-    }
-
-    protected Cell getTargetCell(int col, int row)
-    {
-        if (row >= cfg.numRows)
-            return null;
-        
-        Cell c = state.cell(col, row + 1);
-        if (c instanceof Hole || c.isLockedCage())
-            return getTargetCell(col, row + 1);
-        else if (c.isTeleportTarget()) 
-            return null;
-        
-        return c;
     }
 }
