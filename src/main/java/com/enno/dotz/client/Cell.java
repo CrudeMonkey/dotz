@@ -68,6 +68,11 @@ public abstract class Cell
         this.ctx = ctx;
     }
 
+    public Pt pt()
+    {
+        return new Pt(col, row);
+    }
+    
     public abstract Cell copy();
     
     protected void copyValues(Cell from)
@@ -332,7 +337,7 @@ public abstract class Cell
         {
             if (m_iceShape == null)
             {
-                double sz = ctx.cfg.size * 0.65;
+                double sz = ctx.generator.generateLetters ? ctx.cfg.size * 0.9 : ctx.cfg.size * 0.65;
                 m_iceShape = new Rectangle(sz, sz);
                 m_iceShape.setX(m_x - sz / 2);
                 m_iceShape.setY(m_y - sz / 2); 

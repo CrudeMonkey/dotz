@@ -196,6 +196,9 @@ public abstract class SelectLevelDialog extends MXWindow
     
     protected void previewLevel(Integer levelId)
     {
+        if (levelId == null)
+            return;
+        
         ClientRequest.loadLevel(levelId, new MAsyncCallback<Config>() {
             @Override
             public void onSuccess(Config level)

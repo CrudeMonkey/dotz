@@ -366,9 +366,6 @@ public class GetTransitions
         if (cell instanceof Hole || cell.isLockedCage())
             return isSolidBelow(col, row + 1);
         
-//        if (cell.isLocked())
-//            return true;
-        
         if (cell.item == null)
             return false;
         
@@ -425,32 +422,44 @@ public class GetTransitions
     {
         if (target instanceof ChangeColorCell && src.item.canChangeColor())
         {
-            final Item oldItem = src.item;
-            final Item newItem = ctx.generator.changeColor(ctx, src.item);
-            m_list.add(new DropTransition(state.x(src.col), state.y(src.row), state.x(target.col), state.y(target.row), src.item) {
-                @Override
-                public void afterEnd()
-                {
-                    oldItem.removeShapeFromLayer(ctx.dotLayer);
-                    
-                    newItem.addShapeToLayer(ctx.dotLayer);
-                    newItem.moveShape(state.x(target.col), state.y(target.row));
-                }
-            });
-            target.item = newItem; 
-            src.item = null;
+            Item oldItem = src.item;
+            Item newItem = ctx.generator.changeColor(ctx, src.item);
+            
+            addTeleport(oldItem, newItem, src.pt(), target.pt(), true, false);
         }
         else
         {
-            m_list.add(new DropTransition(state.x(src.col), state.y(src.row), state.x(target.col), state.y(target.row), src.item));
-            target.item = src.item; 
-            src.item = null;
+            if (src.row != target.row - 1)
+            {
+                addTeleport(src.item, null, src.pt(), target.pt(), true, false);
+            }
+            else
+            {
+                m_list.add(new DropTransition(state.x(src.col), state.y(src.row), state.x(target.col), state.y(target.row), src.item));
+                target.item = src.item; 
+                src.item = null;
+            }
         }
     }
     
+    private void addTeleport(Cell src, Cell target)
+    {
+        //Debug.p("teleport from " + src + " to " + target);
+        
+        addTeleport(src.item, null, src.pt(), target.pt(), true, false);
+    }
+
     private void addSpawn(final Pt src, Pt target)
     {
         Item item = ctx.generator.getNextItem(ctx, false);
+        
+        if (target.row > 0)
+        {
+            // It's skipping some cells (e.g. Holes or locked cages)
+            addTeleport(item, null, src, target, false, true);
+            return;
+        }
+        
         m_list.add(new DropTransition(state.x(src.col), state.y(src.row), state.x(target.col), state.y(target.row), item) {
             @Override
             public void afterStart()
@@ -462,6 +471,59 @@ public class GetTransitions
         state.cell(target.col, target.row).item = item;
     }
     
+    /**
+     * 
+     * @param oldItem
+     * @param newItem_      If null, oldItem will be cloned.
+     * @param src
+     * @param target
+     * @param removeFromSrc If true, the oldItem must be removed from the src cell.
+     * @param isBrandNew    If true, the oldItem's shape must be added to the layer first (e.g. when spawning a new item.)
+     */
+    private void addTeleport(final Item oldItem, final Item newItem_, Pt src, Pt target, boolean removeFromSrc, final boolean isBrandNew)
+    {
+        final Item newItem;
+        if (newItem_ == null)
+        {
+            newItem = oldItem.copy();
+            newItem.init(ctx);
+        }
+        else
+        {
+            newItem = newItem_;
+        }
+        
+        m_list.add(new DropTransition(state.x(src.col), state.y(src.row), state.x(src.col), state.y(src.row + 1), oldItem));
+
+        final TeleportClipBox fromBox = new TeleportClipBox(oldItem.shape, src, ctx);
+        final TeleportClipBox toBox = new TeleportClipBox(newItem.shape, target, ctx);
+        
+        m_list.add(new DropTransition(state.x(target.col), state.y(target.row - 1), state.x(target.col), state.y(target.row), newItem) {
+            @Override
+            public void afterStart()
+            {
+                if (isBrandNew) // e.g. when spawning a new item
+                    oldItem.addShapeToLayer(ctx.dotLayer);
+                
+                newItem.addShapeToLayer(ctx.dotLayer);
+                fromBox.init();
+                toBox.init();
+            }
+            
+            @Override
+            public void afterEnd()
+            {
+                fromBox.done();
+                toBox.done();
+                oldItem.removeShapeFromLayer(ctx.dotLayer);
+            }
+        });
+        
+        state.cell(target.col, target.row).item = newItem; 
+        if (removeFromSrc)
+            state.cell(src.col, src.row).item = null;
+    }
+
     private void addDropOut(Cell src)
     {
         if (src.item instanceof Anchor)
@@ -477,41 +539,6 @@ public class GetTransitions
                 item.dropFromBottom();
             }
         });
-        src.item = null;
-    }
-    
-    private void addTeleport(Cell src, Cell target)
-    {
-        //Debug.p("teleport from " + src + " to " + target);
-        
-        final Item clone = src.item.copy();
-        clone.init(ctx);
-        final Item origItem = src.item;
-
-        m_list.add(new DropTransition(state.x(src.col), state.y(src.row), state.x(src.col), state.y(src.row + 1), clone));
-
-        final TeleportClipBox fromBox = new TeleportClipBox(clone.shape, src, ctx);
-        final TeleportClipBox toBox = new TeleportClipBox(origItem.shape, target, ctx);
-        
-        m_list.add(new DropTransition(state.x(target.col), state.y(target.row - 1), state.x(target.col), state.y(target.row), origItem) {
-            @Override
-            public void afterStart()
-            {
-                clone.addShapeToLayer(ctx.dotLayer);
-                fromBox.init();
-                toBox.init();
-            }
-            
-            @Override
-            public void afterEnd()
-            {
-                fromBox.done();
-                toBox.done();
-                clone.removeShapeFromLayer(ctx.dotLayer);
-            }
-        });
-        
-        target.item = origItem; 
         src.item = null;
     }
     
@@ -580,7 +607,7 @@ public class GetTransitions
         return list;
     }
     
-    private boolean endOfLine(Cell c)
+    private static boolean endOfLine(Cell c)
     {
         return c instanceof Slide || c.isTeleportSource() || c instanceof Rock;
     }

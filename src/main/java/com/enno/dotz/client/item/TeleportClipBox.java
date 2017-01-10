@@ -5,6 +5,7 @@ import com.ait.lienzo.client.core.shape.IPrimitive;
 import com.ait.lienzo.client.core.types.BoundingBox;
 import com.enno.dotz.client.Cell;
 import com.enno.dotz.client.Context;
+import com.enno.dotz.client.anim.Pt;
 
 /**
  * TeleportClipBox clips the shape that goes into (or comes out of) a Teleport cell.
@@ -16,6 +17,19 @@ public class TeleportClipBox extends Group
     private Context ctx;
     private IPrimitive<?> m_shape;
 
+    public TeleportClipBox(IPrimitive<?> shape, Pt cell, Context ctx)
+    {
+        this.ctx = ctx;
+        m_shape = shape;
+        
+        double x = ctx.state.x(cell.col);
+        double y = ctx.state.y(cell.row);
+        double sz2 = ctx.cfg.size / 2;
+                
+        setPathClipper(new BoundingBox(x - sz2, y - sz2, x + sz2, y + sz2));
+    }
+    
+    //TODO remove when done
     public TeleportClipBox(IPrimitive<?> shape, Cell cell, Context ctx)
     {
         this.ctx = ctx;
