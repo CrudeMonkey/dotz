@@ -16,6 +16,7 @@ import com.enno.dotz.client.item.Bomb;
 import com.enno.dotz.client.item.Chest;
 import com.enno.dotz.client.item.Clock;
 import com.enno.dotz.client.item.ColorBomb;
+import com.enno.dotz.client.item.Diamond;
 import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.DotBomb;
@@ -82,6 +83,10 @@ public class FrequencySliderGroup extends HLayout
         m_list.add(anchor);
         left.addMember(anchor);
         
+        FrequencySlider diamond = createDiamondSlider(index++);
+        m_list.add(diamond);
+        left.addMember(diamond);
+        
         FrequencySlider fire = createFireSlider(index++);
         m_list.add(fire);
         left.addMember(fire);
@@ -116,7 +121,7 @@ public class FrequencySliderGroup extends HLayout
 
         FrequencySlider chest = createChestSlider(index++);
         m_list.add(chest);
-        left.addMember(chest);
+        right.addMember(chest);
 
         FrequencySlider knight = createKnightSlider(index++);
         m_list.add(knight);
@@ -187,6 +192,8 @@ public class FrequencySliderGroup extends HLayout
                         fire.initFrequency(freq);
                     else if (item instanceof Anchor)
                         anchor.initFrequency(freq);
+                    else if (item instanceof Diamond)
+                        diamond.initFrequency(freq);
                     else if (item instanceof Wild)
                         wild.initFrequency(freq);
                     else if (item instanceof Knight)
@@ -292,6 +299,13 @@ public class FrequencySliderGroup extends HLayout
     protected FrequencySlider createAnchorSlider(int index)
     {
         Anchor dot = new Anchor(false);
+        dot.setContext(ctx);
+        return new FrequencySlider(index, dot, this);
+    }
+    
+    protected FrequencySlider createDiamondSlider(int index)
+    {
+        Diamond dot = new Diamond();
         dot.setContext(ctx);
         return new FrequencySlider(index, dot, this);
     }

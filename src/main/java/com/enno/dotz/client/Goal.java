@@ -11,6 +11,7 @@ public class Goal
     protected int m_knights;
     protected int m_clocks;
     protected int m_anchors;
+    protected int m_diamonds;
     protected int m_doors;
     protected int m_cages;
     protected int m_ice;
@@ -108,6 +109,16 @@ public class Goal
     public void setAnchors(int anchors)
     {
         m_anchors = anchors;
+    }
+
+    public int getDiamonds()
+    {
+        return m_diamonds;
+    }
+
+    public void setDiamonds(int diamonds)
+    {
+        m_diamonds = diamonds;
     }
 
     public int getBubbles()

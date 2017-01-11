@@ -13,6 +13,7 @@ import com.enno.dotz.client.item.Bomb;
 import com.enno.dotz.client.item.Clock;
 import com.enno.dotz.client.item.Cog;
 import com.enno.dotz.client.item.ColorBomb;
+import com.enno.dotz.client.item.Diamond;
 import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.Drop;
@@ -36,7 +37,7 @@ public class ItemPalette extends Palette<Object>
 {
     public ItemPalette()
     {
-        super(40, ItemButton.SIZE, 6, 6);
+        super(40, ItemButton.SIZE, 7, 6);
         
         ctx.backgroundLayer = new Layer();
         add(ctx.backgroundLayer);
@@ -50,6 +51,7 @@ public class ItemPalette extends Palette<Object>
         addButton(new Anchor(false), 3, 0);
         addButton(new Knight(1, false), 4, 0);
         addButton(new Rocket(Direction.EAST, false), 5, 0);
+        addButton(new Diamond(), 6, 0);
         
         for (int i = 0; i < Config.MAX_COLORS; i++)
         {

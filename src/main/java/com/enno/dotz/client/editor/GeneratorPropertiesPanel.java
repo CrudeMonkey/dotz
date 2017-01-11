@@ -93,7 +93,7 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         m_slipperyAnchors.setTitle("Slippery Anchors");
         m_slipperyAnchors.setLabelAsTitle(true);
         m_slipperyAnchors.setValue(false);
-        m_slipperyAnchors.setPrompt("Anchors slip through (in roll mode), similar to Jelly Splash diamonds");
+        m_slipperyAnchors.setPrompt("Anchors/Diamonds slip through (in roll mode), similar to Jelly Splash diamonds");
         
         LinkedHashMap<String,String> modeMap = new LinkedHashMap<String,String>();
         modeMap.put(DOTS_MODE, DOTS_MODE);
@@ -188,6 +188,7 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         m_maxAnchors.setMin(1);
         m_maxAnchors.setStep(1);
         m_maxAnchors.setWidth(70);
+        m_maxAnchors.setPrompt("The generator won't generate more Anchors/Diamonds if the grid already contains this many.");
         
         m_maxDomino = new SpinnerItem();
         m_maxDomino.setTitle("Max Domino");

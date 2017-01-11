@@ -12,6 +12,7 @@ import com.enno.dotz.client.item.Blaster;
 import com.enno.dotz.client.item.Blocker;
 import com.enno.dotz.client.item.Chest;
 import com.enno.dotz.client.item.Clock;
+import com.enno.dotz.client.item.Diamond;
 import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.DotBomb;
@@ -51,7 +52,7 @@ public class Generator
     public int           animalStrength   = 10;
     public Animal.Type   animalType       = Animal.Type.DEFAULT;
     public Animal.Action animalAction     = Animal.Action.DEFAULT;
-    public int           maxAnchors       = 3;
+    public int           maxAnchors       = 3;                  // also applies to Diamonds
     public int           knightStrength   = 3;
     public int           blockerStrength  = 2;
     public int           bombStrength     = 9;
@@ -65,7 +66,7 @@ public class Generator
     public boolean       dominoMode       = false;
     public boolean       clickMode        = false;
     public int           maxDomino        = 9;
-    public boolean       slipperyAnchors  = false;
+    public boolean       slipperyAnchors  = false;              // also applies to Diamonds
     public int           minChainLength   = 2;
     public String        rewardStrategies = "";
     public int           icePickRadius    = 3;
@@ -264,8 +265,11 @@ public class Generator
             
             if (m_list.size() > 1)
             {
-                if (maxAnchors > 0 && item instanceof Anchor && 
-                    ctx.score.getAnchorsInGrid() >= maxAnchors)
+                if (maxAnchors > 0 && item instanceof Anchor && ctx.score.getAnchorsInGrid() >= maxAnchors)
+                {
+                    continue;
+                }
+                if (maxAnchors > 0 && item instanceof Diamond && ctx.score.getDiamondsInGrid() >= maxAnchors)
                 {
                     continue;
                 }
@@ -307,6 +311,10 @@ public class Generator
             else if (item instanceof Anchor)
             {
                 ctx.score.generatedAnchor();
+            }
+            else if (item instanceof Diamond)
+            {
+                ctx.score.generatedDiamond();
             }
             else if (item instanceof Animal)
             {

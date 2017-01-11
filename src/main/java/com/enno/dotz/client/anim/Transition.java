@@ -108,6 +108,29 @@ public abstract class Transition implements IAnimationCallback
         }
     }
 
+    public static class RollTransition extends Transition
+    {
+        public RollTransition(double from_x, double from_y, double to_x, double to_y, Item item)
+        {
+            super(from_x, from_y, to_x, to_y, item);
+        }
+        
+        @Override
+        protected void move(double pct)
+        {
+            if (pct < 0.5)
+            {
+                double x = from_x + pct * 2 * dx;
+                item.moveShape(x, from_y);
+            }
+            else
+            {
+                double y = from_y + (pct - 0.5) * 2 * dy;
+                item.moveShape(from_x + dx, y);
+            }
+        }
+    }
+
     public static class GrowFireTransition extends Transition
     {
         public GrowFireTransition(double from_x, double from_y, double to_x, double to_y, Item item)
@@ -143,19 +166,23 @@ public abstract class Transition implements IAnimationCallback
             this.ctx = ctx;
         }
         
+        @Override
         public void afterStart()
         {
             m_line = new Line(from_x, from_y, from_x, from_y);
             m_line.setStrokeColor(ColorName.BLACK);
-            m_line.setStrokeWidth(2);
+            m_line.setStrokeWidth(5);
+            m_line.setDashArray(2, 2);
             ctx.nukeLayer.add(m_line);
         }
         
+        @Override
         public void afterEnd()
         {
             ctx.nukeLayer.remove(m_line);
         }
         
+        @Override
         protected void move(double pct)
         {
             if (m_line == null)
@@ -182,6 +209,7 @@ public abstract class Transition implements IAnimationCallback
             m_isWide = isWide;
         }
         
+        @Override
         public void afterStart()
         {
             for (int i = 0; i < 2; i++)
@@ -196,12 +224,14 @@ public abstract class Transition implements IAnimationCallback
             }
         }
         
+        @Override
         public void afterEnd()
         {
             ctx.nukeLayer.remove(m_line[0]);
             ctx.nukeLayer.remove(m_line[1]);
         }
         
+        @Override
         protected void move(double pct)
         {
             if (m_line[0] == null)

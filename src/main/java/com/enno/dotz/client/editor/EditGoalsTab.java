@@ -37,6 +37,7 @@ public class EditGoalsTab extends VLayout
     private All           m_animals;
     private All           m_knights;
     private All           m_anchors;
+    private All           m_diamonds;
     private All           m_clocks;
     private All           m_bubbles;
     private All           m_doors;
@@ -175,6 +176,20 @@ public class EditGoalsTab extends VLayout
             public void initGoal(Goal goal)
             {
                 val(goal.getAnchors());
+            }
+        };
+            
+        m_diamonds = new All("Diamonds"){
+            @Override
+            public void prepareSave(Goal goal)
+            {
+                goal.setDiamonds(val());
+            }
+
+            @Override
+            public void initGoal(Goal goal)
+            {
+                val(goal.getDiamonds());
             }
         };
             
@@ -337,7 +352,8 @@ public class EditGoalsTab extends VLayout
                 new DotImageItem(5, ctx), m_dots[5], m_circuits, m_rockets,
                 m_moves, m_cages, m_mirrors,
                 m_time, m_score, m_blockers,
-                m_chainGoal, m_words, m_bubbles
+                m_chainGoal, m_words, m_bubbles,
+                m_diamonds
         };
         
         form.setFields(m_fields);

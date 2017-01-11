@@ -26,6 +26,7 @@ import com.enno.dotz.client.item.Anchor;
 import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Blocker;
 import com.enno.dotz.client.item.Clock;
+import com.enno.dotz.client.item.Diamond;
 import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.Fire;
@@ -170,6 +171,10 @@ public class ScorePanel extends LienzoPanel
         int need = goal.getAnchors();
         if (need != 0)
             m_list.add(new AnchorGoal(need, ctx));
+        
+        need = goal.getDiamonds();
+        if (need != 0)
+            m_list.add(new DiamondGoal(need, ctx));
         
         need = goal.getAnimals();
         if (need != 0)
@@ -517,6 +522,45 @@ public class ScorePanel extends LienzoPanel
             else
             {
                 int got = ctx.score.getDroppedAnchors();
+                if (got >= m_goal)
+                    setCompleted();
+                else
+                    setText(got + " / " + m_goal);
+            }
+        }
+    }
+    
+    public static class DiamondGoal extends GoalItem
+    {
+        private int m_goal;
+        
+        public DiamondGoal(int need, Context ctx)
+        {
+            super(ctx);
+            
+            m_goal = need;
+        }
+        
+        protected IPrimitive<?> createShape()
+        {
+            Diamond d = new Diamond();
+            d.setContext(ctx);
+            return d.createShape(SHAPE_SIZE);
+        }
+        
+        protected void updateText()
+        {
+            if (m_goal == Goal.ALL)
+            {
+                int gen = ctx.score.getDiamondsInGrid();
+                if (gen > 0)
+                    setText("" + gen);
+                else 
+                    setCompleted();
+            }
+            else
+            {
+                int got = ctx.score.getDroppedDiamonds();
                 if (got >= m_goal)
                     setCompleted();
                 else

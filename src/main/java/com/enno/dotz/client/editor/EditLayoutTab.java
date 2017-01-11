@@ -126,7 +126,7 @@ public abstract class EditLayoutTab extends VLayout
         };
                 
         MXAccordion acc = MXAccordion.createAccordion("Cells", wrap(m_cellPalette));
-        acc.setWidth(250);
+        acc.setWidth(350);
         acc.setHeight(110);
         right.addMember(acc);
 
@@ -141,7 +141,7 @@ public abstract class EditLayoutTab extends VLayout
         };
         
         acc = MXAccordion.createAccordion("Items", wrap(m_itemPalette));
-        acc.setWidth(300);
+        acc.setWidth(350);
         acc.setHeight(200);
         right.addMember(acc);
         
@@ -156,7 +156,7 @@ public abstract class EditLayoutTab extends VLayout
         };
         
         acc = MXAccordion.createAccordion("Mode", wrap(m_modePalette));
-        acc.setWidth(300);
+        acc.setWidth(350);
         acc.setHeight(100);
         right.addMember(acc);        
         

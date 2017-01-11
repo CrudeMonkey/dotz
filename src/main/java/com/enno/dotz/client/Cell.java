@@ -1864,12 +1864,12 @@ public abstract class Cell
             return shape;
         }
         
-        @Override
-        public void zap()
-        {
-            if (m_popped)
-                super.zap();
-        }
+//        @Override
+//        public void zap()
+//        {
+//            if (m_popped)
+//                super.zap();
+//        }
         
         @Override
         public void explode(Integer color, int chainSize)

@@ -32,6 +32,7 @@ import com.enno.dotz.client.item.Bomb;
 import com.enno.dotz.client.item.Chest;
 import com.enno.dotz.client.item.Clock;
 import com.enno.dotz.client.item.ColorBomb;
+import com.enno.dotz.client.item.Diamond;
 import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.DotBomb;
@@ -190,6 +191,7 @@ public class LevelParser
             addItems("fire", p, grid);
             addItems("wild", p, grid);
             addItems("anchor", p, grid);
+            addItems("diamond", p, grid);
             addItems("yinyang", p, grid);
             addItems("random", p, grid);
             
@@ -376,6 +378,10 @@ public class LevelParser
         {
             return new Anchor(stuck);
         }
+        if (itemClass.equals("diamond"))
+        {
+            return new Diamond();
+        }
         if (itemClass.equals("yinyang"))
         {
             return new YinYang(stuck);
@@ -455,6 +461,9 @@ public class LevelParser
         
         if (json.isInteger("anchors"))
             goal.setAnchors(json.getAsInteger("anchors"));
+        
+        if (json.isInteger("diamonds"))
+            goal.setDiamonds(json.getAsInteger("diamonds"));
         
         if (json.isInteger("maxMoves"))
             goal.setMaxMoves(json.getAsInteger("maxMoves"));
@@ -718,6 +727,10 @@ public class LevelParser
                 {
                     g.add(new ItemFrequency(new Anchor(false), f));
                 }
+                else if (item.equals("diamond"))
+                {
+                    g.add(new ItemFrequency(new Diamond(), f));
+                }
                 else if (item.equals("yinyang"))
                 {
                     g.add(new ItemFrequency(new YinYang(false), f));
@@ -858,6 +871,7 @@ public class LevelParser
         NArray wilds = new NArray();
         NArray fires = new NArray();
         NArray anchors = new NArray();
+        NArray diamonds = new NArray();
         NArray yinyangs = new NArray();
         NArray randoms = new NArray();
         
@@ -1055,6 +1069,10 @@ public class LevelParser
                 {
                     anchors.push(toJson(cell.item, col, row));                  
                 }
+                else if (cell.item instanceof Diamond)
+                {
+                    diamonds.push(toJson(cell.item, col, row));                  
+                }
                 else if (cell.item instanceof RandomItem)
                 {
                     randoms.push(toJson(cell.item, col, row));                  
@@ -1111,6 +1129,7 @@ public class LevelParser
         add(p, "fires", fires);
         add(p, "wilds", wilds);
         add(p, "anchors", anchors);
+        add(p, "diamonds", diamonds);
         add(p, "yinyangs", yinyangs);
         add(p, "randoms", randoms);
         
@@ -1304,6 +1323,11 @@ public class LevelParser
             if (addClass)
                 a.put("class", "anchor");
         }
+        else if (item instanceof Diamond)
+        {
+            if (addClass)
+                a.put("class", "diamond");
+        }
         else if (item instanceof RandomItem)
         {
             if (addClass)
@@ -1382,6 +1406,9 @@ public class LevelParser
         
         if (g.getAnchors() != 0)
             p.put("anchors", g.getAnchors());
+        
+        if (g.getDiamonds() != 0)
+            p.put("diamonds", g.getDiamonds());
         
         if (g.getFire() != 0)
             p.put("fire", g.getFire());
@@ -1498,6 +1525,8 @@ public class LevelParser
             a.push("fire");
         else if (item instanceof Anchor)
             a.push("anchor");
+        else if (item instanceof Diamond)
+            a.push("diamond");
         else if (item instanceof Wild)
             a.push("wild");
         else if (item instanceof RandomItem)

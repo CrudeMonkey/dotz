@@ -8,6 +8,7 @@ import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Blocker;
 import com.enno.dotz.client.item.Chest;
 import com.enno.dotz.client.item.Clock;
+import com.enno.dotz.client.item.Diamond;
 import com.enno.dotz.client.item.Fire;
 import com.enno.dotz.client.item.Item;
 import com.enno.dotz.client.item.Knight;
@@ -27,6 +28,9 @@ public class Score
     private int m_anchorsInGrid;
     private int m_droppedAnchors;
     private int m_explodedAnchors;
+    
+    private int m_diamondsInGrid;
+    private int m_droppedDiamonds;
     
     private int m_clocksInGrid;
     private int m_droppedClocks;
@@ -125,6 +129,13 @@ public class Score
     {
         m_droppedAnchors++;
         m_anchorsInGrid--;
+        addPoints(10);
+    }
+
+    public void droppedDiamond()
+    {
+        m_droppedDiamonds++;
+        m_diamondsInGrid--;
         addPoints(10);
     }
 
@@ -332,6 +343,11 @@ public class Score
     {
         return m_droppedAnchors;
     }
+    
+    public int getDroppedDiamonds()
+    {
+        return m_droppedDiamonds;
+    }
 
     public int getDroppedClocks()
     {
@@ -346,6 +362,11 @@ public class Score
     public void generatedAnchor()
     {
         m_anchorsInGrid++;
+    }
+    
+    public void generatedDiamond()
+    {
+        m_diamondsInGrid++;
     }
     
     public void generatedAnimal()
@@ -396,6 +417,11 @@ public class Score
     public int getAnchorsInGrid()
     {
         return m_anchorsInGrid;
+    }
+    
+    public int getDiamondsInGrid()
+    {
+        return m_diamondsInGrid;
     }
     
     public int getClocksInGrid()
@@ -514,6 +540,10 @@ public class Score
         if (item instanceof Anchor)
         {
             m_anchorsInGrid++;
+        }
+        else if (item instanceof Diamond)
+        {
+            m_diamondsInGrid++;
         }
         else if (item instanceof Animal)
         {

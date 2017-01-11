@@ -10,7 +10,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.ait.lienzo.client.core.animation.IAnimationCallback;
 import com.ait.lienzo.client.core.shape.Layer;
 import com.enno.dotz.client.Cell;
 import com.enno.dotz.client.Cell.ChangeColorCell;
@@ -25,8 +24,10 @@ import com.enno.dotz.client.GridState;
 import com.enno.dotz.client.SoundManager.Sound;
 import com.enno.dotz.client.anim.Pt.PtList;
 import com.enno.dotz.client.anim.Transition.DropTransition;
+import com.enno.dotz.client.anim.Transition.RollTransition;
 import com.enno.dotz.client.item.Anchor;
 import com.enno.dotz.client.item.Clock;
+import com.enno.dotz.client.item.Diamond;
 import com.enno.dotz.client.item.Item;
 import com.enno.dotz.client.item.TeleportClipBox;
 import com.enno.dotz.client.util.CallbackChain.Callback;
@@ -340,7 +341,7 @@ public class GetTransitions
     
     private static boolean checkAnchor(Cell c, boolean anchorsOnly)
     {
-        return !anchorsOnly || c.item instanceof Anchor;
+        return !anchorsOnly || c.item instanceof Anchor || c.item instanceof Diamond;
     }
     
     private boolean isSolidBelow(int col, int row)
@@ -400,13 +401,13 @@ public class GetTransitions
             if (endOfLine(c))
                 return null;
             
+            Pt above = c.pt();            
             if (c instanceof Hole || c.isLockedCage())
             {
-                return getSourceAbove(new Pt(p.col, p.row - 1));
+                return getSourceAbove(above);
             }
             else
             {
-                Pt above = new Pt(p.col, p.row - 1);
                 above.dir = DOWN;
                 return above;
             }
@@ -415,7 +416,11 @@ public class GetTransitions
 
     private void addRollDown(Cell src, final Cell target)
     {
-        addDropDown(src, target); // TODO animate roll
+//        addDropDown(src, target); // TODO animate roll
+        
+        m_list.add(new RollTransition(state.x(src.col), state.y(src.row), state.x(target.col), state.y(target.row), src.item));
+        target.item = src.item; 
+        src.item = null;
     }
     
     private void addDropDown(Cell src, final Cell target)
@@ -528,6 +533,8 @@ public class GetTransitions
     {
         if (src.item instanceof Anchor)
             m_list.addSound(Sound.DROPPED_ANCHOR);
+        else if (src.item instanceof Diamond)
+            m_list.addSound(Sound.DROPPED_DIAMOND);
         else if (src.item instanceof Clock)
             m_list.addSound(Sound.DROPPED_CLOCK);
         

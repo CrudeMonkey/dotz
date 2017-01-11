@@ -25,6 +25,7 @@ import com.enno.dotz.client.item.Animal.Action;
 import com.enno.dotz.client.item.Animal.Type;
 import com.enno.dotz.client.item.Blocker;
 import com.enno.dotz.client.item.Clock;
+import com.enno.dotz.client.item.Diamond;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.Fire;
 import com.enno.dotz.client.item.Item;
@@ -155,8 +156,9 @@ public class RandomGridGenerator
     private static final int BLINKING_DOOR_ID = 24;
     private static final int BLOCKER_ID = 25;
     private static final int BUBBLE_ID = 26;
+    private static final int DIAMOND_ID = 27;
     
-    private static final int LAST_ID = BUBBLE_ID;
+    //private static final int LAST_ID = DIAMOND_ID;
     
     private Context ctx;
     private GridState state;
@@ -293,6 +295,11 @@ public class RandomGridGenerator
             case ANCHOR_ID: 
             {
                 new AnchorFeature().gen(props);
+                break;                
+            }
+            case DIAMOND_ID: 
+            {
+                new DiamondFeature().gen(props);
                 break;                
             }
             case WILD_ID: 
@@ -1334,6 +1341,21 @@ public class RandomGridGenerator
         }
     }
     
+    public class DiamondFeature extends ItemFeature
+    {
+        public DiamondFeature()
+        {
+            super(1, 3, 3, 2);
+            m_repeat = false;
+        }
+
+        @Override
+        protected Item createItem(boolean x_sym, boolean y_sym)
+        {
+            return new Diamond();
+        }
+    }
+    
     public class FireFeature extends ItemFeature
     {
         public FireFeature()
@@ -1585,6 +1607,7 @@ public class RandomGridGenerator
         a.push(new NObject("id", DOT_ID).put("name", "Dots"));
         a.push(new NObject("id", WILD_ID).put("name", "Wild Cards"));
         a.push(new NObject("id", ANCHOR_ID).put("name", "Anchors"));
+        a.push(new NObject("id", DIAMOND_ID).put("name", "Diamonds"));
         a.push(new NObject("id", FIRE_ID).put("name", "Fire"));
         a.push(new NObject("id", ANIMAL_ID).put("name", "Animals"));
         a.push(new NObject("id", CLOCK_ID).put("name", "Clocks"));

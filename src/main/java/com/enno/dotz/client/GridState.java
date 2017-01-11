@@ -702,7 +702,7 @@ public class GridState
                     {
                         if (canConnect(item, item2, 1, 0))
                         {
-                            Debug.p("can connect " + col + "," + row + " - " + (col+1) + "," + row);
+                            //Debug.p("can connect " + col + "," + row + " - " + (col+1) + "," + row);
                             return false;
                         }
                     }
@@ -719,7 +719,7 @@ public class GridState
                     {
                         if (canConnect(item, item2, 0, 1))
                         {
-                            Debug.p("can connect " + col + "," + row + " - " + col + "," + (row+1));
+                            //Debug.p("can connect " + col + "," + row + " - " + col + "," + (row+1));
                             return false;
                         }
                     }

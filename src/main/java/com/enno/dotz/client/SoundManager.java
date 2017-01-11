@@ -19,6 +19,7 @@ public class SoundManager
         OUT_OF_TIME("buzzer_x.wav"),
         ANIMAL_DIED("burp_x.wav"),
         DROPPED_ANCHOR("110393__soundscalpel-com__water-splash.wav"),
+        DROPPED_DIAMOND("171640__fins__scale-c7-short.mp3"),
         DROPPED_CLOCK("blurp_x.wav"),
         CIRCUIT_OFF("259961__thehorriblejoke__warp-down.mp3"),
         LASER_BREAKING("254942__deatlev__beam.wav"),
