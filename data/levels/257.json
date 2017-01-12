@@ -535,7 +535,7 @@
     "blockerStrength": 2,
     "animalType": "Default",
     "animalAction": "Default",
-    "rewardStrategies": "B5,E7,C9",
+    "rewardStrategies": "b<5,e<7,c<9",
     "icePickRadius": 3,
     "dropRadius": 3,
     "freq": [

@@ -7,11 +7,11 @@
 * Connect Mode
   - should you be able to connect thru transporters? you can now
   - fire goes thru transporter
-* New Goal: sequence of chains, e.g. first 3 red, then 5 green, then 8 blue etc.
+* DONE: New Goal: sequence of chains, e.g. first 3 red, then 5 green, then 8 blue etc.
 * change Striped color in Editor
 * add Wrapped Dot in Editor
 * when extinguishing Fire with a Drop, it still grows
-* unarmed explodies - triggered by clicking
+* DONE: (Bomb) unarmed explodies - triggered by clicking
 * DONE: ClickConnectMode: activate explodies and Color bombs, Blasters
 * DONE: Toy Blast - combine Blaster, Bomb, ColorBomb when next to each other
 * Turner can it rotate doors?

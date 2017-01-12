@@ -68,7 +68,7 @@ public enum Preset
                 g.clickMode = true;
                 c.numColumns = 9;
                 c.numRows= 9;
-                g.rewardStrategies = "B5,E7,C9";
+                g.rewardStrategies = "b<5,e<7,c<9";
                 break;
             case JELLY_SPLASH:
                 g.diagonalMode = true;

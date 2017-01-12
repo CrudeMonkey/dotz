@@ -23,8 +23,9 @@ ice Strength uses ice.
 
 * In Word Mode dots are replaced with [[Letters]].
 * Letters can have a bomb attached, just like a Dot Bomb. We call this a [[Letter Bomb]].
-* The following items can be connected to make a word: Letter, Wild Card, Animal, and Letter Bomb.
+* The following items can be connected to make a word: Letter, Wild Card, Animal, Knight, and Letter Bomb.
 * When the first item is an Animal, the word length must be at least 5. The Animal counts as a wild card. The Animal must be the first letter of the word.
+* When the first item is a Knight, jump knight-like to the following letters. The knight acts like a wild card.
 
 -- Domino Mode @[tags: ['domino', 'dominoes']]
 
@@ -159,6 +160,8 @@ Regular Doors and Directional Doors:
 
 -- Teleport
 
+-- Bubble
+
 -- Ice
 
 * Ice can be removed with explosions or by connecting dots.
@@ -167,14 +170,16 @@ Regular Doors and Directional Doors:
 
 -- Controller
 
-* A controller may change the state of a cell after each turn
+* A controller may change the state of a cell after each turn.
 * E.g Blinking Door, Blinking Cage
-* The controller's [[Sequence]] is basically an unending list of zeroes and ones, where 0 turns a feature off and 1 turns it on
+* The controller's [[Sequence]] is basically an infinite list of zeroes and ones, where 0 turns a feature off and 1 turns it on.
 
 
 ========================================
 
 - Items
+
+* Most items can be [[stuck]], which prevents them from dropping down.
 
 -- Dot
 
@@ -208,9 +213,15 @@ The Animal counts as a wild card. The Animal must be the first letter of the wor
 -- Anchor
 
 * Drop out at the bottom of the grid.
-* [[Maximum Anchors In Level]] determines how many anchors can exist at any time.
-* [[Slippery Anchors]]
+* Maximum Anchors In Level determines how many anchors can exist at any time.
+* Slippery Anchors determines how they roll in Roll Mode
 
+-- Diamond
+
+* Similar to Anchor, except it can't explode or be zapped.
+* Drops out at the bottom of the grid.
+* Maximum Anchors In Level determines how many diamonds can exist at any time.
+* Slippery Anchors determines how they roll in Roll Mode
 
 -- Fire
 
@@ -274,6 +285,8 @@ Keys can unlock Regular Doors, Directional Doors, Regular Cages and Directional 
 * Extinguishes fire.
 
 -- Yin Yang
+
+* Reshuffles the dots in the grid
 
 -- Domino
 
@@ -341,16 +354,16 @@ Specifies which items will be generated at the top of the grid and in what (rela
 * Roll Mode
 * Diagonal Mode (only works with Dot Mode)
 * Random Seed / Seed - initialize the random number generator with a fixed value, or with a random value each time. The Gen button can be used to generate a fixed value.
-* Minimum Chain Length - how many dots much be chained at least (default: 2)
+* Minimum Chain Length - how many dots must be chained at least (default: 2)
 * Animal Strength / Type - what kind of animals should be generated (if any)
 * Fire Growth Rate - how many fires will be added at the end of a move (unless fire was extinguished or there is no fire)
 * Knight Strength
 * Clock Strength
 * Bomb Strength
 * Blocker Strength
-* Maximum Anchors In Level - the generator won't generate any anchors if the level already contains this many
+* [[Maximum Anchors In Level]] - the generator won't generate any anchors or diamonds if the level already contains this many
 * Initial Dots Only - when filling the initial screen, should the random items be filled with dots only, or with whatever the generator can generate.
-* Slippery Anchors - anchors will drop before other items, potentially slipping in between (similar to Jelly Splash - this makes it easier)
+* [[Slippery Anchors]] - anchors and diamonds will drop before other items, potentially slipping in between (similar to Jelly Splash - this makes it easier)
 * Maximum Domino - in Domino Mode, what is the maximum number of pips
 
 --- Rewards
@@ -372,6 +385,7 @@ See [Goals]
 
 - Organizing Levels and Sets
 
+- Recent Levels
 
 ========================================
 

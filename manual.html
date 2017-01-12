@@ -1,7 +1,16 @@
+
 <HTML>
+<HEAD>
+<style>
+.anchored_section {
+   font-style: italic;
+}
+</style>
+</HEAD>
 <BODY>
-<H1>Index</H1><UL>
-<LI><a href='#bogus_section'>1 - Bogus section</a>
+<H1>Index</H1>
+<UL>
+<LI><a href='#introduction'>1 - Introduction</a>
 <LI><a href='#modes'>2 - Modes</a>
 <UL>
 <LI><a href='#dot_mode'>2.1 - Dot Mode</a>
@@ -10,98 +19,104 @@
 <LI><a href='#diagonal_mode'>2.1.2 - Diagonal Mode</a>
 </UL>
 <LI><a href='#swap_mode'>2.2 - Swap Mode</a>
-<LI><a href='#letter_mode'>2.3 - Letter Mode</a>
+<LI><a href='#word_mode'>2.3 - Word Mode</a>
 <LI><a href='#domino'>2.4 - Domino Mode</a>
 </UL>
-<LI><a href='#mode_options'>3 - Mode Options</a>
+<LI><a href='#click_mode'>3 - Click Mode</a>
+<LI><a href='#mode_options'>4 - Mode Options</a>
 <UL>
-<LI><a href='#roll_mode'>3.1 - Roll Mode</a>
-<LI><a href='#minimum_chain_length'>3.2 - Minimum Chain Length (default: 2)</a>
-<LI><a href='#mode_indicator'>3.3 - Mode Indicator</a>
+<LI><a href='#roll_mode'>4.1 - Roll Mode</a>
+<LI><a href='#minimum_chain_length'>4.2 - Minimum Chain Length (default: 2)</a>
+<LI><a href='#mode_indicator'>4.3 - Mode Indicator</a>
 </UL>
-<LI><a href='#goals'>4 - Goals</a>
+<LI><a href='#goals'>5 - Goals</a>
 <UL>
-<LI><a href='#all_vs_specific_number'>4.1 - All vs. Specific Number</a>
-<LI><a href='#number_of_moves'>4.2 - Number of Moves</a>
-<LI><a href='#points'>4.3 - Points</a>
-<LI><a href='#free_dots_or_dominoes'>4.4 - Free Dots or Dominoes</a>
-<LI><a href='#free_animals'>4.5 - Free Animals</a>
-<LI><a href='#drop_anchors_or_clocks'>4.6 - Drop Anchors or Clocks</a>
-<LI><a href='#open_doors_or_cages'>4.7 - Open Doors or Cages</a>
-<LI><a href='#melt_ice'>4.8 - Melt Ice</a>
-<LI><a href='#extinguish_fire'>4.9 - Extinguish Fire</a>
-<LI><a href='#timed_level'>4.10 - Timed Level</a>
-<LI><a href='#free_birds'>4.11 - Free Birds</a>
-<LI><a href='#connect_lasers'>4.12 - Connect Lasers</a>
-<LI><a href='#deactivate_circuits'>4.13 - Deactivate Circuits</a>
-<LI><a href='#free_knights'>4.14 - Free Knights</a>
-<LI><a href='#fire_rockets'>4.15 - Fire Rockets</a>
-<LI><a href='#explode_mirrors_or_blockers'>4.16 - Explode Mirrors or Blockers</a>
+<LI><a href='#all_vs_specific_number'>5.1 - All vs. Specific Number</a>
+<LI><a href='#number_of_moves'>5.2 - Number of Moves</a>
+<LI><a href='#points'>5.3 - Points</a>
+<LI><a href='#free_dots_or_dominoes'>5.4 - Free Dots or Dominoes</a>
+<LI><a href='#free_animals'>5.5 - Free Animals</a>
+<LI><a href='#drop_anchors_or_clocks'>5.6 - Drop Anchors or Clocks</a>
+<LI><a href='#open_doors_or_cages'>5.7 - Open Doors or Cages</a>
+<LI><a href='#melt_ice'>5.8 - Melt Ice</a>
+<LI><a href='#extinguish_fire'>5.9 - Extinguish Fire</a>
+<LI><a href='#timed_level'>5.10 - Timed Level</a>
+<LI><a href='#free_birds'>5.11 - Free Birds</a>
+<LI><a href='#connect_lasers'>5.12 - Connect Lasers</a>
+<LI><a href='#deactivate_circuits'>5.13 - Deactivate Circuits</a>
+<LI><a href='#free_knights'>5.14 - Free Knights</a>
+<LI><a href='#fire_rockets'>5.15 - Fire Rockets</a>
+<LI><a href='#explode_mirrors_or_blockers'>5.16 - Explode Mirrors or Blockers</a>
+<LI><a href='#chains'>5.17 - Chains</a>
 </UL>
-<LI><a href='#boosts'>5 - Boosts</a>
-<LI><a href='#cells'>6 - Cells</a>
+<LI><a href='#boosts'>6 - Boosts</a>
+<LI><a href='#cells'>7 - Cells</a>
 <UL>
-<LI><a href='#regular_cell'>6.1 - Regular Cell</a>
-<LI><a href='#hole'>6.2 - Hole</a>
-<LI><a href='#rock'>6.3 - Rock</a>
-<LI><a href='#slide'>6.4 - Slide</a>
-<LI><a href='#door'>6.5 - Door</a>
-<LI><a href='#cage'>6.6 - Cage</a>
-<LI><a href='#change_color_cell'>6.7 - Change Color Cell</a>
-<LI><a href='#circuit'>6.8 - Circuit</a>
-<LI><a href='#conveyer_belt'>6.9 - Conveyer Belt</a>
-<LI><a href='#lazy_susan'>6.10 - Lazy Susan</a>
-<LI><a href='#teleport'>6.11 - Teleport</a>
-<LI><a href='#ice'>6.12 - Ice</a>
-<LI><a href='#controller'>6.13 - Controller</a>
+<LI><a href='#regular_cell'>7.1 - Regular Cell</a>
+<LI><a href='#hole'>7.2 - Hole</a>
+<LI><a href='#rock'>7.3 - Rock</a>
+<LI><a href='#slide'>7.4 - Slide</a>
+<LI><a href='#door'>7.5 - Door</a>
+<LI><a href='#cage'>7.6 - Cage</a>
+<LI><a href='#change_color_cell'>7.7 - Change Color Cell</a>
+<LI><a href='#circuit'>7.8 - Circuit</a>
+<LI><a href='#conveyer_belt'>7.9 - Conveyer Belt</a>
+<LI><a href='#lazy_susan'>7.10 - Lazy Susan</a>
+<LI><a href='#teleport'>7.11 - Teleport</a>
+<LI><a href='#bubble'>7.12 - Bubble</a>
+<LI><a href='#ice'>7.13 - Ice</a>
+<LI><a href='#controller'>7.14 - Controller</a>
 </UL>
-<LI><a href='#items'>7 - Items</a>
+<LI><a href='#items'>8 - Items</a>
 <UL>
-<LI><a href='#dot'>7.1 - Dot</a>
-<LI><a href='#wild_card'>7.2 - Wild Card</a>
-<LI><a href='#bomb'>7.3 - Dot Bomb</a>
-<LI><a href='#animal'>7.4 - Animal</a>
-<LI><a href='#anchor'>7.5 - Anchor</a>
-<LI><a href='#fire'>7.6 - Fire</a>
-<LI><a href='#laser'>7.7 - Laser and Mirror</a>
-<LI><a href='#blocker'>7.8 - Blocker</a>
-<LI><a href='#clock'>7.9 - Clock</a>
-<LI><a href='#egg'>7.10 - Egg</a>
-<LI><a href='#explody'>7.11 - Explody</a>
-<LI><a href='#knight'>7.12 - Knight</a>
-<LI><a href='#rocket'>7.13 - Rocket</a>
-<LI><a href='#color_bomb'>7.14 - Color Bomb</a>
-<LI><a href='#striped'>7.15 - Striped Dot</a>
-<LI><a href='#wrapped_dot'>7.16 - Wrapped Dot</a>
-<LI><a href='#turner'>7.17 - Turner</a>
-<LI><a href='#key'>7.18 - Key</a>
-<LI><a href='#ice_pick'>7.19 - Ice Pick</a>
-<LI><a href='#drop'>7.20 - Drop</a>
-<LI><a href='#yin_yang'>7.21 - Yin Yang</a>
-<LI><a href='#domino'>7.22 - Domino</a>
-<LI><a href='#letter_dot'>7.23 - Letter Dot</a>
+<LI><a href='#dot'>8.1 - Dot</a>
+<LI><a href='#wild_card'>8.2 - Wild Card</a>
+<LI><a href='#bomb'>8.3 - Dot Bomb</a>
+<LI><a href='#animal'>8.4 - Animal</a>
+<LI><a href='#anchor'>8.5 - Anchor</a>
+<LI><a href='#diamond'>8.6 - Diamond</a>
+<LI><a href='#fire'>8.7 - Fire</a>
+<LI><a href='#laser'>8.8 - Laser and Mirror</a>
+<LI><a href='#blocker'>8.9 - Blocker</a>
+<LI><a href='#clock'>8.10 - Clock</a>
+<LI><a href='#egg'>8.11 - Egg</a>
+<LI><a href='#explody'>8.12 - Explody</a>
+<LI><a href='#knight'>8.13 - Knight</a>
+<LI><a href='#rocket'>8.14 - Rocket</a>
+<LI><a href='#color_bomb'>8.15 - Color Bomb</a>
+<LI><a href='#striped'>8.16 - Striped Dot</a>
+<LI><a href='#wrapped'>8.17 - Wrapped Dot</a>
+<LI><a href='#blaster'>8.18 - Blaster</a>
+<LI><a href='#turner'>8.19 - Turner</a>
+<LI><a href='#key'>8.20 - Key</a>
+<LI><a href='#ice_pick'>8.21 - Ice Pick</a>
+<LI><a href='#water_drop'>8.22 - Water Drop</a>
+<LI><a href='#yin_yang'>8.23 - Yin Yang</a>
+<LI><a href='#domino'>8.24 - Domino</a>
+<LI><a href='#letter'>8.25 - Letter Dot</a>
 </UL>
-<LI><a href='#level_editor'>8 - Level Editor</a>
+<LI><a href='#level_editor'>9 - Level Editor</a>
 <UL>
-<LI><a href='#layout_tab'>8.1 - Layout tab</a>
+<LI><a href='#layout_tab'>9.1 - Layout tab</a>
 <UL>
-<LI><a href='#keyboard_keys'>8.1.1 - Keyboard keys</a>
-<LI><a href='#cells_mode'>8.1.2 - Cells Mode</a>
-<LI><a href='#items_mode'>8.1.3 - Items Mode</a>
-<LI><a href='#special_mode'>8.1.4 - Special Mode</a>
-<LI><a href='#settings'>8.1.5 - Settings</a>
+<LI><a href='#keyboard_keys'>9.1.1 - Keyboard keys</a>
+<LI><a href='#cells_mode'>9.1.2 - Cells Mode</a>
+<LI><a href='#items_mode'>9.1.3 - Items Mode</a>
+<LI><a href='#special_mode'>9.1.4 - Special Mode</a>
+<LI><a href='#settings'>9.1.5 - Settings</a>
 </UL>
-<LI><a href='#generator_frequencies_tab'>8.2 - Generator Frequencies tab</a>
-<LI><a href='#generator_settings_tab'>8.3 - Generator Settings tab</a>
+<LI><a href='#generator_frequencies_tab'>9.2 - Generator Frequencies tab</a>
+<LI><a href='#generator_settings_tab'>9.3 - Generator Settings tab</a>
 <UL>
-<LI><a href='#rewards'>8.3.1 - Rewards</a>
+<LI><a href='#rewards'>9.3.1 - Rewards</a>
 </UL>
-<LI><a href='#goals_tab'>8.4 - Goals tab</a>
-<LI><a href='#random_level_generator'>8.5 - Random Level Generator</a>
+<LI><a href='#goals_tab'>9.4 - Goals tab</a>
+<LI><a href='#random_level_generator'>9.5 - Random Level Generator</a>
 </UL>
-<LI><a href='#organizing_levels_and_sets'>9 - Organizing Levels and Sets</a>
+<LI><a href='#organizing_levels_and_sets'>10 - Organizing Levels and Sets</a>
+<LI><a href='#recent_levels'>11 - Recent Levels</a>
 </UL>
-<H1 id='bogus_section'>1 - Bogus section</H1>
+<H1 id='introduction'>1 - Introduction</H1>
 <a href='#ice_strength'>ice Strength</a> uses <a href='#ice'>ice</a>.<BR><BR>
 <H1 id='modes'>2 - Modes</H1>
 <H2 id='dot_mode'>2.1 - Dot Mode</H2>
@@ -121,51 +136,67 @@
 <LI>Similar to Candy Crush.
 </UL>
 <BR><BR>
-<H2 id='letter_mode'>2.3 - Letter Mode</H2>
+<H2 id='word_mode'>2.3 - Word Mode</H2>
+<UL>
+<LI>In <a href='#word_mode'>Word Mode</a> <a href='#dot'>dots</a> are replaced with <span id='letters' class='anchored_section'>Letters
+</span>.
+<LI><a href='#letter'>Letters</a> can have a <a href='#bomb'>bomb</a> attached, just like a <a href='#bomb'>Dot Bomb</a>. We call this a <span id='letter_bomb' class='anchored_section'>Letter Bomb
+</span>.
+<LI>The following <a href='#items'>items</a> can be connected to make a word: <a href='#letter'>Letter</a>, <a href='#wild_card'>Wild Card</a>, <a href='#animal'>Animal</a>, <a href='#knight'>Knight</a>, and <a href='#letter_bomb'>Letter Bomb</a>.
+<LI>When the first <a href='#items'>item</a> is an <a href='#animal'>Animal</a>, the word length must be at least 5. The <a href='#animal'>Animal</a> counts as a <a href='#wild_card'>wild card</a>. The <a href='#animal'>Animal</a> must be the first <a href='#letter'>letter</a> of the word.
+<LI>When the first <a href='#items'>item</a> is a <a href='#knight'>Knight</a>, jump <a href='#knight'>knight</a>-like to the following <a href='#letter'>letters</a>. The <a href='#knight'>knight</a> acts like a <a href='#wild_card'>wild card</a>.
+</UL>
+<BR><BR>
 <H2 id='domino'>2.4 - Domino Mode</H2>
 <UL>
 <LI>To connect two <a href='#domino'>dominoes</a>, the number of pips of the two <a href='#domino'>dominoes</a> of the adjacent sides must be the same.
-<LI>When making longer chains, each side of a <a href='#domino'>domino</a> can be used only once. E.g. if a <a href='#domino'>domino</a> with (2,5) is connected to (5,4), you can't connect the (5,4) to e.g. (5,1), because the 5 was already used when connecting to the (2,5) <a href='#domino'>domino</a>. 
-<LI><a href='#wild_card'>Wild cards</a> can be used to connect unrelated chains.
-<LI>The <span id='maximum_domino'>Maximum Domino
+<LI>When making longer <a href='#chains'>chains</a>, each side of a <a href='#domino'>domino</a> can be used only once. E.g. if a <a href='#domino'>domino</a> with (2,5) is connected to (5,4), you can't connect the (5,4) to e.g. (5,1), because the 5 was already used when connecting to the (2,5) <a href='#domino'>domino</a>. 
+<LI><a href='#wild_card'>Wild cards</a> can be used to connect unrelated <a href='#chains'>chains</a>.
+<LI>The <span id='maximum_domino' class='anchored_section'>Maximum Domino
 </span> option determines the maximum number of pips that will be generated on each side of a <a href='#domino'>domino</a>.
 </UL>
 <BR><BR>
-<H1 id='mode_options'>3 - Mode Options</H1>
-<H2 id='roll_mode'>3.1 - Roll Mode</H2>
+<H1 id='click_mode'>3 - Click Mode</H1>
+<UL>
+<LI>Similar to Toy Blast.
+</UL>
+<BR><BR>
+<H1 id='mode_options'>4 - Mode Options</H1>
+<H2 id='roll_mode'>4.1 - Roll Mode</H2>
 Affects how <a href='#items'>items</a> fall down. Normally <a href='#items'>items</a> only falls straight down, and they don't fall off of <a href='#rock'>Rocks</a>.But in <a href='#roll_mode'>Roll Mode</a>, <a href='#items'>items</a> can roll sideways off of each other or off <a href='#rock'>Rocks</a>.<BR><BR>
-<H2 id='minimum_chain_length'>3.2 - Minimum Chain Length (default: 2)</H2>
+<H2 id='minimum_chain_length'>4.2 - Minimum Chain Length (default: 2)</H2>
 <UL>
 <LI>N/A to <a href='#swap_mode'>Swap Mode</a>
 </UL>
 <BR><BR>
-<H2 id='mode_indicator'>3.3 - Mode Indicator</H2>
+<H2 id='mode_indicator'>4.3 - Mode Indicator</H2>
 <UL>
 <LI>When playing a level, the <a href='#mode_indicator'>Mode Indicator</a> tells you which <a href='#modes'>mode</a> it is.
 </UL>
 <BR><BR>
-<H1 id='goals'>4 - Goals</H1>
-<H2 id='all_vs_specific_number'>4.1 - All vs. Specific Number</H2>
-<H2 id='number_of_moves'>4.2 - Number of Moves</H2>
-<H2 id='points'>4.3 - Points</H2>
-<H2 id='free_dots_or_dominoes'>4.4 - Free Dots or Dominoes</H2>
-<H2 id='free_animals'>4.5 - Free Animals</H2>
-<H2 id='drop_anchors_or_clocks'>4.6 - Drop Anchors or Clocks</H2>
-<H2 id='open_doors_or_cages'>4.7 - Open Doors or Cages</H2>
-<H2 id='melt_ice'>4.8 - Melt Ice</H2>
-<H2 id='extinguish_fire'>4.9 - Extinguish Fire</H2>
-<H2 id='timed_level'>4.10 - Timed Level</H2>
-<H2 id='free_birds'>4.11 - Free Birds</H2>
-<H2 id='connect_lasers'>4.12 - Connect Lasers</H2>
-<H2 id='deactivate_circuits'>4.13 - Deactivate Circuits</H2>
-<H2 id='free_knights'>4.14 - Free Knights</H2>
-<H2 id='fire_rockets'>4.15 - Fire Rockets</H2>
-<H2 id='explode_mirrors_or_blockers'>4.16 - Explode Mirrors or Blockers</H2>
-<H1 id='boosts'>5 - Boosts</H1>
+<H1 id='goals'>5 - Goals</H1>
+<H2 id='all_vs_specific_number'>5.1 - All vs. Specific Number</H2>
+<H2 id='number_of_moves'>5.2 - Number of Moves</H2>
+<H2 id='points'>5.3 - Points</H2>
+<H2 id='free_dots_or_dominoes'>5.4 - Free Dots or Dominoes</H2>
+<H2 id='free_animals'>5.5 - Free Animals</H2>
+<H2 id='drop_anchors_or_clocks'>5.6 - Drop Anchors or Clocks</H2>
+<H2 id='open_doors_or_cages'>5.7 - Open Doors or Cages</H2>
+<H2 id='melt_ice'>5.8 - Melt Ice</H2>
+<H2 id='extinguish_fire'>5.9 - Extinguish Fire</H2>
+<H2 id='timed_level'>5.10 - Timed Level</H2>
+<H2 id='free_birds'>5.11 - Free Birds</H2>
+<H2 id='connect_lasers'>5.12 - Connect Lasers</H2>
+<H2 id='deactivate_circuits'>5.13 - Deactivate Circuits</H2>
+<H2 id='free_knights'>5.14 - Free Knights</H2>
+<H2 id='fire_rockets'>5.15 - Fire Rockets</H2>
+<H2 id='explode_mirrors_or_blockers'>5.16 - Explode Mirrors or Blockers</H2>
+<H2 id='chains'>5.17 - Chains</H2>
+<H1 id='boosts'>6 - Boosts</H1>
 Most of the <a href='#boosts'>boosts</a> work the same as the associated <a href='#items'>item</a>.<BR><BR>
 <UL>
 <LI><a href='#turner'>Turner</a> - rotate something 90 degrees clockwise
-<LI><a href='#drop'>Drop</a> - <a href='#extinguish_fire'>extinguish fire</a> in a 3x3 region
+<LI><a href='#water_drop'>Water Drop</a> - <a href='#extinguish_fire'>extinguish fire</a> in a 3x3 region
 <LI><a href='#ice_pick'>Ice Pick</a> - melt region of <a href='#ice'>ice</a>
 <LI><a href='#color_bomb'>Color Bomb</a> - remove all <a href='#dot'>dots</a> of a color
 <LI><a href='#wild_card'>Wild Card</a> - change a <a href='#dot'>dot</a> into a <a href='#wild_card'>wild card</a>
@@ -174,11 +205,11 @@ Most of the <a href='#boosts'>boosts</a> work the same as the associated <a href
 <LI><a href='#key'>Key</a> - open <a href='#door'>Door</a>
 </UL>
 <BR><BR>
-<H1 id='cells'>6 - Cells</H1>
-<H2 id='regular_cell'>6.1 - Regular Cell</H2>
-<H2 id='hole'>6.2 - Hole</H2>
-<H2 id='rock'>6.3 - Rock</H2>
-<H2 id='slide'>6.4 - Slide</H2>
+<H1 id='cells'>7 - Cells</H1>
+<H2 id='regular_cell'>7.1 - Regular Cell</H2>
+<H2 id='hole'>7.2 - Hole</H2>
+<H2 id='rock'>7.3 - Rock</H2>
+<H2 id='slide'>7.4 - Slide</H2>
 <a href='#slide'>Slides</a> can not be placed:<UL>
 <LI>Above/below another <a href='#slide'>slide</a>
 <LI>Below a <a href='#teleport'>teleport</a> source or <a href='#rock'>rock</a>
@@ -187,72 +218,78 @@ Most of the <a href='#boosts'>boosts</a> work the same as the associated <a href
 <LI>Next to a <a href='#rock'>rock</a>, such that <a href='#items'>items</a> would <a href='#slide'>slide</a> into the <a href='#rock'>rock</a>
 </UL>
 <BR><BR>
-<H2 id='door'>6.5 - Door</H2>
+<H2 id='door'>7.5 - Door</H2>
 A <a href='#door'>Door</a> is a <a href='#cells'>cell</a> that may hold an <a href='#items'>item</a>. The <a href='#items'>item</a> will not be released until the <a href='#door'>door</a> is opened.<BR><BR>
 There are 3 types:<UL>
-<LI><span id='regular_door'>Regular Door
+<LI><span id='regular_door' class='anchored_section'>Regular Door
 </span> - can be opened on all 4 sides
-<LI><span id='directional_door'>Directional Door
+<LI><span id='directional_door' class='anchored_section'>Directional Door
 </span> - can only be opened on one side
-<LI><span id='blinking_door'>Blinking Door
+<LI><span id='blinking_door' class='anchored_section'>Blinking Door
 </span> - can't be opened
 </UL>
 <BR><BR>
 <a href='#regular_door'>Regular Doors</a> and <a href='#directional_door'>Directional Doors</a>:<UL>
 <LI>Can be opened by removing a <a href='#dot'>dot</a> next to it. 
-<LI>The <span id='door_strength'>Door Strength
+<LI>The <span id='door_strength' class='anchored_section'>Door Strength
 </span> indicates how many times it will take to open it.
 <LI>Can also be opened by making <a href='#squares'>squares</a> or explosions. These actions reduce their strength, ultimately causing the <a href='#door'>Door</a> to be removed.
 <LI>Can also be opened with <a href='#key'>Keys</a>, which will open (remove) the <a href='#door'>Door</a> immediately.
 </UL>
 <BR><BR>
 <UL>
-<LI><a href='#directional_door'>Directional Doors</a> can optionally <a href='#rotate_clockwise'>rotate clockwise</a> or counter clockwise after each move. This is set with the <span id='door_rotation'>Door Rotation
+<LI><a href='#directional_door'>Directional Doors</a> can optionally <a href='#rotate_clockwise'>rotate clockwise</a> or counter clockwise after each move. This is set with the <span id='door_rotation' class='anchored_section'>Door Rotation
 </span>.
 <LI><a href='#blinking_door'>Blinking Doors</a> can not be damaged or removed, but the <a href='#items'>item</a> inside can.
 <LI><a href='#blinking_door'>Blinking Doors</a> blink on and off in a specific <a href='#sequence'>Sequence</a>.
-<LI>A locked <a href='#door'>Door</a> won't let any <a href='#items'>items</a> <a href='#drop'>drop</a> thru it, whereas a locked <a href='#cage'>Cage</a> will.
+<LI>A locked <a href='#door'>Door</a> won't let any <a href='#items'>items</a> drop thru it, whereas a locked <a href='#cage'>Cage</a> will.
 </UL>
 <BR><BR>
-<H2 id='cage'>6.6 - Cage</H2>
-<H2 id='change_color_cell'>6.7 - Change Color Cell</H2>
-<H2 id='circuit'>6.8 - Circuit</H2>
-<H2 id='conveyer_belt'>6.9 - Conveyer Belt</H2>
+<H2 id='cage'>7.6 - Cage</H2>
+<H2 id='change_color_cell'>7.7 - Change Color Cell</H2>
+<H2 id='circuit'>7.8 - Circuit</H2>
+<H2 id='conveyer_belt'>7.9 - Conveyer Belt</H2>
 <UL>
 <LI>A <a href='#conveyer_belt'>conveyer belt</a> that ends at the edge of the grid, wraps around, and comes in on the opposite side.
 </UL>
 <BR><BR>
-<H2 id='lazy_susan'>6.10 - Lazy Susan</H2>
-<H2 id='teleport'>6.11 - Teleport</H2>
-<H2 id='ice'>6.12 - Ice</H2>
+<H2 id='lazy_susan'>7.10 - Lazy Susan</H2>
+<H2 id='teleport'>7.11 - Teleport</H2>
+<H2 id='bubble'>7.12 - Bubble</H2>
+<H2 id='ice'>7.13 - Ice</H2>
 <UL>
 <LI><a href='#ice'>Ice</a> can be removed with explosions or by connecting <a href='#dot'>dots</a>.
-<LI>The <span id='ice_strength'>Ice Strength
+<LI>The <span id='ice_strength' class='anchored_section'>Ice Strength
 </span> determines how many times you need to do this. The darker the <a href='#ice'>ice</a>, the stronger it is.
 <LI><a href='#ice'>Ice</a> can be removed with an <a href='#ice_pick'>Ice Pick</a>.
 </UL>
 <BR><BR>
-<H2 id='controller'>6.13 - Controller</H2>
+<H2 id='controller'>7.14 - Controller</H2>
 <UL>
-<LI>A <a href='#controller'>controller</a> may change the state of a <a href='#cells'>cell</a> after each turn
+<LI>A <a href='#controller'>controller</a> may change the state of a <a href='#cells'>cell</a> after each turn.
 <LI>E.g <a href='#blinking_door'>Blinking Door</a>, Blinking <a href='#cage'>Cage</a>
-<LI>The <a href='#controller'>controller</a>'s <span id='sequence'>Sequence
-</span> is basically an unending list of zeroes and ones, where 0 turns a feature off and 1 turns it on
+<LI>The <a href='#controller'>controller</a>'s <span id='sequence' class='anchored_section'>Sequence
+</span> is basically an infinite list of zeroes and ones, where 0 turns a feature off and 1 turns it on.
 </UL>
 <BR><BR>
-<H1 id='items'>7 - Items</H1>
-<H2 id='dot'>7.1 - Dot</H2>
-<H2 id='wild_card'>7.2 - Wild Card</H2>
-<H2 id='bomb'>7.3 - Dot Bomb</H2>
+<H1 id='items'>8 - Items</H1>
+<UL>
+<LI>Most <a href='#items'>items</a> can be <span id='stuck' class='anchored_section'>stuck
+</span>, which prevents them from dropping down.
+</UL>
+<BR><BR>
+<H2 id='dot'>8.1 - Dot</H2>
+<H2 id='wild_card'>8.2 - Wild Card</H2>
+<H2 id='bomb'>8.3 - Dot Bomb</H2>
 <UL>
 <LI><a href='#dot'>Dots</a> can have a <a href='#bomb'>bomb</a> associated with it. 
 <LI>The <a href='#bomb'>bomb</a> will detonate after a certain number of turns, unless it is removed. When it detonates, the level is lost.
-<LI>The <span id='bomb_strength'>Bomb Strength
+<LI>The <span id='bomb_strength' class='anchored_section'>Bomb Strength
 </span> determines how many turns it tkaes before it detonates.
 </UL>
 <BR><BR>
-<H2 id='animal'>7.4 - Animal</H2>
-<span id='animal_types'>Animal Types
+<H2 id='animal'>8.4 - Animal</H2>
+<span id='animal_types' class='anchored_section'>Animal Types
 </span>:<UL>
 <LI>Default (Random movement)
 <LI>Scared
@@ -260,88 +297,110 @@ There are 3 types:<UL>
 <LI>Frozen (Doesn't move)
 </UL>
 <BR><BR>
-<span id='animal_actions'>Animal Actions
+<span id='animal_actions' class='anchored_section'>Animal Actions
 </span> - when moving to a new <a href='#cells'>cell</a>:<UL>
 <LI>Default - leaves colored <a href='#dot'>dots</a> behind
 <LI>Swap - simply changes place with the <a href='#items'>item</a>
+<LI>Bombify - changes <a href='#dot'>dots</a> into <a href='#bomb'>Dot Bombs</a>
 </UL>
 <BR><BR>
-Swap <a href='#animal'>animals</a> have Mickey ears.<BR><BR>
-<H2 id='anchor'>7.5 - Anchor</H2>
+Swap <a href='#animal'>animals</a> have Mickey ears.Bombify <a href='#animal'>animals</a> have devil horns.<BR><BR>
+In <a href='#word_mode'>Word Mode</a>, when the first <a href='#items'>item</a> is an <a href='#animal'>Animal</a>, the word length must be at least 5. The <a href='#animal'>Animal</a> counts as a <a href='#wild_card'>wild card</a>. The <a href='#animal'>Animal</a> must be the first <a href='#letter'>letter</a> of the word.<BR><BR>
+<H2 id='anchor'>8.5 - Anchor</H2>
 <UL>
-<LI><a href='#drop'>Drop</a> out at the bottom of the grid.
-<LI><span id='maximum_anchors_in_level'>Maximum Anchors In Level
-</span> determines how many <a href='#anchor'>anchors</a> can exist at any time.
-<LI><span id='slippery_anchors'>Slippery Anchors
-</span>
+<LI>Drop out at the bottom of the grid.
+<LI><a href='#maximum_anchors_in_level'>Maximum Anchors In Level</a> determines how many <a href='#anchor'>anchors</a> can exist at any time.
+<LI><a href='#slippery_anchors'>Slippery Anchors</a> determines how they roll in <a href='#roll_mode'>Roll Mode</a>
 </UL>
 <BR><BR>
-<H2 id='fire'>7.6 - Fire</H2>
+<H2 id='diamond'>8.6 - Diamond</H2>
 <UL>
-<LI>Can be extinguished with explosions or by making chains or combos next to it.
+<LI>Similar to <a href='#anchor'>Anchor</a>, except it can't explode or be zapped.
+<LI>Drops out at the bottom of the grid.
+<LI><a href='#maximum_anchors_in_level'>Maximum Anchors In Level</a> determines how many <a href='#diamond'>diamonds</a> can exist at any time.
+<LI><a href='#slippery_anchors'>Slippery Anchors</a> determines how they roll in <a href='#roll_mode'>Roll Mode</a>
+</UL>
+<BR><BR>
+<H2 id='fire'>8.7 - Fire</H2>
+<UL>
+<LI>Can be extinguished with explosions or by making <a href='#chains'>chains</a> or combos next to it.
 <LI>If no <a href='#fire'>fire</a> is extinguished during a turn, <a href='#fire'>fire</a> will grow at the end of the turn.
-<LI>The <span id='fire_growth_rate'>Fire Growth Rate
+<LI>The <span id='fire_growth_rate' class='anchored_section'>Fire Growth Rate
 </span> determines how many <a href='#fire'>fires</a> are added each turn (default: 1 <a href='#fire'>fire</a> per turn.)
 </UL>
 <BR><BR>
-<H2 id='laser'>7.7 - Laser and Mirror</H2>
+<H2 id='laser'>8.8 - Laser and Mirror</H2>
 <UL>
-<LI>The <span id='ice_pick'>Ice Pick
+<LI>The <span id='ice_pick' class='anchored_section'>Ice Pick
 </span> can be used to remove <a href='#laser'>mirrors</a>.
 </UL>
 <BR><BR>
-<H2 id='blocker'>7.8 - Blocker</H2>
-<H2 id='clock'>7.9 - Clock</H2>
+<H2 id='blocker'>8.9 - Blocker</H2>
+<H2 id='clock'>8.10 - Clock</H2>
 <UL>
-<LI><a href='#clock'>Clocks</a> automatically detonate after a certain number of turns, depending on the <span id='clock_strength'>Clock Strength
+<LI><a href='#clock'>Clocks</a> automatically detonate after a certain number of turns, depending on the <span id='clock_strength' class='anchored_section'>Clock Strength
 </span>. 
 <LI>The hour hand indicates how many turns it will take until it detonates (at 12 o'<a href='#clock'>clock</a>).
-<LI>When <a href='#clock'>clocks</a> are part of the <a href='#goals'>goals</a>, they need to <a href='#drop'>drop</a> out at the bottom of the grid (similar to <a href='#anchor'>anchors</a>.)
+<LI><a href='#clock'>Clocks</a> drop out at the bottom of the grid.
+<LI>When <a href='#clock'>clocks</a> are part of the <a href='#goals'>goals</a>, they need to drop out at the bottom of the grid (similar to <a href='#anchor'>anchors</a>) before they detonate.
 </UL>
 <BR><BR>
-<H2 id='egg'>7.10 - Egg</H2>
-<H2 id='explody'>7.11 - Explody</H2>
-<H2 id='knight'>7.12 - Knight</H2>
+<H2 id='egg'>8.11 - Egg</H2>
 <UL>
-<LI>In <a href='#dot_mode'>Dot Mode</a>, start a chain with a <a href='#knight'>Knight</a> and jump <a href='#knight'>knight</a>-like to <a href='#dot'>dots</a> of the same color.
+<LI>An <a href='#ice_pick'>Ice Pick</a> can be used to crack an <a href='#egg'>egg</a>.
+</UL>
+<BR><BR>
+<H2 id='explody'>8.12 - Explody</H2>
+<H2 id='knight'>8.13 - Knight</H2>
+<UL>
+<LI>In <a href='#dot_mode'>Dot Mode</a>, start a <a href='#chains'>chain</a> with a <a href='#knight'>Knight</a> and jump <a href='#knight'>knight</a>-like to <a href='#dot'>dots</a> of the same color.
 <LI>In <a href='#swap_mode'>Swap Mode</a>, swap it with a <a href='#dot'>dot</a> (or <a href='#wild_card'>wild card</a>) to create a 3-in-a-row combo.
-<LI>In <a href='#letter_mode'>Letter Mode</a>, start a word with a <a href='#knight'>Knight</a> and jump <a href='#knight'>knight</a>-like to the following letters. The first letter (i.e. the <a href='#knight'>knight</a>) acts like a <a href='#wild_card'>wild card</a>.
+<LI>In <a href='#word_mode'>Word Mode</a>, start a word with a <a href='#knight'>Knight</a> and jump <a href='#knight'>knight</a>-like to the following <a href='#letter'>letters</a>. The <a href='#knight'>knight</a> acts like a <a href='#wild_card'>wild card</a>.
 <LI><a href='#domino'>Domino</a> <a href='#modes'>Mode</a> ??
-<LI>The <span id='knight_strength'>Knight Strength
+<LI>The <span id='knight_strength' class='anchored_section'>Knight Strength
 </span> determines how many times you can use (or explode) the <a href='#knight'>knight</a>.
 </UL>
 <BR><BR>
-<H2 id='rocket'>7.13 - Rocket</H2>
-<H2 id='color_bomb'>7.14 - Color Bomb</H2>
-<H2 id='striped'>7.15 - Striped Dot</H2>
-<H2 id='wrapped_dot'>7.16 - Wrapped Dot</H2>
-<H2 id='turner'>7.17 - Turner</H2>
-The <a href='#turner'>Turner</a> can rotate the following <a href='#items'>items</a> and <a href='#cells'>cells</a>: <a href='#laser'>Mirror</a>, <a href='#laser'>Laser</a>, <a href='#rocket'>Rocket</a>, <a href='#domino'>Domino</a>, <a href='#egg'>Egg</a> (?)<BR><BR>
-<H2 id='key'>7.18 - Key</H2>
-<a href='#key'>Keys</a> can unlock <a href='#regular_door'>Regular Doors</a>, <a href='#directional_door'>Directional Doors</a>, Regular <a href='#cage'>Cages</a> and Directional <a href='#cage'>Cages</a>.<BR><BR>
-<H2 id='ice_pick'>7.19 - Ice Pick</H2>
+<H2 id='rocket'>8.14 - Rocket</H2>
+<H2 id='color_bomb'>8.15 - Color Bomb</H2>
 <UL>
-<LI>Removes <a href='#ice'>ice</a> and <a href='#laser'>mirrors</a>.
+<LI>In <a href='#domino'>Domino</a> <a href='#modes'>Mode</a>, drag it onto a double (e.g. double six) to remove all <a href='#domino'>dominoes</a> that have that number on at least one side.
 </UL>
 <BR><BR>
-<H2 id='drop'>7.20 - Drop</H2>
+<H2 id='striped'>8.16 - Striped Dot</H2>
+<H2 id='wrapped'>8.17 - Wrapped Dot</H2>
+<H2 id='blaster'>8.18 - Blaster</H2>
+<H2 id='turner'>8.19 - Turner</H2>
+The <a href='#turner'>Turner</a> can rotate the following <a href='#items'>items</a> and <a href='#cells'>cells</a>: <a href='#laser'>Mirror</a>, <a href='#laser'>Laser</a>, <a href='#rocket'>Rocket</a>, <a href='#domino'>Domino</a>, <a href='#egg'>Egg</a> (?)<BR><BR>
+<H2 id='key'>8.20 - Key</H2>
+<a href='#key'>Keys</a> can unlock <a href='#regular_door'>Regular Doors</a>, <a href='#directional_door'>Directional Doors</a>, Regular <a href='#cage'>Cages</a> and Directional <a href='#cage'>Cages</a>.<BR><BR>
+<H2 id='ice_pick'>8.21 - Ice Pick</H2>
+<UL>
+<LI>Removes <a href='#ice'>ice</a> and <a href='#laser'>mirrors</a> and cracks <a href='#egg'>eggs</a>.
+</UL>
+<BR><BR>
+<H2 id='water_drop'>8.22 - Water Drop</H2>
 <UL>
 <LI>Extinguishes <a href='#fire'>fire</a>.
 </UL>
 <BR><BR>
-<H2 id='yin_yang'>7.21 - Yin Yang</H2>
-<H2 id='domino'>7.22 - Domino</H2>
-<H2 id='letter_dot'>7.23 - Letter Dot</H2>
+<H2 id='yin_yang'>8.23 - Yin Yang</H2>
 <UL>
-<LI>Used in <a href='#letter_mode'>Letter Mode</a>.
-<LI>Connect letters to make words. Uses the 'enable1.txt' dictionary.
-<LI>It's possible to make <a href='#squares'>squares</a>, e.g. connecting the "R" back to itself with "RIPER".
-<LI>Colors don't matter, except when <a href='#squares'>square</a> is made.
+<LI>Reshuffles the <a href='#dot'>dots</a> in the grid
 </UL>
 <BR><BR>
-<H1 id='level_editor'>8 - Level Editor</H1>
-<H2 id='layout_tab'>8.1 - Layout tab</H2>
-<H3 id='keyboard_keys'>8.1.1 - Keyboard keys</H3>
+<H2 id='domino'>8.24 - Domino</H2>
+<H2 id='letter'>8.25 - Letter Dot</H2>
+<UL>
+<LI>Used in <a href='#word_mode'>Word Mode</a>.
+<LI>Connect <a href='#letter'>letters</a> to make words. Uses the 'enable1.txt' dictionary.
+<LI>It's possible to make <a href='#squares'>squares</a>, e.g. connecting the "R" back to itself with "RIPER".
+<LI>Colors don't matter, except when a <a href='#squares'>square</a> is made.
+</UL>
+<BR><BR>
+<H1 id='level_editor'>9 - Level Editor</H1>
+<H2 id='layout_tab'>9.1 - Layout tab</H2>
+<H3 id='keyboard_keys'>9.1.1 - Keyboard keys</H3>
 <UL>
 <LI>Use '+' and '-' to adjust the strength of <a href='#items'>items</a> (e.g. <a href='#animal'>Animal</a>, <a href='#knight'>Knight</a>, <a href='#bomb'>Dot Bomb</a>, <a href='#blocker'>Blocker</a>, <a href='#clock'>Clock</a>.)
 <UL>
@@ -352,39 +411,39 @@ The <a href='#turner'>Turner</a> can rotate the following <a href='#items'>items
 <UL>
 <LI>The ',' and '.' <a href='#key'>keys</a> work as the '<' and '>' <a href='#key'>keys</a> (for your convenience.)
 </UL>
-<LI>In <a href='#letter_mode'>Letter Mode</a>, typing a letter <a href='#key'>key</a> will change the <a href='#letter_dot'>Letter Dot</a>'s letter.
+<LI>In <a href='#word_mode'>Word Mode</a>, typing a <a href='#letter'>letter</a> <a href='#key'>key</a> will change the <a href='#letter'>Letter Dot</a>'s <a href='#letter'>letter</a>.
 <LI>In <a href='#domino'>Domino</a> <a href='#modes'>Mode</a>, typing 0-9 will change the left or top pips of a <a href='#domino'>domino</a>. Use the shift <a href='#key'>key</a> to change the right or bottom pips.
 </UL>
 <BR><BR>
-<H3 id='cells_mode'>8.1.2 - Cells Mode</H3>
+<H3 id='cells_mode'>9.1.2 - Cells Mode</H3>
 Places the selected <a href='#cells'>cell</a> type.To draw a continuous Conveyer track, simply hold and drag the left mouse button.<BR><BR>
-<H3 id='items_mode'>8.1.3 - Items Mode</H3>
+<H3 id='items_mode'>9.1.3 - Items Mode</H3>
 <UL>
 <LI>Places the selected <a href='#items'>item</a> when clicking the mouse on the grid.
 <LI>Random <a href='#items'>Item</a> (?) - is filled with a random <a href='#items'>item</a> by the generator when the level starts. 
 <UL>
-<LI>The <span id='initial_dots_only'>Initial Dots Only
+<LI>The <span id='initial_dots_only' class='anchored_section'>Initial Dots Only
 </span> option determines whether only <a href='#dot'>dots</a> are used initially, or anything that the generator might generate.
 </UL>
 </UL>
 <BR><BR>
-<H3 id='special_mode'>8.1.4 - Special Mode</H3>
+<H3 id='special_mode'>9.1.4 - Special Mode</H3>
 <UL>
-<LI><span id='place_ice'>Place Ice
+<LI><span id='place_ice' class='anchored_section'>Place Ice
 </span> - in a <a href='#regular_cell'>Regular Cell</a> using Ice Strength
 
-<LI><span id='delete_item'>Delete Item
+<LI><span id='delete_item' class='anchored_section'>Delete Item
 </span>
-<LI><span id='remove_lazy_susan'>Remove Lazy Susan
+<LI><span id='remove_lazy_susan' class='anchored_section'>Remove Lazy Susan
 </span>
-<LI><span id='connect_transporters'>Connect Transporters
+<LI><span id='connect_transporters' class='anchored_section'>Connect Transporters
 </span>
-<LI><span id='rotate_clockwise'>Rotate Clockwise
+<LI><span id='rotate_clockwise' class='anchored_section'>Rotate Clockwise
 </span> - <a href='#rocket'>Rocket</a>, <a href='#laser'>Laser</a>, <a href='#laser'>Mirror</a>, <a href='#directional_door'>Directional Door</a>, Conveyer Section, <a href='#domino'>Domino</a>, <a href='#striped'>Striped</a>, <a href='#turner'>Turner</a>
 <LI>Set <a href='#controller'>Controller</a>
 </UL>
 <BR><BR>
-<H3 id='settings'>8.1.5 - Settings</H3>
+<H3 id='settings'>9.1.5 - Settings</H3>
 <UL>
 <LI><a href='#ice_strength'>Ice Strength</a>
 <LI><a href='#door_strength'>Door Strength</a> - applies to <a href='#door'>Doors</a>, <a href='#cage'>Cages</a> and <a href='#blocker'>Blockers</a>
@@ -396,9 +455,9 @@ Places the selected <a href='#cells'>cell</a> type.To draw a continuous Conveyer
 <LI><a href='#bomb_strength'>Bomb Strength</a>
 </UL>
 <BR><BR>
-<H2 id='generator_frequencies_tab'>8.2 - Generator Frequencies tab</H2>
+<H2 id='generator_frequencies_tab'>9.2 - Generator Frequencies tab</H2>
 Specifies which <a href='#items'>items</a> will be generated at the top of the grid and in what (relative) percentages.<BR><BR>
-<H2 id='generator_settings_tab'>8.3 - Generator Settings tab</H2>
+<H2 id='generator_settings_tab'>9.3 - Generator Settings tab</H2>
 <UL>
 <LI><a href='#modes'>Mode</a>
 <LI><a href='#roll_mode'>Roll Mode</a>
@@ -411,25 +470,155 @@ Specifies which <a href='#items'>items</a> will be generated at the top of the g
 <LI><a href='#clock_strength'>Clock Strength</a>
 <LI><a href='#bomb_strength'>Bomb Strength</a>
 <LI><a href='#blocker'>Blocker</a> Strength
-<LI><a href='#maximum_anchors_in_level'>Maximum Anchors In Level</a> - the generator won't generate any <a href='#anchor'>anchors</a> if the level already contains this many
+<LI><span id='maximum_anchors_in_level' class='anchored_section'>Maximum Anchors In Level
+</span> - the generator won't generate any <a href='#anchor'>anchors</a> or <a href='#diamond'>diamonds</a> if the level already contains this many
 <LI><a href='#initial_dots_only'>Initial Dots Only</a> - when filling the initial screen, should the random <a href='#items'>items</a> be filled with <a href='#dot'>dots</a> only, or with whatever the generator can generate.
-<LI><a href='#slippery_anchors'>Slippery Anchors</a> - <a href='#anchor'>anchors</a> will <a href='#drop'>drop</a> before other <a href='#items'>items</a>, potentially slipping in between (similar to Jelly Splash - this makes it easier)
+<LI><span id='slippery_anchors' class='anchored_section'>Slippery Anchors
+</span> - <a href='#anchor'>anchors</a> and <a href='#diamond'>diamonds</a> will drop before other <a href='#items'>items</a>, potentially slipping in between (similar to Jelly Splash - this makes it easier)
 <LI><a href='#maximum_domino'>Maximum Domino</a> - in <a href='#domino'>Domino</a> <a href='#modes'>Mode</a>, what is the maximum number of pips
 </UL>
 <BR><BR>
-<H3 id='rewards'>8.3.1 - Rewards</H3>
+<H3 id='rewards'>9.3.1 - Rewards</H3>
 Conditions:<UL>
-<LI>Chain Length <a href='#rewards'>Reward</a> - awarded when a chain of a certain length is made
+<LI><a href='#chains'>Chain</a> Length <a href='#rewards'>Reward</a> - awarded when a <a href='#chains'>chain</a> of a certain length is made
 </UL>
 <BR><BR>
 <a href='#rewards'>Rewards</a>:<UL>
 <LI>Change <a href='#dot'>Dot</a> into <a href='#striped'>Striped</a>
 </UL>
 <BR><BR>
-<H2 id='goals_tab'>8.4 - Goals tab</H2>
+<H2 id='goals_tab'>9.4 - Goals tab</H2>
 See Goals
 <BR><BR>
-<H2 id='random_level_generator'>8.5 - Random Level Generator</H2>
-<H1 id='organizing_levels_and_sets'>9 - Organizing Levels and Sets</H1>
+<H2 id='random_level_generator'>9.5 - Random Level Generator</H2>
+<H1 id='organizing_levels_and_sets'>10 - Organizing Levels and Sets</H1>
+<H1 id='recent_levels'>11 - Recent Levels</H1>
+<H1>Glossary</H1>
+<UL>
+<LI><a href='#all_vs_specific_number'>all vs. specific number</a>
+<LI><a href='#anchor'>anchor</a>
+<LI><a href='#animal'>animal</a>
+<LI><a href='#animal_actions'>animal action</a>
+<LI><a href='#animal_types'>animal type</a>
+<LI><a href='#animal'>animals</a>
+<LI><a href='#blaster'>blaster</a>
+<LI><a href='#blinking_door'>blinking door</a>
+<LI><a href='#blocker'>blocker</a>
+<LI><a href='#bomb'>bomb</a>
+<LI><a href='#bomb_strength'>bomb strength</a>
+<LI><a href='#bomb'>bombs</a>
+<LI><a href='#boosts'>boost</a>
+<LI><a href='#bubble'>bubble</a>
+<LI><a href='#cage'>cage</a>
+<LI><a href='#cells'>cell</a>
+<LI><a href='#cells_mode'>cells mode</a>
+<LI><a href='#chains'>chain</a>
+<LI><a href='#change_color_cell'>change color cell</a>
+<LI><a href='#circuit'>circuit</a>
+<LI><a href='#click_mode'>click mode</a>
+<LI><a href='#clock'>clock</a>
+<LI><a href='#clock_strength'>clock strength</a>
+<LI><a href='#clock'>clocks</a>
+<LI><a href='#color_bomb'>color bomb</a>
+<LI><a href='#connect_lasers'>connect laser</a>
+<LI><a href='#connect_transporters'>connect transporter</a>
+<LI><a href='#controller'>controller</a>
+<LI><a href='#conveyer_belt'>conveyer belt</a>
+<LI><a href='#deactivate_circuits'>deactivate circuit</a>
+<LI><a href='#delete_item'>delete item</a>
+<LI><a href='#diagonal_mode'>diagonal mode</a>
+<LI><a href='#diamond'>diamond</a>
+<LI><a href='#directional_door'>directional door</a>
+<LI><a href='#domino'>domino</a>
+<LI><a href='#door'>door</a>
+<LI><a href='#door_rotation'>door rotation</a>
+<LI><a href='#door_strength'>door strength</a>
+<LI><a href='#door'>doors</a>
+<LI><a href='#dot'>dot</a>
+<LI><a href='#bomb'>dot bomb</a>
+<LI><a href='#dot_mode'>dot mode</a>
+<LI><a href='#dot'>dots</a>
+<LI><a href='#drop_anchors_or_clocks'>drop anchors or clock</a>
+<LI><a href='#egg'>egg</a>
+<LI><a href='#explode_mirrors_or_blockers'>explode mirrors or blocker</a>
+<LI><a href='#explody'>explody</a>
+<LI><a href='#extinguish_fire'>extinguish fire</a>
+<LI><a href='#fire'>fire</a>
+<LI><a href='#fire_growth_rate'>fire growth rate</a>
+<LI><a href='#fire_rockets'>fire rocket</a>
+<LI><a href='#fire'>fires</a>
+<LI><a href='#free_animals'>free animal</a>
+<LI><a href='#free_birds'>free bird</a>
+<LI><a href='#free_dots_or_dominoes'>free dots or dominoe</a>
+<LI><a href='#free_knights'>free knight</a>
+<LI><a href='#generator_frequencies_tab'>generator frequencies tab</a>
+<LI><a href='#generator_settings_tab'>generator settings tab</a>
+<LI><a href='#goals'>goal</a>
+<LI><a href='#goals_tab'>goals tab</a>
+<LI><a href='#hole'>hole</a>
+<LI><a href='#ice'>ice</a>
+<LI><a href='#ice_pick'>ice pick</a>
+<LI><a href='#ice_strength'>ice strength</a>
+<LI><a href='#ice'>ices</a>
+<LI><a href='#initial_dots_only'>initial dots only</a>
+<LI><a href='#introduction'>introduction</a>
+<LI><a href='#items'>item</a>
+<LI><a href='#items_mode'>items mode</a>
+<LI><a href='#key'>key</a>
+<LI><a href='#keyboard_keys'>keyboard key</a>
+<LI><a href='#key'>keys</a>
+<LI><a href='#knight'>knight</a>
+<LI><a href='#knight_strength'>knight strength</a>
+<LI><a href='#knight'>knights</a>
+<LI><a href='#laser'>laser</a>
+<LI><a href='#layout_tab'>layout tab</a>
+<LI><a href='#lazy_susan'>lazy susan</a>
+<LI><a href='#letter'>letter</a>
+<LI><a href='#letter_bomb'>letter bomb</a>
+<LI><a href='#letter'>letter dot</a>
+<LI><a href='#level_editor'>level editor</a>
+<LI><a href='#maximum_anchors_in_level'>maximum anchors in level</a>
+<LI><a href='#maximum_domino'>maximum domino</a>
+<LI><a href='#melt_ice'>melt ice</a>
+<LI><a href='#minimum_chain_length'>minimum chain length</a>
+<LI><a href='#laser'>mirror</a>
+<LI><a href='#modes'>mode</a>
+<LI><a href='#mode_indicator'>mode indicator</a>
+<LI><a href='#mode_options'>mode option</a>
+<LI><a href='#modes'>modes</a>
+<LI><a href='#number_of_moves'>number of move</a>
+<LI><a href='#open_doors_or_cages'>open doors or cage</a>
+<LI><a href='#organizing_levels_and_sets'>organizing levels and set</a>
+<LI><a href='#place_ice'>place ice</a>
+<LI><a href='#points'>point</a>
+<LI><a href='#random_level_generator'>random level generator</a>
+<LI><a href='#recent_levels'>recent level</a>
+<LI><a href='#regular_cell'>regular cell</a>
+<LI><a href='#regular_door'>regular door</a>
+<LI><a href='#remove_lazy_susan'>remove lazy susan</a>
+<LI><a href='#rewards'>reward</a>
+<LI><a href='#rock'>rock</a>
+<LI><a href='#rocket'>rocket</a>
+<LI><a href='#rock'>rocks</a>
+<LI><a href='#roll_mode'>roll mode</a>
+<LI><a href='#rotate_clockwise'>rotate clockwise</a>
+<LI><a href='#sequence'>sequence</a>
+<LI><a href='#settings'>setting</a>
+<LI><a href='#slide'>slide</a>
+<LI><a href='#slippery_anchors'>slippery anchor</a>
+<LI><a href='#special_mode'>special mode</a>
+<LI><a href='#squares'>square</a>
+<LI><a href='#striped'>striped</a>
+<LI><a href='#stuck'>stuck</a>
+<LI><a href='#swap_mode'>swap mode</a>
+<LI><a href='#teleport'>teleport</a>
+<LI><a href='#timed_level'>timed level</a>
+<LI><a href='#turner'>turner</a>
+<LI><a href='#water_drop'>water drop</a>
+<LI><a href='#wild_card'>wild card</a>
+<LI><a href='#word_mode'>word mode</a>
+<LI><a href='#wrapped'>wrapped</a>
+<LI><a href='#yin_yang'>yin yang</a>
+<UL>
 </BODY>
 </HTML>

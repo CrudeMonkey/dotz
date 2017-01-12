@@ -102,7 +102,7 @@ class GenManual
         
         void html()
         {
-            buf << "<span id='${anchor.id}'>"
+            buf << "<span id='${anchor.id}' class='anchored_section'>"
             sections*.html()
             buf << "</span>"
         }
@@ -457,7 +457,7 @@ class GenManual
     
     void addIndex()
     {
-        buf << "<H1>Index</H1>"
+        buf << "<H1>Index</H1>\n"
         buf << "<UL>\n"
         chapters.each{
             it.index() 
@@ -465,14 +465,45 @@ class GenManual
         buf << "</UL>\n"
     }
     
+    void addGlossary()
+    {
+        buf << "<H1>Glossary</H1>\n"
+        buf << "<UL>\n"
+        
+        List<String> keys = anchors.keySet() as List
+        keys.sort()
+        
+        String last_id
+        keys.each{ key ->
+            Anchor a = anchors[key]
+            if (a.id == last_id)
+                return
+            last_id = a.id
+            buf << "<LI>" << a.href(key) << "\n"
+        }
+        
+        buf << "<UL>\n"
+    }
+    
     String html()
     {
-        buf << "<HTML>\n"
-        buf << "<BODY>\n"
-        
+        buf << """
+<HTML>
+<HEAD>
+<style>
+.anchored_section {
+   font-style: italic;
+}
+</style>
+</HEAD>
+<BODY>
+"""
         addIndex()
         
         chapters.each{ it.html() }
+        
+        addGlossary()
+        
         buf << "</BODY>\n"
         buf << "</HTML>\n"
         buf.toString()

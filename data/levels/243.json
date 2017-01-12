@@ -56,7 +56,7 @@
     "blockerStrength": 2,
     "animalType": "Default",
     "animalAction": "Default",
-    "rewardStrategies": "z3",
+    "rewardStrategies": "z?3",
     "icePickRadius": 3,
     "dropRadius": 3,
     "freq": [

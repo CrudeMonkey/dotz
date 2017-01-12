@@ -74,7 +74,7 @@
     "bombStrength": 9,
     "blockerStrength": 2,
     "animalType": "Default",
-    "rewardStrategies": "s6",
+    "rewardStrategies": "s?6",
     "freq": [
       [25,"dot",1],
       [25,"dot",2],

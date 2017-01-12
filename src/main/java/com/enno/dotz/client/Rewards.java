@@ -29,6 +29,7 @@ import com.smartgwt.client.data.Record;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.ListGridEditEvent;
 import com.smartgwt.client.types.ListGridFieldType;
+import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
@@ -38,14 +39,50 @@ import com.smartgwt.client.widgets.grid.events.RecordClickHandler;
 
 public class Rewards
 {
+    public enum Where
+    {
+        AT_START("<", "At Start"),
+        AT_END(">", "At End"),
+        RANDOM("?", "Random");
+        
+        private String m_code;
+        private String m_description;
+        
+        Where(String code, String description)
+        {
+            m_code = code;
+            m_description = description;
+        }
+        
+        public String getCode()
+        {
+            return m_code;
+        }
+        
+        public String getDescription()
+        {
+            return m_description;
+        }
+
+        public static Where find(String code)
+        {
+            for (Where w : values())
+            {
+                if (w.getCode().equals(code))
+                    return w;
+            }
+            return null;
+        }
+    }
+
     public abstract static class Reward
     {
-        protected boolean random;
+        protected Where where;
         protected Cell cell;
         
-        protected Reward(boolean random, Cell cell)
+        protected Reward(Where where, Cell cell)
         {
-            this.random = random;
+            this.where = where;
             this.cell = cell;
         }
         
@@ -53,21 +90,95 @@ public class Rewards
 
         public boolean isRandom()
         {
-            return random;
+            return where == Where.RANDOM;
         }
     }
     
     //TODO Key, Reshuffle, Drop, Turner
     //TODO bad reward: DotBomb, Fire, Animal
     
-    /** Abbr: 's', 'S' */
-    public static class StripedReward extends Reward
+    public static abstract class Meta
     {
-        public StripedReward(boolean random, Cell cell)
+        private static Meta[] ALL = {
+                BlasterReward.META,
+                BombifyReward.META,
+                BombReward.META,
+                ColorBombReward.META,
+                ExplodyReward.META,
+                MultiplierReward.META,
+                RocketReward.META,
+                StripedReward.META,
+                WildCardReward.META,
+                WrappedReward.META,
+        };
+        
+        public static final LinkedHashMap<String,Meta> MAP = createMap();
+        
+        protected String m_code;
+        protected String m_description;
+        protected boolean m_randomOnly;
+        
+        public static LinkedHashMap<String,Meta> createMap()
         {
-            super(random, cell);
+            LinkedHashMap<String,Meta> map = new LinkedHashMap<String,Meta>();
+            for (Meta meta : ALL)
+            {
+                map.put(meta.getCode(), meta);
+            }
+            return map;
         }
         
+        public Meta(String code, String description)
+        {
+           this(code, description, false);
+        }
+
+        public Meta(String code, String description, boolean randomOnly)
+        {
+            m_code = code;
+            m_description = description;
+            m_randomOnly = randomOnly;
+        }
+        
+        public abstract Reward createReward(Where where, Cell cell);
+
+        public String getCode()
+        {
+            return m_code;
+        }
+
+        public String getDescription()
+        {
+            return m_description;
+        }
+        
+        public boolean isRandomOnly()
+        {
+            return m_randomOnly;
+        }
+
+        public boolean isInvalidWhere(Where w)
+        {
+            return isRandomOnly() && w != Where.RANDOM;
+        }
+    }
+    
+    public static class StripedReward extends Reward
+    {
+        public static Meta META = new Meta("s", "Striped") {
+            @Override
+            public Reward createReward(Where where, Cell cell)
+            {
+                return new StripedReward(where, cell);
+            }
+        };
+        
+        public StripedReward(Where where, Cell cell)
+        {
+            super(where, cell);
+        }
+        
+        @Override
         public Item upgrade(Item item, Context ctx)
         {
             int color = item == null ? ctx.generator.getNextDotColor() : item.getColor();
@@ -75,14 +186,22 @@ public class Rewards
         }
     }
     
-    /** Abbr: 'w', 'W' */
     public static class WrappedReward extends Reward
     {
-        public WrappedReward(boolean random, Cell cell)
+        public static Meta META = new Meta("w", "Wrapped") {
+            @Override
+            public Reward createReward(Where where, Cell cell)
+            {
+                return new WrappedReward(where, cell);
+            }
+        };
+
+        public WrappedReward(Where where, Cell cell)
         {
-            super(random, cell);
+            super(where, cell);
         }
         
+        @Override
         public Item upgrade(Item item, Context ctx)
         {
             int color = item == null ? ctx.generator.getNextDotColor() : item.getColor();
@@ -90,56 +209,88 @@ public class Rewards
         }
     }
 
-    /** Abbr: 'o' */
     public static class WildCardReward extends Reward
     {
-        public WildCardReward(boolean random, Cell cell)
+        public static Meta META = new Meta("o", "Wild Card") {
+            @Override
+            public Reward createReward(Where where, Cell cell)
+            {
+                return new WildCardReward(where, cell);
+            }
+        };
+
+        public WildCardReward(Where where, Cell cell)
         {
-            super(random, cell);
+            super(where, cell);
         }
 
+        @Override
         public Item upgrade(Item item, Context ctx)
         {
             return new Wild(false);
         }
     }
 
-    /** Abbr: 'x' */
     public static class ExplodyReward extends Reward
     {
-        public ExplodyReward(boolean random, Cell cell)
+        public static Meta META = new Meta("x", "Explody") {
+            @Override
+            public Reward createReward(Where where, Cell cell)
+            {
+                return new ExplodyReward(where, cell);
+            }
+        };
+
+        public ExplodyReward(Where where, Cell cell)
         {
-            super(random, cell);
+            super(where, cell);
         }
 
+        @Override
         public Item upgrade(Item item, Context ctx)
         {
             return new Explody();
         }
     }
 
-    /** Abbr: 'r' */
     public static class RocketReward extends Reward
     {
-        public RocketReward(boolean random, Cell cell)
+        public static Meta META = new Meta("r", "Rocket") {
+            @Override
+            public Reward createReward(Where where, Cell cell)
+            {
+                return new RocketReward(where, cell);
+            }
+        };
+
+        public RocketReward(Where where, Cell cell)
         {
-            super(random, cell);
+            super(where, cell);
         }
 
+        @Override
         public Item upgrade(Item item, Context ctx)
         {
             return new Rocket(Direction.randomDirection(ctx.generator.getRandom()), false);
         }
     }
-    
-    /** Abbr: 'c' */
+
     public static class ColorBombReward extends Reward
     {
-        public ColorBombReward(boolean random, Cell cell)
+        public static Meta META = new Meta("c", "Color Bomb") {
+            @Override
+            public Reward createReward(Where where, Cell cell)
+            {
+                return new ColorBombReward(where, cell);
+            }
+        };
+
+        public ColorBombReward(Where where, Cell cell)
         {
-            super(random, cell);
+            super(where, cell);
         }
 
+        @Override
         public Item upgrade(Item item, Context ctx)
         {
             return new ColorBomb(false);
@@ -149,25 +300,42 @@ public class Rewards
     /** Abbr: 'b', 'B' */
     public static class BlasterReward extends Reward
     {
-        public BlasterReward(boolean random, Cell cell)
+        public static Meta META = new Meta("b", "Blaster") {
+            @Override
+            public Reward createReward(Where where, Cell cell)
+            {
+                return new BlasterReward(where, cell);
+            }
+        };
+
+        public BlasterReward(Where where, Cell cell)
         {
-            super(random, cell);
+            super(where, cell);
         }
 
+        @Override
         public Item upgrade(Item item, Context ctx)
         {
             return new Blaster(ctx.generator.getRandom().nextBoolean(), false);
         }
     }
 
-    /** Abbr: 'e', 'E' */
     public static class BombReward extends Reward
     {
-        public BombReward(boolean random, Cell cell)
+        public static Meta META = new Meta("e", "Bomb") {
+            @Override
+            public Reward createReward(Where where, Cell cell)
+            {
+                return new BombReward(where, cell);
+            }
+        };
+
+        public BombReward(Where where, Cell cell)
         {
-            super(random, cell);
+            super(where, cell);
         }
 
+        @Override
         public Item upgrade(Item item, Context ctx)
         {
             return new Bomb(); // TODO wider radius
@@ -176,13 +344,22 @@ public class Rewards
     
     public static class MultiplierReward extends Reward
     {
-        public MultiplierReward(boolean random, Cell cell)
+        public static Meta META = new Meta("m", "Multiplier", true) {
+            @Override
+            public Reward createReward(Where where, Cell cell)
+            {
+                return new MultiplierReward(where, cell);
+            }
+        };
+
+        public MultiplierReward(Where where, Cell cell)
         {
-            super(random, cell);
+            super(where, cell);
         }
 
         //TODO add isSuitable
         
+        @Override
         public Item upgrade(Item item, Context ctx)
         {
             Dot dot = (Dot) item;
@@ -213,13 +390,22 @@ public class Rewards
     
     public static class BombifyReward extends Reward
     {
-        public BombifyReward(boolean random, Cell cell)
+        public static Meta META = new Meta("z", "Bombify", true) {
+            @Override
+            public Reward createReward(Where where, Cell cell)
+            {
+                return new BombifyReward(where, cell);
+            }
+        };
+
+        public BombifyReward(Where where, Cell cell)
         {
-            super(random, cell);
+            super(where, cell);
         }
 
         //TODO add isSuitable
         
+        @Override
         public Item upgrade(Item item, Context ctx)
         {
             Dot dot = (Dot) item;
@@ -239,8 +425,9 @@ public class Rewards
                 return b.m_chainLength - a.m_chainLength; // largest value first
             }
         };
-
-        private char m_code;
+      
+        private String m_code;
+        private Where m_where;
         private int m_chainLength;
         private int m_every = 1;
         private int m_howMany = 2;
@@ -249,7 +436,8 @@ public class Rewards
         
         public RewardStrategy(NObject obj)
         {
-            m_code = obj.getAsString("type").charAt(0);
+            m_code = obj.getAsString("type");
+            m_where = Where.find(obj.getAsString("where"));
             m_chainLength = obj.getAsInteger("len");
             m_every = obj.getAsInteger("every");
             m_howMany = obj.getAsInteger("howMany");
@@ -257,7 +445,7 @@ public class Rewards
         
         public boolean checkChainSizeReward(List<Cell> chain, int chainSize, List<Reward> list)
         {
-            Cell cell = chain.get(0);
+            Cell cell = m_where == Where.RANDOM ? null : (m_where == Where.AT_START ? chain.get(0) : chain.get(chain.size() - 1));
             
             if (chainSize >= m_chainLength)
             {
@@ -267,68 +455,34 @@ public class Rewards
                 
                 m_counter = 0;
                 
+                Meta meta = Meta.MAP.get(m_code);
+                
                 for (int i = 0; i < m_howMany; i++)
                 {
-                    switch (m_code)
-                    {
-                        case 's':   list.add(new StripedReward(true, null)); break;
-                        case 'S':   list.add(new StripedReward(false, cell)); break;
-                        case 'w':   list.add(new WrappedReward(true, null)); break;
-                        case 'W':   list.add(new WrappedReward(false, cell)); break;
-                        case 'o':   list.add(new WildCardReward(true, cell)); break;
-                        case 'O':   list.add(new WildCardReward(false, cell)); break;
-                        case 'x':   list.add(new ExplodyReward(true, cell)); break;
-                        case 'X':   list.add(new ExplodyReward(false, cell)); break;
-                        case 'r':   list.add(new RocketReward(true, cell)); break;
-                        case 'R':   list.add(new RocketReward(false, cell)); break;
-                        case 'c':   list.add(new ColorBombReward(true, cell)); break;
-                        case 'C':   list.add(new ColorBombReward(false, cell)); break;
-                        case 'b':   list.add(new BlasterReward(true, cell)); break;
-                        case 'B':   list.add(new BlasterReward(false, cell)); break;
-                        case 'e':   list.add(new BombReward(true, cell)); break;
-                        case 'E':   list.add(new BombReward(false, cell)); break;
-                        case 'm':   list.add(new MultiplierReward(true, cell)); break;
-                        case 'z':   list.add(new BombifyReward(true, cell)); break;
-                    }
+                    list.add(meta.createReward(m_where, cell));                    
                 }
                 return true;
             }
             return false;
         }
-        
-        public static String rewardLabel(char code)
-        {
-            switch (code)
-            {
-                case 's':   return "Striped (Random)";
-                case 'S':   return "Striped (Chain Start)";
-                case 'w':   return "Wrapped (Random)";
-                case 'W':   return "Wrapped (Chain Start)";
-                case 'o':   return "Wild Card (Random)";
-                case 'O':   return "Wild Card (Chain Start)";
-                case 'x':   return "Explody (Random)";
-                case 'X':   return "Explody (Chain Start)";
-                case 'r':   return "Rocket (Random)";
-                case 'R':   return "Rocket (Chain Start)";
-                case 'c':   return "Color Bomb (Random)";
-                case 'C':   return "Color Bomb (Chain Start)";
-                case 'b':   return "Blaster (Random)";
-                case 'B':   return "Blaster (Chain Start)";
-                case 'e':   return "Bomb (Random)";
-                case 'E':   return "Bomb (Chain Start)";
-                case 'm':   return "Multiplier (Random)";
-                case 'z':   return "Bombify (Random)";
-            }
-            return "unknown code=" + code;
-        }
 
-        public static final char[] REWARD_CODES = { 's', 'S', 'w', 'W', 'b', 'B', 'o', 'O', 'x', 'X', 'r', 'R', 'c', 'C', 'e', 'E', 'm', 'z'};
-        
-        public static LinkedHashMap<String,String> getValueMap()
+        public static LinkedHashMap<String,String> getTypeMap()
         {
             LinkedHashMap<String,String> list = new LinkedHashMap<String,String>();
-            for (char c : REWARD_CODES)
-                list.put("" + c, rewardLabel(c));
+            for (Meta meta : Meta.MAP.values())
+            {
+                list.put(meta.getCode(), meta.getDescription());
+            }
+            return list;
+        }
+        
+        public static LinkedHashMap<String,String> getWhereMap()
+        {
+            LinkedHashMap<String,String> list = new LinkedHashMap<String,String>();
+            for (Where w : Where.values())
+            {
+                list.put(w.getCode(), w.getDescription());
+            }
             return list;
         }
         
@@ -353,11 +507,13 @@ public class Rewards
                 for (String code : rewardStrategies.split(","))
                 {
                     String type = code.substring(0, 1);
+                    String where = code.substring(1, 2);
+                    
                     int every = 1;
                     int howMany = 1;
                     int len;
                     
-                    String rest = code.substring(1);
+                    String rest = code.substring(2);
                     int e = rest.indexOf("e");
                     int x = rest.indexOf("x");
                     
@@ -385,6 +541,7 @@ public class Rewards
                     NObject row = new NObject();
                     row.put("len", len);
                     row.put("type", type);
+                    row.put("where", where);
                     row.put("howMany", howMany);
                     row.put("every", every);
                     
@@ -519,6 +676,7 @@ public class Rewards
         {
             Record rec = new Record();
             //rec.setAttribute("len", value);
+            rec.setAttribute("where", Where.RANDOM.getCode());
             rec.setAttribute("every", 1);
             rec.setAttribute("howMany", 1);
             m_grid.addData(rec);
@@ -536,13 +694,22 @@ public class Rewards
             for (ListGridRecord rec : m_grid.getRecords())
             {
                 String type = rec.getAttribute("type");
+                String where = rec.getAttribute("where");
                 Integer len = rec.getAttributeAsInt("len");
                 if (len != null && type != null && type.length() > 0)
                 {
+                    Meta meta = Meta.MAP.get(type);
+                    Where w = Where.find(where);
+                    if (meta.isInvalidWhere(w))
+                    {
+                        SC.warn("Type " + meta.getDescription() + " does not support Where = " + w.getDescription());
+                        continue;
+                    }
+                    
                     if (b.length() > 0)
                         b.append(",");
                     
-                    b.append(type).append(len);
+                    b.append(type).append(where).append(len);
                     
                     Integer every = rec.getAttributeAsInt("every");
                     if (every != null && every != 1)
@@ -563,13 +730,15 @@ public class Rewards
             grid.setEditEvent(ListGridEditEvent.CLICK);
             MXListGridField len = new MXListGridField("len", "Chain Length", ListGridFieldType.INTEGER, 120);
             MXListGridField type = new MXListGridField("type", "Reward Type", ListGridFieldType.TEXT, 135);
+            MXListGridField where = new MXListGridField("where", "Where", ListGridFieldType.TEXT, 135);
             MXListGridField every = new MXListGridField("every", "Every", ListGridFieldType.INTEGER, 80);
             MXListGridField howMany = new MXListGridField("howMany", "How Many", ListGridFieldType.INTEGER, 80);
             MXListGridField del = new MXListGridField("del", " ", ListGridFieldType.ICON);
             del.setIcon("delete2.png");
             
-            type.setValueMap(RewardStrategy.getValueMap());
+            type.setValueMap(RewardStrategy.getTypeMap());
             type.setCellAlign(Alignment.CENTER);
+            where.setValueMap(RewardStrategy.getWhereMap());
             len.setCellAlign(Alignment.CENTER);
             every.setCellAlign(Alignment.CENTER);
             howMany.setCellAlign(Alignment.CENTER);
@@ -599,7 +768,7 @@ public class Rewards
 //                }  
 //            });  
             
-            grid.setFields(del, type, len, every, howMany);
+            grid.setFields(del, type, where, len, every, howMany);
             
             return grid;
         }
