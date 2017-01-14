@@ -53,6 +53,11 @@ public class TransitionList extends Callback
         return m_list;
     }
     
+    public boolean isEmpty()
+    {
+        return m_list.isEmpty();
+    }
+    
     public void done()
     {        
     }

@@ -13,18 +13,28 @@ class PrettyPrinter
     private StringBuilder b = new StringBuilder()
     private int level
     
-    private Set<String> dont = [] as Set
+    private Set<String> expand = [] as Set
     
-    public PrettyPrinter(Collection dont)
+    public PrettyPrinter()
     {
-        this.dont = dont as Set
+        this([ 'grid', 'ice', 'items', 'generator', 'goals', 'boosts' ])
     }
     
+    public PrettyPrinter(List expand)
+    {
+        this.expand = expand as Set
+    }
+
     public String toString(JSONObject p)
     {
         level = 0
         add(false, p, true, true)
         return b.toString()
+    }
+    
+    protected boolean shouldExpand(String tag)
+    {
+        expand.contains(tag)
     }
     
     protected void add(boolean afterKey, JSONObject p, boolean expand, boolean expandChildren)
@@ -40,7 +50,7 @@ class PrettyPrinter
                 b << "\n"
                 indent()
                 b << "\"$k\": "
-                add(true, v, expandChildren, expandChildren && !dont.contains(k))
+                add(true, v, expandChildren, expandChildren && shouldExpand(k))
                 if (i != p.size() - 1)
                     b << ","
             }
@@ -104,7 +114,7 @@ class PrettyPrinter
         String s = stream.getText()
         Object json = new JSONParser().parse(s)
         
-        PrettyPrinter pr = new PrettyPrinter(['teleporters', 'conveyors', 'lazySusans', 'doors', 'animals', 'freq'])
+        PrettyPrinter pr = new PrettyPrinter()
         
         println pr.toString(json)
     }

@@ -83,6 +83,11 @@ public abstract class Item
         return true;
     }
     
+    public boolean isRadioActive()
+    {
+        return false;
+    }
+    
     public Integer getColor()
     {
         return null;

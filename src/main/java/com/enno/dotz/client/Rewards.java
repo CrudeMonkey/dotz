@@ -379,7 +379,7 @@ public class Rewards
             if (ctx.generator.getRandom().nextBoolean())
                 n++;
             
-            Dot newDot = new Dot(dot.color, dot.getLetter(), false);
+            Dot newDot = new Dot(dot.color, dot.getLetter(), false, dot.isRadioActive());
             LetterMultiplier m2 = new LetterMultiplier(n, type);
             newDot.setLetterMultiplier(m2);
             

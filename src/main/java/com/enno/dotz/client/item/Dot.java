@@ -6,6 +6,7 @@ import com.ait.lienzo.client.core.shape.IPrimitive;
 import com.ait.lienzo.client.core.shape.Line;
 import com.ait.lienzo.client.core.shape.Rectangle;
 import com.ait.lienzo.client.core.shape.RegularPolygon;
+import com.ait.lienzo.client.core.shape.Shape;
 import com.ait.lienzo.client.core.shape.Text;
 import com.ait.lienzo.client.core.shape.Triangle;
 import com.ait.lienzo.client.core.types.Point2D;
@@ -20,6 +21,8 @@ import com.enno.dotz.client.LetterMultiplier;
 
 public class Dot extends Item
 {
+    private static final int RADIO_PULSE_TIME = 500;   // time to pulse from block to white
+
     public int color;
     private String m_letter;
     private int m_letterPoints;
@@ -28,18 +31,23 @@ public class Dot extends Item
     private double m_tileSize;
     private Text m_pointsText;
     
+    private boolean m_radioActive;
+    private Shape<?> m_radioActiveShape;
+    private double m_radioActiveColorOffset;
+    
     public Dot(int color)
     {
         this.color = color;
     }
     
-    public Dot(int color, String letter, boolean stuck)
+    public Dot(int color, String letter, boolean stuck, boolean radioActive)
     {
         this.color = color;
         setLetter(letter);
         m_stuck = stuck;
+        m_radioActive = radioActive;
     }
-    
+
     public void setLetter(String letter)
     {
         m_letter = letter;
@@ -81,18 +89,35 @@ public class Dot extends Item
     {
         Group g = new Group();
         
+        boolean isEditing = ctx == null ? true : ctx.isEditing;
+        
         if (isStuck())
             g.add(createStuckShape(size));
         
         if (m_letter == null)
         {
             Circle c = new Circle(size / 4);
-            c.setFillColor(cfg == null ? Config.COLORS[0] : cfg.drawColor(color));       // cfg is null in ModePalette  
-            g.add(c);
+            c.setFillColor(cfg == null ? Config.COLORS[0] : cfg.drawColor(color));       // cfg is null in ModePalette
             
+            g.add(c);            
             addMark(color, g, size);
+            
+            if (m_radioActive)
+            {
+                m_radioActiveShape = new Circle(size / 4);
+                if (isEditing)
+                {
+                    m_radioActiveShape.setStrokeColor(ColorName.BLACK);
+                    m_radioActiveShape.setDashArray(2);
+                }
+                else
+                {
+                    m_radioActiveShape.setStrokeColor(ColorName.DEEPPINK);
+                }
+                g.add(m_radioActiveShape);
+            }
         }
-        else
+        else // letter
         {
             double w = size * 0.6; //0.8;
             m_tileSize = w;
@@ -102,6 +127,23 @@ public class Dot extends Item
             r.setX(-w / 2);
             r.setY(-w / 2);
             g.add(r);
+            
+            if (m_radioActive)
+            {
+                m_radioActiveShape = new Rectangle(w, w, w * 0.1);
+                m_radioActiveShape.setX(-w / 2);
+                m_radioActiveShape.setY(-w / 2);
+                if (isEditing)
+                {
+                    m_radioActiveShape.setStrokeColor(ColorName.WHITE);
+                    m_radioActiveShape.setDashArray(2);
+                }
+                else
+                {
+                    m_radioActiveShape.setStrokeColor(ColorName.CHARTREUSE);                    
+                }
+                g.add(m_radioActiveShape);
+            }
             
             IColor textColor = ColorName.BLACK;
             
@@ -135,7 +177,6 @@ public class Dot extends Item
                 text.setTextBaseLine(TextBaseLine.MIDDLE);
                 text.setTextAlign(TextAlign.CENTER);
                 g.add(text);
-                
             }
             
             m_pointsText = new Text("" + m_letterPoints);
@@ -257,6 +298,17 @@ public class Dot extends Item
     }
     
     @Override
+    public boolean isRadioActive()
+    {
+        return m_radioActive;
+    }
+
+    public void setRadioActive(boolean radioActive)
+    {
+        m_radioActive = radioActive;
+    }
+    
+    @Override
     public Integer getColor()
     {
         return color;
@@ -289,7 +341,7 @@ public class Dot extends Item
     @Override
     protected Item doCopy()
     {
-        Dot dot = new Dot(color, m_letter, m_stuck);
+        Dot dot = new Dot(color, m_letter, m_stuck, m_radioActive);
         
         if (m_multiplier != null)
         {
@@ -322,5 +374,40 @@ public class Dot extends Item
         ctx.score.explodedDot(this.color);
         
         return ExplodeAction.REMOVE; // remove dot
+    }
+    
+    @Override
+    public void animate(long t, double cursorX, double cursorY)
+    {
+        if (m_radioActiveShape != null)
+        {
+            double n = t % (RADIO_PULSE_TIME * 2);
+            if (n >= RADIO_PULSE_TIME)
+            {
+                // 500 - 999 -> 499 - 0
+                n = RADIO_PULSE_TIME * 2 - n - 1;
+            }
+            
+            m_radioActiveColorOffset = n;
+
+            double x = 1 + (int) (n * 3 / RADIO_PULSE_TIME);
+            m_radioActiveShape.setStrokeWidth(x);
+            
+            double a = n / RADIO_PULSE_TIME;
+            m_radioActiveShape.setAlpha(a);
+        }
+    }
+    
+    public void copyRadioActiveInfo(Dot dot)
+    {
+        m_radioActiveColorOffset = dot.m_radioActiveColorOffset;
+        
+        double n = m_radioActiveColorOffset;
+        
+        double x = 1 + (int) (n * 3 / RADIO_PULSE_TIME);
+        m_radioActiveShape.setStrokeWidth(x);
+        
+        double a = n / RADIO_PULSE_TIME;
+        m_radioActiveShape.setAlpha(a);
     }
 }

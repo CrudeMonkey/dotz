@@ -45,6 +45,7 @@ public class EditGoalsTab extends VLayout
     private All           m_mirrors;
     private All           m_rockets;
     private All           m_blockers;
+    private All           m_zapBlockers;
     private Num           m_lasers;
     private Num           m_birds;
     private Num           m_dominoes;
@@ -302,7 +303,7 @@ public class EditGoalsTab extends VLayout
             }
         };
 
-        m_blockers = new All("Blockers"){
+        m_blockers = new All("Green Blockers"){
             @Override
             public void prepareSave(Goal goal)
             {
@@ -313,6 +314,20 @@ public class EditGoalsTab extends VLayout
             public void initGoal(Goal goal)
             {
                 val(goal.getBlockers());
+            }
+        };
+
+        m_zapBlockers = new All("Red Zap Blockers"){
+            @Override
+            public void prepareSave(Goal goal)
+            {
+                goal.setZapBlockers(val());
+            }
+
+            @Override
+            public void initGoal(Goal goal)
+            {
+                val(goal.getZapBlockers());
             }
         };
 
@@ -340,8 +355,8 @@ public class EditGoalsTab extends VLayout
         MXForm form = new MXForm();
         form.setNumCols(6);
         
-        Context ctx = new Context(); // just used for drawing the dots
-        ctx.cfg = new Config();      //TODO could copy the colors later
+        Context ctx = new Context(true, new Config()); // just used for drawing the dots
+        //TODO could copy the colors later
         
         m_fields = new FormItem[] {
                 new DotImageItem(0, ctx), m_dots[0], m_anchors,  m_birds,
@@ -352,8 +367,8 @@ public class EditGoalsTab extends VLayout
                 new DotImageItem(5, ctx), m_dots[5], m_circuits, m_rockets,
                 m_moves, m_cages, m_mirrors,
                 m_time, m_score, m_blockers,
-                m_chainGoal, m_words, m_bubbles,
-                m_diamonds
+                m_chainGoal, m_words, m_zapBlockers,
+                m_diamonds, m_bubbles
         };
         
         form.setFields(m_fields);

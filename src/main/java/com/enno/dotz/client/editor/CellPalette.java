@@ -25,9 +25,6 @@ public class CellPalette extends Palette<Cell>
     {
         super(30, CellButton.SIZE, 7, 3);
         
-        ctx.backgroundLayer = new Layer();
-        add(ctx.backgroundLayer);        
-        
         ctx.doorLayer = new Layer();
         add(ctx.doorLayer);
         

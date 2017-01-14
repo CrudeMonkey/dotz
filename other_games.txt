@@ -3,7 +3,7 @@ Toy Blast
 * 9x9
 * one click matches non-diagonal connected dots
 * bubble=cage with item, brick=door without item, balloon=blocker, 
-* rewards: 5=blaster (rocket), 7=bomb (dynamite), 9=ColorBomb (globe) - at end of chain
+* rewards: 5=blaster (rocket), 7=bomb (dynamite), 9=ColorBomb (globe)
 * combos: 2 striped=
 
 Jelly Splash
@@ -18,7 +18,8 @@ Jelly Splash
 
 Candy Crush
 -----------
-
+* 9x9
+* swap mode
 
 
 

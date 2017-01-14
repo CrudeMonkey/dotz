@@ -183,13 +183,17 @@ Regular Doors and Directional Doors:
 
 -- Dot
 
+* Can be connected in Dot Mode.
+* In Word Mode, dots are actually [[Letters]].
+* Dots and Dot Bombs can be [[radio active]], which means they'll change into a different color at the end of each turn. In Word Mode, their letters also change.
+
 -- Wild Card
 
--- Dot Bomb @[tags: ['bomb', 'bombs', 'dot bomb', 'dot bombs']]
+-- Dot Bomb @[tags: ['dot bomb', 'dot bombs']]
 
 * Dots can have a bomb associated with it. 
 * The bomb will detonate after a certain number of turns, unless it is removed. When it detonates, the level is lost.
-* The [[Bomb Strength]] determines how many turns it tkaes before it detonates.
+* The [[Bomb Strength]] determines how many turns it takes before it detonates.
 
 -- Animal
 
@@ -332,6 +336,8 @@ To draw a continuous Conveyer track, simply hold and drag the left mouse button.
 * [[Connect Transporters]]
 * [[Rotate Clockwise]] - Rocket, Laser, Mirror, Directional Door, Conveyer Section, Domino, Striped, Turner
 * Set Controller
+* [[Set Stuck]]
+* Make Radio Active - Dot or Dot Bomb
 
 --- Settings
 

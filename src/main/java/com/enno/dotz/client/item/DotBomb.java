@@ -32,7 +32,13 @@ public class DotBomb extends Item
         m_dot = dot;
         m_stuck = stuck;
     }
-    
+        
+    @Override
+    public boolean isRadioActive()
+    {
+        return m_dot.isRadioActive();
+    }
+
     @Override
     public Integer getColor()
     {
@@ -158,6 +164,9 @@ public class DotBomb extends Item
             else
                 a.setVisible(false);
         }
+        
+        if (isRadioActive())
+            m_dot.animate(t, cursorX, cursorY);
     }
     
     @Override

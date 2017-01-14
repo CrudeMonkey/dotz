@@ -24,6 +24,7 @@ import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Animal.Action;
 import com.enno.dotz.client.item.Animal.Type;
 import com.enno.dotz.client.item.Blocker;
+import com.enno.dotz.client.item.Chest;
 import com.enno.dotz.client.item.Clock;
 import com.enno.dotz.client.item.Diamond;
 import com.enno.dotz.client.item.Dot;
@@ -157,8 +158,8 @@ public class RandomGridGenerator
     private static final int BLOCKER_ID = 25;
     private static final int BUBBLE_ID = 26;
     private static final int DIAMOND_ID = 27;
-    
-    //private static final int LAST_ID = DIAMOND_ID;
+    private static final int ZAP_BLOCKER_ID = 28;
+    private static final int CHEST_ID = 29;
     
     private Context ctx;
     private GridState state;
@@ -314,7 +315,12 @@ public class RandomGridGenerator
             }
             case BLOCKER_ID: 
             {
-                new BlockerFeature().gen(props);
+                new BlockerFeature(false).gen(props);
+                break;                
+            }
+            case ZAP_BLOCKER_ID: 
+            {
+                new BlockerFeature(true).gen(props);
                 break;                
             }
             case ICE_ID: 
@@ -352,6 +358,11 @@ public class RandomGridGenerator
                 new RocketFeature().gen(props);
                 break;                
             }
+            case CHEST_ID: 
+            {
+                new ChestFeature().gen(props);
+                break;                
+            }
             case CHANGE_COLOR_ID: 
             {
                 new ChangeColorFeature().gen(props);
@@ -386,7 +397,9 @@ public class RandomGridGenerator
         f.add(10, LASER_ID);
         f.add(10, MIRROR_ID);
         f.add(10, ROCKET_ID);        
-        f.add(30, BLOCKER_ID);        
+        f.add(20, CHEST_ID);        
+        f.add(30, BLOCKER_ID);
+        f.add(10, ZAP_BLOCKER_ID);
         f.add(30, CAGE_ID);
         f.add(10, BLINKING_CAGE_ID);
         f.add(10, BLINKING_DOOR_ID);
@@ -1308,7 +1321,7 @@ public class RandomGridGenerator
         @Override
         protected Item createItem(boolean x_sym, boolean y_sym)
         {
-            return new Dot(m_color, null, m_stuck);
+            return new Dot(m_color, null, m_stuck, false); //TODO support radioActive
         }
     }
     
@@ -1372,15 +1385,18 @@ public class RandomGridGenerator
     
     public class BlockerFeature extends ItemFeature
     {
-        public BlockerFeature()
+        private boolean m_zapOnly;
+
+        public BlockerFeature(boolean zapOnly)
         {
-            super(1, 3, 4, 2);
+            super(1, 3, zapOnly ? 1 : 4, zapOnly ? 1 : 2);
+            m_zapOnly = zapOnly;
         }
 
         @Override
         protected Item createItem(boolean x_sym, boolean y_sym)
         {
-            return new Blocker(m_props.blockerStrength(), m_stuck);
+            return new Blocker(m_props.blockerStrength(), m_stuck, m_zapOnly);
         }
     }
     
@@ -1483,6 +1499,30 @@ public class RandomGridGenerator
         {
             int dir = mirrorDirection(m_direction, x_sym, y_sym);
             return new Rocket(dir, m_stuck);
+        }
+    }
+    
+    public class ChestFeature extends ItemFeature
+    {
+        private int m_doorStrength;
+
+        public ChestFeature()
+        {
+            super(1, 3, 2, 4);
+            m_repeat = false;
+        }
+
+        @Override
+        public void gen(Properties props)
+        {
+            m_doorStrength = props.doorStrength();
+            super.gen(props);
+        }
+        
+        @Override
+        protected Item createItem(boolean x_sym, boolean y_sym)
+        {
+            return new Chest(null, m_doorStrength); //TODO wrap existing item
         }
     }
     
@@ -1615,7 +1655,9 @@ public class RandomGridGenerator
         a.push(new NObject("id", LASER_ID).put("name", "Lasers"));
         a.push(new NObject("id", MIRROR_ID).put("name", "Mirrors"));
         a.push(new NObject("id", ROCKET_ID).put("name", "Rockets"));
-        a.push(new NObject("id", BLOCKER_ID).put("name", "Blockers"));
+        a.push(new NObject("id", CHEST_ID).put("name", "Chests"));
+        a.push(new NObject("id", BLOCKER_ID).put("name", "Blockers (Green)"));
+        a.push(new NObject("id", ZAP_BLOCKER_ID).put("name", "Zap Blockers (Red)"));
         return a;
     }
 }

@@ -10,6 +10,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.ait.lienzo.client.core.animation.IAnimation;
+import com.ait.lienzo.client.core.animation.IAnimationHandle;
 import com.ait.lienzo.client.core.shape.Layer;
 import com.enno.dotz.client.Cell;
 import com.enno.dotz.client.Cell.ChangeColorCell;
@@ -31,6 +33,7 @@ import com.enno.dotz.client.item.Diamond;
 import com.enno.dotz.client.item.Item;
 import com.enno.dotz.client.item.TeleportClipBox;
 import com.enno.dotz.client.util.CallbackChain.Callback;
+import com.enno.dotz.client.util.Debug;
 
 public class GetTransitions
 {
@@ -454,23 +457,22 @@ public class GetTransitions
         addTeleport(src.item, null, src.pt(), target.pt(), true, false);
     }
 
-    private void addSpawn(final Pt src, Pt target)
+    private void addSpawn(Pt src, Pt target)
     {
-        Item item = ctx.generator.getNextItem(ctx, false);
+        Item item = ctx.generator.getNextItem(ctx, false);        
+        final TeleportClipBox toBox = new TeleportClipBox(item.shape, target, ctx);
         
-        if (target.row > 0)
-        {
-            // It's skipping some cells (e.g. Holes or locked cages)
-            addTeleport(item, null, src, target, false, true);
-            return;
-        }
-        
-        m_list.add(new DropTransition(state.x(src.col), state.y(src.row), state.x(target.col), state.y(target.row), item) {
+        m_list.add(new DropTransition(state.x(target.col), state.y(target.row - 1), state.x(target.col), state.y(target.row), item) {
             @Override
             public void afterStart()
             {
-                //Debug.p("spawn " + src);
-                item.addShapeToLayer(ctx.dotLayer);
+                toBox.init();
+            }
+            
+            @Override
+            public void afterEnd()
+            {
+                toBox.done();
             }
         });
         state.cell(target.col, target.row).item = item;

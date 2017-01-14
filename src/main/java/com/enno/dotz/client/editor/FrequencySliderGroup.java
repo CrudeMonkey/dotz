@@ -45,8 +45,8 @@ public class FrequencySliderGroup extends HLayout
     
     public FrequencySliderGroup(boolean isNew, Config level)
     {
-        ctx = new Context(); // just used for drawing the sliders
-        ctx.cfg = new Config();      //TODO could copy the colors later       
+        ctx = new Context(true, new Config()); // just used for drawing the sliders
+        //TODO could copy the colors later       
         
         VLayout left = new VLayout();
         VLayout right = new VLayout();
@@ -155,9 +155,13 @@ public class FrequencySliderGroup extends HLayout
         m_list.add(key);
         right.addMember(key);
         
-        FrequencySlider blocker = createBlockerSlider(index++);
+        FrequencySlider blocker = createBlockerSlider(index++, false);
         m_list.add(blocker);
         right.addMember(blocker);
+        
+        FrequencySlider zapBlocker = createBlockerSlider(index++, true);
+        m_list.add(zapBlocker);
+        right.addMember(zapBlocker);
         
         FrequencySlider blaster = createBlasterSlider(index++);
         m_list.add(blaster);
@@ -225,7 +229,12 @@ public class FrequencySliderGroup extends HLayout
                     else if (item instanceof IcePick)
                         pick.initFrequency(freq);
                     else if (item instanceof Blocker)
-                        blocker.initFrequency(freq);
+                    {
+                        if (((Blocker) item).isZapOnly())
+                            zapBlocker.initFrequency(freq);
+                        else
+                            blocker.initFrequency(freq);
+                    }
                     else if (item instanceof Bomb)
                         bomb.initFrequency(freq);
                     else if (item instanceof Blaster)
@@ -359,9 +368,9 @@ public class FrequencySliderGroup extends HLayout
         return new FrequencySlider(index, dot, this);
     }
 
-    protected FrequencySlider createBlockerSlider(int index)
+    protected FrequencySlider createBlockerSlider(int index, boolean zapOnly)
     {
-        Blocker dot = new Blocker(1, false);
+        Blocker dot = new Blocker(1, false, zapOnly);
         dot.setContext(ctx);
         return new FrequencySlider(index, dot, this);
     }

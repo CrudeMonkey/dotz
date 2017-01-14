@@ -14,7 +14,9 @@ import com.enno.dotz.client.ui.MXForm;
 import com.enno.dotz.client.ui.MXSelectItem;
 import com.enno.dotz.client.ui.MXTextInput;
 import com.smartgwt.client.util.SC;
+import com.smartgwt.client.widgets.Slider;
 import com.smartgwt.client.widgets.form.fields.ButtonItem;
+import com.smartgwt.client.widgets.form.fields.SliderItem;
 import com.smartgwt.client.widgets.form.fields.SpinnerItem;
 import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
 import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
@@ -58,6 +60,7 @@ public abstract class GeneratorPropertiesPanel extends VLayout
     private MXCheckBox m_findWords;
     private SpinnerItem m_maxWordLength;
     private SpinnerItem m_chestStrength;
+    private SliderItem m_radioActivePct;
 
     public GeneratorPropertiesPanel(Config level)
     {
@@ -260,13 +263,24 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         m_maxWordLength.setWidth(70);
         m_maxWordLength.setPrompt("When finding specific (generated) words in Word Mode");
         
+        m_radioActivePct = new SliderItem();
+        m_radioActivePct.setTitle("Radio Active Pct");
+        m_radioActivePct.setVertical(false);
+        m_radioActivePct.setValue(0.0);
+        m_radioActivePct.setMinValue(0.0);
+        m_radioActivePct.setMaxValue(100.0);
+        m_radioActivePct.setNumValues(100);
+        m_radioActivePct.setRoundPrecision(0);
+        m_radioActivePct.setRoundValues(false);
+        m_radioActivePct.setPrompt("Percentage of radio active Dots and DotBombs");
+        
         m_randomSeed.setColSpan(2);
         m_rollMode.setColSpan(2);
         m_mode.setColSpan(2);
         m_diagonalMode.setColSpan(2);
         m_minChainLength.setColSpan(2);
         m_removeLetters.setColSpan(2);
-        m_initialDotsOnly.setColSpan(2);
+        m_radioActivePct.setColSpan(2);
         
         form.setFields(
                 m_mode, m_chestStrength, m_knightStrength,
@@ -277,7 +291,7 @@ public abstract class GeneratorPropertiesPanel extends VLayout
                 m_minChainLength, m_maxAnchors, m_blockerStrength,
                 m_rewardStrategies, m_editRewards, m_icePickRadius, m_dropRadius,
                 m_removeLetters, m_findWords, m_maxWordLength,
-                m_initialDotsOnly);
+                m_radioActivePct, m_initialDotsOnly);
         
         m_seed.setDisabled(true);
         m_genSeed.setDisabled(true);
@@ -314,6 +328,7 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         m_rewardStrategies.setValue(g.rewardStrategies);
         m_icePickRadius.setRadius(g.icePickRadius); 
         m_dropRadius.setRadius(g.dropRadius);
+        m_radioActivePct.setValue(g.radioActivePct);
         
         m_removeLetters.setValue(g.removeLetters);
         m_findWords.setValue(g.findWords);
@@ -403,6 +418,7 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         g.findWords = m_findWords.isChecked();
         g.removeLetters = m_removeLetters.isChecked();
         g.maxWordLength = Integer.parseInt(m_maxWordLength.getValueAsString());
+        g.radioActivePct = m_radioActivePct.getValueAsFloat().intValue();
         
         g.rewardStrategies = m_rewardStrategies.getValueAsString();
         if (g.rewardStrategies == null)

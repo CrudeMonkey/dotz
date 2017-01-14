@@ -35,6 +35,7 @@ import com.enno.dotz.client.anim.GetTransitions;
 import com.enno.dotz.client.anim.GrowFire;
 import com.enno.dotz.client.anim.MoveAnimals;
 import com.enno.dotz.client.anim.Pt;
+import com.enno.dotz.client.anim.RadioActives;
 import com.enno.dotz.client.anim.ShowDescription;
 import com.enno.dotz.client.anim.ShowWordCallback;
 import com.enno.dotz.client.anim.Transition.DropTransition;
@@ -81,12 +82,13 @@ public class GridState
     private List<RewardStrategy> m_rewardStrategies;
     
     public EndOfLevel endOfLevel;
-    
+
     public GridState(int numColumns, int numRows)
     {
         this.numRows = numRows;
         this.numColumns = numColumns;
-        m_grid = new Cell[numColumns * (numRows + 1)]; //TODO do we need the extra row?
+        
+        m_grid = new Cell[numColumns * numRows]; //TODO do we need the extra row?
     }
     
     public void init(Context ctx, boolean replaceRandom)
@@ -314,6 +316,7 @@ public class GridState
         
         list.add(new GetTransitions(ctx).getCallback(ctx.dotLayer, cfg.dropDuration));        
         list.add(explodeLoop(false, false)); // don't check clocks
+        list.add(radioActives());
         list.add(activateControllers());
         list.add(moveBeasts());
         list.add(moveSusans());
@@ -368,6 +371,7 @@ public class GridState
         
         list.add(explodeLoop(false, false)); // don't check clocks
         list.add(activateControllers());
+        list.add(radioActives());        
         list.add(moveBeasts());
         list.add(moveSusans());
         list.add(transitions());             // susans can leave empty cells
@@ -1569,6 +1573,35 @@ public class GridState
     
     protected AnimList getInitialTransitions(Layer layer, double dropDuration)
     {
+        for (int row = 0; row < numRows; row++)
+        {
+            for (int col = 0; col < numColumns; col++)
+            {
+                final Item item = cell(col, row).item;
+                if (item == null)
+                    continue;
+                
+                item.moveShape(x(col), y(row));
+                item.addShapeToLayer(ctx.dotLayer);                
+            }
+        }
+        
+        AnimList animList = new AnimList() {
+            @Override
+            public void run()
+            {
+                ctx.iceLayer.draw();
+                ctx.doorLayer.draw();
+                
+                super.run();
+            }
+        };
+        
+        return animList;
+    }
+    
+    protected AnimList getInitialTransitionsOld(Layer layer, double dropDuration)
+    {
         TransitionList[] transList = new TransitionList[numRows];
         for (int row = 0; row < numRows; row++)
         {
@@ -1618,24 +1651,29 @@ public class GridState
         return animList;
     }
     
+    public double size()
+    {
+        return cfg.size;
+    }
+    
     public final double x(int col)
     {
-        return col * cfg.size + cfg.size / 2.0;
+        return ctx.gridDx + col * cfg.size + cfg.size / 2.0;
     }
     
     public final double y(int row)
     {
-        return (row + 1) * cfg.size + cfg.size / 2.0;
+        return ctx.gridDy + row * cfg.size + cfg.size / 2.0;
     }
     
     public int col(int x)
     {
-        return x / cfg.size;
+        return (x - ctx.gridDx) / cfg.size;
     }
     
     public int row(int y)
     {
-        return y / cfg.size - 1;
+        return (y - ctx.gridDy) / cfg.size;
     }
 
     public static void p(String s)
@@ -1907,6 +1945,11 @@ public class GridState
                 }
             }
         };
+    }
+    
+    public TransitionList radioActives()
+    {
+        return RadioActives.createTransitions(ctx);
     }
     
     public TransitionList explosions()

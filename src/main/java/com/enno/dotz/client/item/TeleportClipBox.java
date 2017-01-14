@@ -29,7 +29,7 @@ public class TeleportClipBox extends Group
         setPathClipper(new BoundingBox(x - sz2, y - sz2, x + sz2, y + sz2));
     }
     
-    //TODO remove when done
+    //TODO remove when done - still used by ConveryorCell
     public TeleportClipBox(IPrimitive<?> shape, Cell cell, Context ctx)
     {
         this.ctx = ctx;

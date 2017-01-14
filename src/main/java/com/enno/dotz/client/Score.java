@@ -70,6 +70,9 @@ public class Score
     private int m_blockersInGrid;
     private int m_explodedBlockers;
 
+    private int m_zapBlockersInGrid;
+    private int m_explodedZapBlockers;
+
     private int m_chestsInGrid;
     private int m_openedChests;
     
@@ -211,6 +214,13 @@ public class Score
         addPoints(10);
     }
     
+    public void explodedZapBlocker()
+    {
+        m_explodedZapBlockers++;
+        m_zapBlockersInGrid--;
+        addPoints(20);
+    }
+    
     public void explodedAnchor()
     {
         m_explodedAnchors++;
@@ -339,6 +349,11 @@ public class Score
         return m_explodedBlockers;
     }
     
+    public int getExplodedZapBlockers()
+    {
+        return m_explodedZapBlockers;
+    }
+    
     public int getDroppedAnchors()
     {
         return m_droppedAnchors;
@@ -409,6 +424,11 @@ public class Score
         m_blockersInGrid++;
     }
 
+    public void generatedZapBlocker()
+    {
+        m_zapBlockersInGrid++;
+    }
+
     public void generatedChest()
     {
         m_chestsInGrid++;
@@ -477,6 +497,11 @@ public class Score
     public int getBlockersInGrid()
     {
         return m_blockersInGrid;
+    }
+
+    public int getZapBlockersInGrid()
+    {
+        return m_zapBlockersInGrid;
     }
 
     public int getInitialIce()
@@ -575,7 +600,10 @@ public class Score
         }
         else if (item instanceof Blocker)
         {
-            m_blockersInGrid++;
+            if (((Blocker) item).isZapOnly())
+                m_zapBlockersInGrid++;
+            else
+                m_blockersInGrid++;
         }
         else if (item instanceof Chest)
         {

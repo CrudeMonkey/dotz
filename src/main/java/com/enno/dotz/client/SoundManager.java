@@ -36,7 +36,8 @@ public class SoundManager
         AXE("322171__liamg-sfx__axe-impact-gore.wav"),
         ZAP("268168__shaun105__laser.wav"),
         WOOSH("216675_2549002-lq.mp3"),
-        BUBBLE("89534__cgeffex__very-fast-bubble-pop1.mp3");
+        BUBBLE("89534__cgeffex__very-fast-bubble-pop1.mp3"),
+        SWAP_RADIOACTIVE("28469__simmfoc__blip-1.wav");
 //        BLIP("blip.wav");
         
         private Audio m_audio;

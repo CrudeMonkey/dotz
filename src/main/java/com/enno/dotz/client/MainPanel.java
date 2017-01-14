@@ -626,8 +626,7 @@ public class MainPanel extends VLayout
             @Override
             public void run()
             {
-                Context ctx = new Context();
-                ctx.cfg = level;
+                Context ctx = new Context(false, level);
                 
                 killLevel();
                 
@@ -913,6 +912,7 @@ public class MainPanel extends VLayout
         private Context ctx;
         private DotzGridPanel m_grid;
         private ScorePanel m_score;
+        private WordDisplayPanel m_wordDisplayPanel;
         private StatsPanel m_statsPanel;
         private BoostPanel m_boostPanel;
         
@@ -929,6 +929,13 @@ public class MainPanel extends VLayout
             m_score = new ScorePanel(ctx);
             ctx.scorePanel = m_score;
             addMember(m_score);
+            
+            if (ctx.cfg.generator.generateLetters)
+            {
+                m_wordDisplayPanel = new WordDisplayPanel(ctx);
+                ctx.wordDisplayPanel = m_wordDisplayPanel;
+                addMember(m_wordDisplayPanel);
+            }
             
             GridContainer g = new GridContainer();            
             g.addMember(m_grid, ctx.cfg);

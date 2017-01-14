@@ -7,12 +7,17 @@ import com.ait.lienzo.client.core.animation.IAnimation;
 import com.ait.lienzo.client.core.animation.IAnimationHandle;
 import com.ait.lienzo.client.core.animation.IndefiniteAnimation;
 import com.ait.lienzo.client.core.animation.LayerRedrawManager;
+import com.ait.lienzo.client.core.image.ImageShapeLoadedHandler;
 import com.ait.lienzo.client.core.shape.FastLayer;
 import com.ait.lienzo.client.core.shape.GridLayer;
 import com.ait.lienzo.client.core.shape.Layer;
 import com.ait.lienzo.client.core.shape.Line;
+import com.ait.lienzo.client.core.shape.Picture;
+import com.ait.lienzo.client.core.shape.Rectangle;
 import com.ait.lienzo.client.widget.LienzoPanel;
 import com.ait.lienzo.shared.core.types.ColorName;
+import com.enno.dotz.client.Cell.Hole;
+import com.enno.dotz.client.Cell.Rock;
 import com.enno.dotz.client.item.Animal.EyeTracker;
 
 public class DotzGridPanel extends LienzoPanel
@@ -25,9 +30,11 @@ public class DotzGridPanel extends LienzoPanel
     protected Config cfg;
     protected GridState m_state;
     
-    private Layer m_backgroundLayer;
+    private FloorLayer m_floorLayer;
     private Layer m_iceLayer;
+    private Layer m_backgroundLayer;
     private Layer m_connectLayer;
+    private Layer m_borderLayer;
     private Layer m_dotLayer;
     private Layer m_doorLayer;
     private Layer m_nukeLayer; // nuke explosions and moving fire
@@ -38,7 +45,7 @@ public class DotzGridPanel extends LienzoPanel
 
     public DotzGridPanel(Context ctx, EndOfLevel endOfLevel)
     {
-        super(ctx.cfg.numColumns * ctx.cfg.size, (ctx.cfg.numRows + 1) * ctx.cfg.size);
+        super(ctx.gridWidth, ctx.gridHeight);
         
         this.ctx = ctx;
         ctx.gridPanel = this;
@@ -56,12 +63,15 @@ public class DotzGridPanel extends LienzoPanel
         ctx.state = ctx.cfg.grid.copy();
         m_state = ctx.state;
         
-        setBackgroundColor(ColorName.WHITE);
+        //setBackgroundColor(ColorName.WHITE);
         
-        Line gridLine = new Line();
-        gridLine.setStrokeColor(ColorName.DARKGRAY);
+//        Line gridLine = new Line();
+//        gridLine.setStrokeColor(ColorName.DARKGRAY);
         
-        add(new GridLayer(cfg.size, gridLine));
+        m_floorLayer = new FloorLayer(ctx);
+        add(m_floorLayer);
+        
+        //add(new GridLayer(cfg.size, gridLine));
         
         m_iceLayer = createLayer();
         ctx.iceLayer = m_iceLayer;
@@ -74,6 +84,9 @@ public class DotzGridPanel extends LienzoPanel
         m_connectLayer = new Layer(); // only this layer responds to events (for performance)
         add(m_connectLayer);
         ctx.connectLayer = m_connectLayer;
+        
+        m_borderLayer = createLayer();
+        add(m_borderLayer);
         
         m_dotLayer = createLayer();
         add(m_dotLayer);
@@ -96,9 +109,17 @@ public class DotzGridPanel extends LienzoPanel
         ctx.init();
         m_state.init(ctx, replaceRandom);
         
+        m_floorLayer.init(ctx);
+        setBorders();
+        
         ctx.score.initGrid(ctx.state);        
     }
     
+    public void setBorders()
+    {
+        new BorderFinder(m_state).find(m_borderLayer);
+    }
+
     private Layer createLayer()
     {
 //        Layer layer = new Layer();
@@ -182,5 +203,82 @@ public class DotzGridPanel extends LienzoPanel
         public void retry();
         public void skip();
         public void editLevel();
+    }
+    
+    public static class FloorLayer extends FastLayer
+    {
+        private boolean m_gridLines;
+
+        public FloorLayer(Context ctx)
+        {
+            m_gridLines = true;
+        }
+        
+        public void init(Context ctx)
+        {
+            Picture p = new Picture("images/Background-Image-8HE.jpg", false);
+            add(p);
+            p.getImageProxy().setImageShapeLoadedHandler(new ImageShapeLoadedHandler<Picture>()
+            {                
+                @Override
+                public void onImageShapeLoaded(Picture image)
+                {
+                    LayerRedrawManager.get().schedule(FloorLayer.this);
+                }
+            });
+            
+            GridState state = ctx.state;
+            int sz = (int) state.size();
+            
+            int rockScale = 2;
+            
+            for (int col = 0; col < state.numColumns; col++)
+            {
+                for (int row = 0; row < state.numRows; row++)
+                {
+                    double x = state.x(col) - sz/2;
+                    double y = state.y(row) - sz/2;
+                    
+                    Cell c = state.cell(col,  row);
+                    if (c instanceof Hole)
+                    {
+                        
+                    }
+                    else if (c instanceof Rock)
+                    {
+                        p = new Picture("images/backdrop-21534_960_720.jpg", (int) x, (int) y, rockScale * sz, rockScale * sz, sz, sz, false);
+                        p.setX(x);
+                        p.setY(y);
+                        add(p);
+                        
+                        p.getImageProxy().setImageShapeLoadedHandler(new ImageShapeLoadedHandler<Picture>()
+                        {                
+                            @Override
+                            public void onImageShapeLoaded(Picture image)
+                            {
+                                LayerRedrawManager.get().schedule(FloorLayer.this);
+                            }
+                        });
+                    }
+                    else
+                    {
+                        Rectangle r = new Rectangle(sz, sz);
+                        r.setX(x);
+                        r.setY(y);
+                        
+                        r.setFillColor(ColorName.WHITE);
+                        add(r);
+                        
+                        Line line = new Line(x, y, x + sz, y);
+                        line.setStrokeColor(ColorName.DARKGRAY);
+                        add(line);
+                        
+                        line = new Line(x, y, x, y + sz);
+                        line.setStrokeColor(ColorName.DARKGRAY);
+                        add(line);
+                    }
+                }
+            }
+        }
     }
 }

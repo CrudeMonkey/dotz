@@ -71,6 +71,7 @@ public class Generator
     public String        rewardStrategies = "";
     public int           icePickRadius    = 3;
     public int           dropRadius       = 3;
+    public int           radioActivePct   = 0;
     
     // Word Mode settings
     public boolean       removeLetters    = true;
@@ -173,6 +174,7 @@ public class Generator
         g.removeLetters = removeLetters;
         g.findWords = findWords;
         g.maxWordLength = maxWordLength;
+        g.radioActivePct = radioActivePct;
         
         for (ItemFrequency f : m_list)
         {
@@ -288,7 +290,14 @@ public class Generator
                     continue;
             }
             
-            if (item instanceof DotBomb)
+            if (item instanceof Dot)
+            {
+                if (radioActivePct > 0)
+                {
+                    ((Dot) item).setRadioActive(m_rnd.nextInt(100) < radioActivePct);
+                }
+            }
+            else if (item instanceof DotBomb)
             {
                 Dot dot = null;
                 do
@@ -297,6 +306,11 @@ public class Generator
                     dot = (Dot) getNextDot().createItem(ctx, generateLetters ? s_letterGenerator : null, getDominoGenerator());
                 }
                 while (m_excludeDotColor != -1 && m_numDotColors > 1 && dot.color == m_excludeDotColor);
+                
+                if (radioActivePct > 0)
+                {
+                    dot.setRadioActive(m_rnd.nextInt(100) < radioActivePct);
+                }
                 
                 ((DotBomb) item).setDot(dot);
             }
@@ -342,7 +356,10 @@ public class Generator
             }
             else if (item instanceof Blocker)
             {
-                ctx.score.generatedBlocker();
+                if (((Blocker) item).isZapOnly())
+                    ctx.score.generatedZapBlocker();
+                else
+                    ctx.score.generatedBlocker();
             }
             break;
         }        
@@ -369,25 +386,29 @@ public class Generator
         if (!hasAtLeastTwoColors())
             return oldItem;
         
-        Item item;
+        Dot oldDot = (oldItem instanceof DotBomb) ? ((DotBomb) oldItem).getDot() : (Dot) oldItem;
+        
+        Dot newDot;
         while (true)
         {
-            item = getNextDot().createItem(ctx, generateLetters ? s_letterGenerator : null, getDominoGenerator());
-            if (oldItem.getColor() == item.getColor())
+            newDot = (Dot) getNextDot().createItem(ctx, generateLetters ? s_letterGenerator : null, getDominoGenerator());
+            if (oldItem.getColor() == newDot.getColor())
                 continue;
             
             break;
         }
         
+        newDot.setRadioActive(oldDot.isRadioActive());        
+        
         if (oldItem instanceof DotBomb)
         {
-            DotBomb bomb = new DotBomb((Dot) item, ((DotBomb) oldItem).getStrength(), oldItem.isStuck());
+            DotBomb bomb = new DotBomb(newDot, ((DotBomb) oldItem).getStrength(), oldItem.isStuck());
             bomb.init(ctx);
             return bomb;
         }
         
-        item.init(ctx);
-        return item;
+        newDot.init(ctx);
+        return newDot;
     }
 
     public boolean hasAtLeastTwoColors()

@@ -35,9 +35,8 @@ public class PreviewLevelPanel extends VLayout
         setWidth((Integer) null);
         setHeight((Integer) null);
         
-        Context ctx = new Context();
-        ctx.cfg = level;
         level.size = 40;
+        Context ctx = new Context(false, level);
         
         this.ctx = ctx;
         
@@ -51,7 +50,9 @@ public class PreviewLevelPanel extends VLayout
         GridContainer g = new GridContainer();            
         g.addMember(m_grid, ctx.cfg);
         addMember(g);
-        
+
+        m_grid.init(false);
+
         m_boostPanel = new BoostPanel(ctx);
         ctx.boostPanel = m_boostPanel;
         addMember(m_boostPanel); 
@@ -59,15 +60,17 @@ public class PreviewLevelPanel extends VLayout
         MXLabel desc = new MXLabel(ctx.cfg.description == null ? "" : ctx.cfg.description);
         desc.setWidth100();
         desc.setHeight(40);
+        desc.setAlign(Alignment.CENTER);
         addMember(desc);
         
-        m_grid.init(false);
         initItemGraphics();
 
         m_connectionLayer = new Layer();
         m_connectionLayer.setListening(false);
         m_grid.add(m_connectionLayer);
         initTeleportInfo();
+        
+        m_grid.setBorders();
         
         m_grid.draw();
         

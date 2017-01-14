@@ -277,7 +277,8 @@ public class LevelParser
         if (itemClass.equals("blocker"))
         {
             int strength = row.getAsInteger("strength");
-            return new Blocker(strength, stuck);
+            boolean zapOnly = row.isBoolean("zapOnly") ? row.getAsBoolean("zapOnly") : false;
+            return new Blocker(strength, stuck, zapOnly);
         }
         if (itemClass.equals("blaster"))
         {
@@ -328,8 +329,9 @@ public class LevelParser
         {
             int color = row.getAsInteger("color");
             String letter = row.getAsString("letter");
-
-            Dot dot = new Dot(color, letter, stuck);
+            boolean radioActive = row.isBoolean("radioActive") ? row.getAsBoolean("radioActive") : false;
+            
+            Dot dot = new Dot(color, letter, stuck, radioActive);
 
             NObject mult = row.getAsObject("mult");
             if (mult != null)
@@ -344,8 +346,9 @@ public class LevelParser
             if (row.isString("letter"))
                 letter = row.getAsString("letter");
             int strength = row.getAsInteger("strength");
-
-            Dot dot = new Dot(color, letter, stuck);
+            boolean radioActive = row.isBoolean("radioActive") ? row.getAsBoolean("radioActive") : false;
+            
+            Dot dot = new Dot(color, letter, stuck, radioActive);
             NObject mult = row.getAsObject("mult");
             if (mult != null)
                 dot.setLetterMultiplier(LetterMultiplier.fromJson(mult));
@@ -497,6 +500,9 @@ public class LevelParser
 
         if (json.isInteger("blockers"))
             goal.setBlockers(json.getAsInteger("blockers"));
+
+        if (json.isInteger("zapBlockers"))
+            goal.setZapBlockers(json.getAsInteger("zapBlockers"));
 
         if (json.isInteger("score"))
             goal.setScore(json.getAsInteger("score"));
@@ -695,6 +701,9 @@ public class LevelParser
         if (p.isInteger("maxWordLength"))
             g.maxWordLength = p.getAsInteger("maxWordLength");
         
+        if (p.isInteger("radioActivePct"))
+            g.radioActivePct = p.getAsInteger("radioActivePct");
+        
         NArray freq = p.getAsArray("freq");
         for (int i = 0, n = freq.size(); i < n; i++)
         {
@@ -753,7 +762,11 @@ public class LevelParser
                 }
                 else if (item.equals("blocker"))
                 {
-                    g.add(new ItemFrequency(new Blocker(g.blockerStrength, false), f));
+                    g.add(new ItemFrequency(new Blocker(g.blockerStrength, false, false), f));
+                }
+                else if (item.equals("zapBlocker"))
+                {
+                    g.add(new ItemFrequency(new Blocker(g.blockerStrength, false, true), f));
                 }
                 else if (item.equals("blaster"))
                 {
@@ -1208,6 +1221,8 @@ public class LevelParser
         {
             Blocker an = (Blocker) item;
             a.put("strength", an.getStrength());
+            if (an.isZapOnly())
+                a.put("zapOnly", true);
             if (addClass)
                 a.put("class", "blocker");
         }
@@ -1280,6 +1295,9 @@ public class LevelParser
         {
             Dot dot = (Dot) item;
             a.put("color", dot.color);
+            if (dot.isRadioActive())
+                a.put("radioActive", true);
+            
             if (addClass)
                 a.put("class", "dot");
 
@@ -1297,6 +1315,9 @@ public class LevelParser
             Dot dot = bomb.getDot();
             
             a.put("color", dot.color);
+            if (dot.isRadioActive())
+                a.put("radioActive", true);
+            
             if (dot.isLetter())
             {
                 a.put("letter", dot.getLetter());
@@ -1434,6 +1455,9 @@ public class LevelParser
         if (g.getBlockers() != 0)
             p.put("blockers", g.getBlockers());
         
+        if (g.getZapBlockers() != 0)
+            p.put("zapBlockers", g.getZapBlockers());
+        
         if (g.getMaxMoves() != 0)
             p.put("maxMoves", g.getMaxMoves());
         
@@ -1489,6 +1513,9 @@ public class LevelParser
         p.put("blockerStrength", g.blockerStrength);
         p.put("animalType", g.animalType.getName());
         p.put("animalAction", g.animalAction.getName());
+        
+        if (g.radioActivePct > 0)
+            p.put("radioActivePct", g.radioActivePct);
         
         String rewards = g.rewardStrategies;
         if (rewards != null && rewards.length() > 0)
@@ -1558,7 +1585,12 @@ public class LevelParser
         else if (item instanceof DotBomb)
             a.push("dotBomb");
         else if (item instanceof Blocker)
-            a.push("blocker");
+        {
+            if (((Blocker) item).isZapOnly())
+                a.push("zapBlocker");
+            else
+                a.push("blocker");
+        }
         else if (item instanceof Bomb)
             a.push("bomb");
         else if (item instanceof Blaster)

@@ -6,6 +6,7 @@ import com.ait.lienzo.client.core.shape.IPrimitive;
 import com.ait.lienzo.client.core.shape.Layer;
 import com.ait.lienzo.client.core.shape.Line;
 import com.ait.lienzo.client.core.shape.Rectangle;
+import com.ait.lienzo.client.core.shape.Slice;
 import com.ait.lienzo.client.core.shape.Text;
 import com.ait.lienzo.client.core.shape.Triangle;
 import com.ait.lienzo.client.core.types.Point2D;
@@ -30,9 +31,6 @@ public class ModePalette extends Palette<Object>
     {
         super(40, ItemButton.SIZE, 6, 2);
         
-        ctx.backgroundLayer = new Layer();
-        add(ctx.backgroundLayer);
-
         ctx.dotLayer = new Layer();
         add(ctx.dotLayer);                
         
@@ -45,6 +43,7 @@ public class ModePalette extends Palette<Object>
         addButton(new SetController(), 0, 1);
         addButton(new Chestify(), 1, 1);
         addButton(new Stick(), 2, 1);
+        addButton(new RadioActive(), 3, 1);
     }
     
     private void addButton(Object cell, int col, int row)
@@ -55,78 +54,27 @@ public class ModePalette extends Palette<Object>
         
         int numCols = 1;
         int numRows = 1;
-        if (cell instanceof ConnectTeleportMode)
-        {            
-            double sz = ctx.cfg.size;
-            IPrimitive<?> shape = ((ConnectTeleportMode) cell).createShape(sz);
-            shape.setX(x);
-            shape.setY(y);
-            ctx.dotLayer.add(shape);
-        }
-        else if (cell instanceof DeleteSusan)
-        {
-            IPrimitive<?> shape = ((DeleteSusan) cell).createShape(ctx.cfg.size);
-            shape.setX(x);
-            shape.setY(y);
-            ctx.dotLayer.add(shape);
-        }
-        else if (cell instanceof ChangeIce)
-        {
-            IPrimitive<?> shape = ((ChangeIce) cell).createShape(ctx.cfg.size);
-            shape.setX(x);
-            shape.setY(y);
-            ctx.dotLayer.add(shape);
-        }
-        else if (cell instanceof DeleteItem)
-        {
-            IPrimitive<?> shape = ((DeleteItem) cell).createShape(ctx.cfg.size);
-            shape.setX(x);
-            shape.setY(y);
-            ctx.dotLayer.add(shape);
-        }
-        else if (cell instanceof RotateItem)
-        {
-            IPrimitive<?> shape = ((RotateItem) cell).createShape(ctx.cfg.size);
-            shape.setX(x);
-            shape.setY(y);
-            ctx.dotLayer.add(shape);
-        }
-        else if (cell instanceof Bombify)
-        {
-            IPrimitive<?> shape = ((Bombify) cell).createShape(ctx.cfg.size);
-            shape.setX(x);
-            shape.setY(y);
-            ctx.dotLayer.add(shape);
-        }
-        else if (cell instanceof Chestify)
-        {
-            IPrimitive<?> shape = ((Chestify) cell).createShape(ctx.cfg.size);
-            shape.setX(x);
-            shape.setY(y);
-            ctx.dotLayer.add(shape);
-        }
-        else if (cell instanceof SetController)
-        {
-            IPrimitive<?> shape = ((SetController) cell).createShape(ctx.cfg.size);
-            shape.setX(x);
-            shape.setY(y);
-            ctx.dotLayer.add(shape);
-        }
-        else if (cell instanceof Stick)
-        {
-            IPrimitive<?> shape = ((Stick) cell).createShape(ctx.cfg.size);
-            shape.setX(x);
-            shape.setY(y);
-            ctx.dotLayer.add(shape);
-        }
         
+        if (cell instanceof ModeBase)
+        {
+            IPrimitive<?> shape = ((ModeBase) cell).createShape(ctx.cfg.size);
+            shape.setX(x);
+            shape.setY(y);
+            ctx.dotLayer.add(shape);
+        }
+
         ItemButton b = new ItemButton(col, row, numCols, numRows, cell, ctx);
         b.setX((col + 0.5) * W);
         b.setY((row + 0.5) * W);
         m_list.add(b);
     }
     
-    public static class DeleteItem
+    public static interface ModeBase
+    {
+        public IPrimitive<?> createShape(int size);
+    }
+    
+    public static class DeleteItem implements ModeBase
     {
         public IPrimitive<?> createShape(int size)
         {
@@ -151,7 +99,7 @@ public class ModePalette extends Palette<Object>
         }
     }
     
-    public static class RotateItem
+    public static class RotateItem implements ModeBase
     {
         public IPrimitive<?> createShape(int sz)
         {
@@ -177,15 +125,54 @@ public class ModePalette extends Palette<Object>
         }
     }
     
-    public static class Stick
+    public static class Stick implements ModeBase
     {
         public IPrimitive<?> createShape(int size)
         {
             return Item.createStuckShape(size);
         }
     }
+    
+    public static class RadioActive implements ModeBase
+    {
+        public IPrimitive<?> createShape(int sz)
+        {
+            Group g = new Group();
+            
+            double r = sz * 0.4;
+            Circle c = new Circle(r);
+            c.setFillColor(ColorName.YELLOW);
+            c.setStrokeColor(ColorName.BLACK);
+            //c.setStrokeWidth(3);
+            g.add(c);
+            
+            double r2 = r * 0.8;
+            double a = Math.PI / 3;
+            
+            Slice s = new Slice(r2, 0, a, false);
+            s.setFillColor(ColorName.BLACK);
+            g.add(s);
+            
+            s = new Slice(r2, a*2, a*3, false);
+            s.setFillColor(ColorName.BLACK);
+            g.add(s);
+            
+            s = new Slice(r2, a*4, a*5, false);
+            s.setFillColor(ColorName.BLACK);
+            g.add(s);
+            
+            double r3 = r * 0.25;
+            c = new Circle(r3);
+            c.setFillColor(ColorName.BLACK);
+            c.setStrokeColor(ColorName.YELLOW);
+            //c.setStrokeWidth(2);
+            g.add(c);
+            
+            return g;
+        }
+    }
 
-    public static class Bombify
+    public static class Bombify implements ModeBase
     {
         public IPrimitive<?> createShape(int sz)
         {
@@ -193,7 +180,7 @@ public class ModePalette extends Palette<Object>
         }
     }
 
-    public static class Chestify
+    public static class Chestify implements ModeBase
     {
         public IPrimitive<?> createShape(int sz)
         {
@@ -201,7 +188,7 @@ public class ModePalette extends Palette<Object>
         }
     }
     
-    public static class SetController
+    public static class SetController implements ModeBase
     {
         public IPrimitive<?> createShape(int sz)
         {
@@ -209,7 +196,7 @@ public class ModePalette extends Palette<Object>
         }
     }
     
-    public static class DeleteSusan
+    public static class DeleteSusan implements ModeBase
     {
         public IPrimitive<?> createShape(int size)
         {
@@ -237,7 +224,7 @@ public class ModePalette extends Palette<Object>
         }
     }
     
-    public static class ChangeIce 
+    public static class ChangeIce implements ModeBase
     {
         public IPrimitive<?> createShape(int size)
         {

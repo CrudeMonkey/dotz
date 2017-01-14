@@ -5,6 +5,7 @@ import com.ait.lienzo.client.core.animation.IAnimation;
 import com.ait.lienzo.client.core.animation.IAnimationHandle;
 import com.ait.lienzo.client.core.animation.IndefiniteAnimation;
 import com.ait.lienzo.client.core.animation.LayerRedrawManager;
+import com.ait.lienzo.client.core.shape.FastLayer;
 import com.ait.lienzo.client.core.shape.Layer;
 import com.ait.lienzo.client.core.shape.Picture;
 import com.ait.lienzo.client.core.shape.Text;
@@ -35,13 +36,13 @@ public class StatsPanel extends LienzoPanel
 
     public StatsPanel(Context ctx)
     {
-        super(Math.max(ctx.cfg.numColumns, 8) * ctx.cfg.size, 50);
+        super(ctx.gridWidth, 50);
         
         this.ctx = ctx;
         
         setBackgroundColor(ColorName.ALICEBLUE);
         
-        m_layer = new Layer();
+        m_layer = new FastLayer();
         add(m_layer);
         
         m_moves = new Text("Moves: 0");

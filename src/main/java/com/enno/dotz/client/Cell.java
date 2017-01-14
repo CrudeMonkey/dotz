@@ -772,6 +772,9 @@ public abstract class Cell
             
         public void initGraphics(int col, int row, double x, double y, boolean addBorder)
         {
+            if (!ctx.isEditing)
+                return;
+            
             super.initGraphics(col, row, x, y);
             
             double sz = ctx.cfg.size;
@@ -823,6 +826,9 @@ public abstract class Cell
         @Override
         public void removeGraphics()
         {
+            if (!ctx.isEditing)
+                return;
+            
             super.removeGraphics();
             ctx.backgroundLayer.remove(m_shape);
         }
@@ -882,6 +888,9 @@ public abstract class Cell
             
         public void initGraphics(int col, int row, double x, double y, boolean addBorder)
         {
+            if (!ctx.isEditing)
+                return;
+            
             super.initGraphics(col, row, x, y);
             
             double sz = ctx.cfg.size;
@@ -933,6 +942,9 @@ public abstract class Cell
         @Override
         public void removeGraphics()
         {
+            if (!ctx.isEditing)
+                return;
+            
             super.removeGraphics();
             ctx.backgroundLayer.remove(m_shape);
         }

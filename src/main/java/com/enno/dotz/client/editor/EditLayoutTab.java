@@ -36,6 +36,8 @@ import com.enno.dotz.client.editor.ModePalette.ChangeIce;
 import com.enno.dotz.client.editor.ModePalette.Chestify;
 import com.enno.dotz.client.editor.ModePalette.DeleteItem;
 import com.enno.dotz.client.editor.ModePalette.DeleteSusan;
+import com.enno.dotz.client.editor.ModePalette.ModeBase;
+import com.enno.dotz.client.editor.ModePalette.RadioActive;
 import com.enno.dotz.client.editor.ModePalette.RotateItem;
 import com.enno.dotz.client.editor.ModePalette.SetController;
 import com.enno.dotz.client.editor.ModePalette.Stick;
@@ -163,8 +165,7 @@ public abstract class EditLayoutTab extends VLayout
         HLayout top = new HLayout();
         top.setMembersMargin(10);
         
-        ctx = new Context();
-        ctx.cfg = level;
+        ctx = new Context(true, level);
         
         m_grid = new EditGrid(isNew, ctx);
         
@@ -480,7 +481,7 @@ public abstract class EditLayoutTab extends VLayout
         void stop();
     }
     
-    public class ConnectTeleportMode implements LayoutMode
+    public class ConnectTeleportMode implements LayoutMode, ModeBase
     {
         private HandlerRegistration m_mouseDownHandler;
         private HandlerRegistration m_mouseUpHandler;
@@ -698,8 +699,10 @@ public abstract class EditLayoutTab extends VLayout
             LayerRedrawManager.get().schedule(m_layer);
         }
 
-        public IPrimitive<?> createShape(double sz)
+        public IPrimitive<?> createShape(int size)
         {
+            double sz = size;
+            
             Group g = new Group();
             
             double s3 = sz / 3;
@@ -966,6 +969,10 @@ public abstract class EditLayoutTab extends VLayout
             {
                 stick(col, row);
             }
+            else if (m_operation instanceof RadioActive)
+            {
+                radioActify(col, row);
+            }
             else if (m_operation instanceof ChangeIce)
             {
                 changeIce(col, row);
@@ -1115,6 +1122,22 @@ public abstract class EditLayoutTab extends VLayout
             
             Item newItem = cell.item.copy();
             newItem.setStuck(!cell.item.isStuck());
+            removeItem(cell);
+            addItem(cell, newItem);
+        }
+
+        private void radioActify(int col, int row)
+        {
+            GridState state = ctx.state;  
+            Cell cell = state.cell(col, row);
+            if (cell.item == null || !(cell.item instanceof Dot || cell.item instanceof DotBomb))
+                return;
+            
+            Item newItem = cell.item.copy();
+            
+            Dot dot = cell.item instanceof Dot ? (Dot) newItem : ((DotBomb) newItem).getDot();
+            
+            dot.setRadioActive(!dot.isRadioActive());
             removeItem(cell);
             addItem(cell, newItem);
         }
@@ -1275,6 +1298,8 @@ public abstract class EditLayoutTab extends VLayout
             if (keepItem)
                 addItem(newCell, item);
             
+            m_grid.setBorders();
+            
             m_grid.draw();        
         }        
         
@@ -1344,7 +1369,7 @@ public abstract class EditLayoutTab extends VLayout
                     Dot dot = (Dot) cell.item;
                     removeItem(cell);
                     
-                    Dot newDot = new Dot(dot.color, isLetterMode ? Generator.nextLetter(m_rnd) : null, false);
+                    Dot newDot = new Dot(dot.color, isLetterMode ? Generator.nextLetter(m_rnd) : null, dot.isStuck(), dot.isRadioActive());
                     addItem(cell, newDot);
                 }
                 else if (cell.item instanceof DotBomb)
@@ -1353,8 +1378,8 @@ public abstract class EditLayoutTab extends VLayout
                     removeItem(cell);
                     
                     Dot dot = bomb.getDot();
-                    Dot newDot = new Dot(dot.color, isLetterMode ? Generator.nextLetter(m_rnd) : null, cell.item.isStuck());
-                    addItem(cell, new DotBomb(newDot, bomb.getStrength(), dot.isStuck()));
+                    Dot newDot = new Dot(dot.color, isLetterMode ? Generator.nextLetter(m_rnd) : null, dot.isStuck(), dot.isRadioActive());
+                    addItem(cell, new DotBomb(newDot, bomb.getStrength(), bomb.isStuck()));
                 }
             }
         }

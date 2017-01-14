@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ait.lienzo.client.core.shape.Group;
+import com.ait.lienzo.client.core.shape.Layer;
 import com.ait.lienzo.client.core.shape.Rectangle;
 import com.ait.lienzo.client.widget.LienzoPanel;
 import com.ait.lienzo.shared.core.types.Color;
@@ -26,9 +27,13 @@ public abstract class Palette<T> extends LienzoPanel
         
         m_buttonSize = buttonSize;
         
-        ctx = new Context();
-        ctx.cfg = new Config();
-        ctx.cfg.size = size;
+        Config cfg = new Config();
+        cfg.size = size;
+        
+        ctx = new Context(true, cfg);
+
+        ctx.backgroundLayer = new Layer();
+        add(ctx.backgroundLayer);    
         
         addMouseDownHandler(new MouseDownHandler()
         {            
@@ -43,7 +48,7 @@ public abstract class Palette<T> extends LienzoPanel
                 
                 selectOption(col, row);
             }
-        });
+        });            
     }
     
     protected void selectOption(int col, int row)

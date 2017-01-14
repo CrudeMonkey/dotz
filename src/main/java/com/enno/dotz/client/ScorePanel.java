@@ -54,13 +54,13 @@ public class ScorePanel extends LienzoPanel
 
     public ScorePanel(Context ctx)
     {
-        super(Math.max(ctx.cfg.numColumns, 8) * ctx.cfg.size, ROW_HEIGHT);
-        setBackgroundColor(ColorName.ALICEBLUE);
+        super(ctx.gridWidth, ROW_HEIGHT);
         
         this.ctx = ctx;
-        
-        m_width = Math.max(ctx.cfg.numColumns, 8) * ctx.cfg.size;
-        
+        m_width = ctx.gridWidth;
+
+        setBackgroundColor(ColorName.ALICEBLUE);
+
         m_layer = new Layer();
         add(m_layer);
         
@@ -215,6 +215,10 @@ public class ScorePanel extends LienzoPanel
         need = goal.getBlockers();
         if (need != 0)
             m_list.add(new BlockerGoal(need, ctx));
+        
+        need = goal.getZapBlockers();
+        if (need != 0)
+            m_list.add(new ZapBlockerGoal(need, ctx));
         
         need = goal.getLasers();
         if (need != 0)
@@ -887,7 +891,7 @@ public class ScorePanel extends LienzoPanel
         
         protected IPrimitive<?> createShape()
         {
-            Blocker sg = new Blocker(1, false);
+            Blocker sg = new Blocker(1, false, false);
             sg.setContext(ctx);
             return sg.createShape(SHAPE_SIZE * 0.8); 
         }
@@ -905,6 +909,46 @@ public class ScorePanel extends LienzoPanel
             else
             {
                 int got = ctx.score.getExplodedBlockers();
+                if (got >= m_goal)
+                    setCompleted();
+                else
+                    setText(got + " / " + m_goal);
+            }
+        }
+    }    
+    
+    
+    public static class ZapBlockerGoal extends GoalItem
+    {
+        private int m_goal;
+        
+        public ZapBlockerGoal(int need, Context ctx)
+        {
+            super(ctx);
+            
+            m_goal = need;
+        }
+        
+        protected IPrimitive<?> createShape()
+        {
+            Blocker sg = new Blocker(1, false, true);
+            sg.setContext(ctx);
+            return sg.createShape(SHAPE_SIZE * 0.8); 
+        }
+
+        protected void updateText()
+        {
+            if (m_goal == Goal.ALL)
+            {
+                int gen = ctx.score.getZapBlockersInGrid();
+                if (gen > 0)
+                    setText("" + gen);
+                else 
+                    setCompleted();
+            }
+            else
+            {
+                int got = ctx.score.getExplodedZapBlockers();
                 if (got >= m_goal)
                     setCompleted();
                 else

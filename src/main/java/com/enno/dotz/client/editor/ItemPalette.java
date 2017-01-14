@@ -38,9 +38,6 @@ public class ItemPalette extends Palette<Object>
     public ItemPalette()
     {
         super(40, ItemButton.SIZE, 7, 6);
-        
-        ctx.backgroundLayer = new Layer();
-        add(ctx.backgroundLayer);
 
         ctx.dotLayer = new Layer();
         add(ctx.dotLayer);                
@@ -75,10 +72,11 @@ public class ItemPalette extends Palette<Object>
         
         addButton(new IcePick(), 0, 5);
         addButton(new Striped(0, false), 1, 5);
-        addButton(new Blocker(1, false), 2, 5);
-        addButton(new Cog(), 3, 5);
-        addButton(new Blaster(true, false), 4, 5);
-        addButton(new Bomb(), 5, 5);
+        addButton(new Blocker(1, false, false), 2, 5);
+        addButton(new Blocker(1, false, true), 3, 5);
+        addButton(new Cog(), 4, 5);
+        addButton(new Blaster(true, false), 5, 5);
+        addButton(new Bomb(), 6, 5);
     }
     
     private void addButton(Object cell, int col, int row)

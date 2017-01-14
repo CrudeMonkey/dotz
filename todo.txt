@@ -21,7 +21,7 @@
 * option: only straight connections
 * should fire ignore rockets? or maybe ignite them?
 * DONE: row/column Blaster - similar to wrapped explosion, but triggered by clicking - as in Toy Blast
-* Jelly Splash: ignite Wrapped Dot at end of chain
+* Jelly Splash: ignite Wrapped Dot (or Bomb) at end of chain
 * option: Show Grid Lines
 * change Animal chaining in Word Mode 
   - When first item is an Animal, only wild cards and dots of the same color can be connected (and there must be at least 5).

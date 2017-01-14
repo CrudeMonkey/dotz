@@ -26,13 +26,12 @@ public class BoostPanel extends MXHBox
     //protected static final int SIZE = 50;
     
     private BoostPalette m_palette;
-    private Context ctx;
 
     public BoostPanel(Context ctx)
     {
-        this.ctx = ctx;
+        setWidth(ctx.gridWidth);
         
-        m_palette = new BoostPalette(ctx.cfg, ctx.cfg.size);
+        m_palette = new BoostPalette(ctx, ctx.cfg, ctx.cfg.size);
         addMember(m_palette);
         setAlign(Alignment.CENTER);
     }
@@ -48,9 +47,9 @@ public class BoostPanel extends MXHBox
         private ConnectMode m_connectMode;
         private double m_size;
         
-        public BoostPalette(Config level, int size)
+        public BoostPalette(Context ctx, Config level, int size)
         {
-            super((int) (0.8 * size), (int) size, 8, 1);
+            super((int) (0.8 * size), (int) size, (ctx.gridWidth / size), 1);
             m_size = size;
             
             m_active = false;

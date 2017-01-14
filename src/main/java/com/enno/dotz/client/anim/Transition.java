@@ -248,4 +248,12 @@ public abstract class Transition implements IAnimationCallback
             }
         }
     }
+    
+    public static class RadioActiveTransition extends Transition
+    {
+        public RadioActiveTransition(double x, double y)
+        {
+            super(x, y, x, y, null);
+        }
+    }
 }

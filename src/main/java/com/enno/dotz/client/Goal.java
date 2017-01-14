@@ -23,6 +23,7 @@ public class Goal
     protected int m_birds;
     protected int m_dominoes;
     protected int m_blockers;
+    protected int m_zapBlockers;
     protected int m_bubbles;
     
     protected int m_score;
@@ -199,6 +200,16 @@ public class Goal
     public int getBlockers()
     {
         return m_blockers;
+    }
+
+    public void setZapBlockers(int goal)
+    {
+        m_zapBlockers = goal;
+    }
+    
+    public int getZapBlockers()
+    {
+        return m_zapBlockers;
     }
 
     public void setLasers(int goal)
