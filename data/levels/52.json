@@ -1,4 +1,5 @@
 {
+  "id": 52,
   "name": "Caged Animals",
   "creator": "Enno",
   "description": "",
@@ -27,12 +28,12 @@
   ],
   "items": [
     "........",
-    ".??..??.",
-    ".?....??",
-    "??.??.?.",
-    ".?.??.??",
-    "??....?.",
-    ".??..??.",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
     "........"
   ],
   "teleporters": [
@@ -42,53 +43,63 @@
     {"from":[5,5],"to":[4,4]}
   ],
   "doors": [
-        {
-      "p": [
-        1,
-        3
-      ],
-      "strength": 1
-    },
-        {
-      "p": [
-        6,
-        3
-      ],
-      "strength": 1
-    },
-        {
-      "p": [
-        1,
-        4
-      ],
-      "strength": 1
-    },
-        {
-      "p": [
-        6,
-        4
-      ],
-      "strength": 1
-    }
+    {"p":[1,3],"strength":1},
+    {"p":[6,3],"strength":1},
+    {"p":[1,4],"strength":1},
+    {"p":[6,4],"strength":1}
   ],
-  "lazySusans": [  ],
   "animals": [
-    {"p":[2,2],"strength":20,"color":2,"type":"Default"},
-    {"p":[5,2],"strength":20,"color":2,"type":"Default"},
-    {"p":[2,5],"strength":20,"color":2,"type":"Default"},
-    {"p":[5,5],"strength":20,"color":2,"type":"Default"}
+    {"strength":20,"color":2,"type":"Default","p":[2,2]},
+    {"strength":20,"color":2,"type":"Default","p":[5,2]},
+    {"strength":20,"color":2,"type":"Default","p":[2,5]},
+    {"strength":20,"color":2,"type":"Default","p":[5,5]}
   ],
-  "knights": [  ],
-  "clocks": [  ],
+  "randoms": [
+    {"p":[1,1]},
+    {"p":[2,1]},
+    {"p":[5,1]},
+    {"p":[6,1]},
+    {"p":[1,2]},
+    {"p":[6,2]},
+    {"p":[7,2]},
+    {"p":[0,3]},
+    {"p":[3,3]},
+    {"p":[4,3]},
+    {"p":[3,4]},
+    {"p":[4,4]},
+    {"p":[7,4]},
+    {"p":[0,5]},
+    {"p":[1,5]},
+    {"p":[6,5]},
+    {"p":[1,6]},
+    {"p":[2,6]},
+    {"p":[5,6]},
+    {"p":[6,6]}
+  ],
   "generator": {
+    "generateLetters": false,
+    "swapMode": false,
+    "clickMode": false,
+    "rollMode": false,
+    "diagonalMode": false,
+    "dominoMode": false,
+    "slipperyAnchors": false,
+    "minChainLength": 2,
     "seed": -1,
     "fireGrowthRate": 1,
     "maxAnchors": 3,
+    "maxDomino": 9,
     "initialDotsOnly": true,
     "animalStrength": 10,
     "knightStrength": 3,
     "clockStrength": 10,
+    "chestStrength": 1,
+    "bombStrength": 9,
+    "blockerStrength": 2,
     "animalType": "Default",
+    "animalAction": "Default",
+    "icePickRadius": 3,
+    "dropRadius": 3,
     "freq": [
       [20,"dot",0],
       [20,"dot",1],
@@ -100,5 +111,6 @@
   "goals": {
     "dots": {    }
   },
-  "id": 52
+  "boosts": {  },
+  "lastModified": "1484449756887"
 }

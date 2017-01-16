@@ -304,7 +304,7 @@ public class DragConnectMode extends ConnectMode
 
     protected void updateDragLine(int col, int row)
     {
-        if (col < 0 || col >= cfg.numColumns || row < 0 || row > cfg.numRows)
+        if (col < 0 || col >= cfg.numColumns || row < 0 || row >= cfg.numRows)
             return;
                             
         if (col == m_lastCellCol && row == m_lastCellRow)
@@ -962,7 +962,7 @@ public class DragConnectMode extends ConnectMode
                 {
                     Cell cell = m_state.cell(col, row);
                     Item item = cell.item;
-                    if (item != null && !exploded.contains(cell) && cell.canExplode(color))
+                    if (item != null && !exploded.contains(cell) && !cell.isLocked() && cell.canExplode(color))
                     {
                         explode(cell, color, exploded, explodies);
                     }

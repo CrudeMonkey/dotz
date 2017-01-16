@@ -27,16 +27,15 @@
     "........"
   ],
   "items": [
-    "????????",
-    "????????",
-    "??.??.??",
-    "????????",
-    "????????",
-    "??.??.??",
-    "????????",
-    "????????"
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
   ],
-  "teleporters": [  ],
   "doors": [
     {"p":[1,1],"strength":1,"direction":"N","rotate":1},
     {"p":[2,1],"strength":1,"direction":"E","rotate":1},
@@ -81,26 +80,72 @@
     {"p":[6,6],"clockwise":false},
     {"p":[0,0],"clockwise":false}
   ],
-  "animals": [
-    {"p":[2,2],"strength":20,"color":2,"type":"Follow"},
-    {"p":[5,2],"strength":20,"color":3,"type":"Follow"},
-    {"p":[2,5],"strength":20,"color":0,"type":"Follow"},
-    {"p":[5,5],"strength":20,"color":4,"type":"Follow"}
+  "dots": [
+    {"color":4,"p":[0,0]},
+    {"color":4,"p":[1,0]},
+    {"color":2,"p":[6,0]},
+    {"color":2,"p":[7,0]},
+    {"color":4,"p":[0,1]},
+    {"color":4,"p":[1,1]},
+    {"color":2,"p":[6,1]},
+    {"color":2,"p":[7,1]},
+    {"color":1,"p":[0,6]},
+    {"color":1,"p":[1,6]},
+    {"color":0,"p":[6,6]},
+    {"color":0,"p":[7,6]},
+    {"color":1,"p":[0,7]},
+    {"color":1,"p":[1,7]},
+    {"color":0,"p":[6,7]},
+    {"color":0,"p":[7,7]}
   ],
-  "knights": [  ],
-  "clocks": [  ],
-  "lasers": [  ],
-  "mirrors": [  ],
-  "rockets": [  ],
+  "animals": [
+    {"strength":20,"color":2,"type":"Follow","p":[2,2]},
+    {"strength":20,"color":3,"type":"Follow","p":[5,2]},
+    {"strength":20,"color":0,"type":"Follow","p":[2,5]},
+    {"strength":20,"color":4,"type":"Follow","p":[5,5]}
+  ],
+  "randoms": [
+    {"p":[2,0]},
+    {"p":[3,0]},
+    {"p":[4,0]},
+    {"p":[5,0]},
+    {"p":[0,2]},
+    {"p":[7,2]},
+    {"p":[0,3]},
+    {"p":[7,3]},
+    {"p":[0,4]},
+    {"p":[7,4]},
+    {"p":[0,5]},
+    {"p":[7,5]},
+    {"p":[2,7]},
+    {"p":[3,7]},
+    {"p":[4,7]},
+    {"p":[5,7]}
+  ],
   "generator": {
+    "generateLetters": false,
+    "swapMode": false,
+    "clickMode": false,
+    "rollMode": false,
+    "diagonalMode": false,
+    "dominoMode": false,
+    "slipperyAnchors": false,
+    "minChainLength": 2,
     "seed": -1,
     "fireGrowthRate": 1,
     "maxAnchors": 3,
+    "maxDomino": 9,
     "initialDotsOnly": true,
     "animalStrength": 10,
     "knightStrength": 3,
     "clockStrength": 10,
+    "chestStrength": 1,
+    "bombStrength": 9,
+    "blockerStrength": 2,
     "animalType": "Default",
+    "animalAction": "Default",
+    "icePickRadius": 3,
+    "dropRadius": 3,
     "freq": [
       [25,"dot",0],
       [25,"dot",2],
@@ -111,8 +156,9 @@
   "goals": {
     "dots": {    },
     "animals": -1,
-    "maxMoves": 32,
+    "maxMoves": 45,
     "ice": -1
   },
-  "lastModified": "1445539710408"
+  "boosts": {  },
+  "lastModified": "1484448284697"
 }

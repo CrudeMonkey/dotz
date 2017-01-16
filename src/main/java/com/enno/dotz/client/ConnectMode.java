@@ -359,6 +359,7 @@ public abstract class ConnectMode
                             Blaster newBlaster = new Blaster(b.isVertical(), false);
                             newBlaster.arm();
                             newBlaster.setWide(true);
+                            newBlaster.setBothWays(true);
                             newBlaster.init(ctx);
                             newBlaster.addShapeToLayer(ctx.dotLayer);   
                             newBlaster.moveShape(m_state.x(cell.col), m_state.y(cell.row));
@@ -413,6 +414,7 @@ public abstract class ConnectMode
                             Blaster newBlaster = new Blaster(b.isVertical(), false);
                             newBlaster.arm();
                             newBlaster.setWide(true);
+                            newBlaster.setBothWays(true);                            
                             newBlaster.init(ctx);
                             newBlaster.addShapeToLayer(ctx.dotLayer);   
                             newBlaster.moveShape(m_state.x(cell.col), m_state.y(cell.row));
@@ -492,7 +494,7 @@ public abstract class ConnectMode
                     continue;
                 
                 Cell c = m_state.cell(col, row);
-                if (!isReplacableDot(c.item))
+                if (c.isLocked() || !isReplacableDot(c.item))
                     continue;
                 
                 list.add(c);

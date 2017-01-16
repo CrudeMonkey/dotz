@@ -27,14 +27,14 @@
     "........"
   ],
   "items": [
-    "????????",
-    ".??????.",
-    "????????",
-    "????.???",
-    "????????",
-    "???.???.",
-    "..????..",
-    "?.????.?"
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
   ],
   "doors": [
     {"p":[2,1],"strength":1,"direction":"N","rotate":-1},
@@ -63,42 +63,52 @@
     {"p":[7,7],"strength":1,"direction":"S"}
   ],
   "keys": [
-        {
-      "p": [
-        0,
-        1
-      ]
-    },
-        {
-      "p": [
-        7,
-        1
-      ]
-    },
-        {
-      "p": [
-        4,
-        3
-      ]
-    },
-        {
-      "p": [
-        3,
-        5
-      ]
-    },
-        {
-      "p": [
-        7,
-        5
-      ]
-    }
+    {"p":[0,1]},
+    {"p":[7,1]},
+    {"p":[4,3]},
+    {"p":[3,5]},
+    {"p":[7,5]}
+  ],
+  "randoms": [
+    {"p":[0,0]},
+    {"p":[1,0]},
+    {"p":[2,0]},
+    {"p":[3,0]},
+    {"p":[4,0]},
+    {"p":[5,0]},
+    {"p":[6,0]},
+    {"p":[7,0]},
+    {"p":[1,1]},
+    {"p":[4,1]},
+    {"p":[0,2]},
+    {"p":[2,2]},
+    {"p":[3,2]},
+    {"p":[5,2]},
+    {"p":[7,2]},
+    {"p":[0,3]},
+    {"p":[1,3]},
+    {"p":[6,3]},
+    {"p":[7,3]},
+    {"p":[1,4]},
+    {"p":[2,4]},
+    {"p":[6,4]},
+    {"p":[0,5]},
+    {"p":[1,5]},
+    {"p":[6,5]},
+    {"p":[4,6]},
+    {"p":[5,6]},
+    {"p":[3,7]},
+    {"p":[5,7]}
   ],
   "generator": {
     "generateLetters": false,
     "swapMode": false,
+    "clickMode": false,
     "rollMode": false,
+    "diagonalMode": false,
     "dominoMode": false,
+    "slipperyAnchors": false,
+    "minChainLength": 2,
     "seed": 712043368,
     "fireGrowthRate": 1,
     "maxAnchors": 3,
@@ -107,8 +117,13 @@
     "animalStrength": 10,
     "knightStrength": 3,
     "clockStrength": 10,
+    "chestStrength": 1,
     "bombStrength": 9,
+    "blockerStrength": 2,
     "animalType": "Default",
+    "animalAction": "Default",
+    "icePickRadius": 3,
+    "dropRadius": 3,
     "freq": [
       [15.6,"dot",0],
       [15.6,"dot",1],
@@ -124,5 +139,5 @@
     "doors": -1
   },
   "boosts": {  },
-  "lastModified": "1448835185239"
+  "lastModified": "1484448954567"
 }

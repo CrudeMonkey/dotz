@@ -144,7 +144,7 @@ public abstract class Cell
         return item.canGrowFire();
     }
 
-    public boolean canExplodeNextTo(Collection<Cell> cells)
+    public boolean canExplodeNextTo(Collection<Cell> cells, Integer color)
     {
         if (item == null)
             return false;
@@ -1250,22 +1250,47 @@ public abstract class Cell
         }
         
         @Override
-        public boolean canExplodeNextTo(Collection<Cell> cells)
+        public boolean canExplodeNextTo(Collection<Cell> cells, Integer color)
         {
             if (m_blinking && m_strength > 0)
                 return false;
             
             if (m_strength == 0)
             {
-                return super.canExplodeNextTo(cells);
+                return super.canExplodeNextTo(cells, color);
             }
             
-            if (m_neighbor != null)
+            if (hasDirection())
             {
-                return cells.contains(ctx.state.cell(m_neighbor.col, m_neighbor.row));
+                if (m_neighbor == null)
+                    return false;
+                
+                Cell cell = ctx.state.cell(m_neighbor.col, m_neighbor.row);
+                if (!cells.contains(cell))
+                    return false;
+                
+                return matchesColor(color);
             }
             else
-                return m_direction == Direction.NONE;
+            {
+                return matchesColor(color);
+            }
+        }
+        
+        private boolean matchesColor(Integer color)
+        {
+            if (color == null)
+                return true;
+            
+            if (item == null)
+                return true;
+            
+            // If the Door has an item with a color, it has to match if color != null
+            Integer c = item.getColor();
+            if (c == null || c == Config.WILD_ID)
+                return true;
+            
+            return c.equals(color);                
         }
         
         @Override
@@ -1322,6 +1347,8 @@ public abstract class Cell
                 {
                     ctx.score.explodedDoor();                    
                     ctx.doorLayer.remove(m_shape);
+                    
+                    super.explode(color, chainSize);
                 }
                 
                 updateStrength();
@@ -1547,13 +1574,13 @@ public abstract class Cell
         }
 
       @Override
-      public boolean canExplodeNextTo(Collection<Cell> cells)
+      public boolean canExplodeNextTo(Collection<Cell> cells, Integer color)
       {
           if (m_blinking && m_strength > 0)
               return false;
           
           if (m_strength == 0)
-              return super.canExplodeNextTo(cells);
+              return super.canExplodeNextTo(cells, color);
           
           return false;
       }

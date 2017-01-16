@@ -1465,7 +1465,8 @@ public class GridState
             }
         }
         
-        explodeNeighbors(exploded);
+        // Doors with colored item, must much the color
+        explodeNeighbors(exploded, action.color);
     }
     
     private void debombify(CellList chain)
@@ -1879,13 +1880,18 @@ public class GridState
         else
             return a.row == b.row - 1 ? Direction.SOUTH : Direction.NORTH;
     }
-    
+
     protected void explodeNeighbors(Collection<Cell> cells)
+    {
+        explodeNeighbors(cells, null);
+    }
+    
+    protected void explodeNeighbors(Collection<Cell> cells, Integer color)
     {
         Set<Cell> neighbors = new Neighbors(cells);
         for (Cell c : neighbors)
         {
-            if (c.canExplodeNextTo(cells))
+            if (c.canExplodeNextTo(cells, color))
             {
                 c.explode(null, 0);
             }
