@@ -1,0 +1,72 @@
+{
+  "name": "Test Shuffle 1",
+  "creator": "Enno",
+  "description": "",
+  "folder": "Test",
+  "numColumns": 3,
+  "numRows": 3,
+  "grid": [
+    "...",
+    "...",
+    "..."
+  ],
+  "ice": [
+    "...",
+    "...",
+    "..."
+  ],
+  "items": [
+    "...",
+    "...",
+    "..."
+  ],
+  "randoms": [
+    {"p":[0,0]},
+    {"p":[1,0]},
+    {"p":[2,0]},
+    {"p":[0,1]},
+    {"p":[1,1]},
+    {"p":[2,1]},
+    {"p":[0,2]},
+    {"p":[1,2]},
+    {"p":[2,2]}
+  ],
+  "generator": {
+    "generateLetters": false,
+    "swapMode": false,
+    "clickMode": false,
+    "rollMode": false,
+    "diagonalMode": false,
+    "dominoMode": false,
+    "slipperyAnchors": false,
+    "minChainLength": 2,
+    "seed": -1,
+    "fireGrowthRate": 1,
+    "maxAnchors": 3,
+    "maxDomino": 9,
+    "initialDotsOnly": false,
+    "animalStrength": 10,
+    "knightStrength": 3,
+    "clockStrength": 10,
+    "chestStrength": 1,
+    "bombStrength": 9,
+    "blockerStrength": 2,
+    "animalType": "Default",
+    "animalAction": "Default",
+    "icePickRadius": 3,
+    "dropRadius": 3,
+    "freq": [
+      [20,"dot",0],
+      [20,"dot",1],
+      [20,"dot",2],
+      [20,"dot",3],
+      [20,"dot",4]
+    ]
+  },
+  "goals": {
+    "dots": {    }
+  },
+  "boosts": {  },
+  "id": 299,
+  "lastModified": "1484593126301"
+}

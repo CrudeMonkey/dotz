@@ -107,17 +107,19 @@ public abstract class ConnectMode
         {
             stop();
 
-            Sound.RESHUFFLE.play();
-            
             ctx.dotLayer.remove(cell.item.shape);
             cell.item = null;
             
-            ctx.state.reshuffle();
-                        
-            m_state.processChain(new Runnable() {
+            ctx.state.reshuffle(new Runnable() {
+                @Override
                 public void run()
                 {
-                    start(); // next move
+                    m_state.processChain(new Runnable() {
+                        public void run()
+                        {
+                            start(); // next move
+                        }
+                    });
                 }
             });
             
@@ -618,6 +620,7 @@ public abstract class ConnectMode
         else if (item instanceof YinYang)
         {
             m_specialMode = new ReshuffleMode(item, ctx, this, removeItem);
+            m_specialMode.done(null, false);
         }
         else if (item instanceof Key)
         {

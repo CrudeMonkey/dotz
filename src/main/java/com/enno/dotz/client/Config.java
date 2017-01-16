@@ -41,6 +41,7 @@ public class Config
     public double explosionDuration = 250;
     public double growFireDuration = 500;           // grow fire & move animals
     public double lazySusanTurnDuration = growFireDuration / 2;
+    public double reshuffleDuration = 600;
         
     public Generator generator;
     
@@ -48,6 +49,7 @@ public class Config
     public Boosts boosts;
     
     public GridState grid;
+
     
     public Config()
     {

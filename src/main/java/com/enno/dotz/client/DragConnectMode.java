@@ -1015,12 +1015,16 @@ public class DragConnectMode extends ConnectMode
         public void done(Cell cell, boolean alwaysCancel)
         {           
             cancel();
-            
-            Sound.RESHUFFLE.play();            
-            ctx.state.reshuffle();
-            
-            removeStartItem();
-            process();
+                      
+            ctx.state.reshuffle(new Runnable() {
+                @Override
+                public void run()
+                {
+
+                    removeStartItem();
+                    process();
+                }
+            });
         }
     }
     

@@ -43,26 +43,18 @@ import com.enno.dotz.client.anim.TransitionList;
 import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Bomb;
 import com.enno.dotz.client.item.Clock;
-import com.enno.dotz.client.item.ColorBomb;
 import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.DotBomb;
 import com.enno.dotz.client.item.Explody;
-import com.enno.dotz.client.item.Fire;
 import com.enno.dotz.client.item.Item;
-import com.enno.dotz.client.item.Knight;
 import com.enno.dotz.client.item.Laser;
 import com.enno.dotz.client.item.LazySusan;
 import com.enno.dotz.client.item.RandomItem;
-import com.enno.dotz.client.item.Rocket;
 import com.enno.dotz.client.item.Wild;
-import com.enno.dotz.client.item.YinYang;
 import com.enno.dotz.client.util.CallbackChain;
 import com.enno.dotz.client.util.CallbackChain.Callback;
-import com.enno.dotz.client.util.CollectionsUtils;
 import com.enno.dotz.client.util.Debug;
-import com.smartgwt.client.util.BooleanCallback;
-import com.smartgwt.client.util.SC;
 
 public class GridState
 {
@@ -83,6 +75,8 @@ public class GridState
     
     public EndOfLevel endOfLevel;
 
+    private Random m_reshuffleRandom;
+
     public GridState(int numColumns, int numRows)
     {
         this.numRows = numRows;
@@ -95,6 +89,8 @@ public class GridState
     {
         this.ctx = ctx;
         this.cfg = ctx.cfg;
+        
+        m_reshuffleRandom = new Random(ctx.generator.getUsedSeed());
         
         for (int row = 0; row < numRows; row++)
         {
@@ -260,7 +256,7 @@ public class GridState
             processChain2(action, nextMoveCallback);
     }
     
-    private Callback explodeLoop(boolean checkClocks, boolean isEndOfLevel)
+    Callback explodeLoop(boolean checkClocks, boolean isEndOfLevel)
     {
         return new ExplodeLoop(checkClocks, isEndOfLevel);
     }
@@ -424,6 +420,7 @@ public class GridState
     
     private void checkEndOfLevel(Runnable nextMoveCallback)
     {
+        Reshuffle reshuffle;
         if (ctx.scorePanel.isGoalReached())
         {
             final int time = ctx.statsPanel.elapsedTime();            
@@ -463,12 +460,38 @@ public class GridState
             Sound.OUT_OF_MOVES.play();
             endOfLevel.failed("A bomb went off.");
         }
-        else if (mustReshuffle())
+        else if ((reshuffle = mustReshuffle()) != null)
         {
-            reshuffle(nextMoveCallback);
+            reshuffle.reshuffle(nextMoveCallback, new Runnable() {
+                @Override
+                public void run()
+                {
+                    Sound.OUT_OF_MOVES.play();
+                    endOfLevel.failed("No possible moves left. Reshuffle failed.");
+                }
+            });
         }
         else
             nextMoveCallback.run();
+    }
+    
+    protected Reshuffle mustReshuffle()
+    {
+        if (ctx.generator.generateLetters)
+            return null;
+        
+        Reshuffle r = ctx.generator.swapMode ? new ReshuffleSwap(ctx, m_reshuffleRandom) : new Reshuffle(ctx, m_reshuffleRandom);
+        if (r.mustReshuffle())            
+            return r;
+        
+        return null;
+    }
+    
+    /** User clicked YinYang */
+    public void reshuffle(Runnable nextCallback)
+    {
+        Reshuffle r = ctx.generator.swapMode ? new ReshuffleSwap(ctx, m_reshuffleRandom) : new Reshuffle(ctx, m_reshuffleRandom);
+        r.forceReshuffle(nextCallback);
     }
     
     /**
@@ -568,338 +591,7 @@ public class GridState
         ctx.doorLayer.draw();
     }
     
-    protected void reshuffle(final Runnable nextMoveCallback)
-    {
-        SC.ask("You're stuck. Reshuffle?", new BooleanCallback()
-        {            
-            @Override
-            public void execute(Boolean ok)
-            {
-                if (Boolean.TRUE.equals(ok))
-                {
-                    if (!doReshuffle(50))
-                    {
-                        reshuffle(nextMoveCallback);
-                    }
-                    else
-                    {
-                        if (ctx.generator.swapMode)
-                        {
-                            // Do explodeLoop after reshuffle                
-                            CallbackChain chain = new CallbackChain();
-                            chain.add(transitions());
-                            chain.add(explodeLoop(false, false)); // don't check clocks
-                            chain.add(new Callback() {
-                                @Override
-                                public void run()
-                                {
-                                    if (mustReshuffle())
-                                        reshuffle(nextMoveCallback);
-                                    else
-                                        nextMoveCallback.run();
-                                }
-                            });
-                            chain.run();
-                        }
-                        else
-                        {
-                            nextMoveCallback.run();
-                        }
-                    }
-                }
-                else
-                {
-                    nextMoveCallback.run(); //TODO cancel
-                }
-            }
-        });
-    }
-    
-    // When YinYang is clicked
-    public void reshuffle()
-    {
-        doReshuffle(50); //TODO if false, then can't do it
-    }
-    
-    /**
-     * 
-     * @param loop
-     * 
-     * @return Whether it succeeded
-     */
-    protected boolean doReshuffle(int loop)
-    {
-        if (loop < 0)
-            return false;
-        
-        List<Pt> pts = new ArrayList<Pt>();
-        for (int row = 0; row < numRows; row++)
-        {
-            for (int col = 0; col < numColumns; col++)
-            {
-                Cell cell = cell(col, row);
-                if (cell.isLocked())            // Don't reshuffle items stuck in Doors
-                    continue;
-                
-                Item item = cell.item;
-                if (item != null && item.canReshuffle())
-                    pts.add(new Pt(col, row));
-            }
-        }
-        
-        List<Pt> pts2 = new ArrayList<Pt>();
-        pts2.addAll(pts);
-        CollectionsUtils.shuffle(pts2);
-        
-        for (int i = 0, n = pts.size(); i < n; i++)
-        {
-            Pt a = pts.get(i);
-            Pt b = pts2.get(i);
-            if (a != b)
-            {
-                Item ia = cell(a.col, a.row).item;
-                Item ib = cell(b.col, b.row).item;
-                cell(a.col, a.row).item = ib;
-                cell(b.col, b.row).item = ia;
-                ia.moveShape(x(b.col), y(b.row));
-                ib.moveShape(x(a.col), y(a.row));
-            }
-        }
-        
-        if (mustReshuffle())
-            return doReshuffle(loop - 1); // detect infinite loop
-        
-        return true; // success
-    }
-    
-    protected boolean mustReshuffle()
-    {
-        if (ctx.generator.generateLetters)
-            return false;
-                
-        if (ctx.generator.swapMode)
-            return mustReshuffleSwapMode();
-        
-        for (int row = 0; row < numRows; row++)
-        {
-            for (int col = 0; col < numColumns; col++)
-            {
-                Cell cell = cell(col, row);
-                if (cell.isLocked())
-                    continue;
-                
-                Item item = cell.item;
-                if (item == null)
-                    continue;
-                
-                if (item instanceof Rocket || item instanceof YinYang)
-                    return false;
-                
-                if (col < numColumns - 1)
-                {
-                    Cell cell2 = cell(col + 1, row);
-                    if (cell2.isLocked())
-                        continue;
-                    
-                    Item item2 = cell2.item;
-                    if (item2 != null)
-                    {
-                        if (canConnect(item, item2, 1, 0))
-                        {
-                            //Debug.p("can connect " + col + "," + row + " - " + (col+1) + "," + row);
-                            return false;
-                        }
-                    }
-                }
-                
-                if (row < numRows - 1)
-                {
-                    Cell cell2 = cell(col, row + 1);
-                    if (cell2.isLocked())
-                        continue;
-                    
-                    Item item2 = cell2.item;
-                    if (item2 != null)
-                    {
-                        if (canConnect(item, item2, 0, 1))
-                        {
-                            //Debug.p("can connect " + col + "," + row + " - " + col + "," + (row+1));
-                            return false;
-                        }
-                    }
-                }
-            }
-        }
-        
-        if (Domino.hasAnimalChain(this)) // Animal - optional wild cards - double Domino
-            return false;
-        
-        //TODO check knights
-        
-        return true;
-    }
-    
-    protected boolean mustReshuffleSwapMode()
-    {
-        for (int row = 0; row < numRows; row++)
-        {
-            for (int col = 0; col < numColumns; col++)
-            {
-                Cell cell = cell(col, row);
-                if (cell.isLocked())
-                    continue;
-                
-                Item item = cell.item;
-                if (item == null)
-                    continue;
-                
-                if (item instanceof Rocket || item instanceof ColorBomb || item instanceof YinYang)
-                    return false;
-            }
-        }
-        
-        // Try vertical swaps
-        for (int row = 0; row < numRows - 1; row++)
-        {
-            for (int col = 0; col < numColumns; col++)
-            {
-                if (trySwap(col, row, col, row + 1))
-                    return false;
-            }
-        }
-        
-        // Try horizontal swaps
-        for (int row = 0; row < numRows; row++)
-        {
-            for (int col = 0; col < numColumns - 1; col++)
-            {
-                if (trySwap(col, row, col + 1, row))
-                    return false;
-            }
-        }
-        
-        return true;
-    }
-    
-    protected boolean trySwap(int col, int row, int col2, int row2)
-    {
-        Cell cell = cell(col, row);
-        if (cell.isLocked())
-            return false;
-        
-        Item item = cell.item;
-        if (item == null || cantSwap(item))
-            return false;
-
-        Cell cell2 = cell(col2, row2);
-        if (cell2.isLocked())
-            return false;
-        
-        Item item2 = cell2.item;
-        if (item2 == null || cantSwap(item))
-            return false;
-        
-        cell.item = item2;
-        cell2.item = item;
-        boolean canSwap = trySwap2(col, row, col2, row2);
-        cell.item = item;
-        cell2.item = item2;
-        return canSwap;
-    }
-    
-    protected boolean cantSwap(Item item)
-    {
-        return item instanceof Animal || item instanceof Fire || item instanceof Laser || item instanceof Knight;
-    }
-    
-    protected boolean trySwap2(int col, int row, int col2, int row2)
-    {
-        boolean hor = row == row2;
-        if (hor)
-        {
-            if (findCombo(col - 2, row, 1, 0, 6)
-             || findCombo(col, row - 2, 0, 1, 5)
-             || findCombo(col2, row - 2, 0, 1, 5))
-                return true;
-        }
-        else
-        {
-            if (findCombo(col, row - 2, 0, 1, 6)
-             || findCombo(col - 2, row, 1, 0, 5)
-             || findCombo(col - 2, row2, 1, 0, 5))
-                return true;
-        }
-        return false;
-    }
-    
-    protected boolean findCombo(int col, int row, int dcol, int drow, int length)
-    {
-        int c = col, r = row;
-        int n = 0;
-        Integer comboColor = null;
-        for (int i = 0; i < length; i++, c += dcol, r += drow)
-        {
-            Integer cellColor = cellColor(c, r);
-            if (cellColor == null)
-            {
-                n = 0;
-                comboColor = null;
-            }
-            else if (comboColor == null)
-            {
-                comboColor = cellColor;
-                n++;
-            }
-            else if (cellColor == Config.WILD_ID)
-            {
-                n++;
-            }
-            else if (comboColor == Config.WILD_ID)
-            {
-                comboColor = cellColor;
-                n++;
-            }
-            else if (comboColor == cellColor)
-            {
-                n++;
-            }
-            else
-            {
-                n = 0;
-                comboColor = null;
-            }
-            if (n == 3)
-                return true;
-            
-            if (!isValidCell(c, r))
-            {
-                n = 0;
-                continue;
-            }
-        }
-        return false;
-    }
-    
-    protected Integer cellColor(int col, int row)
-    {
-        if (!isValidCell(col, row))
-            return null;
-        
-        Cell cell = cell(col, row);
-        if (cell.isLocked())
-            return null;
-        
-        Item item = cell.item;
-        if (item == null)
-            return null;
-        
-        if (GetSwapMatches.isColorDot(item))
-            return item.getColor();
-        
-        return null;
-    }
-    
-    protected boolean canConnect(Item a, Item b, int dcol, int drow)
+    protected static boolean canConnect(Item a, Item b, int dcol, int drow)
     {
         boolean aDot = (a instanceof Dot || a instanceof Animal);
         if (aDot && b instanceof Wild)

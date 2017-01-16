@@ -84,6 +84,7 @@ public class Generator
     private boolean      m_noChest = false;
     
     private DominoGenerator m_dominoGenerator;
+    private Long m_usedSeed;
 
     public Generator()
     {
@@ -109,13 +110,23 @@ public class Generator
     {
         m_seed = seed;
         m_rnd = null;
+        m_usedSeed = null;
+    }
+    
+    public long getUsedSeed()
+    {
+        if (m_usedSeed == null)
+        {
+            m_usedSeed = m_seed == RANDOM_SEED ? System.currentTimeMillis() : m_seed;
+        }
+        return m_usedSeed;
     }
     
     protected Random getRandom()
     {
         if (m_rnd == null)
         {
-            m_rnd = new Random(m_seed == RANDOM_SEED ? System.currentTimeMillis() : m_seed);
+            m_rnd = new Random(getUsedSeed());
         }
         return m_rnd;
     }
