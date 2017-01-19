@@ -364,7 +364,7 @@ public class GetTransitions
             return true;
         
         Cell cell = state.cell(col, row + 1);
-        if (cell.isLockedDoor())
+        if (cell.isLockedDoor() || cell.isLockedBlockingCage())
             return true;
         
         if (cell instanceof Hole || cell.isLockedCage())
@@ -405,7 +405,7 @@ public class GetTransitions
                 return null;
             
             Pt above = c.pt();            
-            if (c instanceof Hole || c.isLockedCage())
+            if (c instanceof Hole || c.isLockedCage() && !c.isLockedBlockingCage())
             {
                 return getSourceAbove(above);
             }
@@ -459,7 +459,7 @@ public class GetTransitions
 
     private void addSpawn(Pt src, Pt target)
     {
-        Item item = ctx.generator.getNextItem(ctx, false);        
+        Item item = ctx.generator.getNextItem(ctx, false, null);        
         final TeleportClipBox toBox = new TeleportClipBox(item.shape, target, ctx);
         
         m_list.add(new DropTransition(state.x(target.col), state.y(target.row - 1), state.x(target.col), state.y(target.row), item) {
@@ -618,7 +618,7 @@ public class GetTransitions
     
     private static boolean endOfLine(Cell c)
     {
-        return c instanceof Slide || c.isTeleportSource() || c instanceof Rock;
+        return c instanceof Slide || c.isTeleportSource() || c instanceof Rock; //locked door? locked blocking cage?
     }
     
     private boolean nextToSlide(Pt p)

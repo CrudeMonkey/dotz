@@ -30,6 +30,7 @@ import com.enno.dotz.client.Direction;
 import com.enno.dotz.client.Generator;
 import com.enno.dotz.client.GridState;
 import com.enno.dotz.client.anim.Pt;
+import com.enno.dotz.client.editor.EditLevelDialog.ChangeListener;
 import com.enno.dotz.client.editor.LoopDetector.LoopException;
 import com.enno.dotz.client.editor.ModePalette.Bombify;
 import com.enno.dotz.client.editor.ModePalette.ChangeIce;
@@ -54,6 +55,7 @@ import com.enno.dotz.client.item.IcePick;
 import com.enno.dotz.client.item.Item;
 import com.enno.dotz.client.item.Knight;
 import com.enno.dotz.client.item.LazySusan;
+import com.enno.dotz.client.item.RandomItem;
 import com.enno.dotz.client.item.Turner;
 import com.enno.dotz.client.ui.MXAccordion;
 import com.enno.dotz.client.ui.UTabSet;
@@ -101,8 +103,12 @@ public abstract class EditLayoutTab extends VLayout
     
     private Random m_rnd = new Random();
 
-    public EditLayoutTab(boolean isNew, Config level)
+    private ChangeListener m_changeListener;
+
+    public EditLayoutTab(boolean isNew, Config level, ChangeListener changeListener)
     {
+        m_changeListener = changeListener;
+        
         setMargin(10);
         setMembersMargin(10);
         
@@ -204,6 +210,11 @@ public abstract class EditLayoutTab extends VLayout
     protected abstract boolean isLetterMode();
     protected abstract boolean isDominoMode();
 
+    protected void changed()
+    {
+        m_changeListener.changed();
+    }
+    
     public void replaceGrid(GridState state)
     {
         if (m_mode != null)
@@ -221,6 +232,8 @@ public abstract class EditLayoutTab extends VLayout
         
         if (m_mode != null)
             m_mode.start();
+        
+        changed();
     }
     
     public GridState copyGrid()
@@ -362,6 +375,7 @@ public abstract class EditLayoutTab extends VLayout
             if (cell.canIncrementStrength())
             {
                 cell.incrementStrength(ds);
+                changed();
                 return;
             }
         }
@@ -375,6 +389,7 @@ public abstract class EditLayoutTab extends VLayout
                 int ds = c == '-' ? -1 : 1;
                 cell.item.incrementStrength(ds);
                 ctx.dotLayer.draw();
+                changed();
                 return;
             }
             
@@ -382,6 +397,7 @@ public abstract class EditLayoutTab extends VLayout
             if (cell.canIncrementStrength())
             {
                 cell.incrementStrength(c == '-' ? -1 : 1);
+                changed();
                 return;
             }
         }
@@ -424,6 +440,7 @@ public abstract class EditLayoutTab extends VLayout
         cell.item.removeShapeFromLayer(ctx.dotLayer);
         cell.item = null;
         ctx.dotLayer.draw();
+        changed();
     }
     
     protected void addItem(Cell cell, Item item)
@@ -473,6 +490,7 @@ public abstract class EditLayoutTab extends VLayout
         item.addShapeToLayer(ctx.dotLayer);
         cell.item = item;
         ctx.dotLayer.draw();
+        changed();
     }
     
     public interface LayoutMode
@@ -525,6 +543,7 @@ public abstract class EditLayoutTab extends VLayout
                 public void onMouseUp(MouseUpEvent event)
                 {
                     connectTo(event.getX(), event.getY());
+                    changed();
                     cancel();
                 }
             });
@@ -764,6 +783,7 @@ public abstract class EditLayoutTab extends VLayout
         private Pt m_pt;
         private HandlerRegistration m_mouseOverHandler;
 
+        @Override
         public void start()
         {
             m_mouseDown = false;
@@ -771,7 +791,6 @@ public abstract class EditLayoutTab extends VLayout
             
             m_mouseDownHandler = m_grid.addMouseDownHandler(new MouseDownHandler()
             {
-                
                 @Override
                 public void onMouseDown(MouseDownEvent event)
                 {
@@ -903,6 +922,7 @@ public abstract class EditLayoutTab extends VLayout
                     {
                         cell.item.incrementStrength(1);
                         ctx.dotLayer.draw();
+                        changed();
                     }
                     else
                     {
@@ -919,6 +939,7 @@ public abstract class EditLayoutTab extends VLayout
             else if (m_operation instanceof Cell)
             {
                 boolean sameCell = cell.getClass() == m_operation.getClass();
+                
                 if (sameCell && cell instanceof Slide)
                 {
                     boolean left = ((Slide) cell).isToLeft();
@@ -941,10 +962,13 @@ public abstract class EditLayoutTab extends VLayout
                             ((Door) cell).rotate();
                         else
                             cell.incrementStrength(1);
+                        changed();
                     }
-                    else if (sameCell && cell instanceof Cage && !((Cage) cell).isBlinking())
+                    else if (sameCell && cell instanceof Cage && !((Cage) cell).isBlinking() && 
+                            ((Cage) cell).isBlocking() == ((Cage) m_operation).isBlocking())
                     {
                         cell.incrementStrength(1);
+                        changed();
                     }
                     else
                     {
@@ -1072,6 +1096,7 @@ public abstract class EditLayoutTab extends VLayout
             ctx.state.add(susan);
             susan.initGraphics(ctx);
             ctx.backgroundLayer.draw();
+            changed();
         }
 
         private void deleteSusan(int col, int row)
@@ -1084,6 +1109,7 @@ public abstract class EditLayoutTab extends VLayout
                     su.removeGraphics();
                     state.getLazySusans().remove(su);
                     ctx.backgroundLayer.draw();
+                    changed();
                     return;
                 }
             }
@@ -1097,7 +1123,7 @@ public abstract class EditLayoutTab extends VLayout
             if (cell == null || !cell.hasController())
                 SetControllerDialog.closeDialog();
             else
-                SetControllerDialog.setControllable((Controllable) cell);
+                SetControllerDialog.setControllable((Controllable) cell, m_changeListener);
         }
 
         private void changeIce(int col, int row)
@@ -1111,6 +1137,8 @@ public abstract class EditLayoutTab extends VLayout
             cell.updateIce();
             
             ctx.iceLayer.draw();
+            
+            changed();
         }
 
         private void stick(int col, int row)
@@ -1130,14 +1158,22 @@ public abstract class EditLayoutTab extends VLayout
         {
             GridState state = ctx.state;  
             Cell cell = state.cell(col, row);
-            if (cell.item == null || !(cell.item instanceof Dot || cell.item instanceof DotBomb))
+            if (cell.item == null || !(cell.item instanceof Dot || cell.item instanceof DotBomb || cell.item instanceof RandomItem))
                 return;
             
             Item newItem = cell.item.copy();
             
-            Dot dot = cell.item instanceof Dot ? (Dot) newItem : ((DotBomb) newItem).getDot();
+            if (cell.item instanceof RandomItem)
+            {
+                RandomItem rnd = (RandomItem) newItem;
+                rnd.setRadioActive(!rnd.isRadioActive());
+            }
+            else
+            {
+                Dot dot = cell.item instanceof Dot ? (Dot) newItem : ((DotBomb) newItem).getDot();
+                dot.setRadioActive(!dot.isRadioActive());
+            }
             
-            dot.setRadioActive(!dot.isRadioActive());
             removeItem(cell);
             addItem(cell, newItem);
         }
@@ -1148,6 +1184,7 @@ public abstract class EditLayoutTab extends VLayout
             Cell cell = state.cell(col, row);
             if (!(cell.item instanceof Dot || cell.item instanceof DotBomb))
                 return;
+            
             try
             {
                 Debug.p("bombify");
@@ -1181,6 +1218,8 @@ public abstract class EditLayoutTab extends VLayout
                 
                 ctx.dotLayer.draw();
                 Debug.p("bombify done");
+                
+                changed();
             }
             catch (Exception e)
             {
@@ -1300,7 +1339,9 @@ public abstract class EditLayoutTab extends VLayout
             
             m_grid.setBorders();
             
-            m_grid.draw();        
+            m_grid.draw();
+            
+            changed();
         }        
         
         protected void rotateItem(Cell cell, boolean shift)
@@ -1317,6 +1358,7 @@ public abstract class EditLayoutTab extends VLayout
                 {
                     cell.item.rotate(1);
                     ctx.dotLayer.draw();
+                    changed();
                     return;
                 }
                 
@@ -1340,6 +1382,7 @@ public abstract class EditLayoutTab extends VLayout
             {
                 ((ConveyorCell) cell).rotate();
             }
+            changed();
         }
 
         protected void rotateTurner(Cell cell)

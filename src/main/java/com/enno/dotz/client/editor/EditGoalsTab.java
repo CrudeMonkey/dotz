@@ -8,6 +8,7 @@ import com.enno.dotz.client.ChainGoal.EditChainGoalDialog;
 import com.enno.dotz.client.Config;
 import com.enno.dotz.client.Context;
 import com.enno.dotz.client.Goal;
+import com.enno.dotz.client.editor.EditLevelDialog.ChangeListener;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.ui.MXCheckBox;
 import com.enno.dotz.client.ui.MXForm;
@@ -44,6 +45,9 @@ public class EditGoalsTab extends VLayout
     private All           m_cages;
     private All           m_mirrors;
     private All           m_rockets;
+    private Num           m_colorBombs;
+    private Num           m_bombs;
+    private Num           m_blasters;
     private All           m_blockers;
     private All           m_zapBlockers;
     private Num           m_lasers;
@@ -55,9 +59,9 @@ public class EditGoalsTab extends VLayout
     private DotAll[]   m_dots = new DotAll[Config.MAX_COLORS];
     private FormItem[] m_fields;
 
-    public EditGoalsTab(Config level)
+    public EditGoalsTab(Config level, ChangeListener changeListener)
     {
-        m_moves = new Num("Moves") {
+        m_moves = new Num("Moves", changeListener) {
             @Override
             public void prepareSave(Goal goal)
             {
@@ -70,7 +74,7 @@ public class EditGoalsTab extends VLayout
                 val(goal.getMaxMoves());
             }
         };        
-        m_score = new Num("Score") {
+        m_score = new Num("Score", changeListener) {
             @Override
             public void prepareSave(Goal goal)
             {
@@ -83,9 +87,9 @@ public class EditGoalsTab extends VLayout
                 val(goal.getScore());
             }
         };               
-        m_time = new TimeItem();
+        m_time = new TimeItem(changeListener);
 
-        m_lasers = new Num("Lasers") {
+        m_lasers = new Num("Lasers", changeListener) {
             @Override
             public void prepareSave(Goal goal)
             {
@@ -98,7 +102,7 @@ public class EditGoalsTab extends VLayout
                 val(goal.getLasers());
             }
         };
-        m_birds = new Num("Birds") {
+        m_birds = new Num("Birds", changeListener) {
             @Override
             public void prepareSave(Goal goal)
             {
@@ -111,7 +115,7 @@ public class EditGoalsTab extends VLayout
                 val(goal.getBirds());
             }
         };
-        m_words = new Num("Words") {
+        m_words = new Num("Words", changeListener) {
             @Override
             public void prepareSave(Goal goal)
             {
@@ -124,7 +128,7 @@ public class EditGoalsTab extends VLayout
                 val(goal.getWords());
             }
         };
-        m_circuits = new All("Circuits") {
+        m_circuits = new All("Circuits", changeListener) {
             @Override
             public void prepareSave(Goal goal)
             {
@@ -138,7 +142,7 @@ public class EditGoalsTab extends VLayout
             }
         };
             
-        m_ice = new All("Ice") {
+        m_ice = new All("Ice", changeListener) {
             @Override
             public void prepareSave(Goal goal)
             {
@@ -152,7 +156,7 @@ public class EditGoalsTab extends VLayout
             }
         };
             
-        m_fire = new All("Fire"){
+        m_fire = new All("Fire", changeListener){
             @Override
             public void prepareSave(Goal goal)
             {
@@ -166,7 +170,7 @@ public class EditGoalsTab extends VLayout
             }
         };
             
-        m_anchors = new All("Anchors"){
+        m_anchors = new All("Anchors", changeListener){
             @Override
             public void prepareSave(Goal goal)
             {
@@ -180,7 +184,7 @@ public class EditGoalsTab extends VLayout
             }
         };
             
-        m_diamonds = new All("Diamonds"){
+        m_diamonds = new All("Diamonds", changeListener){
             @Override
             public void prepareSave(Goal goal)
             {
@@ -194,7 +198,7 @@ public class EditGoalsTab extends VLayout
             }
         };
             
-        m_bubbles = new All("Bubbles"){
+        m_bubbles = new All("Bubbles", changeListener){
             @Override
             public void prepareSave(Goal goal)
             {
@@ -207,7 +211,7 @@ public class EditGoalsTab extends VLayout
                 val(goal.getBubbles());
             }};
             
-        m_doors = new All("Doors"){
+        m_doors = new All("Doors", changeListener){
             @Override
             public void prepareSave(Goal goal)
             {
@@ -220,7 +224,7 @@ public class EditGoalsTab extends VLayout
                 val(goal.getDoors());
             }};
                 
-        m_cages = new All("Cages"){
+        m_cages = new All("Cages", changeListener){
             @Override
             public void prepareSave(Goal goal)
             {
@@ -233,7 +237,7 @@ public class EditGoalsTab extends VLayout
                 val(goal.getCages());
             }};
                 
-        m_animals = new All("Animals"){
+        m_animals = new All("Animals", changeListener){
             @Override
             public void prepareSave(Goal goal)
             {
@@ -247,7 +251,7 @@ public class EditGoalsTab extends VLayout
             }
         };
 
-        m_knights = new All("Knights"){
+        m_knights = new All("Knights", changeListener){
             @Override
             public void prepareSave(Goal goal)
             {
@@ -261,7 +265,7 @@ public class EditGoalsTab extends VLayout
             }
         };
 
-        m_clocks = new All("Clocks"){
+        m_clocks = new All("Clocks", changeListener){
             @Override
             public void prepareSave(Goal goal)
             {
@@ -275,7 +279,7 @@ public class EditGoalsTab extends VLayout
             }
         };
 
-        m_mirrors = new All("Mirrors"){
+        m_mirrors = new All("Mirrors", changeListener){
             @Override
             public void prepareSave(Goal goal)
             {
@@ -289,7 +293,7 @@ public class EditGoalsTab extends VLayout
             }
         };
 
-        m_rockets = new All("Rockets"){
+        m_rockets = new All("Rockets", changeListener){
             @Override
             public void prepareSave(Goal goal)
             {
@@ -303,7 +307,49 @@ public class EditGoalsTab extends VLayout
             }
         };
 
-        m_blockers = new All("Green Blockers"){
+        m_colorBombs = new Num("ColorBombs", changeListener){
+            @Override
+            public void prepareSave(Goal goal)
+            {
+                goal.setColorBombs(val());
+            }
+
+            @Override
+            public void initGoal(Goal goal)
+            {
+                val(goal.getColorBombs());
+            }
+        };
+
+        m_bombs = new Num("Bombs", changeListener){
+            @Override
+            public void prepareSave(Goal goal)
+            {
+                goal.setBombs(val());
+            }
+
+            @Override
+            public void initGoal(Goal goal)
+            {
+                val(goal.getBombs());
+            }
+        };
+
+        m_blasters = new Num("Blasters", changeListener){
+            @Override
+            public void prepareSave(Goal goal)
+            {
+                goal.setBlasters(val());
+            }
+
+            @Override
+            public void initGoal(Goal goal)
+            {
+                val(goal.getBlasters());
+            }
+        };
+
+        m_blockers = new All("Green Blockers", changeListener){
             @Override
             public void prepareSave(Goal goal)
             {
@@ -317,7 +363,7 @@ public class EditGoalsTab extends VLayout
             }
         };
 
-        m_zapBlockers = new All("Red Zap Blockers"){
+        m_zapBlockers = new All("Red Zap Blockers", changeListener){
             @Override
             public void prepareSave(Goal goal)
             {
@@ -331,7 +377,7 @@ public class EditGoalsTab extends VLayout
             }
         };
 
-        m_dominoes = new Num("Dominoes"){
+        m_dominoes = new Num("Dominoes", changeListener){
             @Override
             public void prepareSave(Goal goal)
             {
@@ -345,11 +391,11 @@ public class EditGoalsTab extends VLayout
             }
         };
 
-        m_chainGoal = new ChainGoalItem();
+        m_chainGoal = new ChainGoalItem(changeListener);
         
         for (int i = 0; i < Config.MAX_COLORS; i++)
         {
-            m_dots[i] = new DotAll(i);
+            m_dots[i] = new DotAll(i, changeListener);
         }
         
         MXForm form = new MXForm();
@@ -368,6 +414,7 @@ public class EditGoalsTab extends VLayout
                 m_moves, m_cages, m_mirrors,
                 m_time, m_score, m_blockers,
                 m_chainGoal, m_words, m_zapBlockers,
+                m_blasters, m_bombs, m_colorBombs,
                 m_diamonds, m_bubbles
         };
         
@@ -442,7 +489,7 @@ public class EditGoalsTab extends VLayout
         private RadioGroupItem m_all;
         private MXTextInput m_text;
         
-        public All(String title)
+        public All(String title, final ChangeListener changeListener)
         {
             setTitle(title);
             
@@ -462,12 +509,14 @@ public class EditGoalsTab extends VLayout
                 public void onChanged(ChangedEvent event)
                 {
                     updateTextEnabled();
+                    changeListener.changed();
                 }
             });
             
             m_text = new MXTextInput();
             m_text.setShowTitle(false);
             m_text.setWidth(60);
+            m_text.addChangedHandler(changeListener);
             
             form.setFields(m_all, m_text);
             
@@ -548,7 +597,7 @@ public class EditGoalsTab extends VLayout
     {
         private MXTextInput m_text;
 
-        public ChainGoalItem()
+        public ChainGoalItem(ChangeListener changeListener)
         {
             setTitle("Chains");
             
@@ -558,6 +607,7 @@ public class EditGoalsTab extends VLayout
             m_text.setShowTitle(false);
             m_text.setWidth(150);
             m_text.setPrompt("E.g. '0=3,1=4' means: first a chain of 3 for color 0, then 4 for color 1");
+            m_text.addChangedHandler(changeListener);
             
             ButtonItem edit = new ButtonItem();
             edit.setTitle("Edit");
@@ -613,10 +663,12 @@ public class EditGoalsTab extends VLayout
     
     public abstract static class Num extends MXTextInput implements GoalField
     {
-        public Num(String title)
+        public Num(String title, ChangeListener changeListener)
         {
             setTitle(title);
             setWidth(60);
+            
+            addChangedHandler(changeListener);
         }
         
         public void val(int val)
@@ -664,9 +716,10 @@ public class EditGoalsTab extends VLayout
     
     public static class TimeItem extends MXTextInput implements GoalField
     {
-        public TimeItem()
+        public TimeItem(ChangeListener changeListener)
         {
-            setTitle("Time");            
+            setTitle("Time");
+            addChangedHandler(changeListener);
         }
         
         @Override
@@ -762,9 +815,9 @@ public class EditGoalsTab extends VLayout
     {
         private int m_color;
         
-        public DotAll(int color)
+        public DotAll(int color, ChangeListener changeListener)
         {
-            super(null);
+            super(null, changeListener);
             setShowTitle(false);
             
             m_color = color;

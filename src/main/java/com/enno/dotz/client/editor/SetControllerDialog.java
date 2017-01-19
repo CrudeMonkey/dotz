@@ -6,6 +6,7 @@ import java.util.List;
 import com.ait.tooling.nativetools.client.NObject;
 import com.enno.dotz.client.Controller;
 import com.enno.dotz.client.Controller.Controllable;
+import com.enno.dotz.client.editor.EditLevelDialog.ChangeListener;
 import com.enno.dotz.client.ui.MXButtonsPanel;
 import com.enno.dotz.client.ui.MXForm;
 import com.enno.dotz.client.ui.MXListGrid;
@@ -13,7 +14,6 @@ import com.enno.dotz.client.ui.MXListGridField;
 import com.enno.dotz.client.ui.MXTextInput;
 import com.enno.dotz.client.ui.MXVBox;
 import com.enno.dotz.client.ui.MXWindow;
-import com.smartgwt.client.data.Record;
 import com.smartgwt.client.types.ListGridFieldType;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
@@ -34,6 +34,7 @@ public class SetControllerDialog extends MXWindow
     private MXTextInput m_repeat;
     private Controllable m_controllable;
     private MXListGrid m_grid;
+    private ChangeListener m_changeListener;
     
     protected SetControllerDialog()
     {
@@ -164,6 +165,7 @@ public class SetControllerDialog extends MXWindow
         addSequenceToGrid(seq);
         
         m_controllable.setSequence(seq);
+        m_changeListener.changed();
     }
 
     private void addSequenceToGrid(String seq)
@@ -195,16 +197,17 @@ public class SetControllerDialog extends MXWindow
         addSequenceToGrid(seq);
     }
 
-    private void setControllableItem(Controllable c)
+    private void setControllableItem(Controllable c, ChangeListener changeListener)
     {
         m_controllable = c;
+        m_changeListener = changeListener;
         
         setSequence(c.getSequence());
     }
 
-    public static void setControllable(Controllable c)
+    public static void setControllable(Controllable c, ChangeListener changeListener)
     {
-        INSTANCE.setControllableItem(c);
+        INSTANCE.setControllableItem(c, changeListener);
         s_open = true;
         INSTANCE.show();
     }

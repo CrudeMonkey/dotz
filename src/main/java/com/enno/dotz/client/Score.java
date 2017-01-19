@@ -79,6 +79,10 @@ public class Score
     private int m_explodedDominoes;
     
     private int m_birds;
+    
+    private int m_usedColorBombs;
+    private int m_usedBombs;
+    private int m_usedBlasters;
 
     private int m_score;
     private int m_moves;    
@@ -233,6 +237,21 @@ public class Score
         addPoints(1);
     }
     
+    public void usedColorBomb()
+    {
+        m_usedColorBombs++;
+    }
+    
+    public void usedBomb()
+    {
+        m_usedBombs++;
+    }
+    
+    public void usedBlaster()
+    {
+        m_usedBlasters++;
+    }
+    
     public void openedChest()
     {
         m_openedChests++;
@@ -372,6 +391,21 @@ public class Score
     public int getOpenedChests()
     {
         return m_openedChests;
+    }
+    
+    public int getUsedColorBombs()
+    {
+        return m_usedColorBombs;
+    }
+    
+    public int getUsedBombs()
+    {
+        return m_usedBombs;
+    }
+    
+    public int getUsedBlasters()
+    {
+        return m_usedBlasters;
     }
     
     public void generatedAnchor()

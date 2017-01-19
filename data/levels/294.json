@@ -2,7 +2,7 @@
   "id": 294,
   "name": "Toy Blast 115",
   "creator": "Enno",
-  "description": "Caveat: cage with diamond let items fall thru",
+  "description": "",
   "folder": "Toy Blast",
   "numColumns": 9,
   "numRows": 9,
@@ -66,9 +66,9 @@
     {"p":[8,5],"strength":1}
   ],
   "cages": [
-    {"p":[1,4],"strength":1},
-    {"p":[4,4],"strength":1},
-    {"p":[7,4],"strength":1}
+    {"p":[1,4],"strength":1,"blocking":true},
+    {"p":[4,4],"strength":1,"blocking":true},
+    {"p":[7,4],"strength":1,"blocking":true}
   ],
   "diamonds": [
     {"p":[1,4]},
@@ -170,5 +170,5 @@
     "maxMoves": 40
   },
   "boosts": {  },
-  "lastModified": "1484535023415"
+  "lastModified": "1484671700569"
 }

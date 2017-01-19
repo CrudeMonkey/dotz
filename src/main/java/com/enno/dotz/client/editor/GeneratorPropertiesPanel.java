@@ -6,6 +6,7 @@ import java.util.Random;
 import com.enno.dotz.client.Config;
 import com.enno.dotz.client.Generator;
 import com.enno.dotz.client.Rewards.RewardEditor;
+import com.enno.dotz.client.editor.EditLevelDialog.ChangeListener;
 import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.ui.MXAccordion;
 import com.enno.dotz.client.ui.MXCheckBox;
@@ -14,7 +15,6 @@ import com.enno.dotz.client.ui.MXForm;
 import com.enno.dotz.client.ui.MXSelectItem;
 import com.enno.dotz.client.ui.MXTextInput;
 import com.smartgwt.client.util.SC;
-import com.smartgwt.client.widgets.Slider;
 import com.smartgwt.client.widgets.form.fields.ButtonItem;
 import com.smartgwt.client.widgets.form.fields.SliderItem;
 import com.smartgwt.client.widgets.form.fields.SpinnerItem;
@@ -31,7 +31,9 @@ public abstract class GeneratorPropertiesPanel extends VLayout
     private static final String SWAP_MODE = "Swap Mode";
     private static final String DOMINO_MODE = "Domino Mode";
     private static final String CLICK_MODE = "Click Mode";
-    
+        
+    private ChangeListener m_changeListener;
+
     private MXTextInput m_seed;
     private SpinnerItem m_animalStrength;
     private MXCheckBox m_randomSeed;
@@ -62,8 +64,10 @@ public abstract class GeneratorPropertiesPanel extends VLayout
     private SpinnerItem m_chestStrength;
     private SliderItem m_radioActivePct;
 
-    public GeneratorPropertiesPanel(Config level)
+    public GeneratorPropertiesPanel(Config level, final ChangeListener changeListener)
     {
+        m_changeListener = changeListener;
+        
         setMargin(10);
         setMembersMargin(10);
         
@@ -76,27 +80,32 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         //m_check.setShowLabel(false);
         //m_randomSeed.setVAlign(VerticalAlignment.CENTER);
         m_randomSeed.setValue(true);
+        m_randomSeed.addChangedHandler(changeListener);
         
         m_initialDotsOnly = new MXCheckBox();
         m_initialDotsOnly.setTitle("Initial Dots Only");
         m_initialDotsOnly.setLabelAsTitle(true);
         m_initialDotsOnly.setValue(true);
- 
+        m_initialDotsOnly.addChangedHandler(changeListener);
+        
         m_rollMode = new MXCheckBox();
         m_rollMode.setTitle("Roll Mode");
         m_rollMode.setLabelAsTitle(true);
         m_rollMode.setValue(false);
+        m_rollMode.addChangedHandler(changeListener);
         
         m_diagonalMode = new MXCheckBox();
         m_diagonalMode.setTitle("Diagonal Mode");
         m_diagonalMode.setLabelAsTitle(true);
         m_diagonalMode.setValue(false);
+        m_diagonalMode.addChangedHandler(changeListener);
         
         m_slipperyAnchors = new MXCheckBox();
         m_slipperyAnchors.setTitle("Slippery Anchors");
         m_slipperyAnchors.setLabelAsTitle(true);
         m_slipperyAnchors.setValue(false);
         m_slipperyAnchors.setPrompt("Anchors/Diamonds slip through (in roll mode), similar to Jelly Splash diamonds");
+        m_slipperyAnchors.addChangedHandler(changeListener);
         
         LinkedHashMap<String,String> modeMap = new LinkedHashMap<String,String>();
         modeMap.put(DOTS_MODE, DOTS_MODE);
@@ -117,6 +126,7 @@ public abstract class GeneratorPropertiesPanel extends VLayout
                 setLetterMode(isLetterMode());
             }
         });
+        m_mode.addChangedHandler(changeListener);
         
         LinkedHashMap<String,String> lenMap = new LinkedHashMap<String,String>();
         lenMap.put("2", "2");
@@ -128,10 +138,12 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         m_minChainLength.setTitle("Min Chain Length");
         m_minChainLength.setValueMap(lenMap);
         m_minChainLength.setValue("2");
+        m_minChainLength.addChangedHandler(changeListener);
         
         m_seed = new MXTextInput();
         m_seed.setTitle("Seed");  
         m_seed.setValue("123");
+        m_seed.addChangedHandler(changeListener);
         
         m_genSeed = new ButtonItem();
         m_genSeed.setTitle("Gen");
@@ -143,6 +155,7 @@ public abstract class GeneratorPropertiesPanel extends VLayout
             public void onClick(ClickEvent event)
             {
                 m_seed.setValue("" + Math.abs(new Random().nextInt()));
+                changeListener.changed();
             }
         });
 
@@ -165,18 +178,21 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         m_animalStrength.setStep(1);
         m_animalStrength.setValue(10);
         m_animalStrength.setWidth(70);
+        m_animalStrength.addChangedHandler(changeListener);
         
         m_animalType = new MXSelectItem();
         m_animalType.setTitle("Animal Type");
         m_animalType.setValueMap(Animal.Type.getValueMap());
         m_animalType.setValue(Animal.Type.DEFAULT.getName());
         m_animalType.setWidth(70);
+        m_animalType.addChangedHandler(changeListener);
         
         m_animalAction = new MXSelectItem();
         m_animalAction.setTitle("Animal Action");
         m_animalAction.setValueMap(Animal.Action.getValueMap());
         m_animalAction.setValue(Animal.Action.DEFAULT.getName());
         m_animalAction.setWidth(70);
+        m_animalAction.addChangedHandler(changeListener);
         
         m_fireGrowthRate = new SpinnerItem();
         m_fireGrowthRate.setTitle("Fire Growth Rate");
@@ -184,6 +200,7 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         m_fireGrowthRate.setMin(1);
         m_fireGrowthRate.setStep(1);
         m_fireGrowthRate.setWidth(70);
+        m_fireGrowthRate.addChangedHandler(changeListener);
         
         m_maxAnchors = new SpinnerItem();
         m_maxAnchors.setTitle("Max Anchors In Level");
@@ -192,6 +209,7 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         m_maxAnchors.setStep(1);
         m_maxAnchors.setWidth(70);
         m_maxAnchors.setPrompt("The generator won't generate more Anchors/Diamonds if the grid already contains this many.");
+        m_maxAnchors.addChangedHandler(changeListener);
         
         m_maxDomino = new SpinnerItem();
         m_maxDomino.setTitle("Max Domino");
@@ -200,6 +218,7 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         m_maxDomino.setMax(9);
         m_maxDomino.setStep(1);
         m_maxDomino.setWidth(70);
+        m_maxDomino.addChangedHandler(changeListener);
         
         m_knightStrength = new SpinnerItem();
         m_knightStrength.setTitle("Knight Strength");
@@ -207,6 +226,7 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         m_knightStrength.setStep(1);
         m_knightStrength.setValue(3);
         m_knightStrength.setWidth(70);
+        m_knightStrength.addChangedHandler(changeListener);
         
         m_clockStrength = new SpinnerItem();
         m_clockStrength.setTitle("Clock Strength");
@@ -214,6 +234,7 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         m_clockStrength.setStep(1);
         m_clockStrength.setValue(10);
         m_clockStrength.setWidth(70);
+        m_clockStrength.addChangedHandler(changeListener);
         
         m_bombStrength = new SpinnerItem();
         m_bombStrength.setTitle("Bomb Strength");
@@ -221,13 +242,15 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         m_bombStrength.setStep(1);
         m_bombStrength.setValue(9);
         m_bombStrength.setWidth(70);
+        m_bombStrength.addChangedHandler(changeListener);
         
         m_blockerStrength = new SpinnerItem();
         m_blockerStrength.setTitle("Blocker Strength");
         m_blockerStrength.setMin(1);
         m_blockerStrength.setStep(1);
-        m_blockerStrength.setValue(2);
+        m_blockerStrength.setValue(1);
         m_blockerStrength.setWidth(70);
+        m_blockerStrength.addChangedHandler(changeListener);
         
         m_chestStrength = new SpinnerItem();
         m_chestStrength.setTitle("Chest Strength");
@@ -235,25 +258,32 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         m_chestStrength.setStep(1);
         m_chestStrength.setValue(1);
         m_chestStrength.setWidth(70);
+        m_chestStrength.addChangedHandler(changeListener);
         
         m_rewardStrategies = new MXTextInput();
         m_rewardStrategies.setTitle("Rewards");
         m_rewardStrategies.setPrompt("E.g. 's4,s8' means: upgrade a Dot to Striped when chain length >= 4 and >= 8");
+        m_rewardStrategies.addChangedHandler(changeListener);
         
         m_icePickRadius = new RadiusCombo("Ice Pick Radius");
+        m_icePickRadius.addChangedHandler(changeListener);
+        
         m_dropRadius = new RadiusCombo("Drop Radius");
+        m_dropRadius.addChangedHandler(changeListener);
         
         m_removeLetters = new MXCheckBox();
         m_removeLetters.setTitle("Remove Letters");
         m_removeLetters.setLabelAsTitle(true);
         m_removeLetters.setValue(false);
         m_removeLetters.setPrompt("Whether to remove letters after chain is made in Word Mode");
+        m_removeLetters.addChangedHandler(changeListener);
         
         m_findWords = new MXCheckBox();
         m_findWords.setTitle("Find Words");
         m_findWords.setLabelAsTitle(true);
         m_findWords.setValue(false);
         m_findWords.setPrompt("Whether user should find specific (generated) words in Word Mode");
+        m_findWords.addChangedHandler(changeListener);
         
         m_maxWordLength = new SpinnerItem();
         m_maxWordLength.setTitle("Max Word Length");
@@ -262,6 +292,7 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         m_maxWordLength.setValue(6);
         m_maxWordLength.setWidth(70);
         m_maxWordLength.setPrompt("When finding specific (generated) words in Word Mode");
+        m_maxWordLength.addChangedHandler(changeListener);
         
         m_radioActivePct = new SliderItem();
         m_radioActivePct.setTitle("Radio Active Pct");
@@ -269,10 +300,11 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         m_radioActivePct.setValue(0.0);
         m_radioActivePct.setMinValue(0.0);
         m_radioActivePct.setMaxValue(100.0);
-        m_radioActivePct.setNumValues(100);
-        m_radioActivePct.setRoundPrecision(0);
+        m_radioActivePct.setNumValues(1000);
+        m_radioActivePct.setRoundPrecision(1);
         m_radioActivePct.setRoundValues(false);
         m_radioActivePct.setPrompt("Percentage of radio active Dots and DotBombs");
+        m_radioActivePct.addChangedHandler(changeListener);
         
         m_randomSeed.setColSpan(2);
         m_rollMode.setColSpan(2);
@@ -342,9 +374,9 @@ public abstract class GeneratorPropertiesPanel extends VLayout
             m_seed.setValue("" + g.getSeed());
             m_seed.setDisabled(false);
             m_genSeed.setDisabled(false);
-            }
+        }
         
-        m_boostProps = new BoostPropertiesPanel(level);
+        m_boostProps = new BoostPropertiesPanel(level, changeListener);
         MXAccordion acc = MXAccordion.createAccordion("Boosts", m_boostProps);
         addMember(acc);
     }
@@ -433,6 +465,7 @@ public abstract class GeneratorPropertiesPanel extends VLayout
             public void saveRewards(String rewards)
             {
                 m_rewardStrategies.setValue(rewards);
+                m_changeListener.changed();
             }
         };
     }

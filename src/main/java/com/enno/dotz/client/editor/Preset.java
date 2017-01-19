@@ -35,6 +35,7 @@ public enum Preset
     public Config getPresetConfig()
     {
         Config c = new Config();
+        c.folder = m_name;
         
         Generator g = new Generator();
         c.generator = g;

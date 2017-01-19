@@ -14,6 +14,8 @@ import com.smartgwt.client.util.BooleanCallback;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
+import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
+import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.layout.VLayout;
 
 public abstract class EditLevelDialog extends MXWindow
@@ -27,7 +29,10 @@ public abstract class EditLevelDialog extends MXWindow
     
     private Config m_level;
     private GeneratorPropertiesPanel m_props;
+    private ChangeListener m_changeListener;
 
+    private boolean m_changed = false;
+    
     public EditLevelDialog(boolean isNew, Config level)
     {
         setTitle("Level Editor");
@@ -55,9 +60,11 @@ public abstract class EditLevelDialog extends MXWindow
         pane.setMembersMargin(10);
         
         m_tabs = new UTabSet();
-        pane.addMember(m_tabs);
+        pane.addMember(m_tabs);        
         
-        m_layout = new EditLayoutTab(isNew, level)
+        m_changeListener = new ChangeListener();
+        
+        m_layout = new EditLayoutTab(isNew, level, m_changeListener)
         {
             @Override
             protected boolean isLetterMode()
@@ -74,10 +81,10 @@ public abstract class EditLevelDialog extends MXWindow
         
         m_tabs.addTab("Layout", m_layout);  
         
-        m_generator = new EditGeneratorTab(isNew, level);
+        m_generator = new EditGeneratorTab(isNew, level, m_changeListener);
         m_tabs.addTab("Generator Frequencies", m_generator);                
         
-        m_props = new GeneratorPropertiesPanel(level)
+        m_props = new GeneratorPropertiesPanel(level, m_changeListener)
         {
             @Override
             protected void setLetterMode(boolean isLetterMode)
@@ -87,8 +94,9 @@ public abstract class EditLevelDialog extends MXWindow
         };
         m_tabs.addTab("Generator Settings", m_props); 
         
-        m_goals = new EditGoalsTab(level);
+        m_goals = new EditGoalsTab(level, m_changeListener);
         m_tabs.addTab("Goals", m_goals);
+        
         
         m_buttons = new MXButtonsPanel();
         m_buttons.add("Test", new ClickHandler()
@@ -166,7 +174,10 @@ public abstract class EditLevelDialog extends MXWindow
             @Override
             public void onClick(ClickEvent event)
             {
-                closeWindow();
+                askToSave(new Runnable() { 
+                    @Override
+                    public void run() {} // do nothing - just ask 'Do you want to save' if necessary
+                });
             }
         });
         pane.addMember(m_buttons);
@@ -246,6 +257,9 @@ public abstract class EditLevelDialog extends MXWindow
 
                 m_layout.setLevelID(id);
                 
+                m_changed = false;
+                setTitle("Level Editor");
+                
                 if (afterSave != null)
                     afterSave.run();
             }
@@ -260,6 +274,13 @@ public abstract class EditLevelDialog extends MXWindow
 
     public void askToSave(final Runnable action)
     {
+        if (!m_changed)
+        {
+            closeWindow();
+            action.run();
+            return;
+        }
+        
         showEditor();
         MXNotification.askYesNoCancel("Save Level?", "Do you want to save the current level?", 300, 100, 100, 100, new BooleanCallback()
         {            
@@ -288,5 +309,23 @@ public abstract class EditLevelDialog extends MXWindow
                 }
             }
         });
+    }
+    
+    public class ChangeListener implements ChangedHandler
+    {
+        public void changed()
+        {
+            if (!m_changed)
+                setTitle("* Level Editor");
+            
+            m_changed = true;
+            Debug.p("changed");
+        }
+
+        @Override
+        public void onChanged(ChangedEvent event)
+        {
+            changed();
+        }
     }
 }

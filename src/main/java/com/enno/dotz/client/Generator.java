@@ -71,7 +71,7 @@ public class Generator
     public String        rewardStrategies = "";
     public int           icePickRadius    = 3;
     public int           dropRadius       = 3;
-    public int           radioActivePct   = 0;
+    public double        radioActivePct   = 0;
     
     // Word Mode settings
     public boolean       removeLetters    = true;
@@ -263,7 +263,7 @@ public class Generator
         return ((Dot) dot.item).color;
     }
     
-    public Item getNextItem(Context ctx, boolean initial)
+    public Item getNextItem(Context ctx, boolean initial, Boolean radioActive)
     {
         if (initial && dominoMode)
         {
@@ -303,10 +303,7 @@ public class Generator
             
             if (item instanceof Dot)
             {
-                if (radioActivePct > 0)
-                {
-                    ((Dot) item).setRadioActive(m_rnd.nextInt(100) < radioActivePct);
-                }
+                ((Dot) item).setRadioActive(makeRadioActive(radioActive));
             }
             else if (item instanceof DotBomb)
             {
@@ -318,10 +315,7 @@ public class Generator
                 }
                 while (m_excludeDotColor != -1 && m_numDotColors > 1 && dot.color == m_excludeDotColor);
                 
-                if (radioActivePct > 0)
-                {
-                    dot.setRadioActive(m_rnd.nextInt(100) < radioActivePct);
-                }
+                dot.setRadioActive(makeRadioActive(radioActive));
                 
                 ((DotBomb) item).setDot(dot);
             }
@@ -329,7 +323,7 @@ public class Generator
             {
                 Chest chest = (Chest) item;
                 m_noChest = true;   // prevent chest inside chest
-                chest.setItem(getNextItem(ctx, initial));
+                chest.setItem(getNextItem(ctx, initial, radioActive));
                 m_noChest = false;
                 ctx.score.generatedChest();
             }
@@ -377,6 +371,14 @@ public class Generator
         
         item.init(ctx);
         return item;
+    }
+    
+    private boolean makeRadioActive(Boolean radioActive)
+    {
+        if (radioActive != null)
+            return radioActive.booleanValue();
+        else
+            return radioActivePct > 0 && m_rnd.nextDouble() * 100 < radioActivePct;
     }
     
     protected Item getNextDomino(Context ctx)

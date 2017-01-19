@@ -14,6 +14,7 @@ import com.enno.dotz.client.item.Blaster;
 import com.enno.dotz.client.item.Bomb;
 import com.enno.dotz.client.item.Explody;
 import com.enno.dotz.client.item.Striped;
+import com.enno.dotz.client.util.Debug;
 
 public class Explosions
 {
@@ -41,6 +42,8 @@ public class Explosions
             
             if (c.item instanceof Blaster)
             {
+                ctx.score.usedBlaster();
+                
                 Blaster blaster = (Blaster) c.item;
                 bothWays = blaster.isBothWays();
                 isWide = blaster.isWide();
@@ -55,6 +58,7 @@ public class Explosions
             double x = state.x(c.col);
             double y = state.y(c.row);
 
+            final boolean doingHorizontal = !vertical || bothWays;
             if (vertical || bothWays)
             {
                 for (int row = 0; row < nr; row++)
@@ -76,12 +80,16 @@ public class Explosions
                     public void afterEnd()
                     {
                         super.afterEnd();
-                        for (Cell to : blasted)
-                            to.zap();           
+                        
+                        if (!doingHorizontal)   // don't zap them twice if we're blasting both directions
+                        {
+                            for (Cell to : blasted)
+                                to.zap();
+                        }
                     }
                 });
             }
-            if (!vertical || bothWays)
+            if (doingHorizontal)
             {
                 for (int col = 0; col < nc; col++)
                 {
@@ -134,7 +142,10 @@ public class Explosions
             if (c.item instanceof Explody)
                 r = ((Explody) c.item).getRadius();
             else if (c.item instanceof Bomb)
+            {
+                ctx.score.usedBomb();
                 r = ((Bomb) c.item).getRadius();
+            }
             
             if (r > 1)
             {

@@ -208,21 +208,23 @@ public class ClickConnectMode extends ConnectMode
     
     private void addNeighbors(int col, int row, int color, CellList list)
     {
-        addNeighbor(col - 1, row, color, list);
-        addNeighbor(col + 1, row, color, list);
-        addNeighbor(col, row - 1, color, list);
-        addNeighbor(col, row + 1, color, list);
+        Cell cell = m_state.cell(col, row);
+        
+        addNeighbor(cell, col - 1, row, color, list);
+        addNeighbor(cell, col + 1, row, color, list);
+        addNeighbor(cell, col, row - 1, color, list);
+        addNeighbor(cell, col, row + 1, color, list);
         
         if (ctx.generator.diagonalMode)
         {
-            addNeighbor(col - 1, row - 1, color, list);
-            addNeighbor(col + 1, row - 1, color, list);
-            addNeighbor(col - 1, row + 1, color, list);
-            addNeighbor(col + 1, row + 1, color, list);
+            addNeighbor(cell, col - 1, row - 1, color, list);
+            addNeighbor(cell, col + 1, row - 1, color, list);
+            addNeighbor(cell, col - 1, row + 1, color, list);
+            addNeighbor(cell, col + 1, row + 1, color, list);
         }
     }
 
-    private void addNeighbor(int col, int row, int color, CellList list)
+    private void addNeighbor(Cell prev, int col, int row, int color, CellList list)
     {
         if (!m_state.isValidCell(col, row) || list.didCell(col, row))
             return;
@@ -230,6 +232,9 @@ public class ClickConnectMode extends ConnectMode
         Cell cell = m_state.cell(col, row);
         if (!cell.canConnect(color, false))
             return;
+        
+        if (cell.isLockedCage() && prev.isLockedCage())
+            return; // can't connect 2 locked cages
         
         list.add(cell);
         addNeighbors(cell.col, cell.row, color, list);

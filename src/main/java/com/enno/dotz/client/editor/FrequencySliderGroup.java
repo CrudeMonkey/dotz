@@ -8,6 +8,7 @@ import com.enno.dotz.client.Context;
 import com.enno.dotz.client.Direction;
 import com.enno.dotz.client.Generator;
 import com.enno.dotz.client.Generator.ItemFrequency;
+import com.enno.dotz.client.editor.EditLevelDialog.ChangeListener;
 import com.enno.dotz.client.item.Anchor;
 import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Blaster;
@@ -43,8 +44,12 @@ public class FrequencySliderGroup extends HLayout
     private Context ctx;
     private List<FrequencySlider> m_list = new ArrayList<FrequencySlider>();
     
-    public FrequencySliderGroup(boolean isNew, Config level)
+    private ChangeListener m_changeListener;
+    
+    public FrequencySliderGroup(boolean isNew, Config level, ChangeListener changeListener)
     {
+        m_changeListener = changeListener;
+        
         ctx = new Context(true, new Config()); // just used for drawing the sliders
         //TODO could copy the colors later       
         
@@ -448,6 +453,7 @@ public class FrequencySliderGroup extends HLayout
                     slider.setFrequency(left / n);
             }
         }
+        m_changeListener.changed();
     }
 
     public void setSelected(int index, boolean selected)
@@ -504,6 +510,7 @@ public class FrequencySliderGroup extends HLayout
                 }
             }
         }
+        m_changeListener.changed();
     }
 
     public boolean validate()

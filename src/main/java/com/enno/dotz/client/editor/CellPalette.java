@@ -23,7 +23,7 @@ public class CellPalette extends Palette<Cell>
 {
     public CellPalette()
     {
-        super(30, CellButton.SIZE, 7, 3);
+        super(30, CellButton.SIZE, 8, 3);
         
         ctx.doorLayer = new Layer();
         add(ctx.doorLayer);
@@ -34,23 +34,24 @@ public class CellPalette extends Palette<Cell>
         addButton(new Door(1, Direction.EAST, 0), 3, 0);
         addButton(new Door(1, Direction.SOUTH, 0), 4, 0);
         addButton(new Door(1, Direction.WEST, 0), 5, 0);
-        addButton(new Door(Controller.ON_OFF), 6, 0);
+        addButton(new Door(1, Direction.NONE, 0), 6, 0);
+        addButton(new Door(Controller.ON_OFF), 7, 0);
         
         addButton(new Slide(false), 0, 1);
         addButton(new Slide(true), 1, 1);
-        addButton(new Door(1, Direction.NONE, 0), 2, 1);
-        addButton(new Teleport(false), 3, 1);
-        addButton(new Teleport(true), 4, 1);
-        addButton(new ChangeColorCell(), 5, 1);        
-        addButton(new Bubble(), 6, 1);        
+        addButton(new Cage(1, false), 2, 1);
+        addButton(new Cage(1, true), 3, 1);
+        addButton(new Cage(Controller.ON_OFF), 4, 1);
+        addButton(new Teleport(false), 5, 1);
+        addButton(new Teleport(true), 6, 1);
+        addButton(new ChangeColorCell(), 7, 1);        
 
         addButton(new CircuitCell(), 0, 2);
         addButton(new ConveyorCell(Direction.NORTH, -1), 1, 2);
         addButton(new ConveyorCell(Direction.NORTH, 0), 2, 2);
         addButton(new ConveyorCell(Direction.NORTH, 1), 3, 2);
-        addButton(new Rock(), 4, 2);
-        addButton(new Cage(1), 5, 2);
-        addButton(new Cage(Controller.ON_OFF), 6, 2);
+        addButton(new Bubble(), 4, 2);        
+        addButton(new Rock(), 5, 2);
     }
     
     private void addButton(Cell cell, int col, int row)

@@ -49,17 +49,6 @@ public class Config
     public Boosts boosts;
     
     public GridState grid;
-
-    
-    public Config()
-    {
-        
-    }
-    
-    public void init()
-    {
-        
-    }
     
     public IColor drawColor(Integer color)
     {

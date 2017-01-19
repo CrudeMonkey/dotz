@@ -156,6 +156,8 @@ public abstract class ConnectMode
     {
         if (!cell.isLocked() && cell.item instanceof Blaster)
         {
+            ctx.score.usedBlaster();
+            
             ctx.state.activateLasers(false);
             popBubble(cell);
             ((Blaster) cell.item).arm();
@@ -181,6 +183,8 @@ public abstract class ConnectMode
     {
         if (!cell.isLocked() && cell.item instanceof Bomb)
         {
+            ctx.score.usedBomb();
+            
             ctx.state.activateLasers(false);
             popBubble(cell);
             ((Bomb) cell.item).arm();
@@ -323,17 +327,28 @@ public abstract class ConnectMode
                 final Cell neighbor = findSpecialNeighbor(cell);
                 if (neighbor == null)
                     return false;
+                
                 final Item neighborItem = neighbor.item;
                 
                 mergeCells(cell, neighbor, new Runnable() {
                     public void run()
                     {
+                        ctx.score.usedColorBomb();
                         if (neighborItem instanceof ColorBomb)
                         {
+                            ctx.score.usedColorBomb();
+                            ctx.scorePanel.update();
+                            
                             GetSwapMatches.animateTotalBomb(m_state, process());
                         }
                         else
                         {
+                            if (neighborItem instanceof Blaster)
+                                ctx.score.usedBlaster();
+                            else if (neighborItem instanceof Bomb)
+                                ctx.score.usedBomb();
+                            ctx.scorePanel.update();
+                            
                             replace(cell, neighborItem);
                         }
                     }
@@ -345,6 +360,7 @@ public abstract class ConnectMode
                 final Cell neighbor = findSpecialNeighbor(cell);
                 if (neighbor == null)
                     return false;
+                
                 final Item neighborItem = neighbor.item;
                 
                 mergeCells(cell, neighbor, new Runnable() {
@@ -352,10 +368,17 @@ public abstract class ConnectMode
                     {
                         if (neighborItem instanceof ColorBomb)
                         {
+                            ctx.score.usedColorBomb();
+                            ctx.score.usedBlaster();
+                            ctx.scorePanel.update();
+                            
                             replace(cell, originItem);
                         }
                         else if (neighborItem instanceof Bomb)
                         {
+                            ctx.score.usedBomb(); // NOTE: we didn't use a Blast yet!
+                            ctx.scorePanel.update();
+                            
                             Blaster b = (Blaster) originItem;
                             
                             Blaster newBlaster = new Blaster(b.isVertical(), false);
@@ -370,6 +393,9 @@ public abstract class ConnectMode
                         }
                         else if (neighborItem instanceof Blaster)
                         {
+                            ctx.score.usedBlaster();
+                            ctx.scorePanel.update();
+                            
                             Blaster b = (Blaster) originItem;
                             
                             Blaster newBlaster = new Blaster(b.isVertical(), false);
@@ -390,6 +416,7 @@ public abstract class ConnectMode
                 final Cell neighbor = findSpecialNeighbor(cell);
                 if (neighbor == null)
                     return false;
+                
                 final Item neighborItem = neighbor.item;
                 
                 mergeCells(cell, neighbor, new Runnable() {
@@ -397,10 +424,17 @@ public abstract class ConnectMode
                     {
                         if (neighborItem instanceof ColorBomb)
                         {
+                            ctx.score.usedBomb();
+                            ctx.score.usedColorBomb();
+                            ctx.scorePanel.update();
+                            
                             replace(cell, originItem);
                         }
                         else if (neighborItem instanceof Bomb)
                         {
+                            ctx.score.usedBomb();   // only one so far!
+                            ctx.scorePanel.update();
+                            
                             Bomb bomb = new Bomb(2, false); // 2: 5x5
                             bomb.arm();
                             bomb.init(ctx);
@@ -411,6 +445,9 @@ public abstract class ConnectMode
                         }
                         else if (neighborItem instanceof Blaster)
                         {
+                            ctx.score.usedBomb();   // NOTE we didn't use a Blaster yet!
+                            ctx.scorePanel.update();
+                            
                             Blaster b = (Blaster) neighborItem;
                             
                             Blaster newBlaster = new Blaster(b.isVertical(), false);

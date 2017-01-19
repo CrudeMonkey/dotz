@@ -2,6 +2,7 @@ package com.enno.dotz.client.editor;
 
 import com.enno.dotz.client.Boosts;
 import com.enno.dotz.client.Config;
+import com.enno.dotz.client.editor.EditLevelDialog.ChangeListener;
 import com.enno.dotz.client.ui.MXForm;
 import com.smartgwt.client.widgets.form.fields.SpinnerItem;
 import com.smartgwt.client.widgets.layout.VLayout;
@@ -17,7 +18,7 @@ public class BoostPropertiesPanel extends VLayout
     private SpinnerItem m_reshuffles;
     private SpinnerItem m_keys;
     
-    public BoostPropertiesPanel(Config level)
+    public BoostPropertiesPanel(Config level, ChangeListener changeListener)
     {
         setMargin(10);
         
@@ -30,6 +31,7 @@ public class BoostPropertiesPanel extends VLayout
         m_turners.setMin(0);
         m_turners.setStep(1);
         m_turners.setWidth(70);
+        m_turners.addChangedHandler(changeListener);
         
         m_drops = new SpinnerItem();
         m_drops.setTitle("Drops");
@@ -37,6 +39,7 @@ public class BoostPropertiesPanel extends VLayout
         m_drops.setMin(0);
         m_drops.setStep(1);
         m_drops.setWidth(70);
+        m_drops.addChangedHandler(changeListener);
         
         m_picks = new SpinnerItem();
         m_picks.setTitle("Ice Picks");
@@ -44,6 +47,7 @@ public class BoostPropertiesPanel extends VLayout
         m_picks.setMin(0);
         m_picks.setStep(1);
         m_picks.setWidth(70);
+        m_picks.addChangedHandler(changeListener);
         
         m_colorBombs = new SpinnerItem();
         m_colorBombs.setTitle("Color Bombs");
@@ -51,6 +55,7 @@ public class BoostPropertiesPanel extends VLayout
         m_colorBombs.setMin(0);
         m_colorBombs.setStep(1);
         m_colorBombs.setWidth(70);
+        m_colorBombs.addChangedHandler(changeListener);
         
         m_wildCards = new SpinnerItem();
         m_wildCards.setTitle("Wild Cards");
@@ -58,6 +63,7 @@ public class BoostPropertiesPanel extends VLayout
         m_wildCards.setMin(0);
         m_wildCards.setStep(1);
         m_wildCards.setWidth(70);
+        m_wildCards.addChangedHandler(changeListener);
         
         m_explodies = new SpinnerItem();
         m_explodies.setTitle("Explodies");
@@ -65,6 +71,7 @@ public class BoostPropertiesPanel extends VLayout
         m_explodies.setMin(0);
         m_explodies.setStep(1);
         m_explodies.setWidth(70);
+        m_explodies.addChangedHandler(changeListener);
         
         m_reshuffles = new SpinnerItem();
         m_reshuffles.setTitle("Reshuffles");
@@ -72,6 +79,7 @@ public class BoostPropertiesPanel extends VLayout
         m_reshuffles.setMin(0);
         m_reshuffles.setStep(1);
         m_reshuffles.setWidth(70);
+        m_reshuffles.addChangedHandler(changeListener);
         
         m_keys = new SpinnerItem();
         m_keys.setTitle("Keys");
@@ -79,6 +87,7 @@ public class BoostPropertiesPanel extends VLayout
         m_keys.setMin(0);
         m_keys.setStep(1);
         m_keys.setWidth(70);
+        m_keys.addChangedHandler(changeListener);
         
         form.setFields(m_turners, m_drops, m_picks, m_colorBombs, m_wildCards, m_explodies, m_reshuffles, m_keys);
         

@@ -1244,7 +1244,7 @@ public class RandomGridGenerator
         @Override
         protected Cell createCell(boolean x_sym, boolean y_sym)
         {
-            return new Cage(m_cageStrength);
+            return new Cage(m_cageStrength, false);
         }
     }
     

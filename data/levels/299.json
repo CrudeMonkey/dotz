@@ -18,11 +18,13 @@
     "..",
     ".."
   ],
+  "keys": [
+    {"p":[1,1]}
+  ],
   "randoms": [
     {"p":[0,0]},
     {"p":[1,0]},
-    {"p":[0,1]},
-    {"p":[1,1]}
+    {"p":[0,1]}
   ],
   "generator": {
     "generateLetters": false,
@@ -49,11 +51,11 @@
     "icePickRadius": 3,
     "dropRadius": 3,
     "freq": [
-      [20,"dot",0],
-      [20,"dot",1],
-      [20,"dot",2],
-      [20,"dot",3],
-      [20,"dot",4]
+      [19.9,"dot",0],
+      [19.9,"dot",1],
+      [20.3,"dot",2],
+      [19.9,"dot",3],
+      [19.9,"dot",4]
     ]
   },
   "goals": {
@@ -64,5 +66,5 @@
     "reshuffles": 5,
     "keys": 1
   },
-  "lastModified": "1484594899924"
+  "lastModified": "1484598620554"
 }

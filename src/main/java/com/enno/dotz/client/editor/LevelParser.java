@@ -140,7 +140,8 @@ public class LevelParser
                     if (row.isDefined("strength"))
                     {
                         int strength = row.getAsInteger("strength");
-                        cage = new Cage(strength);
+                        boolean blocking = row.isBoolean("blocking") ? row.getAsBoolean("blocking") : false;
+                        cage = new Cage(strength, blocking);
                     }
                     else
                     {
@@ -391,7 +392,8 @@ public class LevelParser
         }
         if (itemClass.equals("random"))
         {
-            return new RandomItem(stuck);
+            boolean radioActive = row.isBoolean("radioActive") ? row.getAsBoolean("radioActive") : false;
+            return new RandomItem(stuck, radioActive);
         }
         if (itemClass.equals("chest"))
         {
@@ -498,6 +500,15 @@ public class LevelParser
         if (json.isInteger("rockets"))
             goal.setRockets(json.getAsInteger("rockets"));
 
+        if (json.isInteger("colorBombs"))
+            goal.setColorBombs(json.getAsInteger("colorBombs"));
+
+        if (json.isInteger("bombs"))
+            goal.setBombs(json.getAsInteger("bombs"));
+
+        if (json.isInteger("blasters"))
+            goal.setBlasters(json.getAsInteger("blasters"));
+
         if (json.isInteger("blockers"))
             goal.setBlockers(json.getAsInteger("blockers"));
 
@@ -585,7 +596,7 @@ public class LevelParser
                     case 'F': item = new Fire(false); break;
                     case 'A': item = new Anchor(false); break;
                     case 'Y': item = new YinYang(false); break;
-                    case '?': item = new RandomItem(false); break;
+                    case '?': item = new RandomItem(false, false); break;
                     default: 
                         if (Character.isDigit(c))
                         {
@@ -701,8 +712,8 @@ public class LevelParser
         if (p.isInteger("maxWordLength"))
             g.maxWordLength = p.getAsInteger("maxWordLength");
         
-        if (p.isInteger("radioActivePct"))
-            g.radioActivePct = p.getAsInteger("radioActivePct");
+        if (p.isDouble("radioActivePct"))
+            g.radioActivePct = p.getAsDouble("radioActivePct");
         
         NArray freq = p.getAsArray("freq");
         for (int i = 0, n = freq.size(); i < n; i++)
@@ -972,7 +983,12 @@ public class LevelParser
                     if (b.isBlinking())
                         a.put("seq", b.getSequence());
                     else
+                    {
                         a.put("strength", b.getStrength());
+                        
+                        if (b.isBlocking())
+                            a.put("blocking", true);
+                    }
                     
                     gridLine += '.';
                     cages.push(a);
@@ -1351,6 +1367,10 @@ public class LevelParser
         }
         else if (item instanceof RandomItem)
         {
+            RandomItem rnd = (RandomItem) item;
+            if (rnd.isRadioActive())
+                a.put("radioActive", true);
+            
             if (addClass)
                 a.put("class", "random");
         }
@@ -1451,6 +1471,15 @@ public class LevelParser
         
         if (g.getRockets() != 0)
             p.put("rockets", g.getRockets());
+        
+        if (g.getColorBombs() != 0)
+            p.put("colorBombs", g.getColorBombs());
+        
+        if (g.getBombs() != 0)
+            p.put("bombs", g.getBombs());
+        
+        if (g.getBlasters() != 0)
+            p.put("blasters", g.getBlasters());
         
         if (g.getBlockers() != 0)
             p.put("blockers", g.getBlockers());

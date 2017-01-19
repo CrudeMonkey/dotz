@@ -103,7 +103,10 @@ public class GridState
                 if (c.item != null)
                 {
                     if (replaceRandom && (c.item instanceof RandomItem))
-                        c.item = ctx.generator.getNextItem(ctx, true);
+                    {
+                        RandomItem rnd = (RandomItem) c.item;
+                        c.item = ctx.generator.getNextItem(ctx, true, rnd.isRadioActive());
+                    }
                     else
                     {
                         if (c.item instanceof Dot)

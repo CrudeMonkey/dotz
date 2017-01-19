@@ -459,6 +459,9 @@ public class DragConnectMode extends ConnectMode
                         if (!neighbor.canConnect(m_color, m_isWordMode))
                             return;
                         
+                        if (neighbor.isLockedCage() && m_state.cell(m_lastCellCol, m_lastCellRow).isLockedCage())
+                            return; // make sure we're not connecting 2 locked cages
+                        
                         if (m_cells.didCell(col, row))
                         {
                             if (ctx.isWild(m_color)) // can't make a square of all wildcards
@@ -909,6 +912,8 @@ public class DragConnectMode extends ConnectMode
             }
             
             cancel();
+            
+            ctx.score.usedColorBomb();
             
             Sound.DROP.play();
             if (ctx.generator.dominoMode)

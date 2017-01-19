@@ -25,6 +25,9 @@ public class Goal
     protected int m_blockers;
     protected int m_zapBlockers;
     protected int m_bubbles;
+    protected int m_colorBombs;
+    protected int m_bombs;
+    protected int m_blasters;
     
     protected int m_score;
     protected int m_time;
@@ -87,7 +90,7 @@ public class Goal
         return m_clocks;
     }
 
-    public void setClocks(Integer goal)
+    public void setClocks(int goal)
     {
         m_clocks = goal;
     }
@@ -275,5 +278,35 @@ public class Goal
     public void setChainGoal(ChainGoal chainGoal)
     {
         m_chainGoal = chainGoal;
+    }
+
+    public int getColorBombs()
+    {
+        return m_colorBombs;
+    }
+
+    public void setColorBombs(int colorBombs)
+    {
+        m_colorBombs = colorBombs;
+    }
+
+    public int getBombs()
+    {
+        return m_bombs;
+    }
+
+    public void setBombs(int bombs)
+    {
+        m_bombs = bombs;
+    }
+
+    public int getBlasters()
+    {
+        return m_blasters;
+    }
+
+    public void setBlasters(int blasters)
+    {
+        m_blasters = blasters;
     }
 }

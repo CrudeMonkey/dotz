@@ -24,8 +24,11 @@ import com.enno.dotz.client.Cell.CircuitCell;
 import com.enno.dotz.client.Cell.Door;
 import com.enno.dotz.client.item.Anchor;
 import com.enno.dotz.client.item.Animal;
+import com.enno.dotz.client.item.Blaster;
 import com.enno.dotz.client.item.Blocker;
+import com.enno.dotz.client.item.Bomb;
 import com.enno.dotz.client.item.Clock;
+import com.enno.dotz.client.item.ColorBomb;
 import com.enno.dotz.client.item.Diamond;
 import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
@@ -235,6 +238,18 @@ public class ScorePanel extends LienzoPanel
         need = goal.getRockets();
         if (need != 0)
             m_list.add(new RocketGoal(need, ctx));
+        
+        need = goal.getBlasters();
+        if (need != 0)
+            m_list.add(new BlasterGoal(need, ctx));
+        
+        need = goal.getBombs();
+        if (need != 0)
+            m_list.add(new BombGoal(need, ctx));
+        
+        need = goal.getColorBombs();
+        if (need != 0)
+            m_list.add(new ColorBombGoal(need, ctx));
         
         need = goal.getDominoes();
         if (need != 0)
@@ -970,7 +985,7 @@ public class ScorePanel extends LienzoPanel
         
         protected IPrimitive<?> createShape()
         {
-            Cage animal = new Cage(1);
+            Cage animal = new Cage(1, false);
             double sz = SHAPE_SIZE * 0.6;
             
             Group wrap = new Group();
@@ -1284,6 +1299,123 @@ public class ScorePanel extends LienzoPanel
                 else
                     setText(got + " / " + m_goal);
             }
+        }
+    }
+    
+    public static class BlasterGoal extends GoalItem
+    {
+        private int m_goal;
+        
+        public BlasterGoal(int need, Context ctx)
+        {
+            super(ctx);
+            
+            m_goal = need;
+        }
+        
+        protected IPrimitive<?> createShape()
+        {
+            Blaster animal = new Blaster(false, false);
+            animal.setContext(ctx);
+            return animal.createShape(SHAPE_SIZE);
+        }
+        
+        protected void updateText()
+        {
+//            if (m_goal == Goal.ALL)
+//            {
+//                int gen = ctx.score.getBlasters();
+//                if (gen > 0)
+//                    setText("" + gen);
+//                else 
+//                    setCompleted();
+//            }
+//            else
+//            {
+                int got = ctx.score.getUsedBlasters();
+                if (got >= m_goal)
+                    setCompleted();
+                else
+                    setText(got + " / " + m_goal);
+//            }
+        }
+    }
+    
+    public static class BombGoal extends GoalItem
+    {
+        private int m_goal;
+        
+        public BombGoal(int need, Context ctx)
+        {
+            super(ctx);
+            
+            m_goal = need;
+        }
+        
+        protected IPrimitive<?> createShape()
+        {
+            Bomb animal = new Bomb();
+            animal.setContext(ctx);
+            return animal.createShape(SHAPE_SIZE);
+        }
+        
+        protected void updateText()
+        {
+//            if (m_goal == Goal.ALL)
+//            {
+//                int gen = ctx.score.getRocketsInGrid();
+//                if (gen > 0)
+//                    setText("" + gen);
+//                else 
+//                    setCompleted();
+//            }
+//            else
+//            {
+                int got = ctx.score.getUsedBombs();
+                if (got >= m_goal)
+                    setCompleted();
+                else
+                    setText(got + " / " + m_goal);
+//            }
+        }
+    }
+    
+    public static class ColorBombGoal extends GoalItem
+    {
+        private int m_goal;
+        
+        public ColorBombGoal(int need, Context ctx)
+        {
+            super(ctx);
+            
+            m_goal = need;
+        }
+        
+        protected IPrimitive<?> createShape()
+        {
+            ColorBomb animal = new ColorBomb(false);
+            animal.setContext(ctx);
+            return animal.createShape(SHAPE_SIZE);
+        }
+        
+        protected void updateText()
+        {
+//            if (m_goal == Goal.ALL)
+//            {
+//                int gen = ctx.score.getRocketsInGrid();
+//                if (gen > 0)
+//                    setText("" + gen);
+//                else 
+//                    setCompleted();
+//            }
+//            else
+//            {
+                int got = ctx.score.getUsedColorBombs();
+                if (got >= m_goal)
+                    setCompleted();
+                else
+                    setText(got + " / " + m_goal);
+//            }
         }
     }
 }

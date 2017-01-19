@@ -164,7 +164,12 @@ public abstract class Cell
     {
         return false;
     }
-    
+
+    public boolean isLockedBlockingCage()
+    {
+        return false;
+    }
+
     /**
      * Whether it's a locked Door or a Rock.
      * 
@@ -303,7 +308,8 @@ public abstract class Cell
         {
             if (item instanceof RandomItem)
             {
-                item = ctx.generator.getNextItem(ctx, false);
+                RandomItem rnd = (RandomItem) item;
+                item = ctx.generator.getNextItem(ctx, false, rnd.isRadioActive());
                 // NOTE: calls item.init(ctx);
             }
             else
@@ -1457,14 +1463,16 @@ public abstract class Cell
         private Text m_text;
         protected IColor m_color = ColorName.BLACK;
         
+        private boolean m_blocking;
         private boolean m_blinking;
         private Controller m_controller;
         
         private Line[] m_offDash = new Line[3];
         
-        public Cage(int strength)
+        public Cage(int strength, boolean blocking)
         {
             m_strength = strength;
+            m_blocking = blocking;
         }
         
         /** Blinking cage */
@@ -1480,6 +1488,11 @@ public abstract class Cell
             return m_blinking;
         }
         
+        public boolean isBlocking()
+        {
+            return m_blocking;
+        }
+        
         @Override
         public boolean hasController()
         {
@@ -1489,7 +1502,7 @@ public abstract class Cell
         @Override
         public Cell copy()
         {
-            Cage c = m_blinking ? new Cage(m_controller.getSequence()) : new Cage(m_strength);
+            Cage c = m_blinking ? new Cage(m_controller.getSequence()) : new Cage(m_strength, m_blocking);
             c.copyValues(this);
             return c;
         }
@@ -1507,6 +1520,11 @@ public abstract class Cell
         public boolean isLockedCage()
         {
             return isLocked();
+        }
+        
+        public boolean isLockedBlockingCage()
+        {
+            return isLocked() && isBlocking();
         }
         
         @Override
@@ -1662,19 +1680,33 @@ public abstract class Cell
             shape.add(r);
             
             double w = s2 / 4;
-            for (int i = 1; i < 4; i++)
+            
+            if (m_blocking)
             {
-                Line line = new Line(b + i * w, b, b + i * w, sz - b);
-                line.setStrokeColor(m_color);
-                
-                if (m_blinking)
+                for (int i = 1; i < 4; i++)
                 {
-                    line.setLineCap(LineCap.SQUARE);
-                    line.setDashArray(3, 3);
-                    m_offDash[i-1] = line;
+                    Line line = new Line(b, b + i * w, sz - b, b + i * w);
+                    line.setStrokeColor(m_color);
+                    
+                    shape.add(line);
                 }
-                
-                shape.add(line);
+            }
+            else
+            {
+                for (int i = 1; i < 4; i++)
+                {
+                    Line line = new Line(b + i * w, b, b + i * w, sz - b);
+                    line.setStrokeColor(m_color);
+                    
+                    if (m_blinking)
+                    {
+                        line.setLineCap(LineCap.SQUARE);
+                        line.setDashArray(3, 3);
+                        m_offDash[i-1] = line;
+                    }
+                    
+                    shape.add(line);
+                }
             }
             
             m_text = new Text("" + m_strength);
