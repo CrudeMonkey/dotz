@@ -63,6 +63,7 @@ public abstract class GeneratorPropertiesPanel extends VLayout
     private SpinnerItem m_maxWordLength;
     private SpinnerItem m_chestStrength;
     private SliderItem m_radioActivePct;
+    private SpinnerItem m_eggsNeeded;
 
     public GeneratorPropertiesPanel(Config level, final ChangeListener changeListener)
     {
@@ -306,6 +307,15 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         m_radioActivePct.setPrompt("Percentage of radio active Dots and DotBombs");
         m_radioActivePct.addChangedHandler(changeListener);
         
+        m_eggsNeeded = new SpinnerItem();
+        m_eggsNeeded.setTitle("Eggs/Bird Ratio");
+        m_eggsNeeded.setMin(2);
+        m_eggsNeeded.setValue(3);
+        m_eggsNeeded.setStep(1);
+        m_eggsNeeded.setWidth(70);
+        m_eggsNeeded.setPrompt("Number of eggs per cracked egg, and cracked eggs per bird");
+        m_eggsNeeded.addChangedHandler(changeListener);
+        
         m_randomSeed.setColSpan(2);
         m_rollMode.setColSpan(2);
         m_mode.setColSpan(2);
@@ -323,7 +333,7 @@ public abstract class GeneratorPropertiesPanel extends VLayout
                 m_minChainLength, m_maxAnchors, m_blockerStrength,
                 m_rewardStrategies, m_editRewards, m_icePickRadius, m_dropRadius,
                 m_removeLetters, m_findWords, m_maxWordLength,
-                m_radioActivePct, m_initialDotsOnly);
+                m_radioActivePct, m_initialDotsOnly, m_eggsNeeded);
         
         m_seed.setDisabled(true);
         m_genSeed.setDisabled(true);
@@ -361,6 +371,7 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         m_icePickRadius.setRadius(g.icePickRadius); 
         m_dropRadius.setRadius(g.dropRadius);
         m_radioActivePct.setValue(g.radioActivePct);
+        m_eggsNeeded.setValue(g.eggsNeeded);
         
         m_removeLetters.setValue(g.removeLetters);
         m_findWords.setValue(g.findWords);
@@ -435,6 +446,7 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         g.animalType = Animal.Type.fromName(m_animalType.getValueAsString());
         g.animalAction = Animal.Action.fromName(m_animalAction.getValueAsString());
         g.initialDotsOnly = m_initialDotsOnly.isChecked();
+        g.eggsNeeded = Integer.parseInt(m_eggsNeeded.getValueAsString());
         
         g.generateLetters = isLetterMode();
         g.swapMode = isSwapMode();

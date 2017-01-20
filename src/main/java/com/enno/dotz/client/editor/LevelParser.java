@@ -277,7 +277,7 @@ public class LevelParser
         }
         if (itemClass.equals("blocker"))
         {
-            int strength = row.getAsInteger("strength");
+            int strength = row.isInteger("strength") ? row.getAsInteger("strength") : 1;
             boolean zapOnly = row.isBoolean("zapOnly") ? row.getAsBoolean("zapOnly") : false;
             return new Blocker(strength, stuck, zapOnly);
         }
@@ -684,6 +684,9 @@ public class LevelParser
         
         if (p.isInteger("blockerStrength"))
             g.blockerStrength = p.getAsInteger("blockerStrength");
+        
+        if (p.isInteger("eggsNeeded"))
+            g.eggsNeeded = p.getAsInteger("eggsNeeded");
         
         if (p.isBoolean("initialDotsOnly"))
             g.initialDotsOnly = p.getAsBoolean("initialDotsOnly");
@@ -1542,6 +1545,7 @@ public class LevelParser
         p.put("blockerStrength", g.blockerStrength);
         p.put("animalType", g.animalType.getName());
         p.put("animalAction", g.animalAction.getName());
+        p.put("eggsNeeded", g.eggsNeeded);
         
         if (g.radioActivePct > 0)
             p.put("radioActivePct", g.radioActivePct);

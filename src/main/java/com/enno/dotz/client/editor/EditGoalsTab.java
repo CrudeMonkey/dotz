@@ -307,7 +307,7 @@ public class EditGoalsTab extends VLayout
             }
         };
 
-        m_colorBombs = new Num("ColorBombs", changeListener){
+        m_colorBombs = new Num("Color Bombs", changeListener){
             @Override
             public void prepareSave(Goal goal)
             {

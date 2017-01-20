@@ -271,7 +271,7 @@ public class DragConnectMode extends ConnectMode
         {
             if (m_isEggMode)
             {
-                if (m_cells.size() < 3)
+                if (m_cells.size() < ctx.generator.eggsNeeded)
                     return;
             }
             else if (m_isDominoMode)
@@ -793,6 +793,18 @@ public class DragConnectMode extends ConnectMode
                 m_removeItem.run();
         }
         
+        protected void process(UserAction action)
+        {
+            m_connectMode.stop();
+            
+            m_state.processChain(action, new Runnable() {
+                public void run()
+                {
+                    m_connectMode.start(); // next move
+                }
+            });
+        }
+        
         protected void process()
         {
             m_connectMode.stop();
@@ -1260,8 +1272,11 @@ public class DragConnectMode extends ConnectMode
             Sound.DRIP.play();
             cancel();
             
+            UserAction action = new UserAction();
+            action.dousedFire = true;
+            
             removeStartItem();
-            process();
+            process(action);
         }        
     }
     

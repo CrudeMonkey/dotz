@@ -11,6 +11,9 @@ public class UserAction
     Integer wordPoints;
     Integer color;
     
+    public boolean dousedFire = false;
+    public GetSwapMatches swapMatches;
+    
     public UserAction()
     {
         cells = new CellList();
@@ -29,9 +32,12 @@ public class UserAction
     }
 
     // ClickConnectMode
-    public UserAction(CellList cells)
+    public UserAction(CellList cells, boolean isEggMode)
     {
         this.cells = cells;
-        this.color = cells.getColor();
+        this.isEggMode = isEggMode;
+        if (!isEggMode)
+            this.color = cells.getColor();
+
     }
 }

@@ -72,6 +72,7 @@ public class Generator
     public int           icePickRadius    = 3;
     public int           dropRadius       = 3;
     public double        radioActivePct   = 0;
+    public int           eggsNeeded       = 3;                  // 3 eggs makes a cracked egg, 3 cracked eggs makes a bird
     
     // Word Mode settings
     public boolean       removeLetters    = true;
@@ -186,6 +187,7 @@ public class Generator
         g.findWords = findWords;
         g.maxWordLength = maxWordLength;
         g.radioActivePct = radioActivePct;
+        g.eggsNeeded = eggsNeeded;
         
         for (ItemFrequency f : m_list)
         {

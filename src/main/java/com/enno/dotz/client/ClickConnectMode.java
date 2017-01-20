@@ -1,5 +1,7 @@
 package com.enno.dotz.client;
 
+import java.util.Collections;
+
 import com.ait.lienzo.client.core.event.NodeMouseDownEvent;
 import com.ait.lienzo.client.core.event.NodeMouseDownHandler;
 import com.ait.lienzo.client.core.event.NodeMouseOutEvent;
@@ -7,10 +9,12 @@ import com.ait.lienzo.client.core.event.NodeMouseOutHandler;
 import com.ait.lienzo.client.core.shape.Layer;
 import com.enno.dotz.client.DragConnectMode.ColorBombMode;
 import com.enno.dotz.client.SoundManager.Sound;
-import com.enno.dotz.client.item.Blaster;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.DotBomb;
+import com.enno.dotz.client.item.Egg;
 import com.enno.dotz.client.item.Item;
+
+import net.sf.cglib.core.CollectionUtils;
 
 public class ClickConnectMode extends ConnectMode
 {
@@ -142,7 +146,8 @@ public class ClickConnectMode extends ConnectMode
                 
                 stop();
                 
-                UserAction action = new UserAction(matches);
+                boolean isEggMode = matches.get(0).item instanceof Egg;
+                UserAction action = new UserAction(matches, isEggMode);
                 m_state.processChain(action, new Runnable()
                 {
                     public void run()
@@ -150,12 +155,6 @@ public class ClickConnectMode extends ConnectMode
                         start(); // next move
                     }
                 });
-
-                
-//                m_start = cell;
-//                                
-//                m_lineMoveReg = m_layer.addNodeMouseMoveHandler(m_lineMoveHandler);
-//                m_mouseUpReg = m_layer.addNodeMouseUpHandler(m_mouseUpHandler);
             }                
         };
         
@@ -192,6 +191,13 @@ public class ClickConnectMode extends ConnectMode
         if (item == null || cell.isLockedDoor())
             return null;
         
+        if (item instanceof Egg)
+        {
+            CellList list = new CellList();
+            boolean isCracked = ((Egg) cell.item).isCracked();
+            return clickEgg(list, cell.col, cell.row, isCracked, null);
+        }
+        
         if (!(item instanceof Dot || item instanceof DotBomb))
             return null;
         
@@ -204,6 +210,57 @@ public class ClickConnectMode extends ConnectMode
             return null;
         
         return list;
+    }
+    
+    protected CellList clickEgg(CellList list, int col, int row, boolean isCracked, Cell prev)
+    {
+        //TODO doesn't work when you click on the middle one of 3
+        
+        if (!m_state.isValidCell(col, row))
+            return null;
+        
+        Cell cell = m_state.cell(col, row);
+        if (cell.isLockedDoor() || list.didCell(col, row))
+            return null;
+        
+        if (prev != null && cell.isLockedCage() && prev.isLockedCage())
+            return null; // can't connect 2 locked cages
+        
+        if (!(cell.item instanceof Egg) || ((Egg) cell.item).isCracked() != isCracked)
+            return null;
+        
+        list.add(cell);
+        if (list.size() == ctx.generator.eggsNeeded)
+        {
+            Collections.reverse(list);
+            return list;
+        }
+        
+        CellList result;
+        if ((result = clickEgg(list, col - 1, row, isCracked, cell)) != null)
+            return result;
+        if ((result = clickEgg(list, col + 1, row, isCracked, cell)) != null)
+            return result;
+        if ((result = clickEgg(list, col, row - 1, isCracked, cell)) != null)
+            return result;
+        if ((result = clickEgg(list, col, row + 1, isCracked, cell)) != null)
+            return result;
+        
+        if (ctx.generator.diagonalMode)
+        {
+            if ((result = clickEgg(list, col - 1, row - 1, isCracked, cell)) != null)
+                return result;
+            if ((result = clickEgg(list, col + 1, row - 1, isCracked, cell)) != null)
+                return result;
+            if ((result = clickEgg(list, col - 1, row + 1, isCracked, cell)) != null)
+                return result;
+            if ((result = clickEgg(list, col + 1, row + 1, isCracked, cell)) != null)
+                return result;
+        }
+        
+        list.remove(list.size() - 1);
+        
+        return null;
     }
     
     private void addNeighbors(int col, int row, int color, CellList list)

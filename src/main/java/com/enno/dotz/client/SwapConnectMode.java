@@ -88,7 +88,7 @@ public class SwapConnectMode extends ConnectMode
                 
                 ctx.lastMove = new Pt(end.col, end.row);
                 
-                m_state.processSwapChain(matches, new Runnable() {
+                m_state.processSwapChain(new UserAction(), matches, new Runnable() {
                     public void run()
                     {
                         start(); // next move

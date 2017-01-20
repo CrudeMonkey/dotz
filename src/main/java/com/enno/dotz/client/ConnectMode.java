@@ -470,8 +470,10 @@ public abstract class ConnectMode
         
         private void replace(final Cell origin, Item item)
         {
+            int n = item instanceof Blaster ? 14 : 18;
+            
             CellList cells = new CellList();
-            for (int i = 0; i < 10; i++)    // TODO how many?
+            for (int i = 0; i < n; i++)    // TODO how many?
             {
                 Cell cell = getRandomCell(cells);
                 if (cell == null)

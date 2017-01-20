@@ -223,16 +223,27 @@ public class GridState
         list.run();
     }
 
+//    public void processChain(final Runnable nextMoveCallback)
+//    {
+//        if (ctx.generator.swapMode)
+//            processSwapChain(new UserAction(), null, nextMoveCallback);
+//        else
+//            processChain(new UserAction(), nextMoveCallback);
+//    }
+    
     public void processChain(final Runnable nextMoveCallback)
     {
-        if (ctx.generator.swapMode)
-            processSwapChain(null, nextMoveCallback);
-        else
-            processChain(new UserAction(), nextMoveCallback);
+        processChain(new UserAction(), nextMoveCallback);
     }
     
     public void processChain(final UserAction action, final Runnable nextMoveCallback)
     {
+        if (ctx.generator.swapMode)
+        {
+            processSwapChain(action, action.swapMatches, nextMoveCallback);
+            return;
+        }
+        
         if (action.isWordMode) // && !ctx.generator.findWords)
         {
             new ShowWordCallback(ctx, action.word, action.wordPoints, action.color)
@@ -269,6 +280,9 @@ public class GridState
         ctx.score.addMove();
         
         m_lastExplodedFire = ctx.score.getExplodedFire();
+        if (action.dousedFire)
+            m_lastExplodedFire--;   // used Drop to douse fire
+        
         clearStunnedAnimals();
         activateLasers(false);
         
@@ -340,11 +354,14 @@ public class GridState
         list.run();
     }
     
-    public void processSwapChain(GetSwapMatches matches, final Runnable nextMoveCallback)
+    public void processSwapChain(final UserAction action, GetSwapMatches matches, final Runnable nextMoveCallback)
     {
         ctx.score.addMove();
         
         m_lastExplodedFire = ctx.score.getExplodedFire();
+        if (action.dousedFire)
+            m_lastExplodedFire--;   // used Drop to douse fire
+        
         clearStunnedAnimals();
         activateLasers(false);
         

@@ -60,13 +60,13 @@ public class Bird extends Group
         {
             int n = ctx.cfg.numColumns - col;
             //m_transformGroup.setTransform(new Transform(1, 0, 0, 1, 0, 0)); 
-            animate(x1, y1, x1 + n * ctx.cfg.size, y1, n * CELL_TIME, ctx.laserLayer, null);
+            animate(x1, y1, x1 + n * ctx.cfg.size, y1, n * CELL_TIME, ctx.laserLayer, whenDone);
         }
         else
         {
             int n = col;
             m_transformGroup.setTransform(new Transform(-1, 0, 0, 1, 0, 0)); 
-            animate(x1, y1, 0, y1, n * CELL_TIME, ctx.laserLayer, null);
+            animate(x1, y1, 0, y1, n * CELL_TIME, ctx.laserLayer, whenDone);
         }
     }
     
