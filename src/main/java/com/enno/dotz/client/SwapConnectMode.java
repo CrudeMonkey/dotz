@@ -130,7 +130,10 @@ public class SwapConnectMode extends ConnectMode
                 if (startSpecialMode(cell, event.getX(), event.getY()))
                     return;
                 
-                if (!(GetSwapMatches.isSwapStart(cell) || cell.item instanceof Knight))
+                if (!GetSwapMatches.isSwapStart(cell))
+//                if (!(GetSwapMatches.isSwapStart(cell) || cell.item instanceof Knight))
+                
+//                if (cell.item == null || !cell.item.canSwap())
                     return;
                 
                 m_swapping = true;

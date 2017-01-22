@@ -46,7 +46,9 @@ import com.enno.dotz.client.item.Item.ExplodeAction;
 import com.enno.dotz.client.item.Laser;
 import com.enno.dotz.client.item.RandomItem;
 import com.enno.dotz.client.item.Rocket;
+import com.enno.dotz.client.item.Striped;
 import com.enno.dotz.client.item.Wild;
+import com.enno.dotz.client.item.WrappedDot;
 import com.google.gwt.dom.client.Style.FontWeight;
 
 public abstract class Cell
@@ -2188,6 +2190,8 @@ public abstract class Cell
         {
             ITEM("Item"),
             BOMBIFY("Bombify"),
+            WRAP("Wrap"),
+            STRIPE("Stripe"),
             MULTIPLIER("Multiplier"),
             RADIATE("Radiate"),
             BUBBLE("Bubble"),
@@ -2442,17 +2446,32 @@ public abstract class Cell
             g.setX(m_x - w / 2);
             g.setY(m_y - h / 2 - sw2);
             
+            double x = w / 2;
             if (m_type == MachineType.ITEM || m_type == MachineType.BOMBIFY || m_type == MachineType.COIN)
             {
                 IPrimitive<?> item = m_launchItem.createShape(sz * 0.6);
-                item.setX(w / 2);
-                item.setY(w / 2);
+                item.setX(x);
+                item.setY(x);
                 g.add(item);
             }
             else if (m_type == MachineType.BUBBLE)
             {
                 IPrimitive<?> item = new Bubble().createShape(sz * 0.6);
-                double x = w / 2 - sz * 0.3;
+                x -= sz * 0.3;
+                item.setX(x);
+                item.setY(x);
+                g.add(item);
+            }
+            else if (m_type == MachineType.WRAP)
+            {
+                IPrimitive<?> item = new WrappedDot(0).createShape(sz * 0.6);
+                item.setX(x);
+                item.setY(x);
+                g.add(item);
+            }
+            else if (m_type == MachineType.STRIPE)
+            {
+                IPrimitive<?> item = new Striped(0, false).createShape(sz * 0.6);
                 item.setX(x);
                 item.setY(x);
                 g.add(item);
@@ -2460,7 +2479,6 @@ public abstract class Cell
             else if (m_type == MachineType.MULTIPLIER)
             {
                 IPrimitive<?> item = Dot.getMultiplierShapeForMachine();
-                double x = w / 2;
                 item.setX(x);
                 item.setY(x);
                 g.add(item);
@@ -2468,7 +2486,6 @@ public abstract class Cell
             else if (m_type == MachineType.RADIATE)
             {
                 IPrimitive<?> item = RadioActive.createRadioActiveShape(sz * 0.5);
-                double x = w / 2;
                 item.setX(x);
                 item.setY(x);
                 g.add(item);
@@ -2570,6 +2587,17 @@ public abstract class Cell
                 Dot newDot = dot.copy();
                 return new DotBomb(newDot, b.getStrength(), dot.isStuck());
             }
+            else if (m_type == MachineType.WRAP)
+            {
+                Dot dot = (Dot) target.item;
+                return new WrappedDot(dot.color);
+            }
+            else if (m_type == MachineType.STRIPE)
+            {
+                Dot dot = (Dot) target.item;
+                boolean vertical = ctx.generator.getRandom().nextBoolean();
+                return new Striped(dot.color, vertical);
+            }
             else if (m_type == MachineType.MULTIPLIER)
             {
                 return Dot.upgradeMultiplier(target.item, ctx);
@@ -2610,7 +2638,7 @@ public abstract class Cell
             {
                 return cell instanceof ItemCell;
             }
-            else if (m_type == MachineType.BOMBIFY)
+            else if (m_type == MachineType.BOMBIFY || m_type == MachineType.WRAP || m_type == MachineType.STRIPE)
             {
                 if (cell.isLocked() || !cell.canContainItems())
                     return false;

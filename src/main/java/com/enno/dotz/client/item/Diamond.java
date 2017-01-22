@@ -82,6 +82,12 @@ public class Diamond extends Item
     }
     
     @Override
+    public boolean canBeEaten()
+    {
+        return false;
+    }
+    
+    @Override
     protected Item doCopy()
     {
         return new Diamond();

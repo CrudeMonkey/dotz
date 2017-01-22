@@ -9,7 +9,7 @@
   - fire goes thru transporter
 * DONE: New Goal: sequence of chains, e.g. first 3 red, then 5 green, then 8 blue etc.
 * change Striped color in Editor
-* add Wrapped Dot in Editor
+* add Wrapped Dot, Striped in Editor
 * when extinguishing Fire with a Drop, it still grows
 * DONE: (Bomb) unarmed explodies - triggered by clicking
 * DONE: ClickConnectMode: activate explodies and Color bombs, Blasters
@@ -28,6 +28,7 @@
   - Animal 
   - This is too hard. Note that it hard to find a word of length 5, let alone the same color.
   - How about same color and len > 4 OR len > 6
+* Swap Mode: implement 2 Striped candy combo in GetSwapMatches
 
 TEST
 * rockets, wrapped dots, blasters, explodies: armed, see class Explosions

@@ -32,7 +32,7 @@ public class WrappedDot extends Item
     @Override
     public boolean canGrowFire()
     {
-        return true; //TODO or not?
+        return true;
     }
 
     @Override
@@ -91,6 +91,6 @@ public class WrappedDot extends Item
     @Override
     public ExplodeAction explode(Integer color, int chainSize)
     {
-        return ExplodeAction.REMOVE; //TODO
+        return ExplodeAction.EXPLODY; //TODO
     }
 }

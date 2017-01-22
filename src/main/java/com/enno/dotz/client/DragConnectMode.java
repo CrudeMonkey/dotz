@@ -33,7 +33,6 @@ import com.enno.dotz.client.item.Knight;
 import com.enno.dotz.client.item.Mirror;
 import com.enno.dotz.client.item.Turner;
 import com.enno.dotz.client.item.Wild;
-import com.enno.dotz.client.item.WrappedDot;
 import com.google.gwt.event.shared.HandlerRegistration;
 
 public class DragConnectMode extends ConnectMode
@@ -1002,9 +1001,6 @@ public class DragConnectMode extends ConnectMode
 
         private void explode(Cell cell, Integer color, Set<Cell> exploded, Set<Cell> explodies)
         {
-            if (cell.item instanceof WrappedDot)
-                explodies.add(cell);
-            
             exploded.add(cell);
             cell.explode(color, 1);
         }

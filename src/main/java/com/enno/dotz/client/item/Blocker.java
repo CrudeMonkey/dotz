@@ -67,6 +67,18 @@ public class Blocker extends Item
     }
     
     @Override
+    public boolean canBeEaten()
+    {
+        return false;
+    }
+    
+    @Override
+    public boolean canGrowFire()
+    {
+        return false;
+    }
+    
+    @Override
     public void incrementStrength(int ds)
     {
         if (m_strength <= 1 && ds == -1)
@@ -82,6 +94,8 @@ public class Blocker extends Item
         
         if (isStuck())
             g.add(createStuckShape(sz));
+
+        sz *= 0.9;
         
         Ellipse e = new Ellipse(sz * 0.8, sz * 0.75);   // cap
         e.setFillColor(m_zapOnly ? ColorName.RED : Color.fromColorString("#7BD359"));
@@ -127,7 +141,7 @@ public class Blocker extends Item
         m_text.setTextAlign(TextAlign.CENTER);
         m_text.setTextBaseLine(TextBaseLine.MIDDLE);
         
-        if (sz < Config.DEFAULT_CELL_SIZE)  // inside Machine
+        if (sz < Config.DEFAULT_CELL_SIZE *0.9)  // inside Machine
         {
             m_text.setFontSize(6);
             m_text.setY(sz * -0.14 + 1);

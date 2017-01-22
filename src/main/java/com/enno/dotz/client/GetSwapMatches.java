@@ -10,10 +10,8 @@ import com.enno.dotz.client.GridState.SwapCombo;
 import com.enno.dotz.client.SoundManager.Sound;
 import com.enno.dotz.client.anim.Transition.DropTransition;
 import com.enno.dotz.client.anim.TransitionList;
-import com.enno.dotz.client.item.Anchor;
 import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Bird;
-import com.enno.dotz.client.item.Blaster;
 import com.enno.dotz.client.item.ColorBomb;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.DotBomb;
@@ -21,7 +19,6 @@ import com.enno.dotz.client.item.Egg;
 import com.enno.dotz.client.item.Explody;
 import com.enno.dotz.client.item.Item;
 import com.enno.dotz.client.item.Knight;
-import com.enno.dotz.client.item.Mirror;
 import com.enno.dotz.client.item.Striped;
 import com.enno.dotz.client.item.Wild;
 import com.enno.dotz.client.item.WrappedDot;
@@ -430,9 +427,9 @@ public class GetSwapMatches
     
     private void explode(Cell cell, Integer color, Set<Cell> exploded, Set<Cell> explodies)
     {
-        if (cell.item instanceof WrappedDot)
-            explodies.add(cell);            
-        
+//        if (cell.item instanceof WrappedDot)
+//            explodies.add(cell);            
+//        
         exploded.add(cell);
         cell.explode(color, 1);
     }
@@ -447,7 +444,7 @@ public class GetSwapMatches
         if (a.item == null || a.isLocked())
             return false;
         
-        return isColorDot(a.item) || a.item instanceof ColorBomb || a.item instanceof Anchor || a.item instanceof Egg;
+        return a.item.canSwap();
     }
             
     public boolean canSwap(Cell a, Cell b)
@@ -456,11 +453,7 @@ public class GetSwapMatches
         if (b.item == null || b.isLocked())
             return false;
         
-        if (!(isColorDot(b.item) || b.item instanceof ColorBomb || b.item instanceof Anchor || b.item instanceof Mirror || 
-                b.item instanceof Egg))
-            return false;
-        
-        if (!validSwap(a.item, b.item) && !validSwap(b.item, a.item))
+        if (!b.item.canSwap())
             return false;
         
         Item x = a.item;
@@ -482,24 +475,13 @@ public class GetSwapMatches
             return false;
         }
         
-        if (b.item instanceof Knight)
+        if (b.item instanceof Knight)   // start (!) item is a Knight
         {
             SwapCombo combo = new SwapCombo();
             combo.add(b);
             combo.setType(SwapCombo.KNIGHT);
             m_combos.add(combo);
         }
-        
-        return true;
-    }
-    
-    private boolean validSwap(Item a, Item b)
-    {
-        if (a instanceof Wild && b instanceof ColorBomb)
-            return false;
-        
-        if (a instanceof Knight && b instanceof Knight)
-            return false;
         
         return true;
     }
@@ -879,7 +861,6 @@ public class GetSwapMatches
                 return true;
         }
         //TODO specials
-        
         
         return false;
     }

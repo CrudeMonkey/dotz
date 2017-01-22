@@ -133,6 +133,11 @@ public abstract class Item
         return false;
     }
 
+    public boolean canSwap()
+    {
+        return true;
+    }
+    
     public boolean stopsLaser()
     {
         return false;

@@ -57,6 +57,12 @@ public class Chest extends Item
     }
     
     @Override
+    public boolean canSwap()
+    {
+        return false;
+    }
+    
+    @Override
     public boolean canDrop()
     {
         return false;

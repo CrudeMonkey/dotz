@@ -42,8 +42,10 @@
   "machines": [
     {"p":[8,0],"every":1,"howMany":3,"trigger":"Zap\/Chain","type":"Item","item":{"class":"random"}},
     {"p":[8,1],"every":1,"howMany":3,"trigger":"Zap\/Chain","type":"Item","item":{"class":"wild"}},
+    {"p":[0,2],"every":1,"howMany":3,"trigger":"Zap\/Chain","type":"Wrap"},
     {"p":[8,2],"every":1,"howMany":3,"trigger":"Zap\/Chain","type":"Item","item":{"vertical":true,"class":"blaster"}},
     {"p":[8,3],"every":1,"howMany":3,"trigger":"Zap\/Chain","type":"Item","item":{"class":"fire"}},
+    {"p":[0,4],"every":1,"howMany":3,"trigger":"Zap\/Chain","type":"Stripe"},
     {"p":[8,4],"every":1,"howMany":3,"trigger":"Zap\/Chain","type":"Bubble"},
     {"p":[8,5],"every":1,"howMany":3,"trigger":"Zap\/Chain","type":"Radiate"},
     {"p":[1,6],"every":1,"howMany":3,"trigger":"Zap\/Chain","type":"Coin","item":{"amount":1,"class":"coin"}},
@@ -51,6 +53,10 @@
     {"p":[8,6],"every":1,"howMany":3,"trigger":"Zap\/Chain","type":"Item","item":{"radius":1,"class":"bomb"}},
     {"p":[8,7],"every":1,"howMany":3,"trigger":"Zap\/Chain","type":"Item","item":{"strength":1,"class":"blocker"}},
     {"p":[8,8],"every":1,"howMany":3,"trigger":"Zap\/Chain","type":"Item","item":{"direction":"E","class":"rocket"}}
+  ],
+  "blockers": [
+    {"strength":9,"p":[5,8]},
+    {"strength":30,"zapOnly":true,"p":[6,8]}
   ],
   "randoms": [
     {"p":[0,0]},
@@ -69,7 +75,6 @@
     {"p":[5,1]},
     {"p":[6,1]},
     {"p":[7,1]},
-    {"p":[0,2]},
     {"p":[1,2]},
     {"p":[2,2]},
     {"p":[3,2]},
@@ -85,7 +90,6 @@
     {"p":[5,3]},
     {"p":[6,3]},
     {"p":[7,3]},
-    {"p":[0,4]},
     {"p":[1,4]},
     {"p":[2,4]},
     {"p":[3,4]},
@@ -120,8 +124,6 @@
     {"p":[2,8]},
     {"p":[3,8]},
     {"p":[4,8]},
-    {"p":[5,8]},
-    {"p":[6,8]},
     {"p":[7,8]}
   ],
   "generator": {
@@ -133,7 +135,7 @@
     "dominoMode": false,
     "slipperyAnchors": false,
     "minChainLength": 2,
-    "seed": -1,
+    "seed": 123,
     "fireGrowthRate": 1,
     "maxAnchors": 3,
     "maxDomino": 9,
@@ -161,5 +163,5 @@
     "coins": 1000
   },
   "boosts": {  },
-  "lastModified": "1485106128471"
+  "lastModified": "1485111951444"
 }

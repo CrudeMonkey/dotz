@@ -43,8 +43,10 @@
     {"p":[5,2],"every":1,"howMany":3,"trigger":"Zap\/Chain","type":"Coin","item":{"amount":1,"class":"coin"}},
     {"p":[7,2],"every":1,"howMany":3,"trigger":"Zap\/Chain","type":"Item","item":{"radius":1,"class":"bomb"}},
     {"p":[7,3],"every":1,"howMany":3,"trigger":"Zap\/Chain","type":"Item","item":{"vertical":true,"class":"blaster"}},
+    {"p":[0,4],"every":1,"howMany":3,"trigger":"Zap\/Chain","type":"Stripe"},
     {"p":[3,4],"every":1,"howMany":3,"trigger":"Zap\/Chain","type":"Bubble"},
     {"p":[7,4],"every":1,"howMany":3,"trigger":"Zap\/Chain","type":"Item","item":{"class":"random"}},
+    {"p":[0,5],"every":1,"howMany":3,"trigger":"Zap\/Chain","type":"Wrap"},
     {"p":[7,5],"every":1,"howMany":3,"trigger":"Zap\/Chain","type":"Item","item":{"stuck":true,"class":"fire"}},
     {"p":[7,6],"every":1,"howMany":3,"trigger":"Zap\/Chain","type":"Item","item":{"direction":"E","class":"rocket"}},
     {"p":[0,7],"every":1,"howMany":3,"trigger":"Zap\/Chain","type":"Radiate"},
@@ -78,13 +80,11 @@
     {"p":[4,3]},
     {"p":[5,3]},
     {"p":[6,3]},
-    {"p":[0,4]},
     {"p":[1,4]},
     {"p":[2,4]},
     {"p":[4,4]},
     {"p":[5,4]},
     {"p":[6,4]},
-    {"p":[0,5]},
     {"p":[1,5]},
     {"p":[2,5]},
     {"p":[3,5]},
@@ -142,5 +142,5 @@
     "coins": 20
   },
   "boosts": {  },
-  "lastModified": "1485059239289"
+  "lastModified": "1485109589253"
 }

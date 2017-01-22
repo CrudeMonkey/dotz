@@ -229,6 +229,12 @@ public class Laser extends Item
             case Direction.NORTH: shape.setRotation(-Math.PI / 2); break;
         }
     }
+    
+    @Override
+    public boolean canSwap()
+    {
+        return false;
+    }
 
     @Override
     public boolean canBeEaten()

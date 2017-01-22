@@ -36,12 +36,20 @@ public class Fire extends Item
         
         return star;
     }
-    
+        
+    @Override
+    public boolean canSwap()
+    {
+        return false;
+    }
+
+    @Override
     protected Item doCopy()
     {
         return new Fire(m_stuck);
     }
 
+    @Override
     public boolean canExplodeNextTo()
     {
         return true;

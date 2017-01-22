@@ -164,6 +164,12 @@ public class Animal extends Item
     }
     
     @Override
+    public boolean canSwap()
+    {
+        return false;
+    }
+    
+    @Override
     public boolean stopsLaser()
     {
         return true;
