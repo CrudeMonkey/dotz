@@ -362,31 +362,9 @@ public class Rewards
         @Override
         public Item upgrade(Item item, Context ctx)
         {
-            Dot dot = (Dot) item;
-            
-            int n, type;
-            LetterMultiplier m = dot.getLetterMultiplier();
-            if (m == null)
-            {
-                n = 2;
-                type = ctx.generator.getRandom().nextBoolean() ? LetterMultiplier.LETTER_MULTIPLIER : LetterMultiplier.WORD_MULTIPLIER;
-            }
-            else
-            {
-                type = m.getType();
-                n = m.getMultiplier() + 1;
-            }
-            if (ctx.generator.getRandom().nextBoolean())
-                n++;
-            
-            Dot newDot = new Dot(dot.color, dot.getLetter(), false, dot.isRadioActive());
-            LetterMultiplier m2 = new LetterMultiplier(n, type);
-            newDot.setLetterMultiplier(m2);
-            
-            return newDot;
+            return Dot.upgradeMultiplier(item, ctx);
         }
     }
-    
     
     public static class BombifyReward extends Reward
     {

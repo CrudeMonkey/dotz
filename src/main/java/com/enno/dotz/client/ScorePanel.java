@@ -28,6 +28,7 @@ import com.enno.dotz.client.item.Blaster;
 import com.enno.dotz.client.item.Blocker;
 import com.enno.dotz.client.item.Bomb;
 import com.enno.dotz.client.item.Clock;
+import com.enno.dotz.client.item.Coin;
 import com.enno.dotz.client.item.ColorBomb;
 import com.enno.dotz.client.item.Diamond;
 import com.enno.dotz.client.item.Domino;
@@ -262,6 +263,10 @@ public class ScorePanel extends LienzoPanel
         need = goal.getWords();
         if (need != 0)
             m_list.add(new WordsGoal(need, ctx));
+
+        need = goal.getCoins();
+        if (need != 0)
+            m_list.add(new CoinGoal(need, ctx));
 
         ChainGoal combi = goal.getChainGoal();
         if (combi != null)
@@ -705,6 +710,45 @@ public class ScorePanel extends LienzoPanel
         }
     }
     
+    public static class CoinGoal extends GoalItem
+    {
+        private int m_goal;
+        
+        public CoinGoal(int need, Context ctx)
+        {
+            super(ctx);
+            
+            m_goal = need;
+        }
+        
+        protected IPrimitive<?> createShape()
+        {
+            Coin coin = new Coin();
+            coin.setContext(ctx);
+            return coin.createShape(SHAPE_SIZE * 0.8);
+        }
+        
+        protected void updateText()
+        {
+//            if (m_goal == Goal.ALL)
+//            {
+//                int gen = ctx.score.getAnimalsInGrid();
+//                if (gen > 0)
+//                    setText("" + gen);
+//                else 
+//                    setCompleted();
+//            }
+//            else
+//            {
+                int got = ctx.score.getExplodedCoins();
+                if (got >= m_goal)
+                    setCompleted();
+                else
+                    setText(got + " / " + m_goal);
+//            }
+        }
+    }
+    
     public static class IceGoal extends GoalItem
     {
         private int m_goal;
@@ -803,7 +847,6 @@ public class ScorePanel extends LienzoPanel
                 setText(got + " / " + goal);
         }
     }
-    
     
     public static class WordsGoal extends GoalItem
     {

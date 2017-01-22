@@ -37,6 +37,7 @@ public class PreviewLevelPanel extends VLayout
         
         level.size = 40;
         Context ctx = new Context(false, level);
+        ctx.isPreview = true;
         
         this.ctx = ctx;
         

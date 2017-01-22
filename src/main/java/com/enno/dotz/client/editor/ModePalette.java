@@ -137,6 +137,11 @@ public class ModePalette extends Palette<Object>
     {
         public IPrimitive<?> createShape(int sz)
         {
+            return createRadioActiveShape(sz);
+        }
+        
+        public static IPrimitive<?> createRadioActiveShape(double sz)
+        {
             Group g = new Group();
             
             double r = sz * 0.4;

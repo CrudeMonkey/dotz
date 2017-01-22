@@ -1,14 +1,18 @@
 package com.enno.dotz.client.anim;
 
+import java.util.Random;
+
 import com.ait.lienzo.client.core.animation.IAnimation;
 import com.ait.lienzo.client.core.animation.IAnimationCallback;
 import com.ait.lienzo.client.core.animation.IAnimationHandle;
+import com.ait.lienzo.client.core.shape.IPrimitive;
 import com.ait.lienzo.client.core.shape.Line;
 import com.ait.lienzo.client.core.types.Point2D;
 import com.ait.lienzo.client.core.types.Point2DArray;
 import com.ait.lienzo.shared.core.types.ColorName;
 import com.enno.dotz.client.Context;
 import com.enno.dotz.client.item.Item;
+import com.enno.dotz.client.util.Debug;
 
 public abstract class Transition implements IAnimationCallback
 {
@@ -18,13 +22,28 @@ public abstract class Transition implements IAnimationCallback
     double bounceFactor = 0.6;
     double bounceUp = 0.5;
     
-    protected Transition(double from_x, double from_y, double to_x, double to_y, Item item)
+    protected IPrimitive<?> m_shape;
+    
+    protected Transition(double from_x, double from_y, double to_x, double to_y)
     {
         this.from_x = from_x;
         this.from_y = from_y;
         this.dx = to_x - from_x;
         this.dy = to_y - from_y;
-        this.item = item;
+    }
+    
+    protected Transition(double from_x, double from_y, double to_x, double to_y, Item item)
+    {
+        this(from_x, from_y, to_x, to_y, item.shape);
+        
+        this.item = item;        
+    }
+    
+    protected Transition(double from_x, double from_y, double to_x, double to_y, IPrimitive<?> shape)
+    {
+        this(from_x, from_y, to_x, to_y);
+        
+        m_shape = shape;        
     }
     
     public boolean containsItem(Item item)
@@ -89,7 +108,13 @@ public abstract class Transition implements IAnimationCallback
             x = from_x + pct * dx;
             y = from_y + pct * dy;
         }
-        item.moveShape(x, y);
+        moveShape(x, y);
+    }
+    
+    protected void moveShape(double x, double y)
+    {
+        m_shape.setX(x);
+        m_shape.setY(y);
     }
     
     public void afterStart()
@@ -108,6 +133,151 @@ public abstract class Transition implements IAnimationCallback
         }
     }
 
+    protected static Random s_rnd = new Random();
+    
+    public static class ArchTransition extends Transition
+    {
+        private final double DX = 50;
+        
+        private final double SLACK = 0.2;
+        private final double SCALE = 1 - SLACK;
+        
+        private double[] m_abc;
+
+        private double m_start;
+        private double m_end;
+
+        private boolean m_fadeOut;
+
+        public ArchTransition(double from_x, double from_y, double to_x, double to_y, double dy, Item item)
+        {
+            this(from_x, from_y, to_x, to_y, dy, item.shape);
+        }
+        
+        public ArchTransition(double from_x, double from_y, double to_x, double to_y, double dy, IPrimitive<?> shape)
+        {
+            super(from_x, from_y, to_x, to_y, shape);
+            
+            double top = Math.min(from_y, to_y) + dy;
+            
+            if (dx == 0)
+                m_abc = test(from_x, from_y, to_x + DX, to_y, top);
+            else
+                m_abc = test(from_x, from_y, to_x, to_y, top);
+            
+            m_start = s_rnd.nextDouble() * SLACK;
+            m_end = m_start + SCALE;
+        }
+        
+        public IAnimationCallback fadeOut()
+        {
+            m_fadeOut = true;
+            return this;
+        }
+        
+        @Override
+        protected void move(double pct)
+        {
+            if (pct < m_start)
+                move2(0);
+            else if (pct >= m_end)
+                move2(1);
+            else
+            {
+                move2((pct - m_start) / SCALE);
+            }
+        }
+        
+        protected void move2(double pct)
+        {
+            if (dx == 0)
+            {
+                double x = from_x + pct * DX;
+                double y = m_abc[0] * (x + m_abc[1]) * (x + m_abc[1]) + m_abc[2];
+                moveShape(from_x, y);
+            }
+            else
+            {
+                double x = from_x + pct * dx;
+                double y = m_abc[0] * (x + m_abc[1]) * (x + m_abc[1]) + m_abc[2];
+                moveShape(x, y);
+            }
+            
+            if (m_fadeOut)
+                m_shape.setAlpha(1 - pct);
+        }
+
+        // http://math.stackexchange.com/questions/1257301/formula-of-parabola-from-two-points-and-the-y-coordinate-of-the-vertex
+        public static double[] solve(double x1, double y1, double x2, double y2, double y0)
+        {
+            // y = a(x + b)^2 + y0
+            // y1 = a(x1 + b)^2 + y0
+            // y2 = a(x2 + b)^2 + y0
+            // 
+            // a = (y1-y0)/(x1+b)^2
+            // (y1-y0)/(x1+b)^2 * (x2 + b)^2 = y2 - y0
+            // (y1-y0) * (x2+b)^2 = (y2-y0) * (x1+b)^2
+            // 
+            
+            double A = y1 - y2;
+            
+            if (A == 0)
+            {
+                double b = -(x1 + x2) / 2;
+                double a = (y1 - y0) / ((x1 + b) * (x1 + b));
+                return new double[] { a, b, y0 };
+            }
+            
+            double B = 2 * x2 * (y1 - y0) - 2 * x1 * (y2 - y0);
+            double C = x2 * x2 * (y1 - y0) - x1 * x1 * (y2 - y0);
+            
+            double D = Math.sqrt(B * B - 4 * A * C);
+            double b1 = (-B + D) / (2 * A);
+            double b2 = (-B - D) / (2 * A);
+            
+            double x0 = -b1;
+            if (x0 >= x1 && x0 <= x2 || x0 <= x1 && x0 >= x2)
+            {
+                double a = (y1 - y0) / ((x1 + b1) * (x1 + b1));
+                double b = b1;
+                return new double[] { a, b, y0 };
+            }
+            else
+            {
+                double a = (y1 - y0) / ((x1 + b2) * (x1 + b2));
+                double b = b2;                
+                return new double[] { a, b, y0 };
+            }
+        }
+        
+        public static double[] test(double x1, double y1, double x2, double y2, double y0)
+        {
+            double[] abc = solve(x1, y1, x2, y2, y0);
+            
+            double _y1 = abc[0] * (x1 + abc[1]) * (x1 + abc[1]) + abc[2];
+            double _y2 = abc[0] * (x2 + abc[1]) * (x2 + abc[1]) + abc[2];
+
+            if (!eq(_y1, y1) || !eq(_y2, y2))
+            {
+                p(x1 + "," + y1 + " " + x2 + "," + y2 + "  y0=" + y0);
+                p("y1=" + _y1 + " was " + y1);
+                p("y2=" + _y2 + " was " + y2);
+            }            
+            return abc;
+        }
+
+        private static void p(String s)
+        {
+            Debug.p(s);
+            System.out.println(s);
+        }
+
+        private static boolean eq(double a, double b)
+        {
+            return Math.abs(a - b) < 0.01;
+        }
+    }
+
     public static class RollTransition extends Transition
     {
         public RollTransition(double from_x, double from_y, double to_x, double to_y, Item item)
@@ -121,12 +291,12 @@ public abstract class Transition implements IAnimationCallback
             if (pct < 0.5)
             {
                 double x = from_x + pct * 2 * dx;
-                item.moveShape(x, from_y);
+                moveShape(x, from_y);
             }
             else
             {
                 double y = from_y + (pct - 0.5) * 2 * dy;
-                item.moveShape(from_x + dx, y);
+                moveShape(from_x + dx, y);
             }
         }
     }
@@ -162,7 +332,7 @@ public abstract class Transition implements IAnimationCallback
         
         public ExplosionTransition(double from_x, double from_y, double to_x, double to_y, Context ctx)
         {
-            super(from_x, from_y, to_x, to_y, null);
+            super(from_x, from_y, to_x, to_y);
             this.ctx = ctx;
         }
         
@@ -204,7 +374,7 @@ public abstract class Transition implements IAnimationCallback
         
         public BlastTransition(double from_x, double from_y, double to_x, double to_y, boolean isWide, Context ctx)
         {
-            super(from_x, from_y, to_x, to_y, null);
+            super(from_x, from_y, to_x, to_y);
             this.ctx = ctx;
             m_isWide = isWide;
         }
@@ -253,7 +423,14 @@ public abstract class Transition implements IAnimationCallback
     {
         public RadioActiveTransition(double x, double y)
         {
-            super(x, y, x, y, null);
+            super(x, y, x, y);
         }
+    }
+    
+    public static void main(String[] args)
+    {
+//        ArchTransition.test(-1, 1, 2, 4, 0);
+//        ArchTransition.test(-1, 1, 1, 1, 0);
+        ArchTransition.test(350,200, 250,200, 100);
     }
 }

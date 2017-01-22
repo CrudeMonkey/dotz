@@ -7,6 +7,8 @@ import com.ait.lienzo.shared.core.types.IColor;
 public class Config
 {
     public static final int UNDEFINED_ID = -1;
+
+    public static final int DEFAULT_CELL_SIZE = 50;
     
     public static int WILD_ID = 100;
     public static int ANCHOR_ID = 101;
@@ -32,7 +34,7 @@ public class Config
     
     public int numColumns = 8;
     public int numRows = 8;
-    public int size = 50;               // size of grid cell (iPhone 320x480 - size=40)
+    public int size = DEFAULT_CELL_SIZE;               // size of grid cell (iPhone 320x480 - size=40)
 
     public IColor[] colors = COLORS; //TODO define colors
 

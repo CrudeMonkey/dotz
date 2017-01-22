@@ -10,12 +10,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.ait.lienzo.client.core.animation.IAnimation;
-import com.ait.lienzo.client.core.animation.IAnimationHandle;
 import com.ait.lienzo.client.core.shape.Layer;
 import com.enno.dotz.client.Cell;
 import com.enno.dotz.client.Cell.ChangeColorCell;
 import com.enno.dotz.client.Cell.Hole;
+import com.enno.dotz.client.Cell.Machine;
 import com.enno.dotz.client.Cell.Rock;
 import com.enno.dotz.client.Cell.Slide;
 import com.enno.dotz.client.Cell.Teleport;
@@ -33,7 +32,6 @@ import com.enno.dotz.client.item.Diamond;
 import com.enno.dotz.client.item.Item;
 import com.enno.dotz.client.item.TeleportClipBox;
 import com.enno.dotz.client.util.CallbackChain.Callback;
-import com.enno.dotz.client.util.Debug;
 
 public class GetTransitions
 {
@@ -405,7 +403,7 @@ public class GetTransitions
                 return null;
             
             Pt above = c.pt();            
-            if (c instanceof Hole || c.isLockedCage() && !c.isLockedBlockingCage())
+            if (c instanceof Hole || c instanceof Machine || c.isLockedCage() && !c.isLockedBlockingCage())
             {
                 return getSourceAbove(above);
             }

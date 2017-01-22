@@ -12,6 +12,7 @@ import com.enno.dotz.client.item.Blocker;
 import com.enno.dotz.client.item.Bomb;
 import com.enno.dotz.client.item.Clock;
 import com.enno.dotz.client.item.Cog;
+import com.enno.dotz.client.item.Coin;
 import com.enno.dotz.client.item.ColorBomb;
 import com.enno.dotz.client.item.Diamond;
 import com.enno.dotz.client.item.Domino;
@@ -28,6 +29,7 @@ import com.enno.dotz.client.item.LazySusan;
 import com.enno.dotz.client.item.Mirror;
 import com.enno.dotz.client.item.RandomItem;
 import com.enno.dotz.client.item.Rocket;
+import com.enno.dotz.client.item.Spider;
 import com.enno.dotz.client.item.Striped;
 import com.enno.dotz.client.item.Turner;
 import com.enno.dotz.client.item.Wild;
@@ -62,6 +64,7 @@ public class ItemPalette extends Palette<Object>
         addButton(new Laser(Direction.EAST, false), 3, 3);
         addButton(new Mirror(false, false), 4, 3);        
         addButton(new YinYang(false), 5, 3);
+        addButton(new Coin(), 6, 3);
 
         addButton(new Egg(), 0, 4);
         addButton(new Domino(), 1, 4);
@@ -69,6 +72,7 @@ public class ItemPalette extends Palette<Object>
         addButton(new Drop(), 3, 4);
         addButton(new ColorBomb(false), 4, 4);
         addButton(new Key(false), 5, 4);
+        addButton(new Spider(), 6, 4);
         
         addButton(new IcePick(), 0, 5);
         addButton(new Striped(0, false), 1, 5);

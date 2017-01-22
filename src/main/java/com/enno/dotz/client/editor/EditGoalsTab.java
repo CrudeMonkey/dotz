@@ -54,6 +54,7 @@ public class EditGoalsTab extends VLayout
     private Num           m_birds;
     private Num           m_dominoes;
     private Num           m_words;
+    private Num           m_coins;
     private ChainGoalItem m_chainGoal;
 
     private DotAll[]   m_dots = new DotAll[Config.MAX_COLORS];
@@ -335,6 +336,20 @@ public class EditGoalsTab extends VLayout
             }
         };
 
+        m_coins = new Num("Coins", changeListener){
+            @Override
+            public void prepareSave(Goal goal)
+            {
+                goal.setCoins(val());
+            }
+
+            @Override
+            public void initGoal(Goal goal)
+            {
+                val(goal.getCoins());
+            }
+        };
+
         m_blasters = new Num("Blasters", changeListener){
             @Override
             public void prepareSave(Goal goal)
@@ -415,7 +430,7 @@ public class EditGoalsTab extends VLayout
                 m_time, m_score, m_blockers,
                 m_chainGoal, m_words, m_zapBlockers,
                 m_blasters, m_bombs, m_colorBombs,
-                m_diamonds, m_bubbles
+                m_diamonds, m_bubbles, m_coins
         };
         
         form.setFields(m_fields);

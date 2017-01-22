@@ -67,7 +67,7 @@ public class Matrix
         return new Transform(new double[] { m00, m10, m01, m11, m02, m12 });
     }
     
-    protected static void solve(double[][] M, double[] solution)
+    public static void solve(double[][] M, double[] solution)
     {
         // solve using Cramer's rule
         // xi = det(Mi)/det(M), 

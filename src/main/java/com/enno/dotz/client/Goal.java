@@ -28,6 +28,7 @@ public class Goal
     protected int m_colorBombs;
     protected int m_bombs;
     protected int m_blasters;
+    protected int m_coins;
     
     protected int m_score;
     protected int m_time;
@@ -123,6 +124,16 @@ public class Goal
     public void setDiamonds(int diamonds)
     {
         m_diamonds = diamonds;
+    }
+
+    public int getCoins()
+    {
+        return m_coins;
+    }
+
+    public void setCoins(int coins)
+    {
+        m_coins = coins;
     }
 
     public int getBubbles()

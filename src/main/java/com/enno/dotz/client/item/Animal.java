@@ -88,7 +88,7 @@ public class Animal extends Item
     public enum Action
     {
         DEFAULT("Default"), // replace item with dot of Animal's color
-        BOMBIFY("Bombify"), // replace Dot wit DotBomb
+        BOMBIFY("Bombify"), // replace Dot with DotBomb
         SWAP("Swap");       // swap item with Animal
         
         private String m_name;
@@ -431,6 +431,7 @@ public class Animal extends Item
             m_pupils[i].setY(ny);
         }
     }
+    
     public static class EyeTracker
     {
         private int m_x, m_y;

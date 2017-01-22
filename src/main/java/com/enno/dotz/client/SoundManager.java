@@ -37,7 +37,21 @@ public class SoundManager
         ZAP("268168__shaun105__laser.wav"),
         WOOSH("216675_2549002-lq.mp3"),
         BUBBLE("89534__cgeffex__very-fast-bubble-pop1.mp3"),
-        SWAP_RADIOACTIVE("28469__simmfoc__blip-1.wav");
+        SWAP_RADIOACTIVE("28469__simmfoc__blip-1.wav"),
+        
+//        COIN1("coin/coin1.wav"),
+//        COIN2("coin/coin2.wav"),
+//        COIN3("coin/coin3.wav"),
+//        COIN4("coin/coin4.wav"),
+//        COIN5("coin/coin5.wav"),
+
+        COIN1("coin/coin2.wav"),
+        COIN2("coin/coin2.wav"),
+        COIN3("coin/coin2.wav"),
+        COIN4("coin/coin2.wav"),
+        COIN5("coin/coin2.wav"),
+        
+        MUSIC_LOOP1("loop/Marimba Boy.wav");
 //        BLIP("blip.wav");
         
         private Audio m_audio;
@@ -50,10 +64,17 @@ public class SoundManager
         
         public void play()
         {
+            play(false);
+        }
+        
+        public void play(boolean loop)
+        {
             if (m_audio == null)
             {
                 m_audio = Audio.createIfSupported();
                 m_audio.setSrc("sound/" + m_file);
+                if (loop)
+                    m_audio.setLoop(loop);
             }
             m_audio.play();
             
@@ -63,5 +84,30 @@ public class SoundManager
                 Debug.p(err.toSource());
             }
         }
+        
+        public void pause()
+        {
+            if (m_audio != null)
+                m_audio.pause();
+        }
     };
+    
+    private static Sound s_loop = Sound.MUSIC_LOOP1;
+    
+    public static void startLoop()
+    {
+        s_loop.play(true);
+    }
+    
+    public static void pauseLoop()
+    {
+        s_loop.pause();
+    }
+
+    private static Sound[] COINS = { Sound.COIN1, Sound.COIN2, Sound.COIN3, Sound.COIN4, Sound.COIN5 };
+    
+    public static void ding(int n)
+    {
+        COINS[n].play();
+    }
 }

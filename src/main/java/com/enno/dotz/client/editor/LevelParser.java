@@ -12,6 +12,7 @@ import com.enno.dotz.client.Cell.ConveyorCell;
 import com.enno.dotz.client.Cell.Door;
 import com.enno.dotz.client.Cell.Hole;
 import com.enno.dotz.client.Cell.ItemCell;
+import com.enno.dotz.client.Cell.Machine;
 import com.enno.dotz.client.Cell.Rock;
 import com.enno.dotz.client.Cell.Slide;
 import com.enno.dotz.client.Cell.Teleport;
@@ -31,6 +32,7 @@ import com.enno.dotz.client.item.Blocker;
 import com.enno.dotz.client.item.Bomb;
 import com.enno.dotz.client.item.Chest;
 import com.enno.dotz.client.item.Clock;
+import com.enno.dotz.client.item.Coin;
 import com.enno.dotz.client.item.ColorBomb;
 import com.enno.dotz.client.item.Diamond;
 import com.enno.dotz.client.item.Domino;
@@ -101,6 +103,32 @@ public class LevelParser
                 }
             }
             
+            if (p.isArray("machines"))
+            {
+                NArray t = p.getAsArray("machines");
+                for (int i = 0, n = t.size(); i < n; i++)
+                {
+                    NObject row = t.getAsObject(i);
+                    Pt pt = pt(row.getAsArray("p"));
+                    
+                    int howMany = row.getAsInteger("howMany");
+                    int every = row.getAsInteger("every");
+                    String trigger = row.getAsString("trigger");
+                    String type = row.getAsString("type");
+                    
+                    Item launchItem = null;
+                    NObject item = row.getAsObject("item");
+                    if (item != null)
+                    {
+                        String itemClass = item.getAsString("class");
+                        launchItem = getItem(itemClass, item);
+                    }
+                    
+                    Machine machine = new Machine(type, launchItem, every, howMany, trigger);
+                    grid.setCell(pt.col, pt.row, machine);
+                }
+            }
+            
             if (p.isArray("doors"))
             {
                 NArray t = p.getAsArray("doors");
@@ -128,6 +156,7 @@ public class LevelParser
                     grid.setCell(pt.col, pt.row, door);
                 }
             }
+            
             if (p.isArray("cages"))
             {
                 NArray t = p.getAsArray("cages");
@@ -270,6 +299,11 @@ public class LevelParser
             int direction = parseDirection(row.getAsString("direction"));
             return new Laser(direction, stuck);
         }
+        if (itemClass.equals("coin"))
+        {
+            int amount = row.getAsInteger("amount");
+            return new Coin(amount, stuck);
+        }
         if (itemClass.equals("rocket"))
         {
             int direction = parseDirection(row.getAsString("direction"));
@@ -403,7 +437,7 @@ public class LevelParser
             Item item = itemObj == null ? null : getItem(itemObj.getAsString("class"), itemObj); // chest can be empty
             return new Chest(item, strength, stuck);
         }
-        //TODO striped, wrappedDot, explody, RandomItem?
+        //TODO striped, wrappedDot, explody
         return null; // should never happen
     }
     
@@ -520,6 +554,9 @@ public class LevelParser
         
         if (json.isInteger("words"))
             goal.setWords(json.getAsInteger("words"));
+        
+        if (json.isInteger("coins"))
+            goal.setCoins(json.getAsInteger("coins"));
         
         if (json.isInteger("time"))
             goal.setTime(json.getAsInteger("time"));
@@ -873,6 +910,7 @@ public class LevelParser
         NArray ice = new NArray();
         NArray items = new NArray();
         NArray teleporters = new NArray();
+        NArray machines = new NArray();
         NArray animals = new NArray();
         NArray knights = new NArray();
         NArray clocks = new NArray();
@@ -1007,6 +1045,26 @@ public class LevelParser
                     gridLine += '.';
                     conveyors.push(a);
                 }
+                else if (cell instanceof Machine)
+                {
+                    Machine b = (Machine) cell;
+                    NObject a = new NObject();
+                    a.put("p", pt(col, row));
+                    a.put("every", b.getEvery());
+                    a.put("howMany", b.getHowMany());
+                    a.put("trigger", b.getTrigger().name);
+                    a.put("type", b.getMachineType().name);
+                    
+                    Item launchItem = b.getLaunchItem();
+                    if (launchItem != null)
+                    {
+                        NObject item = toJson(launchItem, true);
+                        a.put("item", item);
+                    }
+                    
+                    gridLine += '.';
+                    machines.push(a);
+                }
                 else if (cell instanceof ItemCell)
                 {
                     gridLine += ".";
@@ -1138,6 +1196,7 @@ public class LevelParser
         add(p, "doors", doors);
         add(p, "cages", cages);
         add(p, "conveyors", conveyors);
+        add(p, "machines", machines);
         add(p, "lazySusans", lazySusans);
         add(p, "dots", dots);
         add(p, "dotBombs", dotBombs);
@@ -1202,6 +1261,13 @@ public class LevelParser
             a.put("strength", an.getStrength());
             if (addClass)
                 a.put("class", "knight");
+        }
+        else if (item instanceof Coin)
+        {
+            Coin an = (Coin) item;
+            a.put("amount", an.getAmount());
+            if (addClass)
+                a.put("class", "coin");
         }
         else if (item instanceof Clock)
         {
@@ -1513,6 +1579,9 @@ public class LevelParser
         
         if (g.getWords() != 0)
             p.put("words", g.getWords());
+        
+        if (g.getCoins() != 0)
+            p.put("coins", g.getCoins());
         
         ChainGoal ch = g.getChainGoal();
         if (ch != null)

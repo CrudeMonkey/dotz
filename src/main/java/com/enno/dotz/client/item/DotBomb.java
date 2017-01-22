@@ -12,6 +12,7 @@ import com.ait.lienzo.client.core.types.Point2DArray;
 import com.ait.lienzo.shared.core.types.ColorName;
 import com.ait.lienzo.shared.core.types.TextAlign;
 import com.ait.lienzo.shared.core.types.TextBaseLine;
+import com.enno.dotz.client.Config;
 import com.enno.dotz.client.Context;
 import com.enno.dotz.client.anim.Ignition;
 
@@ -89,13 +90,23 @@ public class DotBomb extends Item
         g.add(c);
         
         m_text = new Text("" + m_strength);
-        m_text.setFontSize(9);
         m_text.setFontStyle("bold");
         m_text.setTextAlign(TextAlign.CENTER);
         m_text.setTextBaseLine(TextBaseLine.MIDDLE);
         m_text.setFillColor(ColorName.BLACK);
-        m_text.setX(-p);
-        m_text.setY(p);
+        
+        if (size < Config.DEFAULT_CELL_SIZE)    // inside Machine
+        {
+            m_text.setFontSize(6);
+            m_text.setX(-p);
+            m_text.setY(p+1);
+        }
+        else
+        {
+            m_text.setFontSize(9);
+            m_text.setX(-p);
+            m_text.setY(p);
+        }
         g.add(m_text);
         
         // Draw fuse        

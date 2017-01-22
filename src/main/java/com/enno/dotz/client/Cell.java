@@ -2,15 +2,18 @@ package com.enno.dotz.client;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import com.ait.lienzo.client.core.shape.Circle;
 import com.ait.lienzo.client.core.shape.Group;
+import com.ait.lienzo.client.core.shape.IPrimitive;
 import com.ait.lienzo.client.core.shape.Line;
 import com.ait.lienzo.client.core.shape.MultiPath;
 import com.ait.lienzo.client.core.shape.PolyLine;
 import com.ait.lienzo.client.core.shape.Polygon;
 import com.ait.lienzo.client.core.shape.Rectangle;
+import com.ait.lienzo.client.core.shape.Slice;
 import com.ait.lienzo.client.core.shape.Text;
 import com.ait.lienzo.client.core.shape.Triangle;
 import com.ait.lienzo.client.core.types.LinearGradient;
@@ -24,11 +27,26 @@ import com.ait.lienzo.shared.core.types.TextAlign;
 import com.ait.lienzo.shared.core.types.TextBaseLine;
 import com.enno.dotz.client.Controller.Controllable;
 import com.enno.dotz.client.anim.Pt;
+import com.enno.dotz.client.editor.ModePalette.RadioActive;
+import com.enno.dotz.client.item.Animal;
+import com.enno.dotz.client.item.Blaster;
+import com.enno.dotz.client.item.Blocker;
+import com.enno.dotz.client.item.Bomb;
 import com.enno.dotz.client.item.Chest;
+import com.enno.dotz.client.item.Coin;
+import com.enno.dotz.client.item.ColorBomb;
+import com.enno.dotz.client.item.Diamond;
+import com.enno.dotz.client.item.Dot;
+import com.enno.dotz.client.item.DotBomb;
+import com.enno.dotz.client.item.Egg;
 import com.enno.dotz.client.item.Explody;
+import com.enno.dotz.client.item.Fire;
 import com.enno.dotz.client.item.Item;
 import com.enno.dotz.client.item.Item.ExplodeAction;
+import com.enno.dotz.client.item.Laser;
 import com.enno.dotz.client.item.RandomItem;
+import com.enno.dotz.client.item.Rocket;
+import com.enno.dotz.client.item.Wild;
 import com.google.gwt.dom.client.Style.FontWeight;
 
 public abstract class Cell
@@ -2161,6 +2179,496 @@ public abstract class Cell
         public boolean stopsLaser()
         {
             return state != State.DONE || itemStopsLaser();
+        }
+    }
+    
+    public static class Machine extends Cell
+    {
+        public static enum MachineType
+        {
+            ITEM("Item"),
+            BOMBIFY("Bombify"),
+            MULTIPLIER("Multiplier"),
+            RADIATE("Radiate"),
+            BUBBLE("Bubble"),
+            COIN("Coin");
+            
+            public String name;
+            
+            MachineType(String name)
+            {
+                this.name = name;
+            }
+            
+            public static MachineType find(String name)
+            {
+                for (MachineType t : values())
+                {
+                    if (t.name.equals(name))
+                        return t;
+                }
+                return null;
+            }
+            
+            public static LinkedHashMap<String,String> getValueMap()
+            {
+                LinkedHashMap<String,String> map = new LinkedHashMap<String,String>();
+                for (MachineType t : values())
+                {
+                    map.put(t.name, t.name);
+                }
+                return map;
+            }
+        }
+        
+        public static enum MachineTrigger
+        {
+            ZAP_AND_CHAIN("Zap/Chain"),
+            ZAP("Zap"),
+            CHAIN("Chain");
+            
+            public String name;
+            
+            MachineTrigger(String name)
+            {
+                this.name = name;
+            }
+            
+            public static MachineTrigger find(String name)
+            {
+                for (MachineTrigger t : values())
+                {
+                    if (t.name.equals(name))
+                        return t;
+                }
+                return null;
+            }
+            
+            public static LinkedHashMap<String,String> getValueMap()
+            {
+                LinkedHashMap<String,String> map = new LinkedHashMap<String,String>();
+                for (MachineTrigger t : values())
+                {
+                    map.put(t.name, t.name);
+                }
+                return map;
+            }
+        }
+        
+        private int m_howMany;
+        private int m_every;
+        private MachineTrigger m_trigger;
+        private MachineType m_type;
+        private Item m_launchItem;
+         
+        private Group m_shape;
+        private Line[] m_lines;
+        
+        private int m_stage;
+        private Text m_howManyText;
+       
+        public Machine()
+        {
+            m_every = 3;
+            m_howMany = 1;
+            m_stage = m_every;
+            m_type = MachineType.ITEM;
+            m_trigger = MachineTrigger.ZAP_AND_CHAIN;
+            m_launchItem = new Fire(false);
+        }
+        
+        public Machine(String type, Item item, int every, int howMany, String trigger)
+        {
+           m_type = MachineType.find(type);
+           m_launchItem = item;
+           m_every = every;
+           m_howMany = howMany;
+           m_trigger = MachineTrigger.find(trigger);
+        }
+        
+        @Override
+        public void initGraphics(int col, int row, double x, double y)
+        {
+            super.initGraphics(col, row, x, y);
+            
+            m_shape = createShape(ctx.cfg.size);
+            
+            if (ctx.isEditing || ctx.isPreview)
+                m_stage = m_every;
+            
+            updateStage();
+            ctx.doorLayer.add(m_shape);
+        }
+        
+        @Override
+        public void removeGraphics()
+        {
+            super.removeGraphics();
+            ctx.doorLayer.remove(m_shape);
+        }
+
+        public MachineType getMachineType()
+        {
+            return m_type;
+        }
+
+        public Item getLaunchItem()
+        {
+            return m_launchItem;
+        }
+        
+        public int getHowMany()
+        {
+            return m_howMany;
+        }
+
+        public void setHowMany(int howMany)
+        {
+            m_howMany = howMany;
+        }
+
+        public int getEvery()
+        {
+            return m_every;
+        }
+
+        public void setEvery(int every)
+        {
+            m_every = every;
+        }
+
+        public MachineTrigger getTrigger()
+        {
+            return m_trigger;
+        }
+        
+        @Override
+        public boolean canDrop()
+        {
+            return false;
+        }
+        
+        @Override
+        public boolean canContainItems()
+        {
+            return false;
+        }
+        
+        @Override
+        public boolean canBeFilled()
+        {
+            return false;
+        }
+        
+        @Override
+        public boolean canGrowFire()
+        {
+            return false;
+        }
+        
+        @Override
+        public boolean canHaveIce()
+        {
+            return false;
+        }
+        
+        @Override
+        public boolean canExplode(Integer color)
+        {
+            return false;
+        }
+        
+        @Override
+        public boolean canBeNuked()
+        {
+            return m_trigger == MachineTrigger.ZAP || m_trigger == MachineTrigger.ZAP_AND_CHAIN;
+        }
+        
+        @Override
+        public boolean canConnect(Integer color, boolean isWordMode)
+        {
+            return false;
+        }
+        
+        @Override
+        public boolean canExplodeNextTo(Collection<Cell> cells, Integer color)
+        {
+            return m_trigger == MachineTrigger.CHAIN || m_trigger == MachineTrigger.ZAP_AND_CHAIN;
+        }
+        
+        @Override
+        public void zap()
+        {
+            if (m_stage < m_every)
+            {
+                m_stage++;
+                updateStage();
+            }
+        }
+        
+        @Override
+        public void explode(Integer color, int chainSize)
+        {
+            zap();
+        }
+        
+        public boolean isTriggered()
+        {
+            return m_stage == m_every;
+        }
+        
+        public void clearStage()
+        {
+            m_stage = 0;
+            updateStage();
+        }
+        
+        protected void updateStage()
+        {
+            for (int i = 0; i < m_every; i++)
+            {
+                m_lines[i].setVisible(i < m_stage);
+            }
+        }
+        
+        public Group createShape(double sz)
+        {            
+            double strokeWidth = 4;
+            double sw2 = strokeWidth / 2;
+            double w = sz * 0.8;
+            double h = sz * 0.75;
+            
+            Group g = new Group();
+            g.setX(m_x - w / 2);
+            g.setY(m_y - h / 2 - sw2);
+            
+            if (m_type == MachineType.ITEM || m_type == MachineType.BOMBIFY || m_type == MachineType.COIN)
+            {
+                IPrimitive<?> item = m_launchItem.createShape(sz * 0.6);
+                item.setX(w / 2);
+                item.setY(w / 2);
+                g.add(item);
+            }
+            else if (m_type == MachineType.BUBBLE)
+            {
+                IPrimitive<?> item = new Bubble().createShape(sz * 0.6);
+                double x = w / 2 - sz * 0.3;
+                item.setX(x);
+                item.setY(x);
+                g.add(item);
+            }
+            else if (m_type == MachineType.MULTIPLIER)
+            {
+                IPrimitive<?> item = Dot.getMultiplierShapeForMachine();
+                double x = w / 2;
+                item.setX(x);
+                item.setY(x);
+                g.add(item);
+            }
+            else if (m_type == MachineType.RADIATE)
+            {
+                IPrimitive<?> item = RadioActive.createRadioActiveShape(sz * 0.5);
+                double x = w / 2;
+                item.setX(x);
+                item.setY(x);
+                g.add(item);
+            }
+            
+            Rectangle r = new Rectangle(w, h);
+            r.setStrokeColor(ColorName.GRAY);
+            r.setStrokeWidth(strokeWidth);
+            g.add(r);
+            
+            r = new Rectangle(w, sz * 0.05);
+            r.setStrokeColor(ColorName.GRAY);
+            r.setStrokeWidth(strokeWidth);
+            g.add(r);
+            
+            for (int i = -1; i <= 1; i += 2) // legs
+            {
+                Slice s = new Slice(sz * 0.08, 0, Math.PI);
+                s.setFillColor(new Color(100, 100, 100));
+                s.setX(w / 2 + i * sz * 0.25);
+                s.setY(h);
+                g.add(s);
+            }
+            
+            m_lines = new Line[m_every];
+            
+            double lw = w / m_every;
+            double lwm = lw * 0.1;
+            double ly = 1;
+            for (int i = 0; i < m_every; i++)
+            {
+                Line l = new Line(i * lw + lwm, ly, i * lw + lw - lwm, ly);
+                l.setStrokeWidth(strokeWidth * 0.5);
+                l.setStrokeColor(ColorName.YELLOW);
+                
+                m_lines[i] = l;                
+                g.add(l);
+            }
+            
+            m_howManyText = new Text("" + m_howMany);
+            m_howManyText.setFillColor(ColorName.BLACK);
+            m_howManyText.setFontSize(7);
+            m_howManyText.setFontStyle(FontWeight.BOLD.getCssName());
+            m_howManyText.setTextAlign(TextAlign.CENTER);
+            m_howManyText.setTextBaseLine(TextBaseLine.MIDDLE);
+            
+            m_howManyText.setX(sz * 0.65);
+            m_howManyText.setY(sz * 0.62);
+            g.add(m_howManyText);
+            
+            m_howManyText.setVisible(m_howMany > 1);
+            
+            return g;
+        }
+        
+        @Override
+        public Cell copy()
+        {
+            return new Machine(m_type.name, m_launchItem == null ? null : m_launchItem.copy(), m_every, m_howMany, m_trigger.name);
+        }
+
+        public static boolean canLaunch(Item item)
+        {
+            return item instanceof Egg || item instanceof RandomItem || item instanceof Fire || item instanceof Blocker || 
+                    item instanceof Wild || item instanceof Rocket || item instanceof Bomb || item instanceof Blaster ||
+                    item instanceof ColorBomb;
+        }
+
+        public Item createItem(Context ctx, Cell target)
+        {
+            if (m_type == MachineType.ITEM)
+            {
+                if (m_launchItem instanceof RandomItem)
+                {
+                    RandomItem rnd = (RandomItem) m_launchItem;
+                    return ctx.generator.getNextItem(ctx, false, rnd.isRadioActive());
+                }
+                
+                Item item = m_launchItem.copy();
+                
+                if (item instanceof Rocket)
+                    ((Rocket) item).setDirection(Direction.randomDirection(ctx.generator.getRandom()));
+                else if (item instanceof Blaster)
+                    ((Blaster) item).setVertical(ctx.generator.getRandom().nextBoolean());
+                
+                return item;
+            }
+            else if (m_type == MachineType.COIN)
+            {
+                Item item = m_launchItem.copy();                
+                ((Coin) item).setAmount(ctx.generator.nextCoinAmount());
+                return item;
+            }
+            else if (m_type == MachineType.BOMBIFY)
+            {
+                DotBomb b = (DotBomb) m_launchItem;
+                Dot dot = (Dot) target.item;
+                
+                Dot newDot = dot.copy();
+                return new DotBomb(newDot, b.getStrength(), dot.isStuck());
+            }
+            else if (m_type == MachineType.MULTIPLIER)
+            {
+                return Dot.upgradeMultiplier(target.item, ctx);
+            }
+            else if (m_type == MachineType.RADIATE)
+            {
+                Item newItem = target.item.copy();
+                Dot dot = null;
+                if (newItem instanceof Dot)
+                    dot = (Dot) newItem;
+                else //if (newItem instanceof DotBomb)
+                    dot = ((DotBomb) newItem).getDot();
+                
+                dot.setRadioActive(true);
+                return newItem;
+            }
+            
+            throw new RuntimeException("unexpected MachineType " + m_type.name);
+        }
+
+        public boolean canTargetCell(Cell cell)
+        {
+            if (m_type == MachineType.ITEM)
+            {
+                if (cell.isLocked() || !cell.canContainItems())
+                    return false;
+                
+                if (cell.item == null)
+                    return true;
+                
+                if (cell.item instanceof Animal || cell.item instanceof Laser || cell.item instanceof Blocker || 
+                        cell.item instanceof Diamond || cell.item instanceof Chest)
+                    return false;
+            
+                return true;
+            }
+            else if (m_type == MachineType.BUBBLE)
+            {
+                return cell instanceof ItemCell;
+            }
+            else if (m_type == MachineType.BOMBIFY)
+            {
+                if (cell.isLocked() || !cell.canContainItems())
+                    return false;
+                
+                if (cell.item == null)
+                    return false;       // or do we just generate a random one?
+                
+                return cell.item instanceof Dot;
+            }
+            else if (m_type == MachineType.MULTIPLIER || m_type == MachineType.RADIATE)
+            {
+                if (cell.isLocked() || !cell.canContainItems())
+                    return false;
+                
+                if (cell.item == null)
+                    return false;
+                
+                return cell.item instanceof Dot;
+            }
+            else if (m_type == MachineType.RADIATE)
+            {
+                if (cell.isLocked() || !cell.canContainItems())
+                    return false;
+                
+                if (cell.item == null)
+                    return false;
+                
+                Dot dot = null;
+                if (cell.item instanceof Dot)
+                {
+                    dot = (Dot) cell.item;
+                }
+                else if (cell.item instanceof DotBomb)
+                {
+                    dot = ((DotBomb) cell.item).getDot();
+                }
+                else
+                    return false;
+                
+                return !dot.isRadioActive();
+            }
+            return false;
+        }
+
+        public boolean canToggleStuck()
+        {
+            if (m_type != MachineType.ITEM)
+                return false;
+            
+            return true;
+        }
+
+        public Machine toggleStuck()
+        {
+            Machine m = (Machine) copy();
+            if (m.m_launchItem != null)
+                m.m_launchItem.setStuck(!m.m_launchItem.isStuck());
+            return m;
         }
     }
 }

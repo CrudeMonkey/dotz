@@ -18,6 +18,8 @@ import com.enno.dotz.client.Cell.Cage;
 import com.enno.dotz.client.Cell.ConveyorCell;
 import com.enno.dotz.client.Cell.Door;
 import com.enno.dotz.client.Cell.Hole;
+import com.enno.dotz.client.Cell.Machine;
+import com.enno.dotz.client.Cell.Machine.MachineType;
 import com.enno.dotz.client.Cell.Rock;
 import com.enno.dotz.client.Cell.Slide;
 import com.enno.dotz.client.Cell.Teleport;
@@ -47,10 +49,12 @@ import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Blocker;
 import com.enno.dotz.client.item.Chest;
 import com.enno.dotz.client.item.Clock;
+import com.enno.dotz.client.item.Coin;
 import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.DotBomb;
 import com.enno.dotz.client.item.Drop;
+import com.enno.dotz.client.item.Fire;
 import com.enno.dotz.client.item.IcePick;
 import com.enno.dotz.client.item.Item;
 import com.enno.dotz.client.item.Knight;
@@ -183,7 +187,7 @@ public abstract class EditLayoutTab extends VLayout
         
         m_editorProps = new EditorPropertiesPanel();
         acc = MXAccordion.createAccordion("Settings", wrap(m_editorProps));
-        acc.setWidth(400);
+        acc.setWidth(585);
         acc.setHeight(100);
         
         VLayout left = new VLayout();
@@ -445,6 +449,19 @@ public abstract class EditLayoutTab extends VLayout
     
     protected void addItem(Cell cell, Item item)
     {
+        tweakItem(item);
+        
+        GridState state = ctx.state;
+        item.init(ctx);
+        item.moveShape(state.x(cell.col), state.y(cell.row));
+        item.addShapeToLayer(ctx.dotLayer);
+        cell.item = item;
+        ctx.dotLayer.draw();
+        changed();
+    }
+
+    protected void tweakItem(Item item)
+    {
         if (item instanceof Animal)
         {
             Animal animal = (Animal) item;
@@ -483,14 +500,6 @@ public abstract class EditLayoutTab extends VLayout
             if (!dot.isLetter())
                 dot.setLetter(Generator.nextLetter(m_rnd));
         }
-        
-        GridState state = ctx.state;
-        item.init(ctx);
-        item.moveShape(state.x(cell.col), state.y(cell.row));
-        item.addShapeToLayer(ctx.dotLayer);
-        cell.item = item;
-        ctx.dotLayer.draw();
-        changed();
     }
     
     public interface LayoutMode
@@ -901,6 +910,22 @@ public abstract class EditLayoutTab extends VLayout
             }
             else if (m_operation instanceof Item)
             {
+                if (cell instanceof Machine)
+                {
+                    Item item = (Item) m_operation;
+                    if (Machine.canLaunch(item))
+                    {
+                        Item launchItem = item.copy();
+                        tweakItem(launchItem);
+                        
+                        Machine machine = createMachine(MachineType.ITEM.name, launchItem);
+                        
+                        if (canHaveCell(col, row, machine))
+                            changeCell(col, row, cell, machine);
+                    }
+                    return;
+                }
+                
                 if (cell.canContainItems())
                 {
                     boolean sameItem = cell.item != null && cell.item.getClass() == m_operation.getClass();
@@ -935,6 +960,33 @@ public abstract class EditLayoutTab extends VLayout
             {
                 if (canHaveCell(col, row, (Cell) m_operation))
                     changeConveyorCell(col, row, cell, (ConveyorCell) ((Cell) m_operation).copy());
+            }
+            else if (m_operation instanceof Machine)
+            {
+                if (canHaveCell(col, row, (Machine) m_operation))
+                {
+                    MachineType type = MachineType.find(m_editorProps.getMachineType());
+                    Item launchItem = null;
+                    
+                    switch (type)
+                    {
+                        case ITEM: 
+                            launchItem = new Fire(false); 
+                            break;
+                        case COIN: 
+                            launchItem = new Coin(1, false); 
+                            break;
+                        case BOMBIFY:
+                            Dot dot = isLetterMode() ? new Dot(0, "A", false, false) : new Dot(0);
+                            int strength = m_editorProps.getBombStrength();                            
+                            launchItem = new DotBomb(dot, strength, false);
+                            break;
+                        default:
+                    }
+                    
+                    Machine machine = createMachine(type.name, launchItem);
+                    changeCell(col, row, cell, machine); 
+                }
             }
             else if (m_operation instanceof Cell)
             {
@@ -1016,7 +1068,7 @@ public abstract class EditLayoutTab extends VLayout
             GridState state = ctx.state;
             
             // Slide, Conveyor, Rock or Hole can't overlap LazySusan
-            if (cell instanceof Slide || cell instanceof Hole || cell instanceof ConveyorCell || cell instanceof Rock)
+            if (cell instanceof Slide || cell instanceof Hole || cell instanceof ConveyorCell || cell instanceof Rock || cell instanceof Machine)
             {
                 for (LazySusan su : state.getLazySusans())
                 {
@@ -1145,6 +1197,18 @@ public abstract class EditLayoutTab extends VLayout
         {
             GridState state = ctx.state;  
             Cell cell = state.cell(col, row);
+            
+            if (cell instanceof Machine)
+            {
+                Machine machine = (Machine) cell;
+                if (machine.canToggleStuck())
+                {
+                    Machine newMachine = machine.toggleStuck();
+                    changeCell(col, row, cell, newMachine);
+                }
+                return;
+            }
+            
             if (cell.item == null || !cell.item.canBeStuck())
                 return;
             
@@ -1397,6 +1461,14 @@ public abstract class EditLayoutTab extends VLayout
     public EditorPropertiesPanel getEditorPropertiesPanel()
     {
         return m_editorProps;
+    }
+
+    public Machine createMachine(String type, Item launchItem)
+    {
+        int every = m_editorProps.getMachineEvery();
+        int howMany = m_editorProps.getMachineHowMany();
+        String trigger = m_editorProps.getMachineTrigger();
+        return new Machine(type, launchItem, every, howMany, trigger);
     }
 
     public void setLetterMode(boolean isLetterMode)

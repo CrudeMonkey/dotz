@@ -13,11 +13,15 @@ import com.ait.lienzo.client.core.animation.IAnimationCallback;
 import com.ait.lienzo.client.core.animation.IAnimationHandle;
 import com.ait.lienzo.client.core.animation.LayerRedrawManager;
 import com.ait.lienzo.client.core.shape.Circle;
+import com.ait.lienzo.client.core.shape.IPrimitive;
 import com.ait.lienzo.client.core.shape.Layer;
 import com.ait.lienzo.shared.core.types.ColorName;
+import com.enno.dotz.client.Cell.Bubble;
 import com.enno.dotz.client.Cell.CircuitCell;
 import com.enno.dotz.client.Cell.Door;
 import com.enno.dotz.client.Cell.Hole;
+import com.enno.dotz.client.Cell.Machine;
+import com.enno.dotz.client.Cell.Machine.MachineType;
 import com.enno.dotz.client.Cell.Rock;
 import com.enno.dotz.client.Cell.Slide;
 import com.enno.dotz.client.Circuits.Circuit;
@@ -38,11 +42,13 @@ import com.enno.dotz.client.anim.Pt;
 import com.enno.dotz.client.anim.RadioActives;
 import com.enno.dotz.client.anim.ShowDescription;
 import com.enno.dotz.client.anim.ShowWordCallback;
+import com.enno.dotz.client.anim.Transition.ArchTransition;
 import com.enno.dotz.client.anim.Transition.DropTransition;
 import com.enno.dotz.client.anim.TransitionList;
 import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Bomb;
 import com.enno.dotz.client.item.Clock;
+import com.enno.dotz.client.item.Coin;
 import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.DotBomb;
@@ -329,6 +335,7 @@ public class GridState
         
         list.add(new GetTransitions(ctx).getCallback(ctx.dotLayer, cfg.dropDuration));        
         list.add(explodeLoop(false, false)); // don't check clocks
+        list.add(machines());
         list.add(radioActives());
         list.add(activateControllers());
         list.add(moveBeasts());
@@ -387,6 +394,7 @@ public class GridState
         
         list.add(explodeLoop(false, false)); // don't check clocks
         list.add(activateControllers());
+        list.add(machines());        
         list.add(radioActives());        
         list.add(moveBeasts());
         list.add(moveSusans());
@@ -717,6 +725,7 @@ public class GridState
                     }
                 };                
                 chain.add(explosions());
+                chain.add(machines());
                 chain.add(transitions());
                 chain.run();
                 return;
@@ -1670,6 +1679,185 @@ public class GridState
         return RadioActives.createTransitions(ctx);
     }
     
+    static final Random s_dingRandom = new Random();
+    
+    public TransitionList machines()
+    {
+        return new TransitionList("machines", ctx.nukeLayer, 1000) //TODO machineDuration
+        {
+            public void init()
+            {
+                CellList targets = new CellList();
+                Random rnd = ctx.generator.getRandom();
+                double dy = -size() * 2;
+                for (int row = 0; row < numRows; row++)
+                {
+                    for (int col = 0; col < numColumns; col++)
+                    {
+                        Cell a = cell(col, row);
+                        if (a instanceof Machine)
+                        {
+                            Machine machine = (Machine) a;
+                            int cx = machine.col;
+                            int cy = machine.row;
+                            
+                            if (((Machine) a).isTriggered())
+                            {
+                                machine.clearStage();
+                                
+                                for (int i = 0; i < machine.getHowMany(); i++)
+                                {
+                                    if (machine.getMachineType() == MachineType.COIN)
+                                    {
+                                        final Coin newItem = (Coin) machine.createItem(ctx, null);
+                                        newItem.init(ctx);
+                                        
+                                        int newCol = rnd.nextInt(numColumns);
+                                        int newRow = rnd.nextInt(numRows);
+                                        
+                                        add(new ArchTransition(x(cx), y(cy), x(newCol), y(newRow), dy, newItem) {
+                                            boolean dinged; 
+                                            
+                                            @Override
+                                            public void move2(double pct)
+                                            {
+                                                if (pct > 0 && !dinged)
+                                                {
+                                                    SoundManager.ding(s_dingRandom.nextInt(5));
+                                                    dinged = true;
+                                                }
+                                                super.move2(pct);
+                                            }
+                                            
+                                            @Override
+                                            public void afterStart()
+                                            {
+                                                newItem.addShapeToLayer(ctx.nukeLayer);
+                                                ctx.nukeLayer.setVisible(true);
+                                                
+//                                                if (playSound)
+//                                                    Sound.WOOSH.play();
+                                            }
+
+                                            @Override
+                                            public void afterEnd()
+                                            {
+                                                newItem.removeShapeFromLayer(ctx.nukeLayer);
+                                                ctx.nukeLayer.setVisible(false);
+                                                
+                                                ctx.score.explodedCoins(newItem.getAmount());
+                                            }
+                                        }.fadeOut());
+                                    }
+                                    else
+                                    {
+                                        final Cell target = getMachineTarget(machine, targets, rnd);
+                                        if (target != null)
+                                        {
+                                            targets.add(target);
+
+                                            final boolean playSound = isEmpty();
+                                            //final boolean isBombify = machine.getMachineType() == MachineType.BOMBIFY;
+                                            
+                                            switch (machine.getMachineType())
+                                            {
+                                                case BUBBLE:
+                                                    final Bubble bubble = new Bubble();                                            
+                                                    final IPrimitive<?> shape = bubble.createShape(size());
+                                                    double d = size() / 2;
+                                                    
+                                                    add(new ArchTransition(x(cx) - d, y(cy) - d, x(target.col) - d, y(target.row) - d, dy, shape) {
+                                                        @Override
+                                                        public void afterStart()
+                                                        {
+                                                            ctx.nukeLayer.add(shape);
+                                                            ctx.nukeLayer.setVisible(true);
+                                                            
+                                                            if (playSound)
+                                                                Sound.WOOSH.play();
+                                                        }
+                                                        
+                                                        @Override
+                                                        public void afterEnd()
+                                                        {
+                                                            ctx.nukeLayer.remove(shape);
+                                                            
+                                                            bubble.item = target.item;
+                                                            bubble.ice = target.ice;
+                                                            setCell(target.col, target.row, bubble);
+                                                            
+                                                            bubble.init(ctx);
+                                                            bubble.initGraphics(target.col, target.row, x(target.col), y(target.row));
+                                                            
+                                                            ctx.score.addBubble();
+                                                            
+                                                            ctx.nukeLayer.setVisible(false);
+                                                        }
+                                                    });
+                                                    break;
+                                                    
+                                                default:
+                                                    final Item newItem = machine.createItem(ctx, target);
+                                                    newItem.init(ctx);
+                                                    
+                                                    add(new ArchTransition(x(cx), y(cy), x(target.col), y(target.row), dy, newItem) {
+                                                        @Override
+                                                        public void afterStart()
+                                                        {
+                                                            newItem.addShapeToLayer(ctx.nukeLayer);
+                                                            ctx.nukeLayer.setVisible(true);
+                                                            
+                                                            if (playSound)
+                                                                Sound.WOOSH.play();
+                                                        }
+                                                        
+                                                        @Override
+                                                        public void afterEnd()
+                                                        {
+                                                            newItem.removeShapeFromLayer(ctx.nukeLayer);
+                                                            if (target.item != null)
+                                                                target.item.removeShapeFromLayer(ctx.dotLayer);
+                                                            
+//                                                            if (isBombify)
+//                                                                ((DotBomb) newItem).incrementStrength(1);   // TODO immediately decreases
+                                                            
+                                                            ctx.score.replace(target.item, newItem);
+                                                            
+                                                            newItem.addShapeToLayer(ctx.dotLayer);
+                                                            target.item = newItem;
+                                                            ctx.nukeLayer.setVisible(false);
+                                                        }
+                                                    });
+                                                    break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            private Cell getMachineTarget(Machine machine, CellList targets, Random rnd)
+            {
+                for (int i = 0; i < 200; i++)
+                {
+                    int col = rnd.nextInt(numColumns);
+                    int row = rnd.nextInt(numRows);
+                    
+                    if (targets.containsCell(col, row))
+                        continue;
+                    
+                    Cell cell = cell(col, row);
+                    if (machine.canTargetCell(cell))
+                        return cell;
+                }
+                return null;
+            }
+        };
+    }
+    
     public TransitionList explosions()
     {
         final List<Cell> explodies = new ArrayList<Cell>();
@@ -1715,6 +1903,7 @@ public class GridState
                 updateScore();
             }
             
+            @Override
             public void init()
             {                
                 for (int row = 0; row < numRows; row++)
@@ -1805,9 +1994,10 @@ public class GridState
                         item.removeShapeFromLayer(ctx.nukeLayer);
                         if (c.item != null)
                         {
-                            c.item.explode(null, 0);
                             c.item.removeShapeFromLayer(ctx.dotLayer);
                         }
+                        
+                        ctx.score.replace(c.item, item);
                         
                         item.addShapeToLayer(ctx.dotLayer);
                         c.item = item;

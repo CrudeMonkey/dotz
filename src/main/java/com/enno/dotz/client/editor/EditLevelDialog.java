@@ -42,7 +42,7 @@ public abstract class EditLevelDialog extends MXWindow
         
         addItem(createPane(isNew, level));
         
-        setWidth(1000);
+        setWidth(1060);
         setHeight(900);
         
         setTop(30);

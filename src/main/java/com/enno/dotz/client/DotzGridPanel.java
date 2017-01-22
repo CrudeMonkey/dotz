@@ -136,6 +136,8 @@ public class DotzGridPanel extends LienzoPanel
             (ctx.generator.clickMode ? new ClickConnectMode(ctx, m_connectLayer) : new DragConnectMode(ctx, m_connectLayer));        
         ctx.boostPanel.setConnectMode(m_connectMode);
         
+        SoundManager.startLoop();
+        
         startItemAnimation();
 
         m_state.doInitialTransitions(new Runnable() {
@@ -150,12 +152,16 @@ public class DotzGridPanel extends LienzoPanel
     
     public void pause()
     {
+        SoundManager.pauseLoop();
+        
         m_connectLayer.setListening(false);
         ctx.statsPanel.pauseTimer();
     }
     
     public void unpause()
     {
+        SoundManager.startLoop();
+        
         m_connectLayer.setListening(true);
         ctx.statsPanel.unpauseTimer();
     }

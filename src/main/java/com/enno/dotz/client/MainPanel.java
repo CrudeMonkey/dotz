@@ -997,6 +997,8 @@ public class MainPanel extends VLayout
         {   
             if (m_playing)
             {
+                SoundManager.pauseLoop();
+            
                 m_grid.kill();
                 m_statsPanel.killTimer();                
                 m_playing = false;

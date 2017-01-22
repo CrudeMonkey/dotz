@@ -16,6 +16,7 @@ import com.ait.lienzo.shared.core.types.IColor;
 import com.ait.lienzo.shared.core.types.TextAlign;
 import com.ait.lienzo.shared.core.types.TextBaseLine;
 import com.enno.dotz.client.Config;
+import com.enno.dotz.client.Context;
 import com.enno.dotz.client.Generator;
 import com.enno.dotz.client.LetterMultiplier;
 
@@ -224,6 +225,32 @@ public class Dot extends Item
             m_multiplierGroup.add(text);
         }
     }
+    
+    public static Group getMultiplierShapeForMachine()
+    {
+        double w = 20;
+        double h = 15;
+        
+        Group g = new Group();
+        Rectangle r = new Rectangle(w, h);
+        r.setStrokeColor(ColorName.BLACK);
+        r.setFillColor(ColorName.YELLOW);
+        r.setX(-w / 2);
+        r.setY(h * -0.55);
+        g.add(r);
+        
+        Text text = new Text("x2");
+        text.setFillColor(ColorName.BLACK);
+        text.setFontSize(10);
+        text.setFontStyle("bold");
+        text.setTextBaseLine(TextBaseLine.MIDDLE);
+        text.setTextAlign(TextAlign.CENTER);
+//        text.setX(w * 0.5);
+//        text.setY(h * 0.5);
+        g.add(text);
+        
+        return g;
+    }
 
     public static void addMark(int color, Group g, double size)
     {
@@ -409,5 +436,31 @@ public class Dot extends Item
         
         double a = n / RADIO_PULSE_TIME;
         m_radioActiveShape.setAlpha(a);
+    }
+
+    public static Item upgradeMultiplier(Item item, Context ctx)
+    {
+        Dot dot = (Dot) item;
+        
+        int n, type;
+        LetterMultiplier m = dot.getLetterMultiplier();
+        if (m == null)
+        {
+            n = 2;
+            type = ctx.generator.getRandom().nextBoolean() ? LetterMultiplier.LETTER_MULTIPLIER : LetterMultiplier.WORD_MULTIPLIER;
+        }
+        else
+        {
+            type = m.getType();
+            n = m.getMultiplier() + 1;
+        }
+        if (ctx.generator.getRandom().nextBoolean())
+            n++;
+        
+        Dot newDot = new Dot(dot.color, dot.getLetter(), false, dot.isRadioActive());
+        LetterMultiplier m2 = new LetterMultiplier(n, type);
+        newDot.setLetterMultiplier(m2);
+        
+        return newDot;
     }
 }

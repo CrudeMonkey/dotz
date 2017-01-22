@@ -84,6 +84,8 @@ public class Score
     private int m_usedBombs;
     private int m_usedBlasters;
 
+    private int m_explodedCoins;
+    
     private int m_score;
     private int m_moves;    
     private int m_wordCount;
@@ -130,6 +132,12 @@ public class Score
         m_explodedFire++;
         m_fireInGrid--;
         addPoints(2);
+    }
+
+    public void explodedCoins(int n)
+    {
+        m_explodedCoins += n;
+        addPoints(n * 10);
     }
 
     public void droppedAnchor()
@@ -301,6 +309,11 @@ public class Score
     public int getExplodedAnimals()
     {
         return m_explodedAnimals;
+    }
+
+    public int getExplodedCoins()
+    {
+        return m_explodedCoins;
     }
 
     public int getExplodedFire()
@@ -570,7 +583,7 @@ public class Score
             for (int col = 0; col < state.numColumns; col++)
             {
                 Cell cell = state.cell(col, row);
-                countItem(cell.item);
+                countItem(cell.item, 1);
                 
                 if (cell instanceof Door && !((Door) cell).isBlinking())
                 {
@@ -594,79 +607,77 @@ public class Score
         m_initialCircuitCount = state.getCircuitCount();
     }
 
-    protected void countItem(Item item)
+    protected void countItem(Item item, int n)
     {
         if (item instanceof Anchor)
         {
-            m_anchorsInGrid++;
+            m_anchorsInGrid += n;
         }
         else if (item instanceof Diamond)
         {
-            m_diamondsInGrid++;
+            m_diamondsInGrid += n;
         }
         else if (item instanceof Animal)
         {
-            m_animalsInGrid++;
+            m_animalsInGrid += n;
         }
         else if (item instanceof Knight)
         {
-            m_knightsInGrid++;
+            m_knightsInGrid += n;
         }
         else if (item instanceof Fire)
         {
-            m_fireInGrid++;
+            m_fireInGrid += n;
         }
         else if (item instanceof Clock)
         {
-            m_clocksInGrid++;
+            m_clocksInGrid += n;
         }
         else if (item instanceof Laser)
         {
-            m_lasersInGrid++;
+            m_lasersInGrid += n;
         }
         else if (item instanceof Mirror)
         {
-            m_mirrorsInGrid++;
+            m_mirrorsInGrid += n;
         }
         else if (item instanceof Rocket)
         {
-            m_rocketsInGrid++;
+            m_rocketsInGrid += n;
         }
         else if (item instanceof Blocker)
         {
             if (((Blocker) item).isZapOnly())
-                m_zapBlockersInGrid++;
+                m_zapBlockersInGrid += n;
             else
-                m_blockersInGrid++;
+                m_blockersInGrid += n;
         }
         else if (item instanceof Chest)
         {
-            m_chestsInGrid++;
+            m_chestsInGrid += n;
             
             Chest chest = (Chest) item;
             if (!(chest.getItem() instanceof RandomItem))
-                countItem(chest.getItem());
+                countItem(chest.getItem(), n);
         }
     }
     
     /** Fire or Animal ate something */
     public void ate(Item item)
     {
-        if (item instanceof Fire)
-        {
-            m_fireInGrid--;
-        }
-        else if (item instanceof Anchor)
-        {
-            m_anchorsInGrid--;
-        }
-        else if (item instanceof Knight)
-        {
-            m_knightsInGrid--;
-        }
-        else if (item instanceof Clock)
-        {
-            m_clocksInGrid--;
-        }
+        countItem(item, -1);
+    }
+    
+    public void replace(Item from, Item to)
+    {
+        if (from != null)
+            countItem(from, -1);
+        
+        countItem(to, 1);
+    }
+
+    public void addBubble()
+    {
+        m_initialBubbleCount++;
     }
 }

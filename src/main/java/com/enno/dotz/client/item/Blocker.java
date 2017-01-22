@@ -9,6 +9,7 @@ import com.ait.lienzo.shared.core.types.Color;
 import com.ait.lienzo.shared.core.types.ColorName;
 import com.ait.lienzo.shared.core.types.TextAlign;
 import com.ait.lienzo.shared.core.types.TextBaseLine;
+import com.enno.dotz.client.Config;
 import com.google.gwt.dom.client.Style.FontWeight;
 
 /**
@@ -46,6 +47,12 @@ public class Blocker extends Item
             m_text.setVisible(m_strength > 1);
             m_text.setText("" + m_strength);
         }
+    }
+    
+    @Override
+    public boolean stopsLaser()
+    {
+        return true;
     }
     
     public boolean isZapOnly()
@@ -116,11 +123,20 @@ public class Blocker extends Item
         
         m_text = new Text("" + m_strength);
         m_text.setFillColor(ColorName.BLACK);
-        m_text.setFontSize(8);
         m_text.setFontStyle(FontWeight.BOLD.getCssName());
         m_text.setTextAlign(TextAlign.CENTER);
-        m_text.setY(sz * -0.14);
-        m_text.setTextBaseLine(TextBaseLine.MIDDLE); // y position is position of top of the text
+        m_text.setTextBaseLine(TextBaseLine.MIDDLE);
+        
+        if (sz < Config.DEFAULT_CELL_SIZE)  // inside Machine
+        {
+            m_text.setFontSize(6);
+            m_text.setY(sz * -0.14 + 1);
+        }
+        else
+        {
+            m_text.setFontSize(8);
+            m_text.setY(sz * -0.14);
+        }
         g.add(m_text);
         
         m_text.setVisible(m_strength > 1);

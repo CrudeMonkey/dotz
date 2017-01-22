@@ -12,6 +12,8 @@ import com.enno.dotz.shared.WordFinder.ResultList;
 public class Context
 {
     public boolean isEditing;
+    public boolean isPreview;
+
     public Config cfg;
     public GridState state;
     public Score score = new Score();

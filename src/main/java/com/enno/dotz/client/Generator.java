@@ -123,7 +123,7 @@ public class Generator
         return m_usedSeed;
     }
     
-    protected Random getRandom()
+    public Random getRandom()
     {
         if (m_rnd == null)
         {
@@ -263,6 +263,25 @@ public class Generator
     {
         ItemFrequency dot = getNextDot();
         return ((Dot) dot.item).color;
+    }
+    
+    private static final int COIN_10_DISTRIB = 1;
+    private static final int COIN_5_DISTRIB = 3;
+    private static final int COIN_1_DISTRIB = 10;
+    private static final double TOTAL_DISTRIB = COIN_10_DISTRIB + COIN_5_DISTRIB + COIN_1_DISTRIB;
+    
+    private static final double COIN_10_CHANCE = COIN_10_DISTRIB / TOTAL_DISTRIB;
+    private static final double COIN_5_CHANCE = COIN_5_DISTRIB / TOTAL_DISTRIB;
+    private static final double COIN_1_CHANCE = COIN_1_DISTRIB / TOTAL_DISTRIB;
+    
+    public int nextCoinAmount()
+    {
+        double d = getRandom().nextDouble();
+        if (d < COIN_10_CHANCE)
+            return 10;
+        if (d < COIN_10_CHANCE + COIN_5_CHANCE)
+            return 5;
+        return 1;
     }
     
     public Item getNextItem(Context ctx, boolean initial, Boolean radioActive)

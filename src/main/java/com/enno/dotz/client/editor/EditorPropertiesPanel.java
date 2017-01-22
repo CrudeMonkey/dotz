@@ -2,6 +2,8 @@ package com.enno.dotz.client.editor;
 
 import java.util.LinkedHashMap;
 
+import com.enno.dotz.client.Cell.Machine.MachineTrigger;
+import com.enno.dotz.client.Cell.Machine.MachineType;
 import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.ui.MXForm;
 import com.enno.dotz.client.ui.MXSelectItem;
@@ -21,6 +23,12 @@ public class EditorPropertiesPanel extends VLayout
     private SpinnerItem m_bombStrength;
     private RadiusCombo m_radius;
 
+    private MXSelectItem m_machineType;
+    private SpinnerItem m_machineEvery;
+    private SpinnerItem m_machineHowMany;
+    private SpinnerItem m_machineZapOnly;
+    private MXSelectItem m_machineTrigger;
+    
     public EditorPropertiesPanel()
     {
         setMargin(10);
@@ -92,17 +100,63 @@ public class EditorPropertiesPanel extends VLayout
         
         m_radius = new RadiusCombo("Drop/Pick Radius");
 
-        MXForm form = new MXForm();
-        form.setNumCols(4);
-        form.setColWidths(100, 50, 120, 50);
+        m_machineType = new MXSelectItem();
+        m_machineType.setTitle("Machine Type");
+        m_machineType.setWidth(85);
+        m_machineType.setValueMap(MachineType.getValueMap());
+        m_machineType.setValue(MachineType.ITEM.name);
         
-        form.setFields(m_iceStrength, m_animalStrength, 
-                m_doorStrength, m_animalType, 
-                m_doorRotation, m_animalAction, 
-                m_clockStrength, m_bombStrength,
+        m_machineEvery = new SpinnerItem();
+        m_machineEvery.setWidth(70);
+        m_machineEvery.setTitle("Machine Every");
+        m_machineEvery.setMin(1);
+        m_machineEvery.setStep(1);
+        m_machineEvery.setValue(1);
+        
+        m_machineHowMany = new SpinnerItem();
+        m_machineHowMany.setWidth(70);
+        m_machineHowMany.setTitle("Machine Items");
+        m_machineHowMany.setMin(1);
+        m_machineHowMany.setStep(1);
+        m_machineHowMany.setValue(3);
+        
+        m_machineTrigger = new MXSelectItem();
+        m_machineTrigger.setTitle("Machine Trigger");
+        m_machineTrigger.setWidth(85);
+        m_machineTrigger.setValueMap(MachineTrigger.getValueMap());
+        m_machineTrigger.setValue(MachineTrigger.ZAP_AND_CHAIN.name);
+        
+        MXForm form = new MXForm();
+        form.setNumCols(6);
+        form.setColWidths(100, 50, 120, 50, 100, 85);
+        
+        form.setFields(m_iceStrength, m_animalStrength, m_machineType,
+                m_doorStrength, m_animalType, m_machineEvery,
+                m_doorRotation, m_animalAction, m_machineHowMany,
+                m_clockStrength, m_bombStrength, m_machineTrigger,
                 m_knightStrength, m_radius);
         
         addMember(form);
+    }
+    
+    public int getMachineEvery()
+    {
+        return Integer.parseInt(m_machineEvery.getValueAsString());
+    }
+    
+    public int getMachineHowMany()
+    {
+        return Integer.parseInt(m_machineHowMany.getValueAsString());
+    }
+    
+    public String getMachineType()
+    {
+        return m_machineType.getValueAsString();
+    }
+    
+    public String getMachineTrigger()
+    {
+        return m_machineTrigger.getValueAsString();
     }
     
     public int getIceStrength()
