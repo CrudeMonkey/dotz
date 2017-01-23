@@ -46,7 +46,13 @@ public class WrappedDot extends Item
     {
         return true;
     }
-
+    
+    @Override
+    public boolean canBeLaunched()
+    {
+        return false;   // see MachineType.WRAP
+    }
+   
     @Override
     public IPrimitive<?> createShape(double size)
     {

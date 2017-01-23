@@ -1,8 +1,6 @@
 package com.enno.dotz.client.item;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Random;
 
 import com.ait.lienzo.client.core.event.NodeMouseMoveEvent;
@@ -14,32 +12,43 @@ import com.ait.lienzo.client.core.shape.IPrimitive;
 import com.ait.lienzo.client.core.shape.Layer;
 import com.ait.lienzo.client.core.shape.MultiPath;
 import com.ait.lienzo.client.core.shape.Text;
+import com.ait.lienzo.shared.core.types.Color;
 import com.ait.lienzo.shared.core.types.ColorName;
 import com.ait.lienzo.shared.core.types.IColor;
 import com.ait.lienzo.shared.core.types.TextAlign;
 import com.ait.lienzo.shared.core.types.TextBaseLine;
+import com.enno.dotz.client.Config;
 import com.enno.dotz.client.Direction;
 import com.enno.dotz.client.SoundManager.Sound;
+import com.enno.dotz.client.util.Console;
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.event.shared.HandlerRegistration;
 
 public class Animal extends Item
 {
-    private static List<Animal> s_list = new ArrayList<Animal>();
-    private static Random s_blinkRandom = new Random();
+    static Random s_blinkRandom = new Random();
 
-    private static int BLINK_DURATION = 300;
+    static int BLINK_DURATION = 300;
 
+    public static final int BLACK_ANIMAL = -1;
+    
     public enum Type
     {
         DEFAULT("Default", ColorName.WHITE, ColorName.BLACK),
-        FOLLOW("Follow", ColorName.FIREBRICK, ColorName.WHITE),
+        FOLLOW("Follow", Color.fromColorString("#F2A59C"), ColorName.RED),
         SCARED("Scared", ColorName.LIGHTBLUE, ColorName.BLACK),
         FROZEN("Frozen", ColorName.WHITE, ColorName.BLACK);
         
         private String m_name;
         private IColor m_eyeColor;
         private IColor m_pupilColor;
+        
+        Type(String name, IColor eyeColor, IColor pupilColor)
+        {
+            m_name = name;
+            m_eyeColor = eyeColor;
+            m_pupilColor = pupilColor;
+        }
         
         public IColor getEyeColor()
         {
@@ -51,13 +60,6 @@ public class Animal extends Item
             return m_pupilColor;
         }
 
-        Type(String name, IColor eyeColor, IColor pupilColor)
-        {
-            m_name = name;
-            m_eyeColor = eyeColor;
-            m_pupilColor = pupilColor;
-        }
-        
         public String getName()
         {
             return m_name;
@@ -142,6 +144,8 @@ public class Animal extends Item
     public int lastDirection = Direction.NONE;
     private long m_startBlink;
     private double m_eyeHeight;
+
+    private double m_eyeWidth;
     
     public Animal(int color, int strength, Type type, boolean stuck)
     {
@@ -157,50 +161,9 @@ public class Animal extends Item
         m_stuck = stuck;
     }
 
-    @Override
-    public boolean canBeEaten()
+    public boolean isBlack()
     {
-        return false;
-    }
-    
-    @Override
-    public boolean canSwap()
-    {
-        return false;
-    }
-    
-    @Override
-    public boolean stopsLaser()
-    {
-        return true;
-    }
-    
-    public int getStrength()
-    {
-        return m_strength;
-    }
-
-    public void setStrength(int strength)
-    {
-        m_strength = strength;
-    }
-    
-    @Override
-    public boolean canIncrementStrength()
-    {
-        return true;
-    }
-    
-    @Override
-    public void incrementStrength(int ds)
-    {
-        if (m_strength <= 1 && ds == -1)
-            return;
-        
-        m_strength += ds;
-        
-        if (m_text != null)
-            m_text.setText("" + m_strength);
+        return m_color == BLACK_ANIMAL;
     }
     
     public Type getType()
@@ -238,7 +201,76 @@ public class Animal extends Item
         
         m_stunned = stunned;
     }
+    
+    @Override
+    public Integer getColor()
+    {
+        return m_color;
+    }
 
+    public void setColor(int color)
+    {
+        m_color = color;
+    }
+
+    @Override
+    public boolean canBeEaten()
+    {
+        return false;
+    }
+    
+    @Override
+    public boolean canSwap()
+    {
+        return false;
+    }
+    
+    @Override
+    public boolean canBeReplaced()
+    {
+        return false;
+    }
+    
+    @Override
+    public boolean stopsLaser()
+    {
+        return true;
+    }
+    
+    public int getStrength()
+    {
+        return m_strength;
+    }
+
+    public void setStrength(int strength)
+    {
+        m_strength = strength;
+    }
+    
+    @Override
+    public boolean canIncrementStrength()
+    {
+        return true;
+    }
+    
+    @Override
+    public boolean canConnect()
+    {
+        return !isBlack();
+    }
+
+    @Override
+    public void incrementStrength(int ds)
+    {
+        if (m_strength <= 1 && ds == -1)
+            return;
+        
+        m_strength += ds;
+        
+        if (m_text != null)
+            m_text.setText("" + m_strength);
+    }
+    
     @Override
     public IPrimitive<?> createShape(double size)
     {
@@ -247,9 +279,11 @@ public class Animal extends Item
         if (isStuck())
             g.add(createStuckShape(size));
         
+        IColor fillColor = m_color == BLACK_ANIMAL ? ColorName.BLACK : (cfg == null ? Config.COLORS[0] : cfg.drawColor(m_color));       // cfg is null in ModePalette
+        
         double r = size * 0.4;
         Circle c = new Circle(r);
-        c.setFillColor(cfg.drawColor(m_color));        
+        c.setFillColor(fillColor);        
         g.add(c);
         
         if (m_action == Action.SWAP)
@@ -260,13 +294,13 @@ public class Animal extends Item
             double y = (r + r2/2) * Math.sin(Math.PI / 4);
             
             Circle c2 = new Circle(r2);
-            c2.setFillColor(cfg.drawColor(m_color));
+            c2.setFillColor(fillColor);
             c2.setX(x);
             c2.setY(-y);
             g.add(c2);
             
             c2 = new Circle(r2);
-            c2.setFillColor(cfg.drawColor(m_color));
+            c2.setFillColor(fillColor);
             c2.setX(-x);
             c2.setY(-y);
             g.add(c2);
@@ -285,7 +319,7 @@ public class Animal extends Item
             horn.A(r2*0.8, r2*0.8, 0, 0, 1, x, y);
             horn.Z();
             
-            horn.setFillColor(cfg.drawColor(m_color));
+            horn.setFillColor(fillColor);
             horn.setRotation(angle);
             
             g.add(horn);
@@ -296,7 +330,7 @@ public class Animal extends Item
             horn.A(r2*0.8, r2*0.8, 0, 0, 0, x, y);
             horn.Z();
             
-            horn.setFillColor(cfg.drawColor(m_color));
+            horn.setFillColor(fillColor);
             horn.setRotation(-angle);
             
             g.add(horn);
@@ -307,13 +341,13 @@ public class Animal extends Item
         m_text.setFontSize(7);
         m_text.setFontStyle(FontWeight.BOLD.getCssName());
         m_text.setTextAlign(TextAlign.CENTER);
-        m_text.setY(5);
-        m_text.setTextBaseLine(TextBaseLine.TOP); // y position is position of top of the text
+        m_text.setTextBaseLine(TextBaseLine.MIDDLE);
+        m_text.setY(r * 0.5);
         g.add(m_text);
         
         m_pupilRadius = r * 0.25;
         m_eyeHeight = r * 0.7;
-        double eyeWidth = m_eyeHeight;
+        m_eyeWidth = m_eyeHeight;
         
         if (m_type == Type.FROZEN)      // looks sleepy
         {
@@ -323,8 +357,10 @@ public class Animal extends Item
         
         for (int i = 0; i < 2; i++)
         {
-            Ellipse eye = new Ellipse(eyeWidth, m_eyeHeight);
+            Ellipse eye = new Ellipse(m_eyeWidth, m_eyeHeight);
             eye.setFillColor(m_type.getEyeColor());
+            if (m_type == Type.FOLLOW)
+                eye.setStrokeColor(ColorName.RED);
             
             double x = r * 0.5 * (i == 0 ? -1 : 1);
             double y = -r * 0.35;
@@ -347,18 +383,6 @@ public class Animal extends Item
             m_pupils[i] = pupil;
         }
         return g;
-    }
-    
-    @Override
-    public Integer getColor()
-    {
-        return m_color;
-    }
-    
-    @Override
-    public boolean canConnect()
-    {
-        return true;
     }
     
     @Override
@@ -388,23 +412,24 @@ public class Animal extends Item
     }
 
     @Override
-    public void addShapeToLayer(Layer layer)
-    {
-        super.addShapeToLayer(layer);        
-        s_list.add(this);
-    }
-
-    @Override
-    public void removeShapeFromLayer(Layer layer)
-    {
-        s_list.remove(this);
-        super.removeShapeFromLayer(layer);
-    }
-
-    @Override
     public void animate(long t, double x, double y)
     {
+        // pupils track the mouse pointer
+        for (int i = 0; i < 2; i++)
+        {
+            double dx = x - m_x[i] - shape.getX();
+            double dy = y - m_y[i] - shape.getY();
+            double angle = Math.atan2(dy, dx);
+            double nx = m_x[i] + Math.cos(angle) * m_pupilRadius;
+            double ny = m_y[i] + Math.sin(angle) * m_pupilRadius;
+            m_pupils[i].setX(nx);
+            m_pupils[i].setY(ny);
+        }
+
         long dt = t - m_startBlink;
+        
+        double curr_h = m_eyeHeight;
+        
         if (dt > BLINK_DURATION)
         {
             m_startBlink = 2 * BLINK_DURATION + s_blinkRandom.nextInt(4 * BLINK_DURATION) + System.currentTimeMillis();
@@ -421,20 +446,28 @@ public class Animal extends Item
             {
                 h = (dt - half) / half;
             }
-            m_eyes[0].setHeight(h * m_eyeHeight);
-            m_eyes[1].setHeight(h * m_eyeHeight);
+            
+            curr_h = h * m_eyeHeight;
+            m_eyes[0].setHeight(curr_h);
+            m_eyes[1].setHeight(curr_h);
         }
         
-        // pupils track the mouse pointer
-        for (int i = 0; i < 2; i++)
+        // Hide the pupils if they're outside the eye's oval
+        if (curr_h == m_eyeHeight)  // not blinking
         {
-            double dx = x - m_x[i] - shape.getX();
-            double dy = y - m_y[i] - shape.getY();
-            double angle = Math.atan2(dy, dx);
-            double nx = m_x[i] + Math.cos(angle) * m_pupilRadius;
-            double ny = m_y[i] + Math.sin(angle) * m_pupilRadius;
-            m_pupils[i].setX(nx);
-            m_pupils[i].setY(ny);
+            m_pupils[0].setVisible(true);
+            m_pupils[1].setVisible(true);
+        }
+        else
+        {
+            //TODO optimize
+            for (int i = 0; i < 2; i++)
+            {
+                double dx = m_pupils[i].getX() - m_x[i];
+                double dy = m_pupils[i].getY() - m_y[i];
+                double d = (dx * dx) / (m_eyeWidth * m_eyeWidth) + (dy * dy) / (curr_h * curr_h);
+                m_pupils[i].setVisible(d < 0.25);   // d * 4 < 1 (i.e. radius * 2 = diameter)
+            }
         }
     }
     

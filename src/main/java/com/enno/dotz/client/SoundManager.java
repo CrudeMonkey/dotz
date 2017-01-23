@@ -18,6 +18,8 @@ public class SoundManager
         BOMB_WENT("80500__ggctuk__exp-obj-large03.wav"),
         OUT_OF_TIME("buzzer_x.wav"),
         ANIMAL_DIED("burp_x.wav"),
+        SPIDER_DIED("squish.mp3"),
+//        SPIDER_DIED("squeek.mp3"),
         DROPPED_ANCHOR("110393__soundscalpel-com__water-splash.wav"),
         DROPPED_DIAMOND("171640__fins__scale-c7-short.mp3"),
         DROPPED_CLOCK("blurp_x.wav"),
@@ -96,7 +98,7 @@ public class SoundManager
     
     public static void startLoop()
     {
-        s_loop.play(true);
+        //s_loop.play(true);
     }
     
     public static void pauseLoop()

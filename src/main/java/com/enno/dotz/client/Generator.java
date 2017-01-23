@@ -24,6 +24,7 @@ import com.enno.dotz.client.item.Knight;
 import com.enno.dotz.client.item.Laser;
 import com.enno.dotz.client.item.Mirror;
 import com.enno.dotz.client.item.Rocket;
+import com.enno.dotz.client.item.Spider;
 import com.enno.dotz.client.item.Turner;
 import com.enno.dotz.client.item.Wild;
 import com.enno.dotz.client.util.FrequencyGenerator;
@@ -73,7 +74,8 @@ public class Generator
     public int           dropRadius       = 3;
     public double        radioActivePct   = 0;
     public int           eggsNeeded       = 3;                  // 3 eggs makes a cracked egg, 3 cracked eggs makes a bird
-    
+    public double        spiderGrowth     = 10;
+
     // Word Mode settings
     public boolean       removeLetters    = true;
     public boolean       findWords        = false;
@@ -360,6 +362,10 @@ public class Generator
             {
                 ctx.score.generatedAnimal();
             }
+            else if (item instanceof Spider)
+            {
+                ctx.score.generatedSpider();
+            }
             else if (item instanceof Knight)
             {
                 ctx.score.generatedKnight();
@@ -400,6 +406,11 @@ public class Generator
             return radioActive.booleanValue();
         else
             return radioActivePct > 0 && m_rnd.nextDouble() * 100 < radioActivePct;
+    }
+    
+    public boolean replicateSpider()
+    {
+        return spiderGrowth > 0 && m_rnd.nextDouble() * 100 < spiderGrowth;
     }
     
     protected Item getNextDomino(Context ctx)
@@ -553,6 +564,13 @@ public class Generator
                 animal.setStrength(ctx.generator.animalStrength);
                 animal.setType(ctx.generator.animalType);
                 animal.setAction(ctx.generator.animalAction);
+            }
+            else if (item instanceof Spider)
+            {
+                Spider animal = (Spider) item;
+                animal.setStrength(ctx.generator.animalStrength);
+//                animal.setType(ctx.generator.animalType);
+//                animal.setAction(ctx.generator.animalAction);
             }
             else if (item instanceof Knight)
             {

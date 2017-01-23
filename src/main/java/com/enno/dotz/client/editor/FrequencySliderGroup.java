@@ -32,6 +32,7 @@ import com.enno.dotz.client.item.Laser;
 import com.enno.dotz.client.item.Mirror;
 import com.enno.dotz.client.item.RandomItem;
 import com.enno.dotz.client.item.Rocket;
+import com.enno.dotz.client.item.Spider;
 import com.enno.dotz.client.item.Turner;
 import com.enno.dotz.client.item.Wild;
 import com.enno.dotz.client.item.YinYang;
@@ -79,6 +80,14 @@ public class FrequencySliderGroup extends HLayout
             m_list.add(slider);
             right.addMember(slider);
         }
+        
+        FrequencySlider spider = createSpiderSlider(index++);
+        m_list.add(spider);
+        left.addMember(spider);
+        
+        FrequencySlider blackAnimal = createAnimalSlider(index++, Animal.BLACK_ANIMAL);
+        m_list.add(blackAnimal);
+        left.addMember(blackAnimal);
         
         FrequencySlider wild = createWildSlider(index++);
         m_list.add(wild);
@@ -201,6 +210,8 @@ public class FrequencySliderGroup extends HLayout
                         fire.initFrequency(freq);
                     else if (item instanceof Anchor)
                         anchor.initFrequency(freq);
+                    else if (item instanceof Spider)
+                        spider.initFrequency(freq);
                     else if (item instanceof Diamond)
                         diamond.initFrequency(freq);
                     else if (item instanceof Wild)
@@ -248,8 +259,11 @@ public class FrequencySliderGroup extends HLayout
                         chest.initFrequency(freq);
                     else if (item instanceof Animal)
                     {
-                        int color = ((Animal) item).getColor();                    
-                        animals.get(color).initFrequency(freq);
+                        int color = ((Animal) item).getColor();   
+                        if (color == Animal.BLACK_ANIMAL)
+                            blackAnimal.initFrequency(freq);
+                        else
+                            animals.get(color).initFrequency(freq);
                     }
                     else if (item instanceof Dot)
                     {
@@ -369,6 +383,13 @@ public class FrequencySliderGroup extends HLayout
     protected FrequencySlider createKeySlider(int index)
     {
         Key dot = new Key(false);
+        dot.setContext(ctx);
+        return new FrequencySlider(index, dot, this);
+    }
+
+    protected FrequencySlider createSpiderSlider(int index)
+    {
+        Spider dot = new Spider();
         dot.setContext(ctx);
         return new FrequencySlider(index, dot, this);
     }

@@ -29,6 +29,7 @@ public class Goal
     protected int m_bombs;
     protected int m_blasters;
     protected int m_coins;
+    protected int m_spiders;
     
     protected int m_score;
     protected int m_time;
@@ -61,19 +62,29 @@ public class Goal
         return m_dots;
     }
     
-    public int getAnimals()
-    {
-        return m_animals;
-    }
-    
     public void setDots(int color, int goal)
     {
         m_dots[color] = goal;
     }
     
+    public int getAnimals()
+    {
+        return m_animals;
+    }
+    
     public void setAnimals(int goal)
     {
         m_animals = goal;
+    }
+
+    public int getSpiders()
+    {
+        return m_spiders;
+    }
+
+    public void setSpiders(int spiders)
+    {
+        m_spiders = spiders;
     }
 
     public int getKnights()

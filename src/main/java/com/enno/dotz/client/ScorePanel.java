@@ -38,6 +38,7 @@ import com.enno.dotz.client.item.Knight;
 import com.enno.dotz.client.item.Laser;
 import com.enno.dotz.client.item.Mirror;
 import com.enno.dotz.client.item.Rocket;
+import com.enno.dotz.client.item.Spider;
 
 
 public class ScorePanel extends LienzoPanel
@@ -267,6 +268,10 @@ public class ScorePanel extends LienzoPanel
         need = goal.getCoins();
         if (need != 0)
             m_list.add(new CoinGoal(need, ctx));
+
+        need = goal.getSpiders();
+        if (need != 0)
+            m_list.add(new SpiderGoal(need, ctx));
 
         ChainGoal combi = goal.getChainGoal();
         if (combi != null)
@@ -546,6 +551,45 @@ public class ScorePanel extends LienzoPanel
             else
             {
                 int got = ctx.score.getDroppedAnchors();
+                if (got >= m_goal)
+                    setCompleted();
+                else
+                    setText(got + " / " + m_goal);
+            }
+        }
+    }
+    
+    public static class SpiderGoal extends GoalItem
+    {
+        private int m_goal;
+        
+        public SpiderGoal(int need, Context ctx)
+        {
+            super(ctx);
+            
+            m_goal = need;
+        }
+        
+        protected IPrimitive<?> createShape()
+        {
+            Spider s = new Spider();
+            s.setContext(ctx);
+            return s.createShape(SHAPE_SIZE);
+        }
+        
+        protected void updateText()
+        {
+            if (m_goal == Goal.ALL)
+            {
+                int gen = ctx.score.getSpidersInGrid();
+                if (gen > 0)
+                    setText("" + gen);
+                else 
+                    setCompleted();
+            }
+            else
+            {
+                int got = ctx.score.getExplodedSpiders();
                 if (got >= m_goal)
                     setCompleted();
                 else

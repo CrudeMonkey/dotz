@@ -57,6 +57,7 @@ public class ItemPalette extends Palette<Object>
             addButton(new Dot(i), i, 1);
             addButton(new Animal(i, 0, Animal.Type.DEFAULT, false), i, 2);
         }        
+        addButton(new Animal(Animal.BLACK_ANIMAL,0, Animal.Type.DEFAULT, false), Config.MAX_COLORS, 2);
         
         addButton(new LazySusan(0, 0, true), 0, 3);
         addButton(new LazySusan(0, 0, false), 1, 3);

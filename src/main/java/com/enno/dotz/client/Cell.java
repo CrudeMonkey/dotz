@@ -110,7 +110,7 @@ public abstract class Cell
     }
     
     /**
-     * Used by layout editor.
+     * Used by layout editor and MoveAnimals.
      * 
      * @return
      */
@@ -2547,13 +2547,6 @@ public abstract class Cell
             return new Machine(m_type.name, m_launchItem == null ? null : m_launchItem.copy(), m_every, m_howMany, m_trigger.name);
         }
 
-        public static boolean canLaunch(Item item)
-        {
-            return item instanceof Egg || item instanceof RandomItem || item instanceof Fire || item instanceof Blocker || 
-                    item instanceof Wild || item instanceof Rocket || item instanceof Bomb || item instanceof Blaster ||
-                    item instanceof ColorBomb;
-        }
-
         public Item createItem(Context ctx, Cell target)
         {
             if (m_type == MachineType.ITEM)
@@ -2570,6 +2563,8 @@ public abstract class Cell
                     ((Rocket) item).setDirection(Direction.randomDirection(ctx.generator.getRandom()));
                 else if (item instanceof Blaster)
                     ((Blaster) item).setVertical(ctx.generator.getRandom().nextBoolean());
+                else if (item instanceof Animal && !((Animal) item).isBlack())
+                    ((Animal) item).setColor(ctx.generator.getNextDotColor());
                 
                 return item;
             }
@@ -2628,8 +2623,7 @@ public abstract class Cell
                 if (cell.item == null)
                     return true;
                 
-                if (cell.item instanceof Animal || cell.item instanceof Laser || cell.item instanceof Blocker || 
-                        cell.item instanceof Diamond || cell.item instanceof Chest)
+                if (!cell.item.canBeReplaced())
                     return false;
             
                 return true;

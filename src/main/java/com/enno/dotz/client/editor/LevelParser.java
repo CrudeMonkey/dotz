@@ -50,6 +50,7 @@ import com.enno.dotz.client.item.LazySusan;
 import com.enno.dotz.client.item.Mirror;
 import com.enno.dotz.client.item.RandomItem;
 import com.enno.dotz.client.item.Rocket;
+import com.enno.dotz.client.item.Spider;
 import com.enno.dotz.client.item.Turner;
 import com.enno.dotz.client.item.Wild;
 import com.enno.dotz.client.item.YinYang;
@@ -217,6 +218,7 @@ public class LevelParser
             addItems("turner", p, grid);
             addItems("key", p, grid);
             addItems("egg", p, grid);
+            addItems("spider", p, grid);
             addItems("chest", p, grid);
             addItems("fire", p, grid);
             addItems("wild", p, grid);
@@ -339,6 +341,11 @@ public class LevelParser
         {
             int strength = row.getAsInteger("strength");
             return new Clock(strength, stuck);
+        }
+        if (itemClass.equals("spider"))
+        {
+            int strength = row.getAsInteger("strength");
+            return new Spider(strength, stuck);
         }
         if (itemClass.equals("drop"))
         {
@@ -515,6 +522,9 @@ public class LevelParser
 
         if (json.isInteger("bubbles"))
             goal.setBubbles(json.getAsInteger("bubbles"));
+
+        if (json.isInteger("spiders"))
+            goal.setSpiders(json.getAsInteger("spiders"));
 
         if (json.isInteger("circuits"))
             goal.setCircuits(json.getAsInteger("circuits"));
@@ -707,9 +717,6 @@ public class LevelParser
         if (p.isInteger("animalStrength"))
             g.animalStrength = p.getAsInteger("animalStrength");
         
-//        if (p.isInteger("animalStrength"))
-//            g.animalStrength = p.getAsInteger("animalStrength");
-        
         if (p.isInteger("clockStrength"))
             g.clockStrength = p.getAsInteger("clockStrength");
         
@@ -755,6 +762,9 @@ public class LevelParser
         if (p.isDouble("radioActivePct"))
             g.radioActivePct = p.getAsDouble("radioActivePct");
         
+        if (p.isDouble("spiderGrowth"))
+            g.spiderGrowth = p.getAsDouble("spiderGrowth");
+        
         NArray freq = p.getAsArray("freq");
         for (int i = 0, n = freq.size(); i < n; i++)
         {
@@ -798,6 +808,10 @@ public class LevelParser
                 else if (item.equals("egg"))
                 {
                     g.add(new ItemFrequency(new Egg(), f));
+                }
+                else if (item.equals("spider"))
+                {
+                    g.add(new ItemFrequency(new Spider(), f));
                 }
                 else if (item.equals("domino"))
                 {
@@ -929,6 +943,7 @@ public class LevelParser
         NArray turners = new NArray();
         NArray keys = new NArray();
         NArray eggs = new NArray();
+        NArray spiders = new NArray();
         NArray blockers = new NArray();
         NArray blasters = new NArray();
         NArray bombs = new NArray();
@@ -1135,6 +1150,10 @@ public class LevelParser
                 {
                     eggs.push(toJson(cell.item, col, row));
                 }
+                else if (cell.item instanceof Spider)
+                {
+                    spiders.push(toJson(cell.item, col, row));
+                }
                 else if (cell.item instanceof Chest)
                 {
                     chests.push(toJson(cell.item, col, row));
@@ -1213,6 +1232,7 @@ public class LevelParser
         add(p, "turners", turners);
         add(p, "keys", keys);
         add(p, "eggs", eggs);
+        add(p, "spiders", spiders);
         add(p, "chests", chests);
         add(p, "blockers", blockers);
         add(p, "blasters", blasters);
@@ -1366,6 +1386,13 @@ public class LevelParser
                 a.put("cracked", true);
             if (addClass)
                 a.put("class", "egg");
+        }
+        else if (item instanceof Spider)
+        {
+            Spider an = (Spider) item;
+            a.put("strength", an.getStrength());
+            if (addClass)
+                a.put("class", "spider");
         }
         else if (item instanceof Chest)
         {
@@ -1571,6 +1598,9 @@ public class LevelParser
         if (g.getBubbles() != 0)
             p.put("bubbles", g.getBubbles());
         
+        if (g.getSpiders() != 0)
+            p.put("spiders", g.getSpiders());
+        
         if (g.getScore() != 0)
             p.put("score", g.getScore());
 
@@ -1618,6 +1648,9 @@ public class LevelParser
         
         if (g.radioActivePct > 0)
             p.put("radioActivePct", g.radioActivePct);
+        
+        if (g.spiderGrowth > 0)
+            p.put("spiderGrowth", g.spiderGrowth);
         
         String rewards = g.rewardStrategies;
         if (rewards != null && rewards.length() > 0)
@@ -1684,6 +1717,8 @@ public class LevelParser
             a.push("yinyang");
         else if (item instanceof Egg)
             a.push("egg");
+        else if (item instanceof Spider)
+            a.push("spider");
         else if (item instanceof DotBomb)
             a.push("dotBomb");
         else if (item instanceof Blocker)

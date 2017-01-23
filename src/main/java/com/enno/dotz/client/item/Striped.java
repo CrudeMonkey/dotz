@@ -118,7 +118,13 @@ public class Striped extends Item
     {
         return true;
     }
-
+    
+    @Override
+    public boolean canBeLaunched()
+    {
+        return false;   // see MachineType.STRIPED
+    }
+   
     @Override
     public void rotate(int n) // ignore n
     {

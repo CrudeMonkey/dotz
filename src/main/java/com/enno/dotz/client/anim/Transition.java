@@ -12,6 +12,7 @@ import com.ait.lienzo.client.core.types.Point2DArray;
 import com.ait.lienzo.shared.core.types.ColorName;
 import com.enno.dotz.client.Context;
 import com.enno.dotz.client.item.Item;
+import com.enno.dotz.client.item.Spider;
 import com.enno.dotz.client.util.Debug;
 
 public abstract class Transition implements IAnimationCallback
@@ -314,6 +315,26 @@ public abstract class Transition implements IAnimationCallback
         public MoveAnimalTransition(double from_x, double from_y, double to_x, double to_y, Item item)
         {
             super(from_x, from_y, to_x, to_y, item);
+        }
+    }
+    
+    public static class MoveSpiderTransition extends Transition
+    {
+        private Spider m_spider;
+        
+        public MoveSpiderTransition(double from_x, double from_y, double to_x, double to_y, Spider item)
+        {
+            super(from_x, from_y, to_x, to_y, item);
+            
+            m_spider = item;
+        }
+        
+        @Override
+        public void move(double pct)
+        {
+            super.move(pct);
+            
+            m_spider.animateLegs(pct);
         }
     }
     

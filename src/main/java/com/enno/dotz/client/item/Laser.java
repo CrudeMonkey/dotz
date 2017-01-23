@@ -249,6 +249,12 @@ public class Laser extends Item
     }
     
     @Override
+    public boolean canBeReplaced()
+    {
+        return false;
+    }
+    
+    @Override
     public boolean stopsLaser()
     {
         return true;

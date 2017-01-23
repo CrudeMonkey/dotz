@@ -16,6 +16,7 @@ import com.enno.dotz.client.item.Laser;
 import com.enno.dotz.client.item.Mirror;
 import com.enno.dotz.client.item.RandomItem;
 import com.enno.dotz.client.item.Rocket;
+import com.enno.dotz.client.item.Spider;
 
 public class Score
 {
@@ -24,6 +25,9 @@ public class Score
     
     private int m_fireInGrid;
     private int m_explodedFire;
+    
+    private int m_spidersInGrid;
+    private int m_explodedSpiders;
     
     private int m_anchorsInGrid;
     private int m_droppedAnchors;
@@ -132,6 +136,13 @@ public class Score
         m_explodedFire++;
         m_fireInGrid--;
         addPoints(2);
+    }
+
+    public void explodedSpider()
+    {
+        m_explodedSpiders++;
+        m_spidersInGrid--;
+        addPoints(5);
     }
 
     public void explodedCoins(int n)
@@ -321,6 +332,11 @@ public class Score
         return m_explodedFire;
     }
     
+    public int getExplodedSpiders()
+    {
+        return m_explodedSpiders;
+    }
+    
     public int getExplodedIce()
     {
         return m_explodedIce;
@@ -441,6 +457,11 @@ public class Score
         m_fireInGrid++;
     }
 
+    public void generatedSpider()
+    {
+        m_spidersInGrid++;
+    }
+
     public void generatedKnight()
     {
         m_knightsInGrid++;
@@ -529,6 +550,11 @@ public class Score
     public int getFireInGrid()
     {
         return m_fireInGrid;
+    }
+
+    public int getSpidersInGrid()
+    {
+        return m_spidersInGrid;
     }
 
     public int getMirrorsInGrid()
@@ -628,6 +654,10 @@ public class Score
         else if (item instanceof Fire)
         {
             m_fireInGrid += n;
+        }
+        else if (item instanceof Spider)
+        {
+            m_spidersInGrid += n;
         }
         else if (item instanceof Clock)
         {

@@ -79,6 +79,18 @@ public class Blocker extends Item
     }
     
     @Override
+    public boolean canBeReplaced()
+    {
+        return false;
+    }
+
+    @Override
+    public boolean canExplodeNextTo()
+    {
+        return !m_zapOnly;
+    }
+     
+    @Override
     public void incrementStrength(int ds)
     {
         if (m_strength <= 1 && ds == -1)
@@ -163,13 +175,7 @@ public class Blocker extends Item
     {
         return new Blocker(m_strength, m_stuck, m_zapOnly);
     }
-
-    @Override
-    public boolean canExplodeNextTo()
-    {
-        return !m_zapOnly;
-    }
-    
+   
     @Override
     public ExplodeAction explode(Integer color, int chainSize)
     {

@@ -17,6 +17,7 @@ import com.enno.dotz.client.anim.Transition.DropTransition;
 import com.enno.dotz.client.anim.Transition.MoveAnimalTransition;
 import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Animal.Action;
+import com.enno.dotz.client.item.Animal.Type;
 import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.DotBomb;
@@ -55,15 +56,17 @@ public class MoveAnimals
                     if (animal.isStunned())
                         continue;
                     
+                    Action action = animal.getAction();
+                    
                     potentialNeighbors.clear();
                     if (col > 0)
-                        maybeAdd(potentialNeighbors, state.cell(col - 1, row));
+                        maybeAdd(potentialNeighbors, state.cell(col - 1, row), action);
                     if (col < nc - 1)
-                        maybeAdd(potentialNeighbors, state.cell(col + 1, row));
+                        maybeAdd(potentialNeighbors, state.cell(col + 1, row), action);
                     if (row > 0)
-                        maybeAdd(potentialNeighbors, state.cell(col, row - 1));
+                        maybeAdd(potentialNeighbors, state.cell(col, row - 1), action);
                     if (row < nr - 1)
-                        maybeAdd(potentialNeighbors, state.cell(col, row + 1));
+                        maybeAdd(potentialNeighbors, state.cell(col, row + 1), action);
                     
                     int n = potentialNeighbors.size();
                     if (n > 0)
@@ -103,7 +106,7 @@ public class MoveAnimals
                         verboten.add(src);
                         verboten.add(target);
                         
-                        if (animal.getAction() == Action.SWAP) //ctx.generator.swapMode)
+                        if (action == Action.SWAP) //ctx.generator.swapMode)
                         {
                             // Swap animal with target dot
                             list.add(new MoveAnimalTransition(state.x(col), state.y(row), state.x(target.col), state.y(target.row), animal)
@@ -133,7 +136,7 @@ public class MoveAnimals
                             });
                             list.add(new DropTransition(state.x(target.col), state.y(target.row), state.x(col), state.y(row), target.item));
                         }
-                        else if (animal.getAction() == Action.BOMBIFY)
+                        else if (action == Action.BOMBIFY)
                         {
                             // Swap animal with target dot
                             list.add(new MoveAnimalTransition(state.x(col), state.y(row), state.x(target.col), state.y(target.row), animal)
@@ -218,9 +221,11 @@ public class MoveAnimals
                                 }
                             });
                         }
-                        else
+                        else // Animal.Action.DEFAULT
                         {
-                            final Dot newDot = new Dot(animal.getColor());
+                            int color = animal.isBlack() ? ctx.generator.getNextDotColor() : animal.getColor();
+                            
+                            final Dot newDot = new Dot(color);
                             if (ctx.generator.generateLetters)
                                 newDot.setLetter(ctx.generator.nextLetter());
                             
@@ -343,19 +348,22 @@ public class MoveAnimals
         return -1;
     }
 
-    private void maybeAdd(List<Cell> potentialNeighbors, Cell cell)
+    private void maybeAdd(List<Cell> potentialNeighbors, Cell cell, Action action)
     {
         if (m_animalTargets.contains(cell))
             return; // another animal is already moving here
         
-        if (cell.isLocked() || cell instanceof Hole || cell instanceof Slide)
+        if (cell.isLocked() || !cell.canContainItems())
             return; // can't move into locked Door
         
         if (cell.item == null)
             return; // can't move into empty cell
         
-        if (!cell.item.canBeEaten())
-            return; // already occupied by animal or laser
+        if (action == Animal.Action.DEFAULT && !cell.item.canBeEaten())
+            return; 
+        
+        if ((action == Animal.Action.SWAP || action == Animal.Action.BOMBIFY) && !cell.item.canSwap())
+            return;
         
         potentialNeighbors.add(cell);
     }

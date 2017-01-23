@@ -34,36 +34,37 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         
     private ChangeListener m_changeListener;
 
-    private MXTextInput m_seed;
-    private SpinnerItem m_animalStrength;
-    private MXCheckBox m_randomSeed;
-    private MXCheckBox m_initialDotsOnly;
-    private MXCheckBox m_rollMode;
-    private MXCheckBox m_diagonalMode;
-    private MXCheckBox m_slipperyAnchors;
-    private SpinnerItem m_fireGrowthRate;
-    private MXSelectItem m_animalType;
-    private MXSelectItem m_animalAction;
-    private SpinnerItem m_maxAnchors;
-    private SpinnerItem m_maxDomino;
-    private SpinnerItem m_knightStrength;
-    private SpinnerItem m_bombStrength;
-    private SpinnerItem m_blockerStrength;
-    private SpinnerItem m_clockStrength;
-    private ButtonItem m_genSeed;
-    private MXComboBoxItem m_mode;
+    private MXTextInput          m_seed;
+    private SpinnerItem          m_animalStrength;
+    private MXCheckBox           m_randomSeed;
+    private MXCheckBox           m_initialDotsOnly;
+    private MXCheckBox           m_rollMode;
+    private MXCheckBox           m_diagonalMode;
+    private MXCheckBox           m_slipperyAnchors;
+    private SpinnerItem          m_fireGrowthRate;
+    private MXSelectItem         m_animalType;
+    private MXSelectItem         m_animalAction;
+    private SpinnerItem          m_maxAnchors;
+    private SpinnerItem          m_maxDomino;
+    private SpinnerItem          m_knightStrength;
+    private SpinnerItem          m_bombStrength;
+    private SpinnerItem          m_blockerStrength;
+    private SpinnerItem          m_clockStrength;
+    private ButtonItem           m_genSeed;
+    private MXComboBoxItem       m_mode;
     private BoostPropertiesPanel m_boostProps;
-    private MXComboBoxItem m_minChainLength;
-    private MXTextInput m_rewardStrategies;
-    private RadiusCombo m_icePickRadius;
-    private RadiusCombo m_dropRadius;
-    private ButtonItem m_editRewards;
-    private MXCheckBox m_removeLetters;
-    private MXCheckBox m_findWords;
-    private SpinnerItem m_maxWordLength;
-    private SpinnerItem m_chestStrength;
-    private SliderItem m_radioActivePct;
-    private SpinnerItem m_eggsNeeded;
+    private MXComboBoxItem       m_minChainLength;
+    private MXTextInput          m_rewardStrategies;
+    private RadiusCombo          m_icePickRadius;
+    private RadiusCombo          m_dropRadius;
+    private ButtonItem           m_editRewards;
+    private MXCheckBox           m_removeLetters;
+    private MXCheckBox           m_findWords;
+    private SpinnerItem          m_maxWordLength;
+    private SpinnerItem          m_chestStrength;
+    private SliderItem           m_radioActivePct;
+    private SpinnerItem          m_eggsNeeded;
+    private SliderItem           m_spiderGrowth;
 
     public GeneratorPropertiesPanel(Config level, final ChangeListener changeListener)
     {
@@ -297,6 +298,7 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         
         m_radioActivePct = new SliderItem();
         m_radioActivePct.setTitle("Radio Active Pct");
+        m_radioActivePct.setHeight(50);
         m_radioActivePct.setVertical(false);
         m_radioActivePct.setValue(0.0);
         m_radioActivePct.setMinValue(0.0);
@@ -306,6 +308,19 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         m_radioActivePct.setRoundValues(false);
         m_radioActivePct.setPrompt("Percentage of radio active Dots and DotBombs");
         m_radioActivePct.addChangedHandler(changeListener);
+        
+        m_spiderGrowth = new SliderItem();
+        m_spiderGrowth.setHeight(50);
+        m_spiderGrowth.setTitle("Spider Growth Pct");
+        m_spiderGrowth.setVertical(false);
+        m_spiderGrowth.setValue(10);
+        m_spiderGrowth.setMinValue(0.0);
+        m_spiderGrowth.setMaxValue(100.0);
+        m_spiderGrowth.setNumValues(1000);
+        m_spiderGrowth.setRoundPrecision(1);
+        m_spiderGrowth.setRoundValues(false);
+        m_spiderGrowth.setPrompt("Growth Rate of Spiders");
+        m_spiderGrowth.addChangedHandler(changeListener);
         
         m_eggsNeeded = new SpinnerItem();
         m_eggsNeeded.setTitle("Eggs/Bird Ratio");
@@ -323,6 +338,7 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         m_minChainLength.setColSpan(2);
         m_removeLetters.setColSpan(2);
         m_radioActivePct.setColSpan(2);
+        m_spiderGrowth.setColSpan(2);
         
         form.setFields(
                 m_mode, m_chestStrength, m_knightStrength,
@@ -333,7 +349,8 @@ public abstract class GeneratorPropertiesPanel extends VLayout
                 m_minChainLength, m_maxAnchors, m_blockerStrength,
                 m_rewardStrategies, m_editRewards, m_icePickRadius, m_dropRadius,
                 m_removeLetters, m_findWords, m_maxWordLength,
-                m_radioActivePct, m_initialDotsOnly, m_eggsNeeded);
+                m_radioActivePct, m_spiderGrowth, m_initialDotsOnly, 
+                m_eggsNeeded);
         
         m_seed.setDisabled(true);
         m_genSeed.setDisabled(true);
@@ -371,6 +388,7 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         m_icePickRadius.setRadius(g.icePickRadius); 
         m_dropRadius.setRadius(g.dropRadius);
         m_radioActivePct.setValue(g.radioActivePct);
+        m_spiderGrowth.setValue(g.spiderGrowth);
         m_eggsNeeded.setValue(g.eggsNeeded);
         
         m_removeLetters.setValue(g.removeLetters);
@@ -462,7 +480,8 @@ public abstract class GeneratorPropertiesPanel extends VLayout
         g.findWords = m_findWords.isChecked();
         g.removeLetters = m_removeLetters.isChecked();
         g.maxWordLength = Integer.parseInt(m_maxWordLength.getValueAsString());
-        g.radioActivePct = m_radioActivePct.getValueAsFloat().intValue();
+        g.radioActivePct = m_radioActivePct.getValueAsFloat().doubleValue();
+        g.spiderGrowth = m_spiderGrowth.getValueAsFloat().doubleValue();
         
         g.rewardStrategies = m_rewardStrategies.getValueAsString();
         if (g.rewardStrategies == null)

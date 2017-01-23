@@ -69,7 +69,13 @@ public class DotBomb extends Item
     {
         return true;
     }
-
+    
+    @Override
+    public boolean canBeLaunched()
+    {
+        return false;   // see MachineType.BOMBIFY
+    }
+   
     @Override
     public IPrimitive<?> createShape(double size)
     {

@@ -915,7 +915,7 @@ public abstract class EditLayoutTab extends VLayout
                 if (cell instanceof Machine)
                 {
                     Item item = (Item) m_operation;
-                    if (Machine.canLaunch(item))
+                    if (item.canBeLaunched())
                     {
                         Item launchItem = item.copy();
                         tweakItem(launchItem);

@@ -38,6 +38,7 @@ import com.enno.dotz.client.anim.FireRocket;
 import com.enno.dotz.client.anim.GetTransitions;
 import com.enno.dotz.client.anim.GrowFire;
 import com.enno.dotz.client.anim.MoveAnimals;
+import com.enno.dotz.client.anim.MoveSpiders;
 import com.enno.dotz.client.anim.Pt;
 import com.enno.dotz.client.anim.RadioActives;
 import com.enno.dotz.client.anim.ShowDescription;
@@ -583,7 +584,7 @@ public class GridState
             int col = rnd.nextInt(numColumns);
             int row = rnd.nextInt(numRows);
             Cell c = cell(col, row);
-            if (!c.isLocked() && c.item instanceof Dot)
+            if (!c.isLocked() && c.item instanceof Dot) //TODO could use Item.canBeReplaced()
                 return c;
             
             i++;
@@ -1665,6 +1666,7 @@ public class GridState
                 Set<Cell> verboten = new HashSet<Cell>();
                 
                 new MoveAnimals(this, verboten, ctx);
+                new MoveSpiders(this, verboten, ctx);
                         
                 if (m_lastExplodedFire == ctx.score.getExplodedFire()) // don't grow fire if any fire exploded
                 {

@@ -133,7 +133,26 @@ public abstract class Item
         return false;
     }
 
+    /** 
+     * @return Whether it can be swapped in Swap Mode (default: true)
+     */
     public boolean canSwap()
+    {
+        return true;
+    }
+    
+    /**
+     * @return Whether it can be replaced by an item launched by a Machine (default: true)
+     */
+    public boolean canBeReplaced()
+    {
+        return true;
+    }
+    
+    /**
+     * @return Whether it can be launched from a Machine (with MachineType.ITEM) - default: true
+     */
+    public boolean canBeLaunched()
     {
         return true;
     }
