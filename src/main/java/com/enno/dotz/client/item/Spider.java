@@ -1,6 +1,5 @@
 package com.enno.dotz.client.item;
 
-import com.ait.lienzo.client.core.shape.Circle;
 import com.ait.lienzo.client.core.shape.Ellipse;
 import com.ait.lienzo.client.core.shape.Group;
 import com.ait.lienzo.client.core.shape.IPrimitive;
@@ -12,8 +11,8 @@ import com.ait.lienzo.shared.core.types.TextBaseLine;
 import com.enno.dotz.client.Direction;
 import com.enno.dotz.client.SoundManager.Sound;
 import com.enno.dotz.client.item.Animal.Action;
+import com.enno.dotz.client.item.Animal.Eyes;
 import com.enno.dotz.client.item.Animal.Type;
-import com.enno.dotz.client.item.Item.ExplodeAction;
 import com.google.gwt.dom.client.Style.FontWeight;
 
 public class Spider extends Item
@@ -27,17 +26,11 @@ public class Spider extends Item
 
     private Text m_text;
 
-    private double[]   m_x      = new double[2];
-    private double[]   m_y      = new double[2];
-    private Ellipse[]  m_eyes   = new Ellipse[2];
-    private Circle[]   m_pupils = new Circle[2];
-    private double     m_pupilRadius;
-    private double     m_eyeHeight;
     private PolyLine[] m_legs   = new PolyLine[6];
+    private Eyes m_eyes;
     
     public int lastDirection = Direction.NONE;
     
-    private long m_startBlink;
     
     public Spider()
     {
@@ -196,34 +189,17 @@ public class Spider extends Item
 //        }
 //        
         double eyeWidth = r2 * 0.45;
-        m_eyeHeight = eyeWidth;
-        m_pupilRadius = size * 0.05;
+        double eyeHeight = eyeWidth;
+        double pupilRadius = size * 0.05;
+        
+        m_eyes = new Eyes(BLINK_DURATION, false, eyeWidth, eyeHeight, pupilRadius, 1.5, ColorName.WHITE, null, ColorName.BLACK);
         
         for (int i = 0; i < 2; i++)
         {
-            Ellipse eye = new Ellipse(eyeWidth, m_eyeHeight);
-            eye.setFillColor(ColorName.WHITE);
-            
             double x = size * 0.08 * (i == 0 ? -1 : 1);
             double y = dy2;
-            m_x[i] = x;
-            m_y[i] = y;
-            
-            eye.setX(x);
-            eye.setY(y);
-            
-            g.add(eye);            
-            m_eyes[i] = eye;
-            
-            Circle pupil = new Circle(1.5);
-            pupil.setFillColor(ColorName.BLACK);
-            
-            pupil.setX(x);
-            pupil.setY(y);
-            
-            g.add(pupil);
-            m_pupils[i] = pupil;
-        }
+            m_eyes.add(i, x, y, g);
+       }
         
         m_text.setVisible(m_strength > 1);
         
@@ -254,38 +230,40 @@ public class Spider extends Item
     @Override
     public void animate(long t, double x, double y)
     {
-        long dt = t - m_startBlink;
-        if (dt > BLINK_DURATION)
-        {
-            m_startBlink = 2 * BLINK_DURATION + Animal.s_blinkRandom.nextInt(4 * BLINK_DURATION) + System.currentTimeMillis();
-        }
-        else if (dt > 0)
-        {
-            double half = BLINK_DURATION / 2.0;
-            double h;
-            if (dt < half)
-            {
-                h = 1 - dt / half;
-            }
-            else
-            {
-                h = (dt - half) / half;
-            }
-            m_eyes[0].setHeight(h * m_eyeHeight);
-            m_eyes[1].setHeight(h * m_eyeHeight);
-        }
+        m_eyes.animate(t, x - shape.getX(), y - shape.getY());
         
-        // pupils track the mouse pointer
-        for (int i = 0; i < 2; i++)
-        {
-            double dx = x - m_x[i] - shape.getX();
-            double dy = y - m_y[i] - shape.getY();
-            double angle = Math.atan2(dy, dx);
-            double nx = m_x[i] + Math.cos(angle) * m_pupilRadius;
-            double ny = m_y[i] + Math.sin(angle) * m_pupilRadius;
-            m_pupils[i].setX(nx);
-            m_pupils[i].setY(ny);
-        }
+//        long dt = t - m_startBlink;
+//        if (dt > BLINK_DURATION)
+//        {
+//            m_startBlink = 2 * BLINK_DURATION + Animal.s_blinkRandom.nextInt(4 * BLINK_DURATION) + System.currentTimeMillis();
+//        }
+//        else if (dt > 0)
+//        {
+//            double half = BLINK_DURATION / 2.0;
+//            double h;
+//            if (dt < half)
+//            {
+//                h = 1 - dt / half;
+//            }
+//            else
+//            {
+//                h = (dt - half) / half;
+//            }
+//            m_eyes[0].setHeight(h * m_eyeHeight);
+//            m_eyes[1].setHeight(h * m_eyeHeight);
+//        }
+//        
+//        // pupils track the mouse pointer
+//        for (int i = 0; i < 2; i++)
+//        {
+//            double dx = x - m_x[i] - shape.getX();
+//            double dy = y - m_y[i] - shape.getY();
+//            double angle = Math.atan2(dy, dx);
+//            double nx = m_x[i] + Math.cos(angle) * m_pupilRadius;
+//            double ny = m_y[i] + Math.sin(angle) * m_pupilRadius;
+//            m_pupils[i].setX(nx);
+//            m_pupils[i].setY(ny);
+//        }
     }
     
     static double UP_DOWN = 1 / 6.0;

@@ -46,6 +46,7 @@ import com.enno.dotz.client.anim.ShowWordCallback;
 import com.enno.dotz.client.anim.Transition.ArchTransition;
 import com.enno.dotz.client.anim.Transition.DropTransition;
 import com.enno.dotz.client.anim.TransitionList;
+import com.enno.dotz.client.anim.TransitionList.NukeTransitionList;
 import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Bomb;
 import com.enno.dotz.client.item.Clock;
@@ -959,11 +960,11 @@ public class GridState
         }
     }
     
-    public abstract class ExplodeBombs extends TransitionList
+    public abstract class ExplodeBombs extends NukeTransitionList
     {
         public ExplodeBombs(List<Cell> bombsWentOff)
         {
-            super("explodeBombs", ctx.nukeLayer, 1000);
+            super("explodeBombs", ctx, 1000);
             
             for (final Cell c : bombsWentOff)
             {
@@ -989,7 +990,6 @@ public class GridState
             @Override
             public void onStart(IAnimation animation, IAnimationHandle handle)
             {
-                ctx.nukeLayer.setVisible(true);
                 Sound.BOMB_WENT.play();
             }
             
@@ -1006,7 +1006,6 @@ public class GridState
                 {
                     r.update(pct);
                 }
-                redraw();
             }
             
             @Override
@@ -1016,12 +1015,6 @@ public class GridState
                 {
                     ctx.nukeLayer.remove(r);
                 }
-                ctx.nukeLayer.setVisible(false);
-            }
-            
-            private void redraw()
-            {
-                LayerRedrawManager.get().schedule(ctx.nukeLayer);
             }
             
             public class Ring extends Circle
@@ -1049,14 +1042,14 @@ public class GridState
         }
     }
     
-    public abstract class ExplodeLasers extends TransitionList
+    public abstract class ExplodeLasers extends NukeTransitionList
     {
         private List<Pt> m_list;
         private ArrayList<Laser> m_lasers;
 
         public ExplodeLasers()
         {
-            super("explodeLasers", ctx.laserLayer, 2400);
+            super("explodeLasers", ctx, 2400);
             
             m_lasers = new ArrayList<Laser>();            
             m_list = Laser.getExplodingLasers(GridState.this, m_lasers);
@@ -1658,7 +1651,7 @@ public class GridState
     
     public TransitionList moveBeasts()
     {
-        return new TransitionList("fire/animal", ctx.nukeLayer, cfg.growFireDuration)
+        return new NukeTransitionList("fire/animal", ctx, cfg.growFireDuration)
         {
             public void init()
             {
@@ -1685,7 +1678,7 @@ public class GridState
     
     public TransitionList machines()
     {
-        return new TransitionList("machines", ctx.nukeLayer, 1000) //TODO machineDuration
+        return new NukeTransitionList("machines", ctx, 1000) //TODO machineDuration
         {
             public void init()
             {
@@ -1735,7 +1728,6 @@ public class GridState
                                             public void afterStart()
                                             {
                                                 newItem.addShapeToLayer(ctx.nukeLayer);
-                                                ctx.nukeLayer.setVisible(true);
                                                 
 //                                                if (playSound)
 //                                                    Sound.WOOSH.play();
@@ -1745,7 +1737,6 @@ public class GridState
                                             public void afterEnd()
                                             {
                                                 newItem.removeShapeFromLayer(ctx.nukeLayer);
-                                                ctx.nukeLayer.setVisible(false);
                                                 
                                                 ctx.score.explodedCoins(newItem.getAmount());
                                             }
@@ -1773,7 +1764,6 @@ public class GridState
                                                         public void afterStart()
                                                         {
                                                             ctx.nukeLayer.add(shape);
-                                                            ctx.nukeLayer.setVisible(true);
                                                             
                                                             if (playSound)
                                                                 Sound.WOOSH.play();
@@ -1792,8 +1782,6 @@ public class GridState
                                                             bubble.initGraphics(target.col, target.row, x(target.col), y(target.row));
                                                             
                                                             ctx.score.addBubble();
-                                                            
-                                                            ctx.nukeLayer.setVisible(false);
                                                         }
                                                     });
                                                     break;
@@ -1807,7 +1795,6 @@ public class GridState
                                                         public void afterStart()
                                                         {
                                                             newItem.addShapeToLayer(ctx.nukeLayer);
-                                                            ctx.nukeLayer.setVisible(true);
                                                             
                                                             if (playSound)
                                                                 Sound.WOOSH.play();
@@ -1827,7 +1814,6 @@ public class GridState
                                                             
                                                             newItem.addShapeToLayer(ctx.dotLayer);
                                                             target.item = newItem;
-                                                            ctx.nukeLayer.setVisible(false);
                                                         }
                                                     });
                                                     break;
@@ -1865,7 +1851,7 @@ public class GridState
         final List<Cell> explodies = new ArrayList<Cell>();
         final List<Cell> armed = new ArrayList<Cell>();
         
-        return new TransitionList("explosions", ctx.nukeLayer, cfg.explosionDuration)
+        return new NukeTransitionList("explosions", ctx, cfg.explosionDuration)
         {
             @Override
             public boolean condition()
@@ -1880,15 +1866,12 @@ public class GridState
                 Sound.ZAP.play();
                 
                 //Debug.p("run explosions");
-                ctx.nukeLayer.setVisible(true);
                 super.run();
             }
             
             public void done()
             {
                 //Debug.p("explosions done");
-                ctx.nukeLayer.draw();
-                ctx.nukeLayer.setVisible(false);
                 
                 for (Cell cell : explodies)
                 {
@@ -1901,7 +1884,8 @@ public class GridState
                     cell.item = null;
                 }
                 
-                ctx.dotLayer.draw();
+                super.done();
+                
                 updateScore();
             }
             
@@ -1951,12 +1935,12 @@ public class GridState
                     c.addTransitions(this, GridState.this, ctx);
                 }
             }
-        };
+        }.addOtherLayers(ctx.backgroundLayer);
     }
     
     public void addRewardAnimation(AnimList list, final Reward reward)
     {
-        TransitionList t = new TransitionList("reward", ctx.nukeLayer, 300)
+        TransitionList t = new NukeTransitionList("reward", ctx, 300)
         {
             public void init()
             {
@@ -1985,7 +1969,6 @@ public class GridState
                     {
                         //Debug.p("spawn " + src);
                         item.addShapeToLayer(ctx.nukeLayer);
-                        ctx.nukeLayer.setVisible(true);
                         
                         Sound.WOOSH.play();
                     }
@@ -2003,7 +1986,6 @@ public class GridState
                         
                         item.addShapeToLayer(ctx.dotLayer);
                         c.item = item;
-                        ctx.nukeLayer.setVisible(false);
                         //Debug.p("reward added");
                     }
                 });

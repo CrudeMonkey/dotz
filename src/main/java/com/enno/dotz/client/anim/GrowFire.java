@@ -97,8 +97,6 @@ public class GrowFire
             public void afterStart()
             {
                 newFire.addShapeToLayer(ctx.nukeLayer);
-                
-                ctx.nukeLayer.setVisible(true);
             }
             
             public void afterEnd()
@@ -110,11 +108,6 @@ public class GrowFire
                 
                 to.item.removeShapeFromLayer(ctx.dotLayer);
                 to.item = newFire;
-                
-                ctx.nukeLayer.draw();
-                ctx.dotLayer.draw();
-                
-                ctx.nukeLayer.setVisible(false);
                 
                 ctx.score.generatedFire();
             }

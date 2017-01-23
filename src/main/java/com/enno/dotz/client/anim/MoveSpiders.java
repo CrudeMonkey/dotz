@@ -119,9 +119,6 @@ public class MoveSpiders
                                     
                                     spider.removeShapeFromLayer(ctx.dotLayer);
                                     spider.addShapeToLayer(ctx.nukeLayer);
-                                    
-                                    ctx.nukeLayer.setVisible(true);
-                                    ctx.dotLayer.draw();
                                 }
                                 
                                 public void afterEnd()
@@ -133,11 +130,6 @@ public class MoveSpiders
                                     
                                     src.item = newSpider;
                                     target.item = spider;
-                                    
-                                    ctx.nukeLayer.draw();
-                                    ctx.dotLayer.draw();
-                                    
-                                    ctx.nukeLayer.setVisible(false);
                                 }
                             });
                         }
@@ -152,9 +144,6 @@ public class MoveSpiders
                                 {
                                     spider.removeShapeFromLayer(ctx.dotLayer);
                                     spider.addShapeToLayer(ctx.nukeLayer);
-                                    
-                                    ctx.nukeLayer.setVisible(true);
-                                    ctx.dotLayer.draw();
                                 }
                                 
                                 public void afterEnd()
@@ -164,11 +153,6 @@ public class MoveSpiders
                                     
                                     src.item = target.item;
                                     target.item = spider;
-                                    
-                                    ctx.nukeLayer.draw();
-                                    ctx.dotLayer.draw();
-                                    
-                                    ctx.nukeLayer.setVisible(false);
                                 }
                             });
                             list.add(new DropTransition(state.x(target.col), state.y(target.row), state.x(col), state.y(row), target.item));
@@ -183,9 +167,6 @@ public class MoveSpiders
 //                                {
 //                                    animal.removeShapeFromLayer(ctx.dotLayer);
 //                                    animal.addShapeToLayer(ctx.nukeLayer);
-//                                    
-//                                    ctx.nukeLayer.setVisible(true);
-//                                    ctx.dotLayer.draw();
 //                                }
 //                                
 //                                public void afterEnd()
@@ -207,11 +188,6 @@ public class MoveSpiders
 //                                    
 //                                    src.item = target.item;
 //                                    target.item = animal;
-//                                    
-//                                    ctx.nukeLayer.draw();
-//                                    ctx.dotLayer.draw();
-//                                    
-//                                    ctx.nukeLayer.setVisible(false);
 //                                }
 //                            });
 //                            list.add(new DropTransition(state.x(target.col), state.y(target.row), state.x(col), state.y(row), target.item));
@@ -233,9 +209,6 @@ public class MoveSpiders
 //                                    
 //                                    animal.removeShapeFromLayer(ctx.dotLayer);
 //                                    animal.addShapeToLayer(ctx.nukeLayer);
-//                                    
-//                                    ctx.nukeLayer.setVisible(true);
-//                                    ctx.dotLayer.draw();
 //                                }
 //                                
 //                                public void afterEnd()
@@ -251,11 +224,6 @@ public class MoveSpiders
 //                                    
 //                                    animal.removeShapeFromLayer(ctx.nukeLayer);
 //                                    animal.addShapeToLayer(ctx.dotLayer);
-//                                    
-//                                    ctx.nukeLayer.draw();
-//                                    ctx.dotLayer.draw();
-//                                    
-//                                    ctx.nukeLayer.setVisible(false);
 //                                }
 //                            });
 //                        }
@@ -278,9 +246,6 @@ public class MoveSpiders
 //                                    
 //                                    animal.removeShapeFromLayer(ctx.dotLayer);
 //                                    animal.addShapeToLayer(ctx.nukeLayer);
-//                                    
-//                                    ctx.nukeLayer.setVisible(true);
-//                                    ctx.dotLayer.draw();
 //                                }
 //                                
 //                                public void afterEnd()
@@ -296,11 +261,6 @@ public class MoveSpiders
 //                                    
 //                                    animal.removeShapeFromLayer(ctx.nukeLayer);
 //                                    animal.addShapeToLayer(ctx.dotLayer);
-//                                    
-//                                    ctx.nukeLayer.draw();
-//                                    ctx.dotLayer.draw();
-//                                    
-//                                    ctx.nukeLayer.setVisible(false);
 //                                }
 //                            });
 //                        }

@@ -22,6 +22,7 @@ import com.enno.dotz.client.SoundManager.Sound;
 import com.enno.dotz.client.anim.AnimList;
 import com.enno.dotz.client.anim.Transition.DropTransition;
 import com.enno.dotz.client.anim.TransitionList;
+import com.enno.dotz.client.anim.TransitionList.NukeTransitionList;
 import com.enno.dotz.client.item.Blaster;
 import com.enno.dotz.client.item.Bomb;
 import com.enno.dotz.client.item.ColorBomb;
@@ -497,13 +498,12 @@ public abstract class ConnectMode
                 
                 newItem.init(ctx);
                 
-                list.addTransition("replaceOne", ctx.nukeLayer, 100, new DropTransition(m_state.x(origin.col), m_state.y(origin.row), m_state.x(cell.col), m_state.y(cell.row), newItem) {
+                list.addNukeTransition("replaceOne", ctx, 100, new DropTransition(m_state.x(origin.col), m_state.y(origin.row), m_state.x(cell.col), m_state.y(cell.row), newItem) {
                     @Override
                     public void afterStart()
                     {
                         //Debug.p("replaceOne start");
                         newItem.addShapeToLayer(ctx.nukeLayer);
-                        ctx.nukeLayer.setVisible(true);
                         
                         Sound.WOOSH.play(); //TODO sound
                     }
@@ -516,8 +516,6 @@ public abstract class ConnectMode
                         newItem.removeShapeFromLayer(ctx.nukeLayer);
                         newItem.addShapeToLayer(ctx.dotLayer);
                         cell.item = newItem;
-                        
-                        ctx.nukeLayer.setVisible(false);
                     }
                 });
             }
@@ -557,7 +555,7 @@ public abstract class ConnectMode
             preMerge();
             
             final Item item = neighbor.item;
-            TransitionList list = new TransitionList("merge", ctx.nukeLayer, 500);
+            TransitionList list = new NukeTransitionList("merge", ctx, 500);
             list.add(new DropTransition(m_state.x(neighbor.col), m_state.y(neighbor.row), m_state.x(cell.col), m_state.y(cell.row), item) {
                 @Override
                 public void afterStart()
@@ -565,7 +563,6 @@ public abstract class ConnectMode
                     //Debug.p("spawn " + src);
                     item.removeShapeFromLayer(ctx.dotLayer);
                     item.addShapeToLayer(ctx.nukeLayer);
-                    ctx.nukeLayer.setVisible(true);
                     
                     Sound.WOOSH.play(); //TODO sound
                 }
@@ -582,7 +579,6 @@ public abstract class ConnectMode
 //                    LayerRedrawManager.get().schedule(ctx.dotLayer);
 //                    LayerRedrawManager.get().schedule(ctx.nukeLayer);
 
-                    ctx.nukeLayer.setVisible(false);
                     postMerge();
                     
                     callback.run();

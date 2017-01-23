@@ -204,7 +204,7 @@ public class LazySusan
             protected void rot(double angle)
             {
                 m_shape.setRotation(angle);
-                LayerRedrawManager.get().schedule(ctx.backgroundLayer);
+//                LayerRedrawManager.get().schedule(ctx.backgroundLayer);
             }
         });
     }

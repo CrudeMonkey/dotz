@@ -1032,7 +1032,9 @@ public class MainPanel extends VLayout
                     m_modeManager.setShowDialog(false);
 
                     panel.unpause();
-                    cb.execute(Boolean.TRUE);
+                    
+                    if (cb != null)
+                        cb.execute(Boolean.TRUE);
                 }
             }, msg);
         }

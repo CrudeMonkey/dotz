@@ -20,7 +20,6 @@ import com.ait.lienzo.shared.core.types.TextBaseLine;
 import com.enno.dotz.client.Config;
 import com.enno.dotz.client.Direction;
 import com.enno.dotz.client.SoundManager.Sound;
-import com.enno.dotz.client.util.Console;
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.event.shared.HandlerRegistration;
 
@@ -132,20 +131,11 @@ public class Animal extends Item
     private Type m_type = Type.FOLLOW;
     private Action m_action = Action.DEFAULT;
     
+    private Eyes m_eyes;
     private Text m_text;
-    private Ellipse[] m_eyes = new Ellipse[2];
-    private Circle[] m_pupils = new Circle[2];
-    
-    private double[] m_x = new double[2]; // center of eye
-    private double[] m_y = new double[2];
-    private double m_pupilRadius;
     
     private boolean m_stunned;
     public int lastDirection = Direction.NONE;
-    private long m_startBlink;
-    private double m_eyeHeight;
-
-    private double m_eyeWidth;
     
     public Animal(int color, int strength, Type type, boolean stuck)
     {
@@ -345,42 +335,24 @@ public class Animal extends Item
         m_text.setY(r * 0.5);
         g.add(m_text);
         
-        m_pupilRadius = r * 0.25;
-        m_eyeHeight = r * 0.7;
-        m_eyeWidth = m_eyeHeight;
+        double pupilRadius = r * 0.25;
+        double eyeHeight = r * 0.7;
+        double eyeWidth = eyeHeight;
         
         if (m_type == Type.FROZEN)      // looks sleepy
         {
-            m_eyeHeight *= 0.5;
-            m_pupilRadius *= 0.5;
+            eyeHeight *= 0.5;
+            pupilRadius *= 0.5;
         }
+        
+        IColor strokeColor = m_type == Type.FOLLOW ? ColorName.RED : null;
+        m_eyes = new Eyes(BLINK_DURATION, true, eyeWidth, eyeHeight, pupilRadius, 2, m_type.getEyeColor(), strokeColor, m_type.getPupilColor());
         
         for (int i = 0; i < 2; i++)
         {
-            Ellipse eye = new Ellipse(m_eyeWidth, m_eyeHeight);
-            eye.setFillColor(m_type.getEyeColor());
-            if (m_type == Type.FOLLOW)
-                eye.setStrokeColor(ColorName.RED);
-            
             double x = r * 0.5 * (i == 0 ? -1 : 1);
             double y = -r * 0.35;
-            m_x[i] = x;
-            m_y[i] = y;
-            
-            eye.setX(x);
-            eye.setY(y);
-            
-            g.add(eye);            
-            m_eyes[i] = eye;
-            
-            Circle pupil = new Circle(2);
-            pupil.setFillColor(m_type.getPupilColor());
-            
-            pupil.setX(x);
-            pupil.setY(y);
-            
-            g.add(pupil);
-            m_pupils[i] = pupil;
+            m_eyes.add(i, x, y, g);
         }
         return g;
     }
@@ -414,59 +386,134 @@ public class Animal extends Item
     @Override
     public void animate(long t, double x, double y)
     {
-        // pupils track the mouse pointer
-        for (int i = 0; i < 2; i++)
-        {
-            double dx = x - m_x[i] - shape.getX();
-            double dy = y - m_y[i] - shape.getY();
-            double angle = Math.atan2(dy, dx);
-            double nx = m_x[i] + Math.cos(angle) * m_pupilRadius;
-            double ny = m_y[i] + Math.sin(angle) * m_pupilRadius;
-            m_pupils[i].setX(nx);
-            m_pupils[i].setY(ny);
-        }
-
-        long dt = t - m_startBlink;
+        m_eyes.animate(t, x - shape.getX(), y - shape.getY());
+    }
+    
+    public static class Eyes
+    {
+        private int     m_blinkDuration;    // ms
+        private boolean m_hidePupils;
         
-        double curr_h = m_eyeHeight;
+        private Ellipse[] m_eyes = new Ellipse[2];
+        private Circle[] m_pupils = new Circle[2];
+        private double[] m_x = new double[2];
+        private double[] m_y = new double[2];
+        private double[] m_px = new double[2];  // pupil x
+        private double[] m_py = new double[2];  // pupil y
         
-        if (dt > BLINK_DURATION)
+        private double m_eyeWidth;
+        private double m_eyeHeight;
+        private double m_pupilRadius;
+        private double m_pupilSize;
+        
+        private IColor m_fillColor;
+        private IColor m_strokeColor;
+        private IColor m_pupilColor;
+        
+        private long m_startBlink;
+        
+        public Eyes(int blinkDuration, boolean hidePupils, double eyeWidth, double eyeHeight, double pupilRadius, double pupilSize, IColor fillColor, IColor strokeColor, IColor pupilColor)
         {
-            m_startBlink = 2 * BLINK_DURATION + s_blinkRandom.nextInt(4 * BLINK_DURATION) + System.currentTimeMillis();
-        }
-        else if (dt > 0)
-        {
-            double half = BLINK_DURATION / 2.0;
-            double h;
-            if (dt < half)
-            {
-                h = 1 - dt / half;
-            }
-            else
-            {
-                h = (dt - half) / half;
-            }
+            m_blinkDuration = blinkDuration;
+            m_hidePupils = hidePupils;
             
-            curr_h = h * m_eyeHeight;
-            m_eyes[0].setHeight(curr_h);
-            m_eyes[1].setHeight(curr_h);
+            m_eyeWidth = eyeWidth;
+            m_eyeHeight = eyeHeight;
+            m_pupilRadius = pupilRadius;
+            m_pupilSize = pupilSize;
+            
+            m_fillColor = fillColor;
+            m_strokeColor = strokeColor;
+            m_pupilColor = pupilColor;
         }
         
-        // Hide the pupils if they're outside the eye's oval
-        if (curr_h == m_eyeHeight)  // not blinking
+        public void add(int i, double x, double y, Group g)
         {
-            m_pupils[0].setVisible(true);
-            m_pupils[1].setVisible(true);
+            Ellipse eye = new Ellipse(m_eyeWidth, m_eyeHeight);
+            eye.setFillColor(m_fillColor);
+            if (m_strokeColor != null)
+                eye.setStrokeColor(m_strokeColor);
+            
+//            double x = r * 0.5 * (i == 0 ? -1 : 1);
+//            double y = -r * 0.35;
+            m_x[i] = x;
+            m_y[i] = y;
+            
+            eye.setX(x);
+            eye.setY(y);
+            
+            g.add(eye);            
+            m_eyes[i] = eye;
+            
+            Circle pupil = new Circle(m_pupilSize);
+            pupil.setFillColor(m_pupilColor);
+            
+            pupil.setX(x);
+            pupil.setY(y);
+            
+            g.add(pupil);
+            m_pupils[i] = pupil;
         }
-        else
+        
+        public void animate(long t, double x, double y)
         {
-            //TODO optimize
+            // pupils track the mouse pointer
             for (int i = 0; i < 2; i++)
             {
-                double dx = m_pupils[i].getX() - m_x[i];
-                double dy = m_pupils[i].getY() - m_y[i];
-                double d = (dx * dx) / (m_eyeWidth * m_eyeWidth) + (dy * dy) / (curr_h * curr_h);
-                m_pupils[i].setVisible(d < 0.25);   // d * 4 < 1 (i.e. radius * 2 = diameter)
+                double dx = x - m_x[i];
+                double dy = y - m_y[i];
+                double angle = Math.atan2(dy, dx);
+                m_px[i] = m_x[i] + Math.cos(angle) * m_pupilRadius;
+                m_py[i] = m_y[i] + Math.sin(angle) * m_pupilRadius;
+                m_pupils[i].setX(m_px[i]);
+                m_pupils[i].setY(m_py[i]);
+            }
+
+            
+            double curr_h = m_eyeHeight;
+            
+            long dt = t - m_startBlink;
+            if (dt > m_blinkDuration)
+            {
+                m_startBlink = 2 * m_blinkDuration + s_blinkRandom.nextInt(4 * m_blinkDuration) + System.currentTimeMillis();
+            }
+            else if (dt > 0)
+            {
+                double half = m_blinkDuration / 2.0;
+                double h;
+                if (dt < half)
+                {
+                    h = 1 - dt / half;
+                }
+                else
+                {
+                    h = (dt - half) / half;
+                }
+                
+                curr_h = h * m_eyeHeight;
+                m_eyes[0].setHeight(curr_h);
+                m_eyes[1].setHeight(curr_h);
+            }
+            
+            if (m_hidePupils)
+            {
+                // Hide the pupils if they're outside the eye's oval
+                if (curr_h == m_eyeHeight)  // not blinking
+                {
+                    m_pupils[0].setVisible(true);
+                    m_pupils[1].setVisible(true);
+                }
+                else
+                {
+                    //TODO optimize
+                    for (int i = 0; i < 2; i++)
+                    {
+                        double dx = m_pupils[i].getX() - m_x[i];
+                        double dy = m_pupils[i].getY() - m_y[i];
+                        double d = (dx * dx) / (m_eyeWidth * m_eyeWidth) + (dy * dy) / (curr_h * curr_h);
+                        m_pupils[i].setVisible(d < 0.25);   // d * 4 < 1 (i.e. radius * 2 = diameter)
+                    }
+                }
             }
         }
     }

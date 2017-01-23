@@ -6,6 +6,7 @@ import com.enno.dotz.client.Context;
 import com.enno.dotz.client.GridState;
 import com.enno.dotz.client.SoundManager.Sound;
 import com.enno.dotz.client.anim.Transition.RadioActiveTransition;
+import com.enno.dotz.client.anim.TransitionList.NukeTransitionList;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.DotBomb;
 import com.enno.dotz.client.item.Item;
@@ -27,7 +28,7 @@ public class RadioActives
 
     public static TransitionList createTransitions(final Context ctx)
     {
-        return new TransitionList("radio actives", ctx.nukeLayer, ctx.cfg.growFireDuration)
+        return new NukeTransitionList("radio actives", ctx, ctx.cfg.growFireDuration)
         {
             @Override
             public void init()
@@ -67,7 +68,6 @@ public class RadioActives
                                 Sound.SWAP_RADIOACTIVE.play();
                             
                             newItem.addShapeToLayer(ctx.nukeLayer);
-                            ctx.nukeLayer.setVisible(true);
                         }
                         
                         @Override
@@ -77,7 +77,6 @@ public class RadioActives
                             newItem.removeShapeFromLayer(ctx.nukeLayer);
                             newItem.addShapeToLayer(ctx.dotLayer);
                             cell.item = newItem;
-                            ctx.nukeLayer.setVisible(false);
                         }
                         
                         @Override

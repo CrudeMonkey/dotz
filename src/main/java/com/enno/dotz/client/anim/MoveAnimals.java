@@ -115,9 +115,6 @@ public class MoveAnimals
                                 {
                                     animal.removeShapeFromLayer(ctx.dotLayer);
                                     animal.addShapeToLayer(ctx.nukeLayer);
-                                    
-                                    ctx.nukeLayer.setVisible(true);
-                                    ctx.dotLayer.draw();
                                 }
                                 
                                 public void afterEnd()
@@ -127,11 +124,6 @@ public class MoveAnimals
                                     
                                     src.item = target.item;
                                     target.item = animal;
-                                    
-                                    ctx.nukeLayer.draw();
-                                    ctx.dotLayer.draw();
-                                    
-                                    ctx.nukeLayer.setVisible(false);
                                 }
                             });
                             list.add(new DropTransition(state.x(target.col), state.y(target.row), state.x(col), state.y(row), target.item));
@@ -145,9 +137,6 @@ public class MoveAnimals
                                 {
                                     animal.removeShapeFromLayer(ctx.dotLayer);
                                     animal.addShapeToLayer(ctx.nukeLayer);
-                                    
-                                    ctx.nukeLayer.setVisible(true);
-                                    ctx.dotLayer.draw();
                                 }
                                 
                                 public void afterEnd()
@@ -169,11 +158,6 @@ public class MoveAnimals
                                     
                                     src.item = target.item;
                                     target.item = animal;
-                                    
-                                    ctx.nukeLayer.draw();
-                                    ctx.dotLayer.draw();
-                                    
-                                    ctx.nukeLayer.setVisible(false);
                                 }
                             });
                             list.add(new DropTransition(state.x(target.col), state.y(target.row), state.x(col), state.y(row), target.item));
@@ -195,9 +179,6 @@ public class MoveAnimals
                                     
                                     animal.removeShapeFromLayer(ctx.dotLayer);
                                     animal.addShapeToLayer(ctx.nukeLayer);
-                                    
-                                    ctx.nukeLayer.setVisible(true);
-                                    ctx.dotLayer.draw();
                                 }
                                 
                                 public void afterEnd()
@@ -213,11 +194,6 @@ public class MoveAnimals
                                     
                                     animal.removeShapeFromLayer(ctx.nukeLayer);
                                     animal.addShapeToLayer(ctx.dotLayer);
-                                    
-                                    ctx.nukeLayer.draw();
-                                    ctx.dotLayer.draw();
-                                    
-                                    ctx.nukeLayer.setVisible(false);
                                 }
                             });
                         }
@@ -240,9 +216,6 @@ public class MoveAnimals
                                     
                                     animal.removeShapeFromLayer(ctx.dotLayer);
                                     animal.addShapeToLayer(ctx.nukeLayer);
-                                    
-                                    ctx.nukeLayer.setVisible(true);
-                                    ctx.dotLayer.draw();
                                 }
                                 
                                 public void afterEnd()
@@ -258,11 +231,6 @@ public class MoveAnimals
                                     
                                     animal.removeShapeFromLayer(ctx.nukeLayer);
                                     animal.addShapeToLayer(ctx.dotLayer);
-                                    
-                                    ctx.nukeLayer.draw();
-                                    ctx.dotLayer.draw();
-                                    
-                                    ctx.nukeLayer.setVisible(false);
                                 }
                             });
                         }

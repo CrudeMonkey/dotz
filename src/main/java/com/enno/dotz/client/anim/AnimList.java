@@ -5,7 +5,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.ait.lienzo.client.core.animation.IAnimationCallback;
-import com.ait.lienzo.client.core.shape.Layer;
+import com.enno.dotz.client.Context;
+import com.enno.dotz.client.anim.TransitionList.NukeTransitionList;
 import com.enno.dotz.client.util.CallbackChain;
 
 public class AnimList extends CallbackChain
@@ -22,9 +23,9 @@ public class AnimList extends CallbackChain
         run();
     }
     
-    public void addTransition(String name, Layer layer, double duration, Transition trans)
+    public void addNukeTransition(String name, Context ctx, double duration, Transition trans)
     {
-        TransitionList list = new TransitionList(name, layer, duration);
+        TransitionList list = new NukeTransitionList(name, ctx, duration);
         list.add(trans);
         add(list);
     }
