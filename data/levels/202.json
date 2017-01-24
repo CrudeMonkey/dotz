@@ -3,7 +3,7 @@
   "name": "Candy Crush 3",
   "creator": "Enno",
   "description": "",
-  "folder": "Swap",
+  "folder": "Candy Crush",
   "numColumns": 7,
   "numRows": 7,
   "grid": [
@@ -61,5 +61,5 @@
     "maxMoves": 16
   },
   "boosts": {  },
-  "lastModified": "1449271289641"
+  "lastModified": "1485209865854"
 }

@@ -22,6 +22,8 @@ public class EditGrid extends DotzGridPanel
         init(false);
         initItemGraphics();
         
+        m_floorLayer.setVisible(false);
+        
         setBorders();
         
         draw();

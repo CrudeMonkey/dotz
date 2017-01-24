@@ -1,9 +1,9 @@
 package com.enno.dotz.client.editor;
 
 import com.ait.lienzo.client.core.shape.Circle;
+import com.ait.lienzo.client.core.shape.FastLayer;
 import com.ait.lienzo.client.core.shape.Group;
 import com.ait.lienzo.client.core.shape.IPrimitive;
-import com.ait.lienzo.client.core.shape.Layer;
 import com.ait.lienzo.client.core.shape.Line;
 import com.ait.lienzo.client.core.shape.Rectangle;
 import com.ait.lienzo.client.core.shape.Slice;
@@ -31,7 +31,7 @@ public class ModePalette extends Palette<Object>
     {
         super(40, ItemButton.SIZE, 6, 2);
         
-        ctx.dotLayer = new Layer();
+        ctx.dotLayer = new FastLayer();
         add(ctx.dotLayer);                
         
         addButton(new ChangeIce(), 0, 0);

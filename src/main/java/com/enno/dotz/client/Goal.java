@@ -30,6 +30,7 @@ public class Goal
     protected int m_blasters;
     protected int m_coins;
     protected int m_spiders;
+    protected int m_chests;
     
     protected int m_score;
     protected int m_time;
@@ -330,5 +331,15 @@ public class Goal
     public void setBlasters(int blasters)
     {
         m_blasters = blasters;
+    }
+
+    public int getChests()
+    {
+        return m_chests;
+    }
+
+    public void setChests(int chests)
+    {
+        m_chests = chests;
     }
 }

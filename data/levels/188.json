@@ -27,73 +27,122 @@
     "........"
   ],
   "items": [
-    "?.??.F.F",
-    "YY?.??3?",
-    "YW??.?A.",
-    "?.2??.A.",
-    ".??????.",
-    "W?.?.???",
-    "?.???...",
-    "????????"
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........",
+    "........"
   ],
   "doors": [
     {"p":[7,1],"strength":1,"direction":"N"},
     {"p":[7,7],"strength":1,"direction":"W","rotate":1}
   ],
+  "dots": [
+    {"color":3,"p":[6,1]},
+    {"color":2,"p":[2,3]}
+  ],
   "dotBombs": [
-    {"p":[3,1],"color":2,"strength":9},
-    {"p":[0,4],"color":2,"strength":9}
+    {"color":2,"strength":9,"p":[3,1]},
+    {"color":2,"strength":9,"p":[0,4]}
   ],
   "animals": [
-    {"p":[7,6],"strength":20,"color":5,"type":"Default"}
+    {"strength":20,"color":5,"type":"Default","p":[7,6]}
   ],
   "knights": [
-    {"p":[7,2],"strength":3},
-    {"p":[7,3],"strength":3}
+    {"strength":3,"p":[7,2]},
+    {"strength":3,"p":[7,3]}
   ],
   "clocks": [
-        {
-      "p": [
-        4,
-        2
-      ],
-      "strength": 10
-    },
-        {
-      "p": [
-        5,
-        3
-      ],
-      "strength": 10
-    }
+    {"strength":10,"p":[4,2]},
+    {"strength":10,"p":[5,3]}
   ],
   "drops": [
-    {"p":[6,6]}
+    {"radius":3,"p":[6,6]}
   ],
   "lasers": [
-    {"p":[4,5],"direction":"E"},
-    {"p":[1,6],"direction":"E"}
+    {"direction":"E","p":[4,5]},
+    {"direction":"E","p":[1,6]}
   ],
   "mirrors": [
-    {"p":[1,0],"flip":false},
-    {"p":[2,5],"flip":false}
+    {"flip":false,"p":[1,0]},
+    {"flip":false,"p":[2,5]}
   ],
   "rockets": [
-    {"p":[1,3],"direction":"E"},
-    {"p":[7,4],"direction":"E"}
+    {"direction":"E","p":[1,3]},
+    {"direction":"E","p":[7,4]}
   ],
   "dominoes": [
-    {"p":[5,6],"num":[2,1],"vertical":true}
+    {"num":[2,1],"vertical":true,"p":[5,6]}
   ],
   "eggs": [
     {"p":[4,0]},
     {"p":[6,0]}
   ],
+  "fires": [
+    {"p":[5,0]},
+    {"p":[7,0]}
+  ],
+  "wilds": [
+    {"p":[1,2]},
+    {"p":[0,5]}
+  ],
+  "anchors": [
+    {"p":[6,2]},
+    {"p":[6,3]}
+  ],
+  "yinyangs": [
+    {"p":[0,1]},
+    {"p":[1,1]},
+    {"p":[0,2]}
+  ],
+  "randoms": [
+    {"p":[0,0]},
+    {"p":[2,0]},
+    {"p":[3,0]},
+    {"p":[2,1]},
+    {"p":[4,1]},
+    {"p":[5,1]},
+    {"p":[2,2]},
+    {"p":[3,2]},
+    {"p":[5,2]},
+    {"p":[0,3]},
+    {"p":[3,3]},
+    {"p":[4,3]},
+    {"p":[1,4]},
+    {"p":[2,4]},
+    {"p":[3,4]},
+    {"p":[4,4]},
+    {"p":[5,4]},
+    {"p":[6,4]},
+    {"p":[1,5]},
+    {"p":[3,5]},
+    {"p":[5,5]},
+    {"p":[6,5]},
+    {"p":[7,5]},
+    {"p":[0,6]},
+    {"p":[2,6]},
+    {"p":[3,6]},
+    {"p":[4,6]},
+    {"p":[0,7]},
+    {"p":[1,7]},
+    {"p":[2,7]},
+    {"p":[3,7]},
+    {"p":[4,7]},
+    {"p":[5,7]},
+    {"p":[6,7]}
+  ],
   "generator": {
     "generateLetters": false,
     "swapMode": true,
+    "clickMode": false,
     "rollMode": false,
+    "diagonalMode": false,
     "dominoMode": false,
+    "slipperyAnchors": false,
+    "minChainLength": 2,
     "seed": 42725,
     "fireGrowthRate": 1,
     "maxAnchors": 3,
@@ -102,8 +151,15 @@
     "animalStrength": 10,
     "knightStrength": 3,
     "clockStrength": 10,
+    "chestStrength": 1,
     "bombStrength": 9,
+    "blockerStrength": 2,
     "animalType": "Default",
+    "animalAction": "Default",
+    "eggsNeeded": 3,
+    "spiderGrowth": 10,
+    "icePickRadius": 3,
+    "dropRadius": 3,
     "freq": [
       [20,"dot",0],
       [20,"dot",1],
@@ -128,5 +184,5 @@
     "reshuffles": 7,
     "keys": 4
   },
-  "lastModified": "1448246519975"
+  "lastModified": "1485271250331"
 }

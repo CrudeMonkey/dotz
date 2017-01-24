@@ -1,6 +1,6 @@
 package com.enno.dotz.client.editor;
 
-import com.ait.lienzo.client.core.shape.Layer;
+import com.ait.lienzo.client.core.shape.FastLayer;
 import com.ait.lienzo.client.core.shape.Rectangle;
 import com.ait.lienzo.shared.core.types.ColorName;
 import com.enno.dotz.client.Cell;
@@ -26,7 +26,7 @@ public class CellPalette extends Palette<Cell>
     {
         super(30, CellButton.SIZE, 8, 3);
         
-        ctx.doorLayer = new Layer();
+        ctx.doorLayer = new FastLayer();
         add(ctx.doorLayer);
         
         addButton(new ItemCell(), 0, 0);

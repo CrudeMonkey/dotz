@@ -113,7 +113,7 @@ public class GridState
                     if (replaceRandom && (c.item instanceof RandomItem))
                     {
                         RandomItem rnd = (RandomItem) c.item;
-                        c.item = ctx.generator.getNextItem(ctx, true, rnd.isRadioActive());
+                        c.item = ctx.generator.getNextItem(ctx, true, rnd.isRadioActive(), c.item.isStuck());
                     }
                     else
                     {
@@ -328,7 +328,7 @@ public class GridState
             }
         }
         
-        ctx.dotLayer.draw();
+        ctx.dotLayer.redraw();
         updateScore();
         
         AnimList list = new AnimList();
@@ -353,7 +353,7 @@ public class GridState
                 activateLasers(true);
 
                 //Debug.p("next move");
-                ctx.dotLayer.draw();
+                ctx.dotLayer.redraw();
                 
                 System.gc();
                 
@@ -411,7 +411,7 @@ public class GridState
                 activateLasers(true);
 
                 //Debug.p("next move");
-                ctx.dotLayer.draw();
+                ctx.dotLayer.redraw();
                 
                 System.gc();
                 
@@ -436,7 +436,7 @@ public class GridState
                             ((Controllable) c).tick();
                     }
                 }
-                ctx.doorLayer.draw();
+                ctx.doorLayer.redraw();
                 
                 doNext();
             }
@@ -604,7 +604,7 @@ public class GridState
                     ((Laser) c.item).activateBeam(active, col, row, ctx);
             }
         }
-        ctx.laserLayer.draw();
+        ctx.laserLayer.redraw();
     }
 
     protected void rotateDoors()
@@ -618,7 +618,7 @@ public class GridState
                     ((Door) c).tickRotateDoor();
             }
         }
-        ctx.doorLayer.draw();
+        ctx.doorLayer.redraw();
     }
     
     protected static boolean canConnect(Item a, Item b, int dcol, int drow)
@@ -712,7 +712,7 @@ public class GridState
                             }                            
                         }
                     }
-                    ctx.backgroundLayer.draw();
+                    ctx.backgroundLayer.redraw();
                 }
             }
             
@@ -1306,8 +1306,8 @@ public class GridState
             @Override
             public void run()
             {
-                ctx.iceLayer.draw();
-                ctx.doorLayer.draw();
+                ctx.iceLayer.redraw();
+                ctx.doorLayer.redraw();
                 
                 super.run();
             }
@@ -1352,8 +1352,8 @@ public class GridState
             @Override
             public void run()
             {
-                ctx.iceLayer.draw();
-                ctx.doorLayer.draw();
+                ctx.iceLayer.redraw();
+                ctx.doorLayer.redraw();
                 
                 super.run();
             }

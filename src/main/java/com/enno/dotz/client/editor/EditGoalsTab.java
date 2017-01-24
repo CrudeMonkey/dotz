@@ -51,6 +51,7 @@ public class EditGoalsTab extends VLayout
     private All           m_blockers;
     private All           m_zapBlockers;
     private All           m_spiders;
+    private All           m_chests;
     private Num           m_lasers;
     private Num           m_birds;
     private Num           m_dominoes;
@@ -407,6 +408,20 @@ public class EditGoalsTab extends VLayout
             }
         };
 
+        m_chests = new All("Chests", changeListener){
+            @Override
+            public void prepareSave(Goal goal)
+            {
+                goal.setChests(val());
+            }
+
+            @Override
+            public void initGoal(Goal goal)
+            {
+                val(goal.getChests());
+            }
+        };
+
         m_dominoes = new Num("Dominoes", changeListener){
             @Override
             public void prepareSave(Goal goal)
@@ -446,7 +461,7 @@ public class EditGoalsTab extends VLayout
                 m_chainGoal, m_words, m_zapBlockers,
                 m_blasters, m_bombs, m_colorBombs,
                 m_diamonds, m_bubbles, m_coins,
-                m_spiders
+                m_spiders, m_chests
         };
         
         form.setFields(m_fields);

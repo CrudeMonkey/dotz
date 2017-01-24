@@ -229,8 +229,8 @@ public class MoveAnimals
                                     src.item = newDot;
                                     target.item = animal;
                                     
-                                    animal.removeShapeFromLayer(ctx.nukeLayer);
                                     animal.addShapeToLayer(ctx.dotLayer);
+                                    animal.removeShapeFromLayer(ctx.nukeLayer);
                                 }
                             });
                         }

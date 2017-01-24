@@ -3,7 +3,7 @@
   "name": "Candy Crush 2",
   "creator": "Enno",
   "description": "",
-  "folder": "Swap",
+  "folder": "Candy Crush",
   "numColumns": 8,
   "numRows": 9,
   "grid": [
@@ -70,5 +70,5 @@
     "dots": {    }
   },
   "boosts": {  },
-  "lastModified": "1481231825941"
+  "lastModified": "1485209865834"
 }

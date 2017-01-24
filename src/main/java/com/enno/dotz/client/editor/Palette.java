@@ -3,8 +3,8 @@ package com.enno.dotz.client.editor;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ait.lienzo.client.core.shape.FastLayer;
 import com.ait.lienzo.client.core.shape.Group;
-import com.ait.lienzo.client.core.shape.Layer;
 import com.ait.lienzo.client.core.shape.Rectangle;
 import com.ait.lienzo.client.widget.LienzoPanel;
 import com.ait.lienzo.shared.core.types.Color;
@@ -32,7 +32,7 @@ public abstract class Palette<T> extends LienzoPanel
         
         ctx = new Context(true, cfg);
 
-        ctx.backgroundLayer = new Layer();
+        ctx.backgroundLayer = new FastLayer();
         add(ctx.backgroundLayer);    
         
         addMouseDownHandler(new MouseDownHandler()
@@ -59,7 +59,7 @@ public abstract class Palette<T> extends LienzoPanel
             if (b.selected(col, row))
                 selected = b;
         }
-        ctx.backgroundLayer.draw();   // redraw button borders
+        ctx.backgroundLayer.redraw();   // redraw button borders
         
         selected(selected);
     }

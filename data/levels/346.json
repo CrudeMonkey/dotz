@@ -1,8 +1,9 @@
 {
+  "id": 346,
   "name": "Toy Blast 5",
   "creator": "Enno",
   "description": "",
-  "folder": "Toy Blast 5",
+  "folder": "Toy Blast",
   "numColumns": 9,
   "numRows": 9,
   "grid": [
@@ -127,6 +128,8 @@
     "blockerStrength": 2,
     "animalType": "Default",
     "animalAction": "Default",
+    "eggsNeeded": 3,
+    "spiderGrowth": 10,
     "rewardStrategies": "b<5,e<7,c<9",
     "icePickRadius": 3,
     "dropRadius": 3,
@@ -146,6 +149,5 @@
     "maxMoves": 30
   },
   "boosts": {  },
-  "id": 346,
-  "lastModified": "1484689974029"
+  "lastModified": "1485209782869"
 }

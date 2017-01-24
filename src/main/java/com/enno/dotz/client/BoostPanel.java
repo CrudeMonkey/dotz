@@ -1,8 +1,8 @@
 package com.enno.dotz.client;
 
 import com.ait.lienzo.client.core.shape.Circle;
+import com.ait.lienzo.client.core.shape.FastLayer;
 import com.ait.lienzo.client.core.shape.IPrimitive;
-import com.ait.lienzo.client.core.shape.Layer;
 import com.ait.lienzo.client.core.shape.Text;
 import com.ait.lienzo.shared.core.types.ColorName;
 import com.ait.lienzo.shared.core.types.TextAlign;
@@ -56,7 +56,7 @@ public class BoostPanel extends MXHBox
             
             setBackgroundColor(ColorName.WHITE);
             
-            ctx.backgroundLayer = new Layer();
+            ctx.backgroundLayer = new FastLayer();
             add(ctx.backgroundLayer);
 
             Boosts boosts = level.boosts;
@@ -116,7 +116,7 @@ public class BoostPanel extends MXHBox
             }
             m_selected = selectedButton;
             
-            ctx.backgroundLayer.draw();
+            ctx.backgroundLayer.redraw();
             
             m_connectMode.cancelBoostMode();
             if (m_selected != null)
@@ -140,7 +140,7 @@ public class BoostPanel extends MXHBox
                         m_selected = null;
                         deselectAll();
                         
-                        ctx.backgroundLayer.draw();                        
+                        ctx.backgroundLayer.redraw();                        
                     }
                 });
             }

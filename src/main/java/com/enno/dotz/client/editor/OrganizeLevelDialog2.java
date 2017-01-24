@@ -1,5 +1,7 @@
 package com.enno.dotz.client.editor;
 
+import java.util.TreeMap;
+
 import com.ait.tooling.nativetools.client.NArray;
 import com.ait.tooling.nativetools.client.NObject;
 import com.enno.dotz.client.Config;
@@ -23,7 +25,6 @@ import com.enno.dotz.client.ui.MXTreeGridField;
 import com.enno.dotz.client.ui.MXVBox;
 import com.enno.dotz.client.ui.MXWindow;
 import com.enno.dotz.client.util.Debug;
-import com.google.gwt.thirdparty.guava.common.collect.Sets;
 import com.smartgwt.client.data.Record;
 import com.smartgwt.client.types.Alignment;
 import com.smartgwt.client.types.DragDataAction;
@@ -822,6 +823,8 @@ public class OrganizeLevelDialog2 extends MXWindow
                 return;
             }
             
+            final boolean isNewSet = "".equals(m_set.getAsString("id"));
+            
             m_set.put("name", name);
             m_set.put("creator", m_creator.getValueAsString());
             
@@ -841,18 +844,21 @@ public class OrganizeLevelDialog2 extends MXWindow
                     m_set.put("id", id);
                     m_id.setValue("" + id);
                     
-                    //TODO add new set to dropdown
-                    
+                    if (!isNewSet)
+                        removeSetFromList(id);
+                                        
                     try
                     {
                         m_sets.push(m_set.deep());
-                        setSets(m_sets);
-                        m_selectSet.setValue(id);
                     }
                     catch (Exception e)
                     {
                         // shouldn't happen
                     }
+                    sortSets();
+                    
+                    setSets(m_sets);
+                    m_selectSet.setValue(id);
                     
                     m_changed = false;
                     if (callback != null)
@@ -884,6 +890,9 @@ public class OrganizeLevelDialog2 extends MXWindow
         {
             m_sets = sets;
             m_selectSet.setOptionDataSource(new MXSimpleDS(sets));
+
+            m_selectSet.fetchData();    // force redisplay of selected item!
+            // see http://forums.smartclient.com/forum/technical-q-a/30732-selectitem-does-not-update-its-options-after-datasource-cache-data-change
         }
 
         protected void createNewSet()
@@ -901,14 +910,37 @@ public class OrganizeLevelDialog2 extends MXWindow
         
         protected void removeSetFromDropdown(int setId)
         {
-            NArray newSets = new NArray();
+            removeSetFromList(setId);
+            setSets(m_sets);
+        }
+
+        protected void removeSetFromList(int setId)
+        {
             for (int i = 0, n = m_sets.size(); i < n; i++)
             {
                 NObject set = m_sets.getAsObject(i);
-                if (set.getAsInteger("id") != setId)
-                    newSets.push(set);
+                if (set.getAsInteger("id").equals(setId))
+                {
+                    m_sets.splice(i, 1);
+                    return;
+                }
             }
-            setSets(newSets);
+        }
+        
+        protected void sortSets()
+        {
+            TreeMap<String, NObject> map = new TreeMap<String,NObject>();
+            for (int i = 0, n = m_sets.size(); i < n; i++)
+            {
+                NObject row = m_sets.getAsObject(i);
+                map.put(row.getAsString("name"), row);
+            }
+            
+            NArray a = new NArray();
+            for (NObject row : map.values())
+                a.push(row);
+            
+            m_sets = a;
         }
     }
 }

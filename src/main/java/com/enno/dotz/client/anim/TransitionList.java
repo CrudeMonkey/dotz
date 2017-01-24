@@ -42,8 +42,8 @@ public class TransitionList extends Callback
             @Override
             public void done()
             {
+                drawOtherLayers();  // prevent stutter
                 TransitionList.this.done();
-                redrawOtherLayers();
                 doNext(); // invoke next Callback in the CallbackChain
             }
         };
@@ -91,6 +91,15 @@ public class TransitionList extends Callback
         {
             for (Layer layer : m_otherLayers)
                 LayerRedrawManager.get().schedule(layer);
+        }
+    }
+    
+    public void drawOtherLayers()
+    {
+        if (m_otherLayers != null)
+        {
+            for (Layer layer : m_otherLayers)
+                layer.draw();
         }
     }
     

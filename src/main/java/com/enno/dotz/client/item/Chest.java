@@ -69,12 +69,6 @@ public class Chest extends Item
     }
     
     @Override
-    public boolean canDrop()
-    {
-        return false;
-    }
-
-    @Override
     public IPrimitive<?> createShape(double size)
     {
         Group g = new Group();
@@ -170,7 +164,7 @@ public class Chest extends Item
     {
         if (m_strength <= 1)
         {
-            //TODO ctx.score.openedChest();
+            ctx.score.openedChest();
             return ExplodeAction.OPEN; // open Chest
         }
         

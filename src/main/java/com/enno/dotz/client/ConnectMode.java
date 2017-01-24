@@ -136,7 +136,7 @@ public abstract class ConnectMode
             ctx.state.activateLasers(false);
             ((Mirror) cell.item).rotate(1);
             Sound.FLIP_MIRROR.play();
-            ctx.dotLayer.draw();
+            ctx.dotLayer.redraw();
             ctx.state.activateLasers(true);
             
             stop();
@@ -163,7 +163,7 @@ public abstract class ConnectMode
             popBubble(cell);
             ((Blaster) cell.item).arm();
             Sound.FLIP_MIRROR.play(); //TODO sound
-            ctx.dotLayer.draw();
+            ctx.dotLayer.redraw();
             ctx.state.activateLasers(true);
             
             stop();
@@ -190,7 +190,7 @@ public abstract class ConnectMode
             popBubble(cell);
             ((Bomb) cell.item).arm();
             Sound.FLIP_MIRROR.play(); //TODO sound
-            ctx.dotLayer.draw();
+            ctx.dotLayer.redraw();
             ctx.state.activateLasers(true);
             
             stop();

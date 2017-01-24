@@ -1,5 +1,6 @@
 package com.enno.dotz.client.box;
 
+import com.ait.lienzo.client.core.animation.LayerRedrawManager;
 import com.ait.lienzo.client.core.event.NodeMouseEnterEvent;
 import com.ait.lienzo.client.core.event.NodeMouseEnterHandler;
 import com.ait.lienzo.client.core.event.NodeMouseExitEvent;
@@ -44,7 +45,7 @@ public class BoxButton extends BoxVLayout
             public void onNodeMouseEnter(NodeMouseEnterEvent event)
             {
                 bg.setFillColor(b.buttonActiveColor);
-                getLayer().draw();
+                redrawLayer();
             }
         });
         
@@ -54,8 +55,13 @@ public class BoxButton extends BoxVLayout
             public void onNodeMouseExit(NodeMouseExitEvent event)
             {
                 bg.setFillColor(b.buttonColor);
-                getLayer().draw();
+                redrawLayer();
             }
         });
+    }
+    
+    protected void redrawLayer()
+    {
+        LayerRedrawManager.get().schedule(getLayer());
     }
 }

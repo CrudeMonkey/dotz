@@ -274,7 +274,8 @@ public class Score
     public void openedChest()
     {
         m_openedChests++;
-        //TODO addPoints
+        m_chestsInGrid--;
+        addPoints(5);
     }
 
     public void addBird()
@@ -302,7 +303,7 @@ public class Score
         return m_moves;
     }
     
-    public int getChests()
+    public int getChestsInGrid()
     {
         return m_chestsInGrid;
     }

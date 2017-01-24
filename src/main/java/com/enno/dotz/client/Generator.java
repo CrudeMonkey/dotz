@@ -286,7 +286,7 @@ public class Generator
         return 1;
     }
     
-    public Item getNextItem(Context ctx, boolean initial, Boolean radioActive)
+    public Item getNextItem(Context ctx, boolean initial, Boolean radioActive, Boolean isStuck)
     {
         if (initial && dominoMode)
         {
@@ -324,6 +324,9 @@ public class Generator
                     continue;
             }
             
+            if (item.canBeStuck() && Boolean.TRUE.equals(isStuck))
+                item.setStuck(true);
+            
             if (item instanceof Dot)
             {
                 ((Dot) item).setRadioActive(makeRadioActive(radioActive));
@@ -346,7 +349,7 @@ public class Generator
             {
                 Chest chest = (Chest) item;
                 m_noChest = true;   // prevent chest inside chest
-                chest.setItem(getNextItem(ctx, initial, radioActive));
+                chest.setItem(getNextItem(ctx, initial, radioActive, null));
                 m_noChest = false;
                 ctx.score.generatedChest();
             }

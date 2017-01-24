@@ -329,7 +329,7 @@ public abstract class Cell
             if (item instanceof RandomItem)
             {
                 RandomItem rnd = (RandomItem) item;
-                item = ctx.generator.getNextItem(ctx, false, rnd.isRadioActive());
+                item = ctx.generator.getNextItem(ctx, false, rnd.isRadioActive(), rnd.isStuck());
                 // NOTE: calls item.init(ctx);
             }
             else
@@ -532,7 +532,7 @@ public abstract class Cell
         {
             m_direction = Direction.rotate(m_direction, true); // clockwise
             setRotation();
-            ctx.backgroundLayer.draw();
+            ctx.backgroundLayer.redraw();
         }        
         
         @Override
@@ -1196,7 +1196,7 @@ public abstract class Cell
             
             m_direction = Direction.rotate(m_direction, true); // clockwise
             setRotation();
-            ctx.doorLayer.draw();
+            ctx.doorLayer.redraw();
         }
         
         @Override
@@ -1388,7 +1388,7 @@ public abstract class Cell
             
             m_shape.setVisible(m_strength > 0);
             
-            ctx.doorLayer.draw();
+            ctx.doorLayer.redraw();
         }
         
         @Override
@@ -1454,7 +1454,7 @@ public abstract class Cell
             m_text.setText("" + m_strength);
             m_text.setVisible(m_strength > 1);
             
-            ctx.doorLayer.draw();
+            ctx.doorLayer.redraw();
         }
 
         @Override
@@ -1778,7 +1778,7 @@ public abstract class Cell
             
             m_shape.setVisible(m_strength > 0);
             
-            ctx.doorLayer.draw();
+            ctx.doorLayer.redraw();
         }
         
         @Override
@@ -1836,14 +1836,14 @@ public abstract class Cell
             return !m_popped;
         }
         
-        @Override
-        public boolean canGrowFire()
-        {
-            if (!m_popped)
-                return false;
-            
-            return super.canGrowFire();
-        }
+//        @Override
+//        public boolean canGrowFire()
+//        {
+//            if (!m_popped)
+//                return false;
+//            
+//            return super.canGrowFire();
+//        }
         
         @Override
         public boolean canBeNuked()
@@ -2554,7 +2554,7 @@ public abstract class Cell
                 if (m_launchItem instanceof RandomItem)
                 {
                     RandomItem rnd = (RandomItem) m_launchItem;
-                    return ctx.generator.getNextItem(ctx, false, rnd.isRadioActive());
+                    return ctx.generator.getNextItem(ctx, false, rnd.isRadioActive(), rnd.isStuck());
                 }
                 
                 Item item = m_launchItem.copy();

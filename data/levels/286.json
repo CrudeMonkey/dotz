@@ -1,4 +1,5 @@
 {
+  "id": 286,
   "name": "Toy Blast 100",
   "creator": "Enno",
   "description": "",
@@ -13,8 +14,8 @@
     "BBBBBBBBB",
     "BBBBBBBBB",
     "BBBBBBBBB",
-    "BBBB BBBB",
-    "BBBB BBBB"
+    "BBBB.BBBB",
+    "BBBB.BBBB"
   ],
   "ice": [
     ".........",
@@ -37,6 +38,14 @@
     ".........",
     ".........",
     "........."
+  ],
+  "cages": [
+    {"p":[4,7],"strength":1,"blocking":true},
+    {"p":[4,8],"strength":1,"blocking":true}
+  ],
+  "colorBombs": [
+    {"p":[4,7]},
+    {"p":[4,8]}
   ],
   "fires": [
     {"stuck":true,"p":[4,4]},
@@ -127,6 +136,8 @@
     "blockerStrength": 2,
     "animalType": "Default",
     "animalAction": "Default",
+    "eggsNeeded": 3,
+    "spiderGrowth": 10,
     "rewardStrategies": "b<5,e<7,c<9",
     "icePickRadius": 3,
     "dropRadius": 3,
@@ -144,6 +155,5 @@
     "bubbles": -1
   },
   "boosts": {  },
-  "id": 286,
-  "lastModified": "1484530948163"
+  "lastModified": "1485223389286"
 }

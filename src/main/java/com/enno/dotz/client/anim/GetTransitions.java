@@ -31,6 +31,7 @@ import com.enno.dotz.client.item.Clock;
 import com.enno.dotz.client.item.Diamond;
 import com.enno.dotz.client.item.Item;
 import com.enno.dotz.client.item.TeleportClipBox;
+import com.enno.dotz.client.util.Console;
 import com.enno.dotz.client.util.CallbackChain.Callback;
 
 public class GetTransitions
@@ -65,6 +66,7 @@ public class GetTransitions
     
     private boolean m_roll;
     private boolean m_slipperyAnchors;
+    private int m_maxLoops;
     
     public GetTransitions(Context ctx)
     {
@@ -74,6 +76,8 @@ public class GetTransitions
         
         m_roll = ctx.generator.rollMode;
         m_slipperyAnchors = ctx.generator.slipperyAnchors;
+        
+        m_maxLoops = state.numColumns * state.numRows;
     }
     
     public Callback getCallback(final Layer layer, final double dropDuration)
@@ -104,16 +108,23 @@ public class GetTransitions
             @Override
             public void run()
             {
-                ctx.backgroundLayer.draw();
-                ctx.iceLayer.draw();
-                ctx.doorLayer.draw();
+                ctx.backgroundLayer.redraw();
+                ctx.iceLayer.redraw();
+                ctx.doorLayer.redraw();
                 
                 super.run();
             }
         };
         
+        int loopCount = 0;
         while (true)
-        {
+        {            
+            if (++loopCount > m_maxLoops)
+            {
+                loopError("transitions");
+                break;
+            }
+            
             m_list = new DropTransitionList(layer, dropDuration);
 
             PtList ptList = new PtList();
@@ -142,14 +153,26 @@ public class GetTransitions
         return animList;
     }
     
+    private void loopError(String s)
+    {
+        Console.log("loopError " + s);
+    }
+    
     private boolean checkRolls(boolean anchorsOnly, PtList droppedInto)
     {
         int before = droppedInto.size();
         
+        int loopCount = 0;
         boolean found = true;
         while (found)
         {
             found = false;
+            
+            if (++loopCount > m_maxLoops)
+            {
+                loopError("checkRolls");
+                break;
+            }
             
             for (int row = cfg.numRows - 1; row > 0; row--)
             {
@@ -227,10 +250,18 @@ public class GetTransitions
     {
         int before = droppedInto.size();
         
+        int loopCount = 0;
         boolean found = true;
+        
         while (found)
         {
             found = false;
+            
+            if (++loopCount > m_maxLoops)
+            {
+                loopError("checkDrops");
+                break;
+            }
             
             for (int row = cfg.numRows; row >= 0; row--)
             {
@@ -239,6 +270,8 @@ public class GetTransitions
                     Pt p = new Pt(col, row);
                     if (droppedInto.contains(p))
                         continue;
+                    
+                    //Console.log("" + p);
                     
                     if (row == cfg.numRows)     // near bottom
                     {
@@ -457,7 +490,7 @@ public class GetTransitions
 
     private void addSpawn(Pt src, Pt target)
     {
-        Item item = ctx.generator.getNextItem(ctx, false, null);        
+        Item item = ctx.generator.getNextItem(ctx, false, null, null);        
         final TeleportClipBox toBox = new TeleportClipBox(item.shape, target, ctx);
         
         m_list.add(new DropTransition(state.x(target.col), state.y(target.row - 1), state.x(target.col), state.y(target.row), item) {

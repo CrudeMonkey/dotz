@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
+import com.ait.lienzo.client.core.shape.FastLayer;
 import com.ait.lienzo.client.core.shape.Layer;
 import com.enno.dotz.client.WordDisplayPanel.FindWordList;
 import com.enno.dotz.client.anim.Pt;
@@ -21,12 +22,12 @@ public class Context
     public Generator generator;
     public Random beastRandom;
 
-    public Layer backgroundLayer;
-    public Layer iceLayer;
-    public Layer dotLayer;
-    public Layer doorLayer;
-    public Layer nukeLayer;
-    public Layer laserLayer;
+    public FastLayer backgroundLayer;
+    public FastLayer iceLayer;
+    public FastLayer dotLayer;
+    public FastLayer doorLayer;
+    public FastLayer nukeLayer;
+    public FastLayer laserLayer;
     public Layer connectLayer;
     
     public DotzGridPanel gridPanel;

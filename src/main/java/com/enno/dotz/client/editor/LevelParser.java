@@ -568,6 +568,9 @@ public class LevelParser
         if (json.isInteger("coins"))
             goal.setCoins(json.getAsInteger("coins"));
         
+        if (json.isInteger("chests"))
+            goal.setChests(json.getAsInteger("chests"));
+        
         if (json.isInteger("time"))
             goal.setTime(json.getAsInteger("time"));
 
@@ -1612,6 +1615,9 @@ public class LevelParser
         
         if (g.getCoins() != 0)
             p.put("coins", g.getCoins());
+        
+        if (g.getChests() != 0)
+            p.put("chests", g.getChests());
         
         ChainGoal ch = g.getChainGoal();
         if (ch != null)

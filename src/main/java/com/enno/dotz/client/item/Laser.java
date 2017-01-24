@@ -6,6 +6,7 @@ import java.util.Random;
 
 import com.ait.lienzo.client.core.shape.Group;
 import com.ait.lienzo.client.core.shape.IPrimitive;
+import com.ait.lienzo.client.core.shape.Layer;
 import com.ait.lienzo.client.core.shape.MultiPath;
 import com.ait.lienzo.client.core.shape.PolyLine;
 import com.ait.lienzo.client.core.types.Point2DArray;
@@ -292,6 +293,15 @@ public class Laser extends Item
         return ExplodeAction.REMOVE; // remove mirror
     }
 
+    @Override
+    public void removeShapeFromLayer(Layer layer)
+    {
+        super.removeShapeFromLayer(layer);
+        
+        if (m_beam != null)
+            ctx.laserLayer.remove(m_beam);
+    }
+    
     private static Random s_rnd = new Random();
     private static IColor[] COLORS = { ColorName.YELLOW, ColorName.AZURE, ColorName.RED, ColorName.DARKMAGENTA };
     

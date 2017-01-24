@@ -30,14 +30,14 @@ public class DotzGridPanel extends LienzoPanel
     protected Config cfg;
     protected GridState m_state;
     
-    private FloorLayer m_floorLayer;
-    private Layer m_iceLayer;
-    private Layer m_backgroundLayer;
+    protected FloorLayer m_floorLayer;
+    private FastLayer m_iceLayer;
+    private FastLayer m_backgroundLayer;
     private Layer m_connectLayer;
-    private Layer m_borderLayer;
-    private Layer m_dotLayer;
-    private Layer m_doorLayer;
-    private Layer m_nukeLayer; // nuke explosions and moving fire
+    private FastLayer m_borderLayer;
+    private FastLayer m_dotLayer;
+    private FastLayer m_doorLayer;
+    private FastLayer m_nukeLayer; // nuke explosions and moving fire
 
     private ConnectMode m_connectMode;
 
@@ -120,7 +120,7 @@ public class DotzGridPanel extends LienzoPanel
         new BorderFinder(m_state).find(m_borderLayer);
     }
 
-    private Layer createLayer()
+    private FastLayer createLayer()
     {
 //        Layer layer = new Layer();
 //        layer.setListening(false); // don't listen to events (for performance)

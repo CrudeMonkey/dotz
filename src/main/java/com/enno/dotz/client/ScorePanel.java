@@ -27,6 +27,7 @@ import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Blaster;
 import com.enno.dotz.client.item.Blocker;
 import com.enno.dotz.client.item.Bomb;
+import com.enno.dotz.client.item.Chest;
 import com.enno.dotz.client.item.Clock;
 import com.enno.dotz.client.item.Coin;
 import com.enno.dotz.client.item.ColorBomb;
@@ -272,6 +273,10 @@ public class ScorePanel extends LienzoPanel
         need = goal.getSpiders();
         if (need != 0)
             m_list.add(new SpiderGoal(need, ctx));
+
+        need = goal.getChests();
+        if (need != 0)
+            m_list.add(new ChestGoal(need, ctx));
 
         ChainGoal combi = goal.getChainGoal();
         if (combi != null)
@@ -590,6 +595,45 @@ public class ScorePanel extends LienzoPanel
             else
             {
                 int got = ctx.score.getExplodedSpiders();
+                if (got >= m_goal)
+                    setCompleted();
+                else
+                    setText(got + " / " + m_goal);
+            }
+        }
+    }
+    
+    public static class ChestGoal extends GoalItem
+    {
+        private int m_goal;
+        
+        public ChestGoal(int need, Context ctx)
+        {
+            super(ctx);
+            
+            m_goal = need;
+        }
+        
+        protected IPrimitive<?> createShape()
+        {
+            Chest s = new Chest(null, 1);
+            s.setContext(ctx);
+            return s.createShape(SHAPE_SIZE);
+        }
+        
+        protected void updateText()
+        {
+            if (m_goal == Goal.ALL)
+            {
+                int gen = ctx.score.getChestsInGrid();
+                if (gen > 0)
+                    setText("" + gen);
+                else 
+                    setCompleted();
+            }
+            else
+            {
+                int got = ctx.score.getOpenedChests();
                 if (got >= m_goal)
                     setCompleted();
                 else

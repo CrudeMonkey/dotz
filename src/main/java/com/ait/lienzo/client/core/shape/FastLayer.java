@@ -1,5 +1,6 @@
 package com.ait.lienzo.client.core.shape;
 
+import com.ait.lienzo.client.core.animation.LayerRedrawManager;
 import com.ait.lienzo.client.core.shape.IPrimitive;
 import com.ait.lienzo.client.core.shape.Layer;
 import com.ait.lienzo.client.core.shape.Node;
@@ -35,5 +36,10 @@ public class FastLayer extends Layer
         getStorageEngine().add(child);
 
         return cast();
+    }
+    
+    public void redraw()
+    {
+        LayerRedrawManager.get().schedule(this);
     }
 }

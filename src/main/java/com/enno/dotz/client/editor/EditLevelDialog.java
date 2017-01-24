@@ -203,7 +203,7 @@ public abstract class EditLevelDialog extends MXWindow
     protected void testLevel()
     {
         m_level.grid = m_layout.getGridState();
-                
+        
         if (!validate(false))            
         {
             return;

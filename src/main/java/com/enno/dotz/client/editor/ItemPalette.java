@@ -1,7 +1,7 @@
 package com.enno.dotz.client.editor;
 
+import com.ait.lienzo.client.core.shape.FastLayer;
 import com.ait.lienzo.client.core.shape.IPrimitive;
-import com.ait.lienzo.client.core.shape.Layer;
 import com.enno.dotz.client.Config;
 import com.enno.dotz.client.Context;
 import com.enno.dotz.client.Direction;
@@ -41,7 +41,7 @@ public class ItemPalette extends Palette<Object>
     {
         super(40, ItemButton.SIZE, 7, 6);
 
-        ctx.dotLayer = new Layer();
+        ctx.dotLayer = new FastLayer();
         add(ctx.dotLayer);                
         
         addButton(new RandomItem(), 0, 0);

@@ -61,18 +61,6 @@ public class Fire extends Item
         ctx.score.explodedFire();
         return ExplodeAction.REMOVE; // remove fire
     }
-
-    @Override
-    public void addShapeToLayer(Layer layer)
-    {
-        super.addShapeToLayer(layer);
-    }
-
-    @Override
-    public void removeShapeFromLayer(Layer layer)
-    {
-        super.removeShapeFromLayer(layer);
-    }
     
     @Override
     public void animate(long t, double cursorX, double cursorY)

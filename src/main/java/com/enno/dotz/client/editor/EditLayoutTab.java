@@ -394,7 +394,7 @@ public abstract class EditLayoutTab extends VLayout
             {
                 int ds = c == '-' ? -1 : 1;
                 cell.item.incrementStrength(ds);
-                ctx.dotLayer.draw();
+                ctx.dotLayer.redraw();
                 changed();
                 return;
             }
@@ -445,7 +445,7 @@ public abstract class EditLayoutTab extends VLayout
         
         cell.item.removeShapeFromLayer(ctx.dotLayer);
         cell.item = null;
-        ctx.dotLayer.draw();
+        ctx.dotLayer.redraw();
         changed();
     }
     
@@ -458,7 +458,7 @@ public abstract class EditLayoutTab extends VLayout
         item.moveShape(state.x(cell.col), state.y(cell.row));
         item.addShapeToLayer(ctx.dotLayer);
         cell.item = item;
-        ctx.dotLayer.draw();
+        ctx.dotLayer.redraw();
         changed();
     }
 
@@ -948,7 +948,7 @@ public abstract class EditLayoutTab extends VLayout
                     else if (sameItem && cell.item.canIncrementStrength())
                     {
                         cell.item.incrementStrength(1);
-                        ctx.dotLayer.draw();
+                        ctx.dotLayer.redraw();
                         changed();
                     }
                     else
@@ -1149,7 +1149,7 @@ public abstract class EditLayoutTab extends VLayout
             
             ctx.state.add(susan);
             susan.initGraphics(ctx);
-            ctx.backgroundLayer.draw();
+            ctx.backgroundLayer.redraw();
             changed();
         }
 
@@ -1162,7 +1162,7 @@ public abstract class EditLayoutTab extends VLayout
                 {
                     su.removeGraphics();
                     state.getLazySusans().remove(su);
-                    ctx.backgroundLayer.draw();
+                    ctx.backgroundLayer.redraw();
                     changed();
                     return;
                 }
@@ -1190,7 +1190,7 @@ public abstract class EditLayoutTab extends VLayout
             cell.ice = m_editorProps.getIceStrength();
             cell.updateIce();
             
-            ctx.iceLayer.draw();
+            ctx.iceLayer.redraw();
             
             changed();
         }
@@ -1282,7 +1282,7 @@ public abstract class EditLayoutTab extends VLayout
                     }
                 }
                 
-                ctx.dotLayer.draw();
+                ctx.dotLayer.redraw();
                 Debug.p("bombify done");
                 
                 changed();
@@ -1310,7 +1310,7 @@ public abstract class EditLayoutTab extends VLayout
                 removeItem(cell);
                 addItem(cell, chest); 
                 
-                ctx.dotLayer.draw();
+                ctx.dotLayer.redraw();
                 Debug.p("chestify done");
             }
             catch (Exception e)
@@ -1423,7 +1423,7 @@ public abstract class EditLayoutTab extends VLayout
                 if (cell.item != null && cell.item.canRotate())
                 {
                     cell.item.rotate(1);
-                    ctx.dotLayer.draw();
+                    ctx.dotLayer.redraw();
                     changed();
                     return;
                 }
