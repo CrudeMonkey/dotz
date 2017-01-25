@@ -31,6 +31,8 @@ public class Goal
     protected int m_coins;
     protected int m_spiders;
     protected int m_chests;
+    protected int m_wrappedDots;
+    protected int m_striped;
     
     protected int m_score;
     protected int m_time;
@@ -161,6 +163,26 @@ public class Goal
     public int getDoors()
     {
         return m_doors;
+    }
+
+    public int getWrappedDots()
+    {
+        return m_wrappedDots;
+    }
+
+    public void setWrappedDots(int wrappedDots)
+    {
+        m_wrappedDots = wrappedDots;
+    }
+
+    public int getStriped()
+    {
+        return m_striped;
+    }
+
+    public void setStriped(int striped)
+    {
+        m_striped = striped;
     }
 
     public void setDoors(int doors)

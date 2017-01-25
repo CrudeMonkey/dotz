@@ -40,6 +40,8 @@ import com.enno.dotz.client.item.Laser;
 import com.enno.dotz.client.item.Mirror;
 import com.enno.dotz.client.item.Rocket;
 import com.enno.dotz.client.item.Spider;
+import com.enno.dotz.client.item.Striped;
+import com.enno.dotz.client.item.WrappedDot;
 
 
 public class ScorePanel extends LienzoPanel
@@ -277,6 +279,14 @@ public class ScorePanel extends LienzoPanel
         need = goal.getChests();
         if (need != 0)
             m_list.add(new ChestGoal(need, ctx));
+
+        need = goal.getWrappedDots();
+        if (need != 0)
+            m_list.add(new WrappedDotGoal(need, ctx));
+
+        need = goal.getStriped();
+        if (need != 0)
+            m_list.add(new StripedGoal(need, ctx));
 
         ChainGoal combi = goal.getChainGoal();
         if (combi != null)
@@ -639,6 +649,62 @@ public class ScorePanel extends LienzoPanel
                 else
                     setText(got + " / " + m_goal);
             }
+        }
+    }
+    
+    public static class WrappedDotGoal extends GoalItem
+    {
+        private int m_goal;
+        
+        public WrappedDotGoal(int need, Context ctx)
+        {
+            super(ctx);
+            
+            m_goal = need;
+        }
+        
+        protected IPrimitive<?> createShape()
+        {
+            WrappedDot s = new WrappedDot(0);
+            s.setContext(ctx);
+            return s.createShape(SHAPE_SIZE);
+        }
+        
+        protected void updateText()
+        {
+            int got = ctx.score.getUsedWrappedDots();
+            if (got >= m_goal)
+                setCompleted();
+            else
+                setText(got + " / " + m_goal);
+        }
+    }
+    
+    public static class StripedGoal extends GoalItem
+    {
+        private int m_goal;
+        
+        public StripedGoal(int need, Context ctx)
+        {
+            super(ctx);
+            
+            m_goal = need;
+        }
+        
+        protected IPrimitive<?> createShape()
+        {
+            Striped s = new Striped(1, false);
+            s.setContext(ctx);
+            return s.createShape(SHAPE_SIZE);
+        }
+        
+        protected void updateText()
+        {
+            int got = ctx.score.getUsedStriped();
+            if (got >= m_goal)
+                setCompleted();
+            else
+                setText(got + " / " + m_goal);
         }
     }
     

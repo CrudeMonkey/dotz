@@ -280,17 +280,11 @@ public class Laser extends Item
         return new Laser(m_direction, m_stuck);
     }
 
-//    @Override
-//    public void dropFromBottom()
-//    {
-//        ctx.score.droppedAnchor();
-//    }
-//
     @Override
     public ExplodeAction explode(Integer color, int chainSize)
     {
         ctx.score.explodedLaser();
-        return ExplodeAction.REMOVE; // remove mirror
+        return ExplodeAction.REMOVE;
     }
 
     @Override

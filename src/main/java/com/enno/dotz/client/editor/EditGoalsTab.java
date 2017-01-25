@@ -57,6 +57,8 @@ public class EditGoalsTab extends VLayout
     private Num           m_dominoes;
     private Num           m_words;
     private Num           m_coins;
+    private Num           m_wrappedDots;
+    private Num           m_striped;
     private ChainGoalItem m_chainGoal;
 
     private DotAll[]   m_dots = new DotAll[Config.MAX_COLORS];
@@ -352,6 +354,34 @@ public class EditGoalsTab extends VLayout
             }
         };
 
+        m_striped = new Num("Striped Dots", changeListener){
+            @Override
+            public void prepareSave(Goal goal)
+            {
+                goal.setStriped(val());
+            }
+
+            @Override
+            public void initGoal(Goal goal)
+            {
+                val(goal.getStriped());
+            }
+        };
+
+        m_wrappedDots = new Num("Wrapped Dots", changeListener){
+            @Override
+            public void prepareSave(Goal goal)
+            {
+                goal.setWrappedDots(val());
+            }
+
+            @Override
+            public void initGoal(Goal goal)
+            {
+                val(goal.getWrappedDots());
+            }
+        };
+
         m_blasters = new Num("Blasters", changeListener){
             @Override
             public void prepareSave(Goal goal)
@@ -461,7 +491,8 @@ public class EditGoalsTab extends VLayout
                 m_chainGoal, m_words, m_zapBlockers,
                 m_blasters, m_bombs, m_colorBombs,
                 m_diamonds, m_bubbles, m_coins,
-                m_spiders, m_chests
+                m_spiders, m_chests, m_wrappedDots,
+                m_striped
         };
         
         form.setFields(m_fields);

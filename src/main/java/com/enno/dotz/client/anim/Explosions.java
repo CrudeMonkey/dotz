@@ -50,6 +50,8 @@ public class Explosions
             }
             else if (c.item instanceof Striped)
             {
+                ctx.score.usedStriped();
+                
                 Striped blaster = (Striped) c.item;
                 bothWays = blaster.isBothWays();
                 isWide = blaster.isWide();

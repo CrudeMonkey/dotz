@@ -78,9 +78,15 @@ public class Striped extends Item
         return g;
     }
     
+    @Override
     public boolean isVertical()
     {
         return vertical;
+    }
+    
+    public void setVertical(boolean vertical)
+    {
+        this.vertical = vertical;
     }
     
     @Override
@@ -88,7 +94,12 @@ public class Striped extends Item
     {
         return color;
     }
-    
+
+    public void setColor(int color)
+    {
+        this.color = color;
+    }
+
     @Override
     public boolean canConnect()
     {

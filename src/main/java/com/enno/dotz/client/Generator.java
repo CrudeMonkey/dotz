@@ -25,8 +25,10 @@ import com.enno.dotz.client.item.Laser;
 import com.enno.dotz.client.item.Mirror;
 import com.enno.dotz.client.item.Rocket;
 import com.enno.dotz.client.item.Spider;
+import com.enno.dotz.client.item.Striped;
 import com.enno.dotz.client.item.Turner;
 import com.enno.dotz.client.item.Wild;
+import com.enno.dotz.client.item.WrappedDot;
 import com.enno.dotz.client.util.FrequencyGenerator;
 
 public class Generator
@@ -344,6 +346,32 @@ public class Generator
                 dot.setRadioActive(makeRadioActive(radioActive));
                 
                 ((DotBomb) item).setDot(dot);
+            }
+            else if (item instanceof WrappedDot)
+            {
+                int color;
+                do
+                {
+                    // Generate dot
+                    color = getNextDotColor();
+                }
+                while (m_excludeDotColor != -1 && m_numDotColors > 1 && color == m_excludeDotColor);
+                
+                ((WrappedDot) item).setColor(color);
+            }
+            else if (item instanceof Striped)
+            {
+                int color;
+                do
+                {
+                    // Generate dot
+                    color = getNextDotColor();
+                }
+                while (m_excludeDotColor != -1 && m_numDotColors > 1 && color == m_excludeDotColor);
+                
+                Striped striped = ((Striped) item);
+                striped.setColor(color);
+                striped.setVertical(getRandom().nextBoolean());
             }
             else if (item instanceof Chest)
             {

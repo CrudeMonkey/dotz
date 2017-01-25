@@ -33,8 +33,10 @@ import com.enno.dotz.client.item.Mirror;
 import com.enno.dotz.client.item.RandomItem;
 import com.enno.dotz.client.item.Rocket;
 import com.enno.dotz.client.item.Spider;
+import com.enno.dotz.client.item.Striped;
 import com.enno.dotz.client.item.Turner;
 import com.enno.dotz.client.item.Wild;
+import com.enno.dotz.client.item.WrappedDot;
 import com.enno.dotz.client.item.YinYang;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.layout.HLayout;
@@ -133,6 +135,12 @@ public class FrequencySliderGroup extends HLayout
         m_list.add(bomb);
         left.addMember(bomb);
 
+        FrequencySlider wrappedDot = createWrappedDotSlider(index++);
+        m_list.add(wrappedDot);
+        left.addMember(wrappedDot);
+
+        //-----------------
+        
         FrequencySlider chest = createChestSlider(index++);
         m_list.add(chest);
         right.addMember(chest);
@@ -180,6 +188,10 @@ public class FrequencySliderGroup extends HLayout
         FrequencySlider blaster = createBlasterSlider(index++);
         m_list.add(blaster);
         right.addMember(blaster);
+        
+        FrequencySlider striped = createStripedSlider(index++);
+        m_list.add(striped);
+        right.addMember(striped);
         
         if (isNew)
         {
@@ -244,6 +256,10 @@ public class FrequencySliderGroup extends HLayout
                         key.initFrequency(freq);
                     else if (item instanceof IcePick)
                         pick.initFrequency(freq);
+                    else if (item instanceof WrappedDot)
+                        wrappedDot.initFrequency(freq);
+                    else if (item instanceof Striped)
+                        striped.initFrequency(freq);
                     else if (item instanceof Blocker)
                     {
                         if (((Blocker) item).isZapOnly())
@@ -411,6 +427,20 @@ public class FrequencySliderGroup extends HLayout
     protected FrequencySlider createColorBombSlider(int index)
     {
         ColorBomb dot = new ColorBomb(false);
+        dot.setContext(ctx);
+        return new FrequencySlider(index, dot, this);
+    }
+
+    protected FrequencySlider createWrappedDotSlider(int index)
+    {
+        WrappedDot dot = new WrappedDot(0);
+        dot.setContext(ctx);
+        return new FrequencySlider(index, dot, this);
+    }
+
+    protected FrequencySlider createStripedSlider(int index)
+    {
+        Striped dot = new Striped(0, false);
         dot.setContext(ctx);
         return new FrequencySlider(index, dot, this);
     }

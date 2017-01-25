@@ -87,7 +87,9 @@ public class Score
     private int m_usedColorBombs;
     private int m_usedBombs;
     private int m_usedBlasters;
-
+    private int m_usedWrappedDots;
+    private int m_usedStriped;
+    
     private int m_explodedCoins;
     
     private int m_score;
@@ -271,6 +273,16 @@ public class Score
         m_usedBlasters++;
     }
     
+    public void usedWrappedDot()
+    {
+        m_usedWrappedDots++;
+    }
+    
+    public void usedStriped()
+    {
+        m_usedStriped++;
+    }
+    
     public void openedChest()
     {
         m_openedChests++;
@@ -436,6 +448,16 @@ public class Score
     public int getUsedBlasters()
     {
         return m_usedBlasters;
+    }
+    
+    public int getUsedWrappedDots()
+    {
+        return m_usedWrappedDots;
+    }
+    
+    public int getUsedStriped()
+    {
+        return m_usedStriped;
     }
     
     public void generatedAnchor()

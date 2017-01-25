@@ -51,8 +51,10 @@ import com.enno.dotz.client.item.Mirror;
 import com.enno.dotz.client.item.RandomItem;
 import com.enno.dotz.client.item.Rocket;
 import com.enno.dotz.client.item.Spider;
+import com.enno.dotz.client.item.Striped;
 import com.enno.dotz.client.item.Turner;
 import com.enno.dotz.client.item.Wild;
+import com.enno.dotz.client.item.WrappedDot;
 import com.enno.dotz.client.item.YinYang;
 import com.enno.dotz.client.ui.ErrorWindow;
 import com.enno.dotz.client.util.Debug;
@@ -571,6 +573,12 @@ public class LevelParser
         if (json.isInteger("chests"))
             goal.setChests(json.getAsInteger("chests"));
         
+        if (json.isInteger("striped"))
+            goal.setStriped(json.getAsInteger("striped"));
+        
+        if (json.isInteger("wrappedDots"))
+            goal.setWrappedDots(json.getAsInteger("wrappedDots"));
+        
         if (json.isInteger("time"))
             goal.setTime(json.getAsInteger("time"));
 
@@ -831,6 +839,14 @@ public class LevelParser
                 else if (item.equals("blocker"))
                 {
                     g.add(new ItemFrequency(new Blocker(g.blockerStrength, false, false), f));
+                }
+                else if (item.equals("wrappedDot"))
+                {
+                    g.add(new ItemFrequency(new WrappedDot(0), f));
+                }
+                else if (item.equals("striped"))
+                {
+                    g.add(new ItemFrequency(new Striped(0, false), f));
                 }
                 else if (item.equals("zapBlocker"))
                 {
@@ -1619,6 +1635,12 @@ public class LevelParser
         if (g.getChests() != 0)
             p.put("chests", g.getChests());
         
+        if (g.getWrappedDots() != 0)
+            p.put("wrappedDots", g.getWrappedDots());
+        
+        if (g.getStriped() != 0)
+            p.put("striped", g.getStriped());
+        
         ChainGoal ch = g.getChainGoal();
         if (ch != null)
             p.put("chainGoal", ch.toNObject());
@@ -1727,6 +1749,10 @@ public class LevelParser
             a.push("spider");
         else if (item instanceof DotBomb)
             a.push("dotBomb");
+        else if (item instanceof WrappedDot)
+            a.push("wrappedDot");
+        else if (item instanceof Striped)
+            a.push("striped");
         else if (item instanceof Blocker)
         {
             if (((Blocker) item).isZapOnly())
