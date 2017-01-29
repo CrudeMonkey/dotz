@@ -1,12 +1,14 @@
 package com.enno.dotz.client.editor;
 
 import com.enno.dotz.client.Config;
-import com.enno.dotz.client.UserSettings;
+import com.enno.dotz.client.ui.MXCheckBox;
 import com.enno.dotz.client.ui.MXForm;
 import com.enno.dotz.client.ui.MXTextArea;
 import com.enno.dotz.client.ui.MXTextInput;
 import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.form.fields.StaticTextItem;
+import com.smartgwt.client.widgets.form.fields.events.ChangedEvent;
+import com.smartgwt.client.widgets.form.fields.events.ChangedHandler;
 import com.smartgwt.client.widgets.layout.HLayout;
 
 public class LevelPropPanel extends HLayout
@@ -16,14 +18,15 @@ public class LevelPropPanel extends HLayout
     private MXTextInput m_folder;
     private StaticTextItem m_id;
     private MXTextArea m_description;
+    private MXCheckBox m_showLoop;
 
     public LevelPropPanel()
     {
         setHeight(30);
         
         MXForm form = new MXForm();
-        form.setNumCols(8);
-        form.setColWidths(100, 250, 60, 100, 60, 140,30, 30);
+        form.setNumCols(10);
+        form.setColWidths(100, 250, 60, 100, 60, 140, 30, 30, 30, 20);
         form.setWidth(770);
         form.setHeight(30);
         
@@ -49,13 +52,29 @@ public class LevelPropPanel extends HLayout
         m_description.setTitle("Description");
         m_description.setHeight(48);
        
+        m_showLoop = new MXCheckBox();
+        m_showLoop.setTitle("Loop");
+        m_showLoop.addChangedHandler(new ChangedHandler()
+        {
+            @Override
+            public void onChanged(ChangedEvent event)
+            {
+                showLoopLayer(m_showLoop.isChecked());
+            }
+        });
+        
         form.setFields(m_name, m_creator, m_folder, m_id, 
-                m_description);
+                m_description, m_showLoop);
         m_description.setColSpan(7);
         
         addMember(form);
     }
 
+    public void showLoopLayer(boolean show)
+    {
+        // override
+    }
+    
     public void setLevel(Config level)
     {
         m_name.setValue(level.id == Config.UNDEFINED_ID ? "?" : level.name);

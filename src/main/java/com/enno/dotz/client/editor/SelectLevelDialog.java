@@ -164,7 +164,17 @@ public abstract class SelectLevelDialog extends MXWindow
             });
         }
         
-        buttons.add("Cancel", createCancelButtonHandler());
+        buttons.add("Org", new ClickHandler()
+        {
+            @Override
+            public void onClick(ClickEvent event)
+            {
+                closeWindow();
+                organizeLevels();
+            }
+        });
+        
+        buttons.add("Cancel", createCancelButtonHandler());        
         
         MXForm form = new MXForm();
         m_preview = new MXCheckBox();
@@ -316,6 +326,10 @@ public abstract class SelectLevelDialog extends MXWindow
     }
     
     public void createNewLevel()
+    {
+    }
+    
+    public void organizeLevels()
     {
     }
 }

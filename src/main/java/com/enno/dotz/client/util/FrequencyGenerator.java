@@ -41,7 +41,6 @@ public class FrequencyGenerator<T>
     
     private List<Frequency<T>> m_list = new ArrayList<Frequency<T>>();
     private boolean m_initialized;
-    private Random m_rnd = new Random();
     private double m_total;
     
     public FrequencyGenerator<T> add(double freq, T obj)
@@ -49,11 +48,6 @@ public class FrequencyGenerator<T>
         m_list.add(new Frequency<T>(freq, obj));
         m_initialized = false;
         return this;
-    }
-    
-    public T next()
-    {
-        return next(m_rnd);
     }
     
     public T next(Random rnd)

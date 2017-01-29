@@ -11,7 +11,6 @@ import java.util.logging.Logger;
 import com.ait.lienzo.client.core.animation.IAnimation;
 import com.ait.lienzo.client.core.animation.IAnimationCallback;
 import com.ait.lienzo.client.core.animation.IAnimationHandle;
-import com.ait.lienzo.client.core.animation.LayerRedrawManager;
 import com.ait.lienzo.client.core.shape.Circle;
 import com.ait.lienzo.client.core.shape.IPrimitive;
 import com.ait.lienzo.client.core.shape.Layer;
@@ -38,6 +37,7 @@ import com.enno.dotz.client.anim.FireRocket;
 import com.enno.dotz.client.anim.GetTransitions;
 import com.enno.dotz.client.anim.GrowFire;
 import com.enno.dotz.client.anim.MoveAnimals;
+import com.enno.dotz.client.anim.MovePacmans;
 import com.enno.dotz.client.anim.MoveSpiders;
 import com.enno.dotz.client.anim.Pt;
 import com.enno.dotz.client.anim.RadioActives;
@@ -62,6 +62,7 @@ import com.enno.dotz.client.item.RandomItem;
 import com.enno.dotz.client.item.Wild;
 import com.enno.dotz.client.util.CallbackChain;
 import com.enno.dotz.client.util.CallbackChain.Callback;
+import com.enno.dotz.client.util.Console;
 import com.enno.dotz.client.util.Debug;
 
 public class GridState
@@ -90,7 +91,7 @@ public class GridState
         this.numRows = numRows;
         this.numColumns = numColumns;
         
-        m_grid = new Cell[numColumns * numRows]; //TODO do we need the extra row?
+        m_grid = new Cell[numColumns * numRows];
     }
     
     public void init(Context ctx, boolean replaceRandom)
@@ -185,6 +186,11 @@ public class GridState
     public final Cell cell(int col, int row)
     {
         return m_grid[row * numColumns + col];
+    }
+    
+    public final Cell cell(Pt p)
+    {
+        return cell(p.col, p.row);
     }
     
     public void setCell(int col, int row, Cell cell)
@@ -340,7 +346,7 @@ public class GridState
         list.add(machines());
         list.add(radioActives());
         list.add(activateControllers());
-        list.add(moveBeasts());
+        list.add(moveBeasts(action));
         list.add(moveSusans());
         list.add(transitions());             // susans can leave empty cells
         list.add(explodeLoop(true, false));  // check clocks also and lasers
@@ -380,17 +386,17 @@ public class GridState
                 @Override
                 public void run()
                 {
-                    processSwapChain2(nextMoveCallback);
+                    processSwapChain2(action, nextMoveCallback);
                 }
             });
         }
         else
         {
-            processSwapChain2(nextMoveCallback);
+            processSwapChain2(action, nextMoveCallback);
         }
     }
     
-    protected void processSwapChain2(final Runnable nextMoveCallback)
+    protected void processSwapChain2(UserAction action, final Runnable nextMoveCallback)
     {
         AnimList list = new GetTransitions(ctx).get(ctx.dotLayer, cfg.dropDuration);        
         
@@ -398,7 +404,7 @@ public class GridState
         list.add(activateControllers());
         list.add(machines());        
         list.add(radioActives());        
-        list.add(moveBeasts());
+        list.add(moveBeasts(action));
         list.add(moveSusans());
         list.add(transitions());             // susans can leave empty cells
         list.add(explodeLoop(true, false));  // check clocks also and lasers
@@ -1649,7 +1655,7 @@ public class GridState
         }
     }
     
-    public TransitionList moveBeasts()
+    public TransitionList moveBeasts(final UserAction action)
     {
         return new NukeTransitionList("fire/animal", ctx, cfg.growFireDuration)
         {
@@ -1658,6 +1664,7 @@ public class GridState
                 //Debug.p("movebeasts");
                 Set<Cell> verboten = new HashSet<Cell>();
                 
+                new MovePacmans(this, verboten, ctx, action);
                 new MoveAnimals(this, verboten, ctx);
                 new MoveSpiders(this, verboten, ctx);
                         

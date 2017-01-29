@@ -166,7 +166,29 @@ public class MainPanel extends VLayout
             }
         });
 
-        levelMenu.setItems(playLevel, newLevel, editLevel, copyLevel, cancelLevel, retryLevel, organizeLevels, recentLevels);
+        MenuItem playback = new MenuItem();
+        playback.setTitle("Playback");
+        playback.addClickHandler(new ClickHandler()
+        {            
+            @Override
+            public void onClick(MenuItemClickEvent event)
+            {
+                playback();
+            }
+        });
+
+        MenuItem selectPlayback = new MenuItem();
+        selectPlayback.setTitle("Select Playback");
+        selectPlayback.addClickHandler(new ClickHandler()
+        {            
+            @Override
+            public void onClick(MenuItemClickEvent event)
+            {
+                selectPlayback();
+            }
+        });
+
+        levelMenu.setItems(playLevel, newLevel, editLevel, copyLevel, cancelLevel, retryLevel, organizeLevels, recentLevels, playback, selectPlayback);
                 
         // Set menu
         Menu setMenu = new Menu();
@@ -439,6 +461,25 @@ public class MainPanel extends VLayout
         addMember(m_gridContainer);
     }
     
+    protected void selectPlayback()
+    {
+        SelectPlaybackDialog.showDialog(new MAsyncCallback<Recorder>()
+        {
+            @Override
+            public void onSuccess(final Recorder recorder)
+            {
+                m_modeManager.askSaveLevel(new Runnable()
+                {                                            
+                    @Override
+                    public void run()
+                    {
+                        playback(recorder);
+                    }
+                });
+            }
+        });
+    }
+
     public void init()
     {
         showRecentLevels();
@@ -471,6 +512,12 @@ public class MainPanel extends VLayout
                     public void createNewLevel()
                     {
                         MainPanel.this.createNewLevel();
+                    }
+                    
+                    @Override
+                    public void organizeLevels()
+                    {
+                        MainPanel.this.organizeLevels();
                     }
                 };
             }
@@ -524,7 +571,12 @@ public class MainPanel extends VLayout
     
     protected void playLevel(final int levelId)
     {
-        playLevel(levelId, new EndOfLevel() {
+        playLevel(levelId, null);
+    }
+    
+    protected void playLevel(final int levelId, final Recorder recorder)
+    {
+        playLevel(levelId, recorder, new EndOfLevel() {
             @Override
             public void goalReached(int time, int score, int moves, int levelId)
             {
@@ -547,7 +599,7 @@ public class MainPanel extends VLayout
                         killLevel();
                         if (ok)
                         {
-                            playLevel(levelId); //TODO don't reload level
+                            playLevel(levelId, recorder); //TODO don't reload level
                         }
                     }
                 });
@@ -596,7 +648,7 @@ public class MainPanel extends VLayout
                         if (ok)
                         {
                             killLevel();
-                            playLevel(levelId); //TODO don't reload level
+                            playLevel(levelId, recorder); //TODO don't reload level
                         }
                     }
                 });
@@ -609,18 +661,35 @@ public class MainPanel extends VLayout
         });
     }
     
-    protected void playLevel(int levelId, final EndOfLevel endOfLevel)
+    protected void playback()
+    {
+        if (m_endOfLevel != null)
+        {
+            Recorder recorder = m_playPanel.ctx.recorder;
+            cancelLevel();
+            
+            playLevel(recorder.getLevelId(), recorder);
+        }
+    }
+    
+    protected void playback(Recorder recorder)
+    {
+        cancelLevel();
+        playLevel(recorder.getLevelId(), recorder);
+    }
+    
+    protected void playLevel(int levelId, final Recorder recorder, final EndOfLevel endOfLevel)
     {
         ClientRequest.loadLevel(levelId, new MAsyncCallback<Config>() {
             @Override
             public void onSuccess(Config level)
             {
-                playLevel(level, Mode.PLAY, endOfLevel);
+                playLevel(level, Mode.PLAY, recorder, endOfLevel);
             }            
         });
     }
     
-    protected void playLevel(final Config level, final Mode mode, final EndOfLevel endOfLevel)
+    protected void playLevel(final Config level, final Mode mode, final Recorder recorder, final EndOfLevel endOfLevel)
     {
         WordList.loadWordList(level.generator.generateLetters, new Runnable() {            
             @Override
@@ -634,7 +703,7 @@ public class MainPanel extends VLayout
                 
                 m_endOfLevel = endOfLevel;
                 
-                m_playPanel = new PlayLevelPanel(ctx, endOfLevel);
+                m_playPanel = new PlayLevelPanel(ctx, recorder, endOfLevel);
                 m_gridContainer.addMember(m_playPanel);
                 
                 m_playPanel.play();
@@ -749,7 +818,7 @@ public class MainPanel extends VLayout
                 m_index++;
                 
                 final int finalLevelId = levelId;
-                playLevel(levelId, new EndOfLevel() {
+                playLevel(levelId, null, new EndOfLevel() {
                     @Override
                     public void goalReached(int time, int score, int moves, int levelId)
                     {
@@ -919,13 +988,18 @@ public class MainPanel extends VLayout
         private boolean m_playing;
         private EndOfLevel m_endOfLevel;
         
-        public PlayLevelPanel(Context ctx, EndOfLevel endOfLevel)
+        public PlayLevelPanel(Context ctx, Recorder recorder, EndOfLevel endOfLevel)
         {
             this.ctx = ctx;
             m_endOfLevel = endOfLevel;
             
+            if (recorder != null)
+            {
+                ctx.playbackDialog = new PlaybackDialog(recorder, ctx);
+            }
+            
             m_grid = new DotzGridPanel(ctx, endOfLevel);
-
+            
             m_score = new ScorePanel(ctx);
             ctx.scorePanel = m_score;
             addMember(m_score);
@@ -949,7 +1023,7 @@ public class MainPanel extends VLayout
             ctx.boostPanel = m_boostPanel;
             addMember(m_boostPanel);
         }
-        
+
         public void cancelLevel()
         {
             if (m_playing)
@@ -1122,12 +1196,12 @@ public class MainPanel extends VLayout
             }
             
             @Override
-            public void testLevel(final Config level)
+            public void testLevel(final Config level, final Recorder recorder)
             {
                 if (level.id != Config.UNDEFINED_ID)
                     m_recentLevelTracker.testing(level.id);
                 
-                playLevel(level, Mode.TEST, new EndOfLevel() {
+                playLevel(level, Mode.TEST, recorder, new EndOfLevel() {
                     @Override
                     public void goalReached(int time, int score, int moves, int levelId)
                     {
@@ -1181,7 +1255,7 @@ public class MainPanel extends VLayout
                     public void retry()
                     {
                         killLevel();
-                        testLevel(level);
+                        testLevel(level, recorder);
                     }
                     
                     @Override

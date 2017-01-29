@@ -15,9 +15,12 @@ import com.ait.lienzo.client.core.event.NodeMouseUpHandler;
 import com.ait.lienzo.client.core.shape.Layer;
 import com.ait.lienzo.client.core.shape.Rectangle;
 import com.ait.lienzo.shared.core.types.ColorName;
+import com.ait.tooling.nativetools.client.NObject;
 import com.enno.dotz.client.Cell.Unlockable;
 import com.enno.dotz.client.SoundManager.Sound;
 import com.enno.dotz.client.anim.Pt;
+import com.enno.dotz.client.anim.Pt.PtList;
+import com.enno.dotz.client.editor.LevelParser;
 import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Chest;
 import com.enno.dotz.client.item.Domino;
@@ -69,22 +72,12 @@ public class DragConnectMode extends ConnectMode
             @Override
             public void onNodeMouseMove(NodeMouseMoveEvent event)
             {
-                int col = m_state.col(event.getX());
-                int row = m_state.row(event.getY());
+                int eventX = event.getX();
+                int eventY = event.getY();
+                int col = m_state.col(eventX);
+                int row = m_state.row(eventY);
                                 
-                if (m_isWordMode || m_isDiagonalMode)
-                {
-                    // Must be relatively near the center so you can drag diagonal lines
-                    double dx = Math.abs(m_state.x(col) - event.getX());
-                    double dy = Math.abs(m_state.y(row) - event.getY());
-                    if (dx < m_margin && dy < m_margin)
-                        updateDragLine(col, row);
-                }
-                else
-                    updateDragLine(col, row);
-                
-                m_dragLine.adjust(event.getX(), event.getY());
-                redraw();
+                mouseMove(eventX, eventY, col, row);
             }
         };
         
@@ -93,8 +86,7 @@ public class DragConnectMode extends ConnectMode
             @Override
             public void onNodeMouseUp(NodeMouseUpEvent event)
             {
-                endOfDrag();
-                connectDone();
+                mouseUp();
             }
         };
         
@@ -103,58 +95,17 @@ public class DragConnectMode extends ConnectMode
             @Override
             public void onNodeMouseDown(NodeMouseDownEvent event)
             {
-                int col = m_state.col(event.getX());
-                int row = m_state.row(event.getY());
+                int eventX = event.getX();
+                int eventY = event.getY();
+                
+                int col = m_state.col(eventX);
+                int row = m_state.row(eventY);
                 if (row < 0 || row >= cfg.numRows || col < 0 || col >= cfg.numColumns)
                     return;
 
                 Cell cell = m_state.cell(col, row);
 
-                if (m_specialMode != null)
-                {
-                    m_specialMode.click(cell);
-                    return;
-                }
-                
-                // clear variables
-                //Debug.p("square=false");
-                m_isSquare = false;
-                m_color = null;
-                m_cells.clear();
-                m_dragLine.clear();
-                
-                //Debug.p("mouse down in cell " + col + "," + row);
-                
-                if (isTriggeredBySingleClick(cell))
-                    return;
-                
-                if (startSpecialMode(cell, event.getX(), event.getY()))
-                    return;
-                
-                //TODO simplify
-                if (!cell.canConnect(null, m_isWordMode) && !(!cell.isLocked() && (cell.item instanceof Knight || cell.item instanceof Egg)))
-                    return;
-                
-                //Debug.p("dragging=true");
-                m_dragging = true;
-                
-                m_isKnightMode = cell.item instanceof Knight;
-                m_isEggMode = cell.item instanceof Egg;
-                m_isDominoMode = cell.item instanceof Domino;
-                
-                m_layer.add(m_dragLine);
-                
-                pushCell(cell, col, row);
-                
-                double x = m_state.x(col);
-                double y = m_state.y(row);
-                m_dragLine.add(x, y);
-                m_dragLine.add(event.getX(), event.getY());
-                
-                redraw();
-                
-                m_lineMoveReg = m_layer.addNodeMouseMoveHandler(m_lineMoveHandler);
-                m_mouseUpReg = m_layer.addNodeMouseUpHandler(m_mouseUpHandler);
+                mouseDown(eventX, eventY, cell);
             }                
         };
         
@@ -182,9 +133,16 @@ public class DragConnectMode extends ConnectMode
         //Debug.p("dragging=false");
 
         m_dragging = false;
-        m_lineMoveReg.removeHandler();
-        m_mouseUpReg.removeHandler();
-        
+        if (m_lineMoveReg != null)
+        {
+            m_lineMoveReg.removeHandler();
+            m_lineMoveReg = null;
+        }
+        if (m_mouseUpReg != null)
+        {
+            m_mouseUpReg.removeHandler();
+            m_mouseUpReg = null;
+        }
         m_layer.remove(m_dragLine);
         
         redraw();            
@@ -291,7 +249,9 @@ public class DragConnectMode extends ConnectMode
         stop(); // stop listening to user input
         
         Cell lastCell = m_cells.get(m_cells.size() - 1);
-        ctx.lastMove = new Pt(lastCell.col, lastCell.row);
+        ctx.lastMove = lastCell.pt();
+        if (ctx.isRecording())
+            ctx.recorder.drag(m_cells);
         
         m_state.processChain(new UserAction(m_cells, m_isSquare, m_isKnightMode, m_isWordMode, m_isEggMode, word, wordPoints, m_color), new Runnable() {
             public void run()
@@ -595,6 +555,94 @@ public class DragConnectMode extends ConnectMode
         m_dragLine.setStrokeColor(cfg.connectColor(m_color));
     }
 
+    @Override
+    protected void mouseDown(Cell c)
+    {
+        mouseDown((int) m_state.x(c.col), (int) m_state.y(c.row), c);
+    }
+    
+    protected void mouseDown(int eventX, int eventY, Cell cell)
+    {
+        if (m_specialMode != null)
+        {
+            m_specialMode.click(cell);
+            return;
+        }
+        
+        // clear variables
+        //Debug.p("square=false");
+        m_isSquare = false;
+        m_color = null;
+        m_cells.clear();
+        m_dragLine.clear();
+        
+        //Debug.p("mouse down in cell " + col + "," + row);
+        
+        if (isTriggeredBySingleClick(cell))
+            return;
+        
+        if (startSpecialMode(cell, eventX, eventY))
+            return;
+        
+        //TODO simplify
+        if (!cell.canConnect(null, m_isWordMode) && !(!cell.isLocked() && (cell.item instanceof Knight || cell.item instanceof Egg)))
+            return;
+        
+        //Debug.p("dragging=true");
+        m_dragging = true;
+        
+        m_isKnightMode = cell.item instanceof Knight;
+        m_isEggMode = cell.item instanceof Egg;
+        m_isDominoMode = cell.item instanceof Domino;
+        
+        m_layer.add(m_dragLine);
+        
+        int col = cell.col;
+        int row = cell.row; 
+        pushCell(cell, col, row);
+        
+        double x = m_state.x(col);
+        double y = m_state.y(row);
+        m_dragLine.add(x, y);
+        m_dragLine.add(eventX, eventY);
+        
+        redraw();
+        
+        m_lineMoveReg = m_layer.addNodeMouseMoveHandler(m_lineMoveHandler);
+        m_mouseUpReg = m_layer.addNodeMouseUpHandler(m_mouseUpHandler);
+    }
+
+    
+    @Override
+    protected void mouseMove(Cell c)
+    {
+        mouseMove((int) m_state.x(c.col), (int) m_state.y(c.row), c.col, c.row);
+    }
+    
+    protected void mouseMove(int eventX, int eventY, int col, int row)
+    {
+        if (m_isWordMode || m_isDiagonalMode)
+        {
+            // Must be relatively near the center so you can drag diagonal lines
+            double dx = Math.abs(m_state.x(col) - eventX);
+            double dy = Math.abs(m_state.y(row) - eventY);
+            if (dx < m_margin && dy < m_margin)
+                updateDragLine(col, row);
+        }
+        else
+            updateDragLine(col, row);
+        
+        m_dragLine.adjust(eventX, eventY);
+        redraw();
+    }
+
+    @Override
+    protected void mouseUp()
+    {
+        endOfDrag();
+        connectDone();
+    }
+
     public static abstract class SpecialMode
     {
         protected Cell m_sourceCell;
@@ -825,6 +873,20 @@ public class DragConnectMode extends ConnectMode
         {
             done(cell, false);
         }
+        
+        protected void record(Cell target)
+        {
+            if (target != null)
+                ctx.lastMove = target.pt();
+            
+            if (ctx.isRecording())
+            {
+                if (m_sourceCell != null)
+                    ctx.recorder.special(m_sourceCell, target);
+                else
+                    ctx.recorder.boost(target, m_item);
+            }
+        }
     }
     
     public static class TurnMode extends SpecialMode
@@ -870,6 +932,8 @@ public class DragConnectMode extends ConnectMode
             }
             
             cancel();
+            
+            record(cell);
             
             Sound.FLIP_MIRROR.play();
             int n = ((Turner) m_item).n;
@@ -923,6 +987,8 @@ public class DragConnectMode extends ConnectMode
             }
             
             cancel();
+            
+            record(cell);
             
             ctx.score.usedColorBomb();
             
@@ -1028,7 +1094,9 @@ public class DragConnectMode extends ConnectMode
         public void done(Cell cell, boolean alwaysCancel)
         {           
             cancel();
-                      
+            
+            record(cell);
+            
             ctx.state.reshuffle(new Runnable() {
                 @Override
                 public void run()
@@ -1077,6 +1145,8 @@ public class DragConnectMode extends ConnectMode
             }
             
             cancel();
+            
+            record(cell);
             
             Sound.DROP.play();
             
@@ -1141,6 +1211,8 @@ public class DragConnectMode extends ConnectMode
             
             cancel();
             
+            record(cell);
+            
             Sound.DROP.play();
             
             if (canUnlock)
@@ -1189,6 +1261,8 @@ public class DragConnectMode extends ConnectMode
             }
             
             cancel();
+            
+            record(cell);
             
             Sound.DROP.play();
             
@@ -1267,6 +1341,8 @@ public class DragConnectMode extends ConnectMode
             
             Sound.DRIP.play();
             cancel();
+            
+            record(cell);
             
             UserAction action = new UserAction();
             action.dousedFire = true;
@@ -1360,6 +1436,8 @@ public class DragConnectMode extends ConnectMode
             Sound.AXE.play();   
             
             cancel();
+            
+            record(cell);
             
             removeStartItem();
             process();

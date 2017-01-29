@@ -1,24 +1,25 @@
 package com.enno.dotz.client.editor;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.enno.dotz.client.Cell;
 import com.enno.dotz.client.Cell.Hole;
+import com.enno.dotz.client.Cell.Machine;
 import com.enno.dotz.client.Cell.Rock;
 import com.enno.dotz.client.Cell.Slide;
 import com.enno.dotz.client.Cell.Teleport;
 import com.enno.dotz.client.GridState;
 import com.enno.dotz.client.anim.Pt;
+import com.enno.dotz.client.anim.Pt.PtList;
 import com.enno.dotz.client.util.Debug;
 
 public class LoopDetector
 {
     public static class LoopException extends Exception
     {
-        public List<Pt> list;
+        public PtList list;
 
-        public LoopException(List<Pt> list)
+        public LoopException(PtList list)
         {
             super("Loop");
             this.list = list;
@@ -38,7 +39,7 @@ public class LoopDetector
     private GridState state;
     private int nc, nr;
     
-    private List<Pt> list = new ArrayList<Pt>();
+    private PtList list = new PtList();
     
     public LoopDetector(GridState state)
     {
@@ -63,16 +64,12 @@ public class LoopDetector
 
     public void validate() throws LoopException
     {
-        COL: for (int col = 0; col < nc; col++)
+        for (int row = 0; row < nr; row++)
         {
-            int row = nr - 1;
-            while (isHole(col, row))
-                row--;
-            
-            if (isDeadEnd(col, row, false))
-                continue COL;
-            
-            chain(col, row, false);
+            for (int col = 0; col < nc; col++)
+            {
+                chain(col, row, false);
+            }
         }
     }
     
@@ -81,51 +78,36 @@ public class LoopDetector
         if (isDeadEnd(col, row, fromTeleportTarget))
             return;
         
+        if (list.contains(col, row))
+            throw new LoopException(list);
+        
+        list.add(new Pt(col, row));
+        
         if (valid(col - 1, row))
         {
             Cell left = state.cell(col - 1,  row);
             if (left instanceof Slide && !((Slide) left).isToLeft())
-                split().chain(col - 1, row - 1, false);
+                chain(col - 1, row - 1, false);
         }
         
         if (valid(col + 1, row))
         {
             Cell right = state.cell(col + 1,  row);
             if (right instanceof Slide && ((Slide) right).isToLeft())
-                split().chain(col + 1, row - 1, false);
+                chain(col + 1, row - 1, false);
         }
         
         Cell c = state.cell(col, row);
         if (c.isTeleportTarget())
         {
             Teleport t = (Teleport) c;
-            push(col, row);
             chain(t.getOtherCol(), t.getOtherRow(), true);            
         }
         else
         {
-            push(col, row);
             chain(col, row - 1, false);
         }
-    }
-    
-    private LoopDetector split()
-    {
-        LoopDetector d = new LoopDetector(state);
-        d.list.addAll(list);
-        return d;
-    }
-
-    protected void push(int col, int row) throws LoopException
-    {
-        Pt pt = new Pt(col, row);
-        if (list.contains(pt))
-        {
-            list.add(pt);
-            throw new LoopException(list);
-        }
-        
-        list.add(pt);
+        list.pop();
     }
 
     protected boolean isDeadEnd(int col, int row, boolean fromTeleportTarget) throws LoopException
@@ -139,8 +121,6 @@ public class LoopDetector
         
         if (!fromTeleportTarget && c.isTeleportSource())
         {
-            LoopDetector d = new LoopDetector(state);            
-            d.chain(col, row, true);
             return true;
         }
         return false;
@@ -149,13 +129,5 @@ public class LoopDetector
     protected boolean valid(int col, int row)
     {
         return col >= 0 && col < nc && row >= 0 && row < nr;
-    }
-    
-    protected boolean isHole(int col, int row)
-    {
-        if (!valid(col, row))
-            return false;
-        
-        return state.cell(col,  row) instanceof Hole;
     }
 }

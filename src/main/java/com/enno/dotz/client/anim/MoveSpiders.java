@@ -45,7 +45,7 @@ public class MoveSpiders
             for (int col = 0; col < cfg.numColumns; col++)
             {
                 final Cell src = state.cell(col, row);
-                if (!src.isLocked() && src.item instanceof Spider)
+                if (!src.isLocked() && src.item instanceof Spider && !m_verboten.contains(src))
                 {
                     final Spider spider = (Spider) src.item;
 //                    if (animal.isStunned())

@@ -10,6 +10,7 @@ public class UserAction
     String word;
     Integer wordPoints;
     Integer color;
+    public int direction = Direction.NONE;
     
     public boolean dousedFire = false;
     public GetSwapMatches swapMatches;
@@ -29,6 +30,11 @@ public class UserAction
         this.word = word;
         this.wordPoints = wordPoints;
         this.color = color;
+        
+        int n = cells.size();
+        Cell p1 = cells.get(n - 2);
+        Cell p2 = cells.get(n - 1);        
+        direction = Direction.fromXY(p1.col, p1.row, p2.col, p2.row);
     }
 
     // ClickConnectMode

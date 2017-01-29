@@ -90,9 +90,16 @@ public class Direction
 
     public static int fromVector(int dx, int dy)
     {
-        if (dx == 0)
-            return dy == 1 ? SOUTH : NORTH;
-        else
-            return dx == 1 ? EAST : WEST;
+        int dir = 0;
+        if (dy != 0)
+            dir += dy == 1 ? SOUTH : NORTH;
+        if (dx != 0)
+            dir += dx == 1 ? EAST : WEST;
+        return dir;
+    }
+
+    public static int fromXY(int col1, int row1, int col2, int row2)
+    {
+        return fromVector(col2 - col1, row2 - row1);
     }
 }

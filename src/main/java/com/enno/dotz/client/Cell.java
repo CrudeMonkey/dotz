@@ -30,24 +30,17 @@ import com.enno.dotz.client.anim.Pt;
 import com.enno.dotz.client.editor.ModePalette.RadioActive;
 import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Blaster;
-import com.enno.dotz.client.item.Blocker;
-import com.enno.dotz.client.item.Bomb;
 import com.enno.dotz.client.item.Chest;
 import com.enno.dotz.client.item.Coin;
-import com.enno.dotz.client.item.ColorBomb;
-import com.enno.dotz.client.item.Diamond;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.DotBomb;
-import com.enno.dotz.client.item.Egg;
 import com.enno.dotz.client.item.Explody;
 import com.enno.dotz.client.item.Fire;
 import com.enno.dotz.client.item.Item;
 import com.enno.dotz.client.item.Item.ExplodeAction;
-import com.enno.dotz.client.item.Laser;
 import com.enno.dotz.client.item.RandomItem;
 import com.enno.dotz.client.item.Rocket;
 import com.enno.dotz.client.item.Striped;
-import com.enno.dotz.client.item.Wild;
 import com.enno.dotz.client.item.WrappedDot;
 import com.google.gwt.dom.client.Style.FontWeight;
 
@@ -780,9 +773,7 @@ public abstract class Cell
     
     public static class Hole extends Cell
     {
-        private static IColor HOLE_COLOR = new Color(180, 180, 180);
-        private static IColor DARK_BORDER = ColorName.BLACK;
-        private static IColor LIGHT_BORDER = new Color(235, 235, 235);
+        private static IColor HOLE_COLOR = new Color(80, 80, 80);
         
         private Group m_shape;
 
@@ -804,46 +795,14 @@ public abstract class Cell
             super.initGraphics(col, row, x, y);
             
             double sz = ctx.cfg.size;
-            GridState state = ctx.state;
             
             Group g = new Group();
-            g.setX(m_x - sz/2);
-            g.setY(m_y - sz/2);            
+            g.setX(m_x - sz/2 + 1);
+            g.setY(m_y - sz/2 + 1);            
             
-            Rectangle r = new Rectangle(sz, sz);
+            Rectangle r = new Rectangle(sz-2, sz-2);
             r.setFillColor(HOLE_COLOR);
             g.add(r);
-            
-            int w = 1;
-            double sz1 = sz - 1;
-            if (addBorder || !holeAt(col, row - 1, state))
-            {
-                Line line = new Line(0, 0, sz, 0); // above
-                line.setStrokeColor(DARK_BORDER);
-                line.setStrokeWidth(w);
-                g.add(line);
-            }
-            if (addBorder ||!holeAt(col - 1, row, state))
-            {
-                Line line = new Line(0, 0, 0, sz); // left
-                line.setStrokeColor(DARK_BORDER);
-                line.setStrokeWidth(w);
-                g.add(line);
-            }
-            if (addBorder ||!holeAt(col, row + 1, state))
-            {
-                Line line = new Line(0, sz1, sz, sz1); // below
-                line.setStrokeColor(LIGHT_BORDER);
-                line.setStrokeWidth(w);
-                g.add(line);
-            }
-            if (addBorder ||!holeAt(col + 1, row, state))
-            {
-                Line line = new Line(sz1, 0, sz1, sz); // right
-                line.setStrokeColor(LIGHT_BORDER);
-                line.setStrokeWidth(w);
-                g.add(line);
-            }
             
             m_shape = g;
             ctx.backgroundLayer.add(m_shape);
@@ -858,15 +817,7 @@ public abstract class Cell
             super.removeGraphics();
             ctx.backgroundLayer.remove(m_shape);
         }
-                
-        private boolean holeAt(int col, int row, GridState state)
-        {
-            if (col < 0 || col > state.numColumns - 1 || row < 0 || row > state.numRows - 1)
-                return false;
-            
-            return state.cell(col,  row) instanceof Hole;
-        }
-        
+
         @Override
         public boolean canContainItems()
         {
@@ -896,9 +847,7 @@ public abstract class Cell
     
     public static class Rock extends Cell
     {
-        private static IColor ROCK_COLOR = new Color(210, 210, 210);
-        private static IColor LIGHT_BORDER = ColorName.BLACK;
-        private static IColor DARK_BORDER = new Color(235, 235, 235);
+        private static IColor ROCK_COLOR = new Color(235, 235, 235);
         
         private Group m_shape;
 
@@ -920,46 +869,14 @@ public abstract class Cell
             super.initGraphics(col, row, x, y);
             
             double sz = ctx.cfg.size;
-            GridState state = ctx.state;
             
             Group g = new Group();
-            g.setX(m_x - sz/2);
-            g.setY(m_y - sz/2);            
+            g.setX(m_x - sz/2 + 1);
+            g.setY(m_y - sz/2 + 1);
             
-            Rectangle r = new Rectangle(sz, sz);
+            Rectangle r = new Rectangle(sz - 2, sz - 2);
             r.setFillColor(ROCK_COLOR);
             g.add(r);
-            
-            int w = 1;
-            double sz1 = sz - 1;
-            if (addBorder || !rockAt(col, row - 1, state))
-            {
-                Line line = new Line(0, 0, sz, 0); // above
-                line.setStrokeColor(DARK_BORDER);
-                line.setStrokeWidth(w);
-                g.add(line);
-            }
-            if (addBorder ||!rockAt(col - 1, row, state))
-            {
-                Line line = new Line(0, 0, 0, sz); // left
-                line.setStrokeColor(DARK_BORDER);
-                line.setStrokeWidth(w);
-                g.add(line);
-            }
-            if (addBorder ||!rockAt(col, row + 1, state))
-            {
-                Line line = new Line(0, sz1, sz, sz1); // below
-                line.setStrokeColor(LIGHT_BORDER);
-                line.setStrokeWidth(w);
-                g.add(line);
-            }
-            if (addBorder ||!rockAt(col + 1, row, state))
-            {
-                Line line = new Line(sz1, 0, sz1, sz); // right
-                line.setStrokeColor(LIGHT_BORDER);
-                line.setStrokeWidth(w);
-                g.add(line);
-            }
             
             m_shape = g;
             ctx.backgroundLayer.add(m_shape);
@@ -973,14 +890,6 @@ public abstract class Cell
             
             super.removeGraphics();
             ctx.backgroundLayer.remove(m_shape);
-        }
-                
-        private boolean rockAt(int col, int row, GridState state)
-        {
-            if (col < 0 || col > state.numColumns - 1 || row < 0 || row > state.numRows - 1)
-                return false;
-            
-            return state.cell(col,  row) instanceof Rock;
         }
         
         @Override

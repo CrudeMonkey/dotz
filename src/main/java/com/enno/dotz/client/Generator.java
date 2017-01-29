@@ -127,6 +127,11 @@ public class Generator
         return m_usedSeed;
     }
     
+    public void setUsedSeed(long seed)
+    {
+        m_usedSeed = seed;
+    }
+    
     public Random getRandom()
     {
         if (m_rnd == null)

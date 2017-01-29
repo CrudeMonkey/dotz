@@ -7,6 +7,7 @@ import com.ait.lienzo.client.core.shape.Text;
 import com.ait.lienzo.shared.core.types.ColorName;
 import com.ait.lienzo.shared.core.types.TextAlign;
 import com.ait.lienzo.shared.core.types.TextBaseLine;
+import com.enno.dotz.client.anim.Pt;
 import com.enno.dotz.client.editor.Palette;
 import com.enno.dotz.client.editor.Palette.PaletteButton;
 import com.enno.dotz.client.item.ColorBomb;
@@ -36,6 +37,11 @@ public class BoostPanel extends MXHBox
         setAlign(Alignment.CENTER);
     }
     
+    public void playback(Item item, Pt p)
+    {
+        m_palette.playback(item, p);
+    }
+    
     public void setActive(boolean active)
     {
         m_palette.setActive(active);
@@ -51,6 +57,8 @@ public class BoostPanel extends MXHBox
         {
             super((int) (0.8 * size), (int) size, (ctx.gridWidth / size), 1);
             m_size = size;
+            
+            this.ctx.recorder = ctx.recorder;
             
             m_active = false;
             
@@ -85,6 +93,38 @@ public class BoostPanel extends MXHBox
             m_active = active;
         }
 
+        public void playback(Item item, final Pt p)
+        {
+            for (final PaletteButton<?> b : m_list)
+            {
+                if (b.getItem().getClass().equals(item.getClass()))
+                {
+                    if (item instanceof Turner)
+                    {
+                        ((BoostButton) b).swapItem(item);
+                        ctx.backgroundLayer.redraw();
+                    }
+                    
+                    m_connectMode.cancelBoostMode();
+                    m_connectMode.startBoostMode((Item) b.getItem(), new Runnable() {
+                        @Override
+                        public void run()
+                        {
+                            updateBoost((BoostButton) b);
+                        }
+                    });
+                    
+                    if (p != null)
+                    {
+                        Cell cell = m_connectMode.ctx.state.cell(p);
+                        m_connectMode.m_specialMode.done(cell, false);
+                    }
+                    
+                    break;
+                }
+            }
+        }
+        
         protected void selected(PaletteButton<Object> selectedButton)
         {
             if (m_selected == selectedButton && selectedButton != null)
@@ -126,21 +166,7 @@ public class BoostPanel extends MXHBox
                     @Override
                     public void run()
                     {
-                        int n = selected.getCount();
-                        if (n == 1)
-                        {
-                            removeBoostButton(selected);
-                            //m_connectMode.cancelBoostMode();
-                        }
-                        else
-                        {
-                            selected.setCount(n - 1);
-                        }
-                        
-                        m_selected = null;
-                        deselectAll();
-                        
-                        ctx.backgroundLayer.redraw();                        
+                        updateBoost(selected);                        
                     }
                 });
             }
@@ -189,6 +215,25 @@ public class BoostPanel extends MXHBox
         {
             m_connectMode = connectMode;
             m_active = connectMode != null;
+        }
+
+        protected void updateBoost(final BoostButton selected)
+        {
+            int n = selected.getCount();
+            if (n == 1)
+            {
+                removeBoostButton(selected);
+                //m_connectMode.cancelBoostMode();
+            }
+            else
+            {
+                selected.setCount(n - 1);
+            }
+            
+            m_selected = null;
+            deselectAll();
+            
+            ctx.backgroundLayer.redraw();
         }
     }
     

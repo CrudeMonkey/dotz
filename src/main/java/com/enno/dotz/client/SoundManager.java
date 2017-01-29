@@ -40,6 +40,8 @@ public class SoundManager
         WOOSH("216675_2549002-lq.mp3"),
         BUBBLE("89534__cgeffex__very-fast-bubble-pop1.mp3"),
         SWAP_RADIOACTIVE("28469__simmfoc__blip-1.wav"),
+        PACMAN_EATS_GHOST("pacman_eatghost.wav"),
+        PACMAN_CHOMP("pacman_chomp.wav"),
         
 //        COIN1("coin/coin1.wav"),
 //        COIN2("coin/coin2.wav"),

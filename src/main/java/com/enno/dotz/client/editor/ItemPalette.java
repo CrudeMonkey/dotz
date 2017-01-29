@@ -27,6 +27,7 @@ import com.enno.dotz.client.item.Knight;
 import com.enno.dotz.client.item.Laser;
 import com.enno.dotz.client.item.LazySusan;
 import com.enno.dotz.client.item.Mirror;
+import com.enno.dotz.client.item.Pacman;
 import com.enno.dotz.client.item.RandomItem;
 import com.enno.dotz.client.item.Rocket;
 import com.enno.dotz.client.item.Spider;
@@ -58,6 +59,7 @@ public class ItemPalette extends Palette<Object>
             addButton(new Animal(i, 0, Animal.Type.DEFAULT, false), i, 2);
         }        
         addButton(new Animal(Animal.BLACK_ANIMAL,0, Animal.Type.DEFAULT, false), Config.MAX_COLORS, 2);
+        addButton(new Pacman(), Config.MAX_COLORS, 1);
         
         addButton(new LazySusan(0, 0, true), 0, 3);
         addButton(new LazySusan(0, 0, false), 1, 3);

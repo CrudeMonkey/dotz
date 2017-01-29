@@ -2,6 +2,7 @@ package com.enno.dotz.client.editor;
 
 import com.ait.tooling.nativetools.client.NObject;
 import com.enno.dotz.client.Config;
+import com.enno.dotz.client.Recorder;
 import com.enno.dotz.client.ShowScoresDialog;
 import com.enno.dotz.client.io.ClientRequest;
 import com.enno.dotz.client.io.ServiceCallback;
@@ -215,7 +216,7 @@ public abstract class EditLevelDialog extends MXWindow
         m_props.prepareSave(m_level);
         
         setVisible(false);
-        testLevel(m_level);
+        testLevel(m_level, null);
     }
     
     protected boolean validate(boolean save)
@@ -270,7 +271,7 @@ public abstract class EditLevelDialog extends MXWindow
 
     public abstract void createNewLevel();
 
-    public abstract void testLevel(Config level);
+    public abstract void testLevel(Config level, Recorder recorder);
 
     public void askToSave(final Runnable action)
     {

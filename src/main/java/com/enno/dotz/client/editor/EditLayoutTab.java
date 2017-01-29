@@ -121,7 +121,13 @@ public abstract class EditLayoutTab extends VLayout
         m_clickDragMode = new ClickDragMode();
         m_connectTeleportMode = new ConnectTeleportMode();
         
-        m_levelPropPanel = new LevelPropPanel();
+        m_levelPropPanel = new LevelPropPanel() {
+            @Override
+            public void showLoopLayer(boolean show)
+            {
+                m_grid.showLoopLayer(show);
+            }
+        };
         addMember(m_levelPropPanel);
         
         m_levelPropPanel.setLevel(level);
@@ -309,9 +315,11 @@ public abstract class EditLayoutTab extends VLayout
         try
         {
             new LoopDetector(ctx.state).validate();
+            m_grid.showLoopLayer(false);
         }
         catch (LoopException e)
         {
+            m_grid.showLoop(e.list);
             SC.warn("Detected a loop: " + e.loopToString());
             return false;
         }

@@ -170,6 +170,47 @@ public class ClientRequest
         });
     }
 
+    public static void record(NObject row, String id, final AsyncCallback<String> callback)
+    {
+        NObject req = new NObject();
+        req.put("row", row);
+        if (id != null)
+        {
+            req.put("id", id);
+        }
+        
+        request("RecordCommand", req, new ServiceCallback() {
+            @Override
+            public void onSuccess(NObject result)
+            {
+                String newId = result.getAsString("id");
+                callback.onSuccess(newId);
+            }
+        });
+    }
+    
+    public static void loadPlaybackList(final AsyncCallback<NArray> callback)
+    {
+        request("LoadPlaybackListCommand", new NObject(), new ServiceCallback() {
+            @Override
+            public void onSuccess(NObject result)
+            {
+                callback.onSuccess(result.getAsArray("list"));
+            }
+        });
+    }
+
+    public static void getPlaybackRows(String id, final AsyncCallback<NArray> callback)
+    {
+        request("GetPlaybackRowsCommand", new NObject("id", id), new ServiceCallback() {
+            @Override
+            public void onSuccess(NObject result)
+            {
+                callback.onSuccess(result.getAsArray("rows"));
+            }
+        });
+    }
+
     protected static void request(String command, NObject request, final AsyncCallback<NObject> callback)
     {        
         s_req.call(command, request, new JSONCommandCallback() {

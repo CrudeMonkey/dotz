@@ -8,6 +8,7 @@ import com.ait.lienzo.client.core.event.NodeMouseMoveHandler;
 import com.ait.lienzo.client.core.event.NodeMouseOutHandler;
 import com.ait.lienzo.client.core.event.NodeMouseUpHandler;
 import com.ait.lienzo.client.core.shape.Layer;
+import com.ait.tooling.nativetools.client.NObject;
 import com.enno.dotz.client.Cell.Bubble;
 import com.enno.dotz.client.DragConnectMode.ColorBombMode;
 import com.enno.dotz.client.DragConnectMode.DropMode;
@@ -20,9 +21,12 @@ import com.enno.dotz.client.DragConnectMode.TurnMode;
 import com.enno.dotz.client.DragConnectMode.WildCardMode;
 import com.enno.dotz.client.SoundManager.Sound;
 import com.enno.dotz.client.anim.AnimList;
+import com.enno.dotz.client.anim.Pt;
 import com.enno.dotz.client.anim.Transition.DropTransition;
 import com.enno.dotz.client.anim.TransitionList;
+import com.enno.dotz.client.anim.Pt.PtList;
 import com.enno.dotz.client.anim.TransitionList.NukeTransitionList;
+import com.enno.dotz.client.editor.LevelParser;
 import com.enno.dotz.client.item.Blaster;
 import com.enno.dotz.client.item.Bomb;
 import com.enno.dotz.client.item.ColorBomb;
@@ -77,10 +81,16 @@ public abstract class ConnectMode
         m_mouseOutReg = m_layer.addNodeMouseOutHandler(m_mouseOutHandler);
         
         ctx.boostPanel.setActive(true);
+        
+        if (ctx.playbackDialog != null)
+            ctx.playbackDialog.start();
     }
     
     public void stop()
     {
+        if (ctx.playbackDialog != null)
+            ctx.playbackDialog.stop();
+        
         ctx.boostPanel.setActive(false);
         
         m_mouseDownReg.removeHandler();
@@ -106,6 +116,9 @@ public abstract class ConnectMode
     {
         if (!cell.isLocked() && cell.item instanceof YinYang)
         {
+            if (ctx.isRecording())
+                ctx.recorder.click(cell);
+            
             stop();
 
             ctx.dotLayer.remove(cell.item.shape);
@@ -133,6 +146,9 @@ public abstract class ConnectMode
     {
         if (!cell.isLocked() && cell.item instanceof Mirror)
         {
+            if (ctx.isRecording())
+                ctx.recorder.click(cell);
+            
             ctx.state.activateLasers(false);
             ((Mirror) cell.item).rotate(1);
             Sound.FLIP_MIRROR.play();
@@ -157,6 +173,9 @@ public abstract class ConnectMode
     {
         if (!cell.isLocked() && cell.item instanceof Blaster)
         {
+            if (ctx.isRecording())
+                ctx.recorder.click(cell);
+            
             ctx.score.usedBlaster();
             
             ctx.state.activateLasers(false);
@@ -219,6 +238,9 @@ public abstract class ConnectMode
     {
         if (!cell.isLocked() && cell.item instanceof Rocket)
         {
+            if (ctx.isRecording())
+                ctx.recorder.click(cell);
+            
             stop();
             m_state.fireRocket(cell, new Runnable() {
                 public void run()
@@ -272,7 +294,7 @@ public abstract class ConnectMode
     
     protected boolean isTriggeredMerge(Cell cell)
     {
-        return new ClickMerge(ctx, m_state) {
+        boolean result = new ClickMerge(ctx, m_state) {
             @Override
             protected void preMerge()
             {
@@ -303,6 +325,11 @@ public abstract class ConnectMode
                 };
             }
         }.isTriggeredMerge(cell);
+        
+        if (result && ctx.isRecording())
+                ctx.recorder.click(cell);        
+        
+        return result;
     }
     
     public abstract static class ClickMerge
@@ -679,5 +706,62 @@ public abstract class ConnectMode
             m_specialMode.cancel();
             m_specialMode = null;
         }
+    }
+
+    public void playback(NObject row)
+    {
+        String type = Recorder.getAction(row);
+        PtList list = Recorder.parsePtList(row);
+        if (type.equals("drag"))
+        {
+            int i = 0;
+            Cell c = m_state.cell(list.get(i++));
+            mouseDown(c);
+            
+            int n = list.size();
+            for (; i < n; i++)
+            {
+                Pt p = list.get(i);
+                c = m_state.cell(p);
+                mouseMove(c);
+            }
+            mouseUp();
+        }
+        else if (type.equals("special") || type.equals("click"))
+        {
+            Cell c = m_state.cell(list.get(0));
+            mouseDown(c);
+            mouseUp();
+            if (list.size() > 1)
+            {
+                c = m_state.cell(list.get(1));
+                mouseDown(c);
+                mouseUp();
+            }
+        }
+        else if (type.equals("swap"))
+        {
+            Cell c = m_state.cell(list.get(0));
+            mouseDown(c);
+            c = m_state.cell(list.get(1));
+            mouseMove(c);
+            mouseUp();
+        }
+        else    // boost
+        {
+            Item item = LevelParser.parseItem(row.getAsObject("item"));
+            Pt p = list.size() > 0 ? list.get(0) : null;
+            ctx.boostPanel.playback(item, p);
+        }
+    }
+
+    
+    //--- Playback Support
+    
+    protected abstract void mouseDown(Cell c);
+    protected abstract void mouseUp();
+    protected void mouseMove(Cell c)
+    {
+        // override in SwapConnectMode
     }
 }

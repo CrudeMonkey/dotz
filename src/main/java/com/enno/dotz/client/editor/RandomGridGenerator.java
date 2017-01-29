@@ -419,7 +419,7 @@ public class RandomGridGenerator
             {
                 final boolean y = rb();
 
-                randomize(m_freqGen.next(), new ExtendedProperties(editorProps) {
+                randomize(m_freqGen.next(rnd), new ExtendedProperties(editorProps) {
     
                     @Override
                     public boolean x_symmetry()

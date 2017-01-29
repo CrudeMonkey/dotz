@@ -9,13 +9,13 @@ import com.ait.lienzo.client.core.animation.IndefiniteAnimation;
 import com.ait.lienzo.client.core.animation.LayerRedrawManager;
 import com.ait.lienzo.client.core.image.ImageShapeLoadedHandler;
 import com.ait.lienzo.client.core.shape.FastLayer;
-import com.ait.lienzo.client.core.shape.GridLayer;
 import com.ait.lienzo.client.core.shape.Layer;
 import com.ait.lienzo.client.core.shape.Line;
 import com.ait.lienzo.client.core.shape.Picture;
 import com.ait.lienzo.client.core.shape.Rectangle;
 import com.ait.lienzo.client.widget.LienzoPanel;
 import com.ait.lienzo.shared.core.types.ColorName;
+import com.ait.tooling.nativetools.client.NObject;
 import com.enno.dotz.client.Cell.Hole;
 import com.enno.dotz.client.Cell.Rock;
 import com.enno.dotz.client.item.Animal.EyeTracker;
@@ -43,6 +43,8 @@ public class DotzGridPanel extends LienzoPanel
 
     private IAnimationHandle m_animation;
 
+    private PlaybackLayer m_playbackLayer;
+
     public DotzGridPanel(Context ctx, EndOfLevel endOfLevel)
     {
         super(ctx.gridWidth, ctx.gridHeight);
@@ -59,10 +61,12 @@ public class DotzGridPanel extends LienzoPanel
 
     public void init(boolean replaceRandom)
     {
+        ctx.init();
+        
         this.cfg = ctx.cfg;
-        ctx.state = ctx.cfg.grid.copy();
         m_state = ctx.state;
         
+
         //setBackgroundColor(ColorName.WHITE);
         
 //        Line gridLine = new Line();
@@ -106,11 +110,15 @@ public class DotzGridPanel extends LienzoPanel
         
         //p("building");
             
-        ctx.init();
         m_state.init(ctx, replaceRandom);
         
         m_floorLayer.init(ctx);
         setBorders();
+        
+        m_playbackLayer = new PlaybackLayer(ctx);
+        m_playbackLayer.setVisible(false);
+        ctx.playbackLayer = m_playbackLayer;
+        add(m_playbackLayer);
         
         ctx.score.initGrid(ctx.state);        
     }
@@ -144,10 +152,16 @@ public class DotzGridPanel extends LienzoPanel
             public void run()
             {
               //Debug.p("start connect mode");
-                m_connectMode.start();  
+                m_connectMode.start();
+                
                 startTimer.run();
             }
         });
+    }
+    
+    public void playback(NObject row)
+    {
+        m_connectMode.playback(row);
     }
     
     public void pause()
@@ -213,6 +227,12 @@ public class DotzGridPanel extends LienzoPanel
     
     public static class FloorLayer extends FastLayer
     {
+//        private static final String ROCK_IMAGE = "images/Mountain Rock-053.jpg";
+        private static final String ROCK_IMAGE = "images/Mountain Rock-057.jpg";
+        private static final String WOOD_IMAGE = "images/Background-Image-8HE.jpg";
+//        private static final String STAR_IMAGE = "images/milky-way-923801_1280.jpg";
+        private static final String STAR_IMAGE = "images/starry-sky-1654074_1280.jpg";
+        
         private boolean m_gridLines;
 
         public FloorLayer(Context ctx)
@@ -222,7 +242,17 @@ public class DotzGridPanel extends LienzoPanel
         
         public void init(Context ctx)
         {
-            Picture p = new Picture("images/Background-Image-8HE.jpg", false);
+            if (ctx.isEditing)
+                initEditing(ctx);
+            else
+                initNotEditing(ctx);
+        }
+        
+        public void initNotEditing(Context ctx)
+        {
+            removeAll();
+            
+            Picture p = new Picture(STAR_IMAGE, false);
             add(p);
             p.getImageProxy().setImageShapeLoadedHandler(new ImageShapeLoadedHandler<Picture>()
             {                
@@ -236,7 +266,7 @@ public class DotzGridPanel extends LienzoPanel
             GridState state = ctx.state;
             int sz = (int) state.size();
             
-            int rockScale = 2;
+            int rockScale = 5;
             
             for (int col = 0; col < state.numColumns; col++)
             {
@@ -252,7 +282,7 @@ public class DotzGridPanel extends LienzoPanel
                     }
                     else if (c instanceof Rock)
                     {
-                        p = new Picture("images/backdrop-21534_960_720.jpg", (int) x, (int) y, rockScale * sz, rockScale * sz, sz, sz, false);
+                        p = new Picture(ROCK_IMAGE, (int) x * rockScale, (int) y * rockScale, rockScale * sz, rockScale * sz, sz, sz, false);
                         p.setX(x);
                         p.setY(y);
                         add(p);
@@ -286,5 +316,38 @@ public class DotzGridPanel extends LienzoPanel
                 }
             }
         }
+
+        public void initEditing(Context ctx)
+        {
+            removeAll();
+            
+            GridState state = ctx.state;
+            int sz = (int) state.size();
+                        
+            for (int col = 0; col < state.numColumns; col++)
+            {
+                for (int row = 0; row < state.numRows; row++)
+                {
+                    double x = state.x(col) - sz/2;
+                    double y = state.y(row) - sz/2;
+                    
+                    Rectangle r = new Rectangle(sz, sz);
+                    r.setX(x);
+                    r.setY(y);
+                    
+                    r.setFillColor(ColorName.WHITE);
+                    add(r);
+                    
+                    Line line = new Line(x, y, x + sz, y);
+                    line.setStrokeColor(ColorName.DARKGRAY);
+                    add(line);
+                    
+                    line = new Line(x, y, x, y + sz);
+                    line.setStrokeColor(ColorName.DARKGRAY);
+                    add(line);
+                }
+            }
+        }
     }
 }
+

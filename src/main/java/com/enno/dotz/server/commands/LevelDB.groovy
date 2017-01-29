@@ -21,6 +21,7 @@ class LevelDB
     private String m_deletedSetDirectory
     private String m_setDirectory
     private String m_statsDirectory
+    private String m_playbackDirectory
     
     private LevelDB()
     {
@@ -34,6 +35,7 @@ class LevelDB
         m_deletedSetDirectory   = "$m_dataDirectory/deletedSets"
         m_setDirectory          = "$m_dataDirectory/sets"
         m_statsDirectory        = "$m_dataDirectory/stats"
+        m_playbackDirectory     = "$m_dataDirectory/playback"
     }
     
     public JSONObject loadLevel(int id)
@@ -333,6 +335,76 @@ class LevelDB
             }
         }
         return list
+    }
+    
+    public Map record(JSONObject params)
+    {
+        JSONObject row = params.row
+        String id
+        if (!params.containsKey("id"))
+        {
+            id = "" + System.currentTimeMillis()
+            row.id = id
+        }
+        else
+        {
+            id = params.id
+        }
+        String txt = row.toJSONString() + ",\n"
+        
+        File file = new File("$m_playbackDirectory/${id}.txt")
+        file.parentFile.mkdirs()
+        file << txt
+        
+        return [id: id]
+    }
+    
+    public List loadPlaybackList()
+    {
+        List list = []
+        
+        new File(m_playbackDirectory).eachFile{ File file ->
+            try
+            {
+                String line = null
+                file.withReader() {
+                    line = it.readLine()
+                }
+                Map map = new JSONParser().parse(line.substring(0, line.length() - 1))
+                list << map
+            }
+            catch (Exception e)
+            {
+                s_log.error("skipping $file", e)
+            }
+        }
+        
+        list.sort{ a, b -> new Long(b.id) <=> new Long(a.id) }
+        
+        SimpleDateFormat fmt = new SimpleDateFormat("HH:mm:ss MM/dd/yyyy")
+        list.each{ Map row -> row.date = fmt.format(new Date(new Long(row.id))) }
+        
+        return list
+    }
+    
+    public List getPlaybackRows(String id)
+    {
+        String fileName = "$m_playbackDirectory/${id}.txt"
+        try 
+        {
+            def stream = new FileInputStream(fileName)
+            String s = stream.getText()
+            s = "[" + s + "{}]"
+            
+            List list = new JSONParser().parse(s)
+            list.remove(list.size() - 1)
+            return list
+        } 
+        catch (Exception e) 
+        {
+            s_log.error("can't read $fileName", e)
+            return []
+        }
     }
     
     protected JSONObject loadResource(String resource)

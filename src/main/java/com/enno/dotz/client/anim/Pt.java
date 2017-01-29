@@ -48,5 +48,14 @@ public class Pt
             }
             return false;
         }
+
+        public Pt pop()
+        {
+            int n = size();
+            if (n == 0)
+                return null;
+            
+            return remove(n - 1);
+        }
     }
 }

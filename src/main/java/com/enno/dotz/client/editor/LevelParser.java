@@ -40,6 +40,7 @@ import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.DotBomb;
 import com.enno.dotz.client.item.Drop;
 import com.enno.dotz.client.item.Egg;
+import com.enno.dotz.client.item.Explody;
 import com.enno.dotz.client.item.Fire;
 import com.enno.dotz.client.item.IcePick;
 import com.enno.dotz.client.item.Item;
@@ -48,6 +49,7 @@ import com.enno.dotz.client.item.Knight;
 import com.enno.dotz.client.item.Laser;
 import com.enno.dotz.client.item.LazySusan;
 import com.enno.dotz.client.item.Mirror;
+import com.enno.dotz.client.item.Pacman;
 import com.enno.dotz.client.item.RandomItem;
 import com.enno.dotz.client.item.Rocket;
 import com.enno.dotz.client.item.Spider;
@@ -124,7 +126,7 @@ public class LevelParser
                     if (item != null)
                     {
                         String itemClass = item.getAsString("class");
-                        launchItem = getItem(itemClass, item);
+                        launchItem = parseItem(itemClass, item);
                     }
                     
                     Machine machine = new Machine(type, launchItem, every, howMany, trigger);
@@ -204,6 +206,7 @@ public class LevelParser
             
             addItems("animal", p, grid);
             addItems("laser", p, grid);
+            addItems("pacman", p, grid);
             addItems("rocket", p, grid);
             addItems("blocker", p, grid);
             addItems("blaster", p, grid);
@@ -280,12 +283,17 @@ public class LevelParser
                 Pt pt = pt(row.getAsArray("p"));                
                 
                 Cell c = grid.cell(pt.col, pt.row);
-                c.item = getItem(singularType, row);
+                c.item = parseItem(singularType, row);
             }
         }
     }
     
-    private Item getItem(String itemClass, NObject row)
+    public static Item parseItem(NObject row)
+    {
+        return parseItem(row.getAsString("class"), row);
+    }
+    
+    public static Item parseItem(String itemClass, NObject row)
     {
         boolean stuck = row.isBoolean("stuck") ? row.getAsBoolean("stuck") : false;
         
@@ -302,6 +310,11 @@ public class LevelParser
         {
             int direction = parseDirection(row.getAsString("direction"));
             return new Laser(direction, stuck);
+        }
+        if (itemClass.equals("pacman"))
+        {
+            int direction = parseDirection(row.getAsString("direction"));
+            return new Pacman(direction, stuck);
         }
         if (itemClass.equals("coin"))
         {
@@ -404,6 +417,11 @@ public class LevelParser
             int turn = row.getAsInteger("n");
             return new Turner(turn, stuck);
         }
+        if (itemClass.equals("explody"))
+        {
+            int radius = row.getAsInteger("radius");
+            return new Explody(radius);
+        }
         if (itemClass.equals("key"))
         {
             return new Key(stuck);
@@ -443,10 +461,10 @@ public class LevelParser
             int strength = row.getAsInteger("strength");
                         
             NObject itemObj = row.getAsObject("item");
-            Item item = itemObj == null ? null : getItem(itemObj.getAsString("class"), itemObj); // chest can be empty
+            Item item = itemObj == null ? null : parseItem(itemObj.getAsString("class"), itemObj); // chest can be empty
             return new Chest(item, strength, stuck);
         }
-        //TODO striped, wrappedDot, explody
+        //TODO striped, wrappedDot, 
         return null; // should never happen
     }
     
@@ -588,7 +606,7 @@ public class LevelParser
         return goal;
     }
 
-    private int parseDirection(String d)
+    private static int parseDirection(String d)
     {
         if (d == null)
             return Direction.NONE;
@@ -605,7 +623,7 @@ public class LevelParser
         return Direction.NONE;
     }
 
-    private Pt pt(NArray a)
+    private static Pt pt(NArray a)
     {
         return new Pt(a.getAsInteger(0), a.getAsInteger(1));
     }
@@ -973,6 +991,7 @@ public class LevelParser
         NArray diamonds = new NArray();
         NArray yinyangs = new NArray();
         NArray randoms = new NArray();
+        NArray pacmans = new NArray();
         
         for (int row = 0; row < c.numRows; row++)
         {
@@ -1145,6 +1164,10 @@ public class LevelParser
                 {
                     lasers.push(toJson(cell.item, col, row));
                 }
+                else if (cell.item instanceof Pacman)
+                {
+                    pacmans.push(toJson(cell.item, col, row));
+                }
                 else if (cell.item instanceof Mirror)
                 {
                     mirrors.push(toJson(cell.item, col, row));
@@ -1245,6 +1268,7 @@ public class LevelParser
         add(p, "picks", picks);
         add(p, "colorBombs", colorBombs);
         add(p, "lasers", lasers);
+        add(p, "pacmans", pacmans);
         add(p, "mirrors", mirrors);
         add(p, "rockets", rockets);
         add(p, "dominoes", dominoes);
@@ -1277,7 +1301,7 @@ public class LevelParser
         return a;
     }
     
-    protected static NObject toJson(Item item, boolean addClass)
+    public static NObject toJson(Item item, boolean addClass)
     {
         NObject a = new NObject();
         if (item.isStuck())
@@ -1293,6 +1317,13 @@ public class LevelParser
                 a.put("action", an.getAction().getName());
             if (addClass)
                 a.put("class", "animal");
+        }
+        else if (item instanceof Explody)
+        {
+            Explody an = (Explody) item;
+            a.put("radius", an.getRadius());
+            if (addClass)
+                a.put("class", "explody");
         }
         else if (item instanceof Knight)
         {
@@ -1363,6 +1394,13 @@ public class LevelParser
             setDirection(a, an.getDirection());
             if (addClass)
                 a.put("class", "laser");
+        }
+        else if (item instanceof Pacman)
+        {
+            Pacman an = (Pacman) item;
+            setDirection(a, an.getDirection());
+            if (addClass)
+                a.put("class", "pacman");
         }
         else if (item instanceof Mirror)
         {

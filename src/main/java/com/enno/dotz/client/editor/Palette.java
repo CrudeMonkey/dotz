@@ -31,7 +31,7 @@ public abstract class Palette<T> extends LienzoPanel
         cfg.size = size;
         
         ctx = new Context(true, cfg);
-
+                
         ctx.backgroundLayer = new FastLayer();
         add(ctx.backgroundLayer);    
         

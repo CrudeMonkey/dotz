@@ -99,62 +99,18 @@ public class ClickConnectMode extends ConnectMode
             @Override
             public void onNodeMouseDown(NodeMouseDownEvent event)
             {
-                int col = m_state.col(event.getX());
-                int row = m_state.row(event.getY());
+                int eventX = event.getX();
+                int eventY = event.getY();
+                int col = m_state.col(eventX);
+                int row = m_state.row(eventY);
                 if (!m_state.isValidCell(col, row))
                 {
                     Sound.MISS.play();
                     return;
                 }
                 
-                Cell cell = m_state.cell(col, row);                
-                
-                if (m_specialMode != null)
-                {
-                    m_specialMode.click(cell);
-                    return;
-                }
-                
-                //TODO knight?
-                
-                if (isTriggeredBySingleClick2(cell))
-                    return;
-                
-                if (isTriggeredMerge(cell))
-                    return;
-                
-                if (igniteBlaster(cell) || igniteBomb(cell))
-                    return;
-                
-                if (startSpecialMode(cell, event.getX(), event.getY()))
-                {
-                    if (m_specialMode instanceof ColorBombMode)
-                    {
-                        Cell c = m_state.getRandomDotCell();
-                        //TODO animate
-                        m_specialMode.done(c, false);
-                    }
-                    return;
-                }
-                
-                CellList matches = clickCell(cell);
-                if (matches == null)
-                {
-                    Sound.MISS.play();
-                    return;
-                }
-                
-                stop();
-                
-                boolean isEggMode = matches.get(0).item instanceof Egg;
-                UserAction action = new UserAction(matches, isEggMode);
-                m_state.processChain(action, new Runnable()
-                {
-                    public void run()
-                    {
-                        start(); // next move
-                    }
-                });
+                Cell cell = m_state.cell(col, row);
+                mouseDown(eventX, eventY, cell);
             }                
         };
         
@@ -167,23 +123,9 @@ public class ClickConnectMode extends ConnectMode
                     m_specialMode.mouseOut();
                     return;
                 }
-                
-//                if (m_swapping)
-//                {
-//                    Sound.MISS.play();
-//                    endSwap();
-//                }
             }
         };
     }
-//    
-//    protected void endSwap()
-//    {
-//
-//        
-//        m_lineMoveReg.removeHandler();
-//        m_mouseUpReg.removeHandler();        
-//    }
     
     protected CellList clickCell(Cell cell)
     {
@@ -295,5 +237,71 @@ public class ClickConnectMode extends ConnectMode
         
         list.add(cell);
         addNeighbors(cell.col, cell.row, color, list);
+    }
+
+    @Override
+    protected void mouseDown(Cell c)
+    {
+        mouseDown((int) m_state.x(c.col), (int) m_state.y(c.row), c);
+    }
+    
+    protected void mouseDown(int eventX, int eventY, Cell cell)
+    {
+        if (m_specialMode != null)
+        {
+            m_specialMode.click(cell);
+            return;
+        }
+        
+        //TODO knight?
+        
+        if (isTriggeredBySingleClick2(cell))
+            return;
+        
+        if (isTriggeredMerge(cell))
+            return;
+        
+        if (igniteBlaster(cell) || igniteBomb(cell))
+            return;
+        
+        if (startSpecialMode(cell, eventX, eventY))
+        {
+            if (m_specialMode instanceof ColorBombMode)
+            {
+                Cell c = m_state.getRandomDotCell();
+                //TODO animate
+                m_specialMode.done(c, false);
+            }
+            return;
+        }
+        
+        CellList matches = clickCell(cell);
+        if (matches == null)
+        {
+            Sound.MISS.play();
+            return;
+        }
+        
+        stop();
+        
+        ctx.lastMove = cell.pt();
+        if (ctx.isRecording())
+            ctx.recorder.click(cell);
+        
+        boolean isEggMode = matches.get(0).item instanceof Egg;
+        UserAction action = new UserAction(matches, isEggMode);
+        m_state.processChain(action, new Runnable()
+        {
+            public void run()
+            {
+                start(); // next move
+            }
+        });
+    }
+    
+    @Override
+    protected void mouseUp()
+    {
+        
     }
 }

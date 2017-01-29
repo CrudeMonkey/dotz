@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.enno.dotz.client.Cell;
-import com.enno.dotz.client.Cell.Hole;
-import com.enno.dotz.client.Cell.Slide;
 import com.enno.dotz.client.Config;
 import com.enno.dotz.client.Context;
 import com.enno.dotz.client.Direction;
@@ -17,7 +15,6 @@ import com.enno.dotz.client.anim.Transition.DropTransition;
 import com.enno.dotz.client.anim.Transition.MoveAnimalTransition;
 import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Animal.Action;
-import com.enno.dotz.client.item.Animal.Type;
 import com.enno.dotz.client.item.Domino;
 import com.enno.dotz.client.item.Dot;
 import com.enno.dotz.client.item.DotBomb;
@@ -29,12 +26,14 @@ public class MoveAnimals
     private GridState state;
     
     private Set<Cell> m_animalTargets = new HashSet<Cell>();
+    private Collection<Cell> m_verboten;
     
     public MoveAnimals(TransitionList list, Collection<Cell> verboten, Context ctx)
     {
         this.ctx = ctx;
         this.cfg = ctx.cfg;
         this.state = ctx.state;
+        m_verboten = verboten;
         
         addTransitions(list, verboten);
     }
@@ -45,12 +44,12 @@ public class MoveAnimals
         int nr = cfg.numRows;
         int nc = cfg.numColumns;
         
-        for (int row = 0; row < cfg.numRows; row++)
+        for (int row = 0; row < nr; row++)
         {
-            for (int col = 0; col < cfg.numColumns; col++)
+            for (int col = 0; col < nc; col++)
             {
                 final Cell src = state.cell(col, row);
-                if (!src.isLocked() && src.item instanceof Animal)
+                if (!src.isLocked() && src.item instanceof Animal && !m_verboten.contains(src))
                 {
                     final Animal animal = (Animal) src.item;
                     if (animal.isStunned())
@@ -59,14 +58,14 @@ public class MoveAnimals
                     Action action = animal.getAction();
                     
                     potentialNeighbors.clear();
+                    if (row < nr - 1)
+                        maybeAdd(potentialNeighbors, state.cell(col, row + 1), action);
+                    if (row > 0)
+                        maybeAdd(potentialNeighbors, state.cell(col, row - 1), action);
                     if (col > 0)
                         maybeAdd(potentialNeighbors, state.cell(col - 1, row), action);
                     if (col < nc - 1)
                         maybeAdd(potentialNeighbors, state.cell(col + 1, row), action);
-                    if (row > 0)
-                        maybeAdd(potentialNeighbors, state.cell(col, row - 1), action);
-                    if (row < nr - 1)
-                        maybeAdd(potentialNeighbors, state.cell(col, row + 1), action);
                     
                     int n = potentialNeighbors.size();
                     if (n > 0)
@@ -243,50 +242,46 @@ public class MoveAnimals
     private List<Cell> findClosestMove(Cell src, List<Cell> potentialNeighbors, Pt lastMove)
     {
         int n = potentialNeighbors.size();
-        int[] dist = new int[n];
+        List<Cell> newList = new ArrayList<Cell>();
+        int min = Integer.MAX_VALUE;
         for (int i = 0; i < n; i++)
         {
             Cell c = potentialNeighbors.get(i);
-            int dx = lastMove.col - c.col;
-            int dy = lastMove.row - c.row;
-            dist[i] = dx * dx + dy * dy;            
-        }
-        int min = Integer.MAX_VALUE, mini = -1;
-        for (int i = 0; i < n; i++)
-        {
-            if (dist[i] < min)
+            int d = Math.abs(lastMove.col - c.col) + Math.abs(lastMove.row - c.row);    // taxicab distance
+            if (d < min)
             {
-                min = dist[i];
-                mini = i;
+                min = d;
+                newList.clear();
+                newList.add(c);
+            }
+            else if (d == min)
+            {
+                newList.add(c);
             }
         }
-        List<Cell> newList = new ArrayList<Cell>();
-        newList.add(potentialNeighbors.get(mini));
         return newList;
     }
 
     private List<Cell> findFurthestMove(Cell src, List<Cell> potentialNeighbors, Pt lastMove)
     {
         int n = potentialNeighbors.size();
-        int[] dist = new int[n];
+        List<Cell> newList = new ArrayList<Cell>();        
+        int max = 0;
         for (int i = 0; i < n; i++)
         {
-            Cell c = potentialNeighbors.get(i);
-            int dx = lastMove.col - c.col;
-            int dy = lastMove.row - c.row;
-            dist[i] = dx * dx + dy * dy;            
-        }
-        int max = 0, maxi = -1;
-        for (int i = 0; i < n; i++)
-        {
-            if (dist[i] > max)
+            Cell c = potentialNeighbors.get(i);            
+            int d = Math.abs(lastMove.col - c.col) + Math.abs(lastMove.row - c.row);    // taxicab distance
+            if (d > max)
             {
-                max = dist[i];
-                maxi = i;
+                max = d;
+                newList.clear();
+                newList.add(c);
+            }
+            else if (d == max)
+            {
+                newList.add(c);
             }
         }
-        List<Cell> newList = new ArrayList<Cell>();
-        newList.add(potentialNeighbors.get(maxi));
         return newList;
     }
 
@@ -318,7 +313,7 @@ public class MoveAnimals
 
     private void maybeAdd(List<Cell> potentialNeighbors, Cell cell, Action action)
     {
-        if (m_animalTargets.contains(cell))
+        if (m_animalTargets.contains(cell) || m_verboten.contains(cell))
             return; // another animal is already moving here
         
         if (cell.isLocked() || !cell.canContainItems())

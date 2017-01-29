@@ -8,6 +8,7 @@ import com.ait.lienzo.client.core.shape.FastLayer;
 import com.ait.lienzo.client.core.shape.Layer;
 import com.enno.dotz.client.WordDisplayPanel.FindWordList;
 import com.enno.dotz.client.anim.Pt;
+import com.enno.dotz.client.util.Console;
 import com.enno.dotz.shared.WordFinder.ResultList;
 
 public class Context
@@ -29,6 +30,7 @@ public class Context
     public FastLayer nukeLayer;
     public FastLayer laserLayer;
     public Layer connectLayer;
+    public PlaybackLayer playbackLayer;
     
     public DotzGridPanel gridPanel;
     public BoostPanel boostPanel;
@@ -49,6 +51,9 @@ public class Context
     public int gridDx;
     public int gridDy;
     
+    public Recorder recorder;
+    public PlaybackDialog playbackDialog;
+    
     public Context(boolean isEditing, Config level)
     {
        this.isEditing = isEditing;
@@ -62,6 +67,11 @@ public class Context
        gridDy = (gridHeight - (cfg.numRows * cfg.size)) / 2;
     }
     
+    public boolean isRecording()
+    {
+        return recorder != null;
+    }
+    
     public boolean isWild(Integer color)
     {
         return cfg.isWild(color);
@@ -69,8 +79,20 @@ public class Context
 
     public void init()
     {
+        state = cfg.grid.copy();
         generator = cfg.generator.copy();
-        beastRandom = new Random(generator.getSeed());
+        
+        if (playbackDialog != null)
+        {
+            generator.setUsedSeed(playbackDialog.getSeed());
+        }
+        beastRandom = new Random(generator.getUsedSeed());
+        
+        if (playbackDialog == null && !isEditing && !isPreview)
+        {
+            recorder = new Recorder(this);
+            recorder.level(cfg.id, generator.getUsedSeed(), cfg.name);
+        }
     }
     
     public void prepareWords()
@@ -79,5 +101,10 @@ public class Context
         {
             findWordList = new FindWordList(this);
         }
+    }
+
+    public void userClicked(Cell cell)
+    {
+        lastMove = cell.pt();
     }
 }
