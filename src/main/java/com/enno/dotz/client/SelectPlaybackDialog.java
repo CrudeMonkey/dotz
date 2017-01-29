@@ -11,6 +11,7 @@ import com.enno.dotz.client.ui.MXWindow;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.types.ListGridFieldType;
 import com.smartgwt.client.types.SelectionStyle;
+import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
@@ -24,11 +25,13 @@ public class SelectPlaybackDialog extends MXWindow
     
     private MXListGrid m_grid;
 
-    private AsyncCallback<Recorder> m_callback;
+    private AsyncCallback<Recorder> m_playbackCallback;
+    private AsyncCallback<Integer> m_editCallback;
     
-    public SelectPlaybackDialog(NArray list, AsyncCallback<Recorder> callback)
+    public SelectPlaybackDialog(NArray list, AsyncCallback<Recorder> playbackCallback, AsyncCallback<Integer> editCallback)
     {
-        m_callback = callback;
+        m_playbackCallback = playbackCallback;
+        m_editCallback = editCallback;
         
         setTitle("Playback List");
         
@@ -44,14 +47,14 @@ public class SelectPlaybackDialog extends MXWindow
         show();
     }
     
-    public static void showDialog(final AsyncCallback<Recorder> callback)
+    public static void showDialog(final AsyncCallback<Recorder> playbackCallback, final AsyncCallback<Integer> editCallback)
     {
         ClientRequest.loadPlaybackList(new MAsyncCallback<NArray>()
         {
             @Override
             public void onSuccess(NArray list)
             {
-                new SelectPlaybackDialog(list, callback);
+                new SelectPlaybackDialog(list, playbackCallback, editCallback);
             }
         });
     }
@@ -100,6 +103,27 @@ public class SelectPlaybackDialog extends MXWindow
                 playback(rec.getAttribute("id"));
             }
         });
+        buttons.add("Edit", new ClickHandler()
+        {            
+            @Override
+            public void onClick(ClickEvent event)
+            {
+                ListGridRecord rec = m_grid.getSelectedRecord();
+                if (rec == null)
+                {
+                    return;
+                }
+                
+                Integer levelId = rec.getAttributeAsInt("level");
+                if (levelId == null || levelId == -1)
+                {
+                    SC.warn("Selected level has no Level ID");
+                    return;
+                }
+                closeWindow();
+                m_editCallback.onSuccess(levelId);
+            }
+        });
         buttons.add("Close", new ClickHandler()
         {            
             @Override
@@ -122,7 +146,7 @@ public class SelectPlaybackDialog extends MXWindow
             {
                 closeWindow();
                 Recorder recorder = new Recorder(rows);
-                m_callback.onSuccess(recorder);
+                m_playbackCallback.onSuccess(recorder);
             }
         });
     }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import com.enno.dotz.client.Cell;
@@ -39,6 +40,7 @@ public class MoveSpiders
         List<Cell> potentialNeighbors = new ArrayList<Cell>();
         int nr = cfg.numRows;
         int nc = cfg.numColumns;
+        Random rnd = ctx.generator.getRandom();
         
         for (int row = 0; row < cfg.numRows; row++)
         {
@@ -94,7 +96,7 @@ public class MoveSpiders
                         }
                         
                         n = potentialNeighbors.size();
-                        final Cell target = potentialNeighbors.get(n == 1 ? 0 : ctx.beastRandom.nextInt(n));
+                        final Cell target = potentialNeighbors.get(n == 1 ? 0 : rnd.nextInt(n));
                         spider.lastDirection = getDirection(src, target);
                         m_animalTargets.add(target);
                         

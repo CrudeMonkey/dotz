@@ -3,6 +3,7 @@ package com.enno.dotz.client.anim;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 
 import com.enno.dotz.client.Cell;
 import com.enno.dotz.client.Config;
@@ -42,6 +43,7 @@ public class MovePacmans
         List<Cell> potentialNeighbors = new ArrayList<Cell>();
         int nr = cfg.numRows;
         int nc = cfg.numColumns;
+        Random rnd = ctx.generator.getRandom();
         
         int dir1 = 0, dir2 = 0;
         if (direction != 0)
@@ -115,7 +117,7 @@ public class MovePacmans
                             }
                             
                             n = potentialNeighbors.size();
-                            target = potentialNeighbors.get(n == 1 ? 0 : ctx.beastRandom.nextInt(n));
+                            target = potentialNeighbors.get(n == 1 ? 0 : rnd.nextInt(n));
                         }
                     }
                     

@@ -1,14 +1,12 @@
 package com.enno.dotz.client;
 
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
 
 import com.ait.lienzo.client.core.shape.FastLayer;
 import com.ait.lienzo.client.core.shape.Layer;
 import com.enno.dotz.client.WordDisplayPanel.FindWordList;
 import com.enno.dotz.client.anim.Pt;
-import com.enno.dotz.client.util.Console;
 import com.enno.dotz.shared.WordFinder.ResultList;
 
 public class Context
@@ -21,7 +19,6 @@ public class Context
     public Score score = new Score();
     
     public Generator generator;
-    public Random beastRandom;
 
     public FastLayer backgroundLayer;
     public FastLayer iceLayer;
@@ -86,7 +83,6 @@ public class Context
         {
             generator.setUsedSeed(playbackDialog.getSeed());
         }
-        beastRandom = new Random(generator.getUsedSeed());
         
         if (playbackDialog == null && !isEditing && !isPreview)
         {

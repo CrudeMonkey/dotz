@@ -477,6 +477,20 @@ public class MainPanel extends VLayout
                     }
                 });
             }
+        }, new MAsyncCallback<Integer>()
+        {
+            @Override
+            public void onSuccess(final Integer levelId)
+            {
+                m_modeManager.askSaveLevel(new Runnable()
+                {                                            
+                    @Override
+                    public void run()
+                    {
+                        editLevel(levelId);
+                    }
+                });
+            }
         });
     }
 
@@ -704,6 +718,17 @@ public class MainPanel extends VLayout
                 m_endOfLevel = endOfLevel;
                 
                 m_playPanel = new PlayLevelPanel(ctx, recorder, endOfLevel);
+                if (ctx.playbackDialog != null)
+                {
+                    ctx.playbackDialog.setRedoCallback(new Runnable() {
+                        public void run()
+                        {
+                            killLevel();
+                            playLevel(level, mode, recorder, endOfLevel);
+                        }
+                    });
+                }
+                
                 m_gridContainer.addMember(m_playPanel);
                 
                 m_playPanel.play();

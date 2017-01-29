@@ -3,6 +3,7 @@ package com.enno.dotz.client.anim;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 
 import com.enno.dotz.client.Cell;
 import com.enno.dotz.client.Config;
@@ -27,6 +28,8 @@ public class GrowFire
         this.ctx = ctx;
         this.cfg = ctx.cfg;
         this.state = ctx.state;
+        
+        Random rnd = ctx.generator.getRandom();
         
         m_verboten = verboten;
         Collection<Cell> cells = getFireCells();
@@ -53,7 +56,7 @@ public class GrowFire
             if (!canGrow())
                 break;
             
-            int index = ctx.beastRandom.nextInt(m_from.size());
+            int index = rnd.nextInt(m_from.size());
             list.add(getTransition(index));
             
             m_from.remove(index);

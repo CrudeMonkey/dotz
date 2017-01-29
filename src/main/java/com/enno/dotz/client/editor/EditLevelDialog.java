@@ -3,8 +3,10 @@ package com.enno.dotz.client.editor;
 import com.ait.tooling.nativetools.client.NObject;
 import com.enno.dotz.client.Config;
 import com.enno.dotz.client.Recorder;
+import com.enno.dotz.client.SelectPlaybackDialog;
 import com.enno.dotz.client.ShowScoresDialog;
 import com.enno.dotz.client.io.ClientRequest;
+import com.enno.dotz.client.io.MAsyncCallback;
 import com.enno.dotz.client.io.ServiceCallback;
 import com.enno.dotz.client.ui.MXButtonsPanel;
 import com.enno.dotz.client.ui.MXNotification;
@@ -12,6 +14,7 @@ import com.enno.dotz.client.ui.MXWindow;
 import com.enno.dotz.client.ui.UTabSet;
 import com.enno.dotz.client.util.Debug;
 import com.smartgwt.client.util.BooleanCallback;
+import com.smartgwt.client.util.SC;
 import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
@@ -105,7 +108,15 @@ public abstract class EditLevelDialog extends MXWindow
             @Override
             public void onClick(ClickEvent event)
             {
-                testLevel();
+                testLevel(null);
+            }
+        });
+        m_buttons.add("Playback", new ClickHandler()
+        {            
+            @Override
+            public void onClick(ClickEvent event)
+            {
+                playback();
             }
         });
         m_buttons.add("Save", new ClickHandler()
@@ -196,12 +207,32 @@ public abstract class EditLevelDialog extends MXWindow
         super.closeWindow();
     }
     
+    protected void playback()
+    {
+        SelectPlaybackDialog.showDialog(new MAsyncCallback<Recorder>()
+        {
+            @Override
+            public void onSuccess(final Recorder recorder)
+            {
+                testLevel(recorder);
+            }
+        },
+        new MAsyncCallback<Integer>()
+        {
+            @Override
+            public void onSuccess(final Integer levelId)
+            {
+                SC.warn("Not implemented from here");
+            }
+        });
+    }
+    
     protected void showEditor()
     {
         setVisible(true);
     }
     
-    protected void testLevel()
+    protected void testLevel(Recorder recorder)
     {
         m_level.grid = m_layout.getGridState();
         
@@ -216,7 +247,7 @@ public abstract class EditLevelDialog extends MXWindow
         m_props.prepareSave(m_level);
         
         setVisible(false);
-        testLevel(m_level, null);
+        testLevel(m_level, recorder);
     }
     
     protected boolean validate(boolean save)

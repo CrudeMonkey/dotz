@@ -33,6 +33,8 @@ public class PlaybackDialog extends MXWindow
     protected Integer m_stepTo;
 
     private long m_seed;
+
+    private Runnable m_redoCallback;
     
     public PlaybackDialog(Recorder rec, Context ctx)
     {
@@ -52,7 +54,7 @@ public class PlaybackDialog extends MXWindow
         setTitle("Playback");
         
         addItem(createPane());
-        setWidth(300);
+        setWidth(350);
         setHeight(800);
         
         setRows(rec.getRows());
@@ -115,6 +117,16 @@ public class PlaybackDialog extends MXWindow
                 int selectedRow = m_grid.getRecordIndex(rec);
                 m_stepTo = selectedRow;
                 nextAction();
+            }
+        });
+        
+        buttons.add("Redo", new ClickHandler()
+        {            
+            @Override
+            public void onClick(ClickEvent event)
+            {
+                closeWindow();
+                m_redoCallback.run();
             }
         });
         
@@ -211,5 +223,10 @@ public class PlaybackDialog extends MXWindow
     public void playback(NObject row)
     {
         m_ctx.gridPanel.playback(row);
+    }
+
+    public void setRedoCallback(Runnable callback)
+    {
+        m_redoCallback = callback;
     }
 }
