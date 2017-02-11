@@ -16,6 +16,12 @@ public class YinYang extends Item
     }
 
     @Override
+    public String getType()
+    {
+        return "yinyang";
+    }
+
+    @Override
     public IPrimitive<?> createShape(double size)
     {
         Group g = new Group();

@@ -5,6 +5,7 @@ import com.enno.dotz.client.Config;
 import com.enno.dotz.client.Recorder;
 import com.enno.dotz.client.SelectPlaybackDialog;
 import com.enno.dotz.client.ShowScoresDialog;
+import com.enno.dotz.client.SlotMachines;
 import com.enno.dotz.client.io.ClientRequest;
 import com.enno.dotz.client.io.MAsyncCallback;
 import com.enno.dotz.client.io.ServiceCallback;
@@ -256,6 +257,18 @@ public abstract class EditLevelDialog extends MXWindow
         {
             return false;
         }
+        
+        SlotMachines sm = new SlotMachines();
+        try
+        {
+            sm.locateSlotMachines(m_layout.getGridState());
+        }
+        catch (Exception e)
+        {
+            SC.warn("Slot machines must be 3 slots in a row");
+            return false;
+        }
+        
         
         //TODO check if goals are attainable, e.g. is dot/anchor/animal spawned
         

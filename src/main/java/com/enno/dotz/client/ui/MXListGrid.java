@@ -5,6 +5,7 @@ import com.ait.tooling.nativetools.client.NArray;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.smartgwt.client.widgets.grid.ListGrid;
+import com.smartgwt.client.widgets.grid.ListGridRecord;
 
 public class MXListGrid extends ListGrid
 {
@@ -187,5 +188,11 @@ public class MXListGrid extends ListGrid
     public void setData(NArray a)
     {
         setData(MXRecordList.toRecordArray(a));
+    }
+
+    public void removeAllRecords()
+    {
+        for (ListGridRecord rec : getRecords())
+            removeData(rec);
     }
 }

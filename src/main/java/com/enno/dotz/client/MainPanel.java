@@ -6,6 +6,7 @@ import java.util.List;
 import com.ait.tooling.nativetools.client.NArray;
 import com.ait.tooling.nativetools.client.NObject;
 import com.enno.dotz.client.DotzGridPanel.EndOfLevel;
+import com.enno.dotz.client.SoundManager.Sound;
 import com.enno.dotz.client.box.LienzoPopup;
 import com.enno.dotz.client.editor.EditLevelDialog;
 import com.enno.dotz.client.editor.EditSetDialog;
@@ -448,8 +449,36 @@ public class MainPanel extends VLayout
         });
         toolStrip.addButton(edit);  
         
+        ToolStripButton undo = m_modeManager.createToolStripButton(Mode.PLAY, Mode.TEST);
+        undo.setIcon("undo.gif");
+        undo.setPrompt("Undo Move");
+        undo.setActionType(SelectionType.BUTTON);  
+        undo.addClickHandler(new com.smartgwt.client.widgets.events.ClickHandler()
+        {            
+            @Override
+            public void onClick(ClickEvent event)
+            {
+                undo();
+            }
+        });
+        toolStrip.addButton(undo);  
+        
+        ToolStripButton redo = m_modeManager.createToolStripButton(Mode.PLAY, Mode.TEST);
+        redo.setIcon("redo.png");
+        redo.setPrompt("Redo Move");
+        redo.setActionType(SelectionType.BUTTON);  
+        redo.addClickHandler(new com.smartgwt.client.widgets.events.ClickHandler()
+        {            
+            @Override
+            public void onClick(ClickEvent event)
+            {
+                redo();
+            }
+        });
+        toolStrip.addButton(redo);  
+        
         HLayout stripContainer = new HLayout();
-        stripContainer.setWidth("150px");
+        stripContainer.setWidth(210);
         stripContainer.setAlign(Alignment.RIGHT);
         stripContainer.addMember(toolStrip);
         
@@ -680,7 +709,7 @@ public class MainPanel extends VLayout
         if (m_endOfLevel != null)
         {
             Recorder recorder = m_playPanel.ctx.recorder;
-            cancelLevel();
+            killLevel();
             
             playLevel(recorder.getLevelId(), recorder);
         }
@@ -688,7 +717,7 @@ public class MainPanel extends VLayout
     
     protected void playback(Recorder recorder)
     {
-        cancelLevel();
+        killLevel();
         playLevel(recorder.getLevelId(), recorder);
     }
     
@@ -720,7 +749,7 @@ public class MainPanel extends VLayout
                 m_playPanel = new PlayLevelPanel(ctx, recorder, endOfLevel);
                 if (ctx.playbackDialog != null)
                 {
-                    ctx.playbackDialog.setRedoCallback(new Runnable() {
+                    ctx.playbackDialog.setRestartCallback(new Runnable() {
                         public void run()
                         {
                             killLevel();
@@ -1001,6 +1030,18 @@ public class MainPanel extends VLayout
         });
     }
     
+    public void undo()
+    {
+        if (m_playPanel != null)
+            m_playPanel.undo();
+    }
+    
+    public void redo()
+    {
+        if (m_playPanel != null)
+            m_playPanel.redo();
+    }
+    
     public static class PlayLevelPanel extends VLayout
     {
         private Context ctx;
@@ -1016,7 +1057,16 @@ public class MainPanel extends VLayout
         public PlayLevelPanel(Context ctx, Recorder recorder, EndOfLevel endOfLevel)
         {
             this.ctx = ctx;
+            ctx.playPanel = this;
             m_endOfLevel = endOfLevel;
+            
+            ctx.undoManager = new UndoManager() {
+                @Override
+                public void push()
+                {
+                    push(copyState());
+                }
+            };
             
             if (recorder != null)
             {
@@ -1049,6 +1099,114 @@ public class MainPanel extends VLayout
             addMember(m_boostPanel);
         }
 
+        public void playback(NObject row)
+        {
+            String action = Recorder.getAction(row);
+            if ("undo".equals(action))
+                undo(true);
+            else if ("redo".equals(action))
+                redo(true);
+            else
+                ctx.gridPanel.playback(row);
+        }
+        
+        public void undo()
+        {
+            undo(false);
+        }
+        
+        public void undo(boolean playingBack)
+        {
+            if (!ctx.undoManager.canUndo())
+                return;
+            
+            if (ctx.isRecording())
+                ctx.recorder.undo();
+            
+            UndoState lastState = ctx.undoManager.peek();
+            UndoState state = ctx.undoManager.undo();
+            
+            restoreState(state);
+            
+            if (ctx.generator.findWords)
+                ctx.findWordList.undoCurrentWord(state.wordToGuess);
+            
+            if (ctx.generator.generateLetters && !ctx.generator.removeLetters)
+            {
+                ctx.lastWord = lastState.word;
+                ctx.guessedWords.remove(ctx.lastWord);
+            }
+            
+            Sound.DROP.play();
+            
+            if (ctx.playbackDialog != null)
+                ctx.playbackDialog.undo(playingBack);
+        }
+        
+        public void redo()
+        {
+            redo(false);
+        }
+        
+        public void redo(boolean playingBack)
+        {
+            if (!ctx.undoManager.canRedo())
+                return;
+            
+            if (ctx.isRecording())
+                ctx.recorder.redo();
+            
+            UndoState state = ctx.undoManager.redo();
+            restoreState(state);
+            
+            if (ctx.generator.findWords)
+                ctx.findWordList.redoCurrentWord(state.wordToGuess);
+            
+            if (ctx.generator.generateLetters && !ctx.generator.removeLetters)
+            {
+                ctx.lastWord = state.word;
+                ctx.guessedWords.add(ctx.lastWord);
+            }
+            
+            Sound.DROP.play();
+            
+            if (ctx.playbackDialog != null)
+            {
+                ctx.playbackDialog.redo(playingBack);
+            }
+        }
+        
+        public UndoState copyState()
+        {
+            UndoState undoState = new UndoState();
+            ctx.generator.copyState(undoState);
+            ctx.score.copyState(undoState);
+            m_grid.copyState(undoState);
+            m_score.copyState(undoState);
+            m_statsPanel.copyState(undoState);
+            m_boostPanel.copyState(undoState);
+            
+            if (ctx.generator.findWords)
+                undoState.wordToGuess = ctx.findWordList.getCurrentWord();
+            
+            if (ctx.generator.generateLetters && !ctx.generator.removeLetters)
+            {
+                undoState.word = ctx.lastWord;
+            }
+            
+            return undoState;
+        }
+        
+        public void restoreState(UndoState undoState)
+        {
+            ctx.generator.restoreState(undoState);
+            ctx.score.restoreState(undoState);
+            m_grid.restoreState(undoState);
+            m_score.restoreState(undoState);
+            m_statsPanel.restoreState(undoState);
+            m_boostPanel.restoreState(undoState);
+        }
+        
         public void cancelLevel()
         {
             if (m_playing)
@@ -1101,6 +1259,12 @@ public class MainPanel extends VLayout
                 m_grid.kill();
                 m_statsPanel.killTimer();                
                 m_playing = false;
+                
+                if (ctx.playbackDialog != null)
+                {
+                    ctx.playbackDialog.closeWindow();
+                    ctx.playbackDialog = null;
+                }
             }
         }
 

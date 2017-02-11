@@ -24,6 +24,12 @@ public class Egg extends Item
         m_cracked = cracked;
         m_stuck = stuck;
     }
+
+    @Override
+    public String getType()
+    {
+        return "egg";
+    }
     
     public boolean isCracked()
     {

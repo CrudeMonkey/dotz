@@ -12,6 +12,7 @@ import com.enno.dotz.client.Cell.ConveyorCell;
 import com.enno.dotz.client.Cell.Door;
 import com.enno.dotz.client.Cell.Hole;
 import com.enno.dotz.client.Cell.ItemCell;
+import com.enno.dotz.client.Cell.Slot;
 import com.enno.dotz.client.Cell.Machine;
 import com.enno.dotz.client.Cell.Rock;
 import com.enno.dotz.client.Cell.Slide;
@@ -54,6 +55,7 @@ public class CellPalette extends Palette<Cell>
         addButton(new Bubble(), 4, 2);        
         addButton(new Rock(), 5, 2);
         addButton(new Machine(), 6, 2);
+        addButton(new Slot(), 7, 2);
     }
     
     private void addButton(Cell cell, int col, int row)

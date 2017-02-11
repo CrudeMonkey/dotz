@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Random;
 
 import com.ait.lienzo.client.core.shape.Circle;
 import com.ait.lienzo.client.core.shape.Group;
@@ -16,6 +17,7 @@ import com.ait.lienzo.client.core.shape.Rectangle;
 import com.ait.lienzo.client.core.shape.Slice;
 import com.ait.lienzo.client.core.shape.Text;
 import com.ait.lienzo.client.core.shape.Triangle;
+import com.ait.lienzo.client.core.types.BoundingBox;
 import com.ait.lienzo.client.core.types.LinearGradient;
 import com.ait.lienzo.client.core.types.Point2D;
 import com.ait.lienzo.shared.core.types.Color;
@@ -26,6 +28,8 @@ import com.ait.lienzo.shared.core.types.LineJoin;
 import com.ait.lienzo.shared.core.types.TextAlign;
 import com.ait.lienzo.shared.core.types.TextBaseLine;
 import com.enno.dotz.client.Controller.Controllable;
+import com.enno.dotz.client.Generator.ItemFrequency;
+import com.enno.dotz.client.SlotMachines.SlotMachineInfo;
 import com.enno.dotz.client.anim.Pt;
 import com.enno.dotz.client.editor.ModePalette.RadioActive;
 import com.enno.dotz.client.item.Animal;
@@ -42,10 +46,17 @@ import com.enno.dotz.client.item.RandomItem;
 import com.enno.dotz.client.item.Rocket;
 import com.enno.dotz.client.item.Striped;
 import com.enno.dotz.client.item.WrappedDot;
+import com.enno.dotz.client.util.Console;
+import com.enno.dotz.client.util.FrequencyGenerator;
 import com.google.gwt.dom.client.Style.FontWeight;
 
 public abstract class Cell
 {
+    // some Cell type identifiers used when undoing Bubble Machine transformations
+    public static final int UNKNOWN_TYPE = 0;
+    public static final int ITEM_CELL = 1;
+    public static final int BUBBLE = 2;
+    
     public static interface Unlockable
     {
         /**
@@ -74,6 +85,11 @@ public abstract class Cell
     protected Cell()
     {        
         //NOTE: row, col is set by GridState.addCell()
+    }
+    
+    public int getType()
+    {
+        return UNKNOWN_TYPE;
     }
     
     public void init(Context ctx)
@@ -236,6 +252,14 @@ public abstract class Cell
         return false;
     }
 
+    /**
+     * @return Whether dots fall thru this cell (e.g. Hole)
+     */
+    public boolean isFallThru()
+    {
+        return false;
+    }
+    
     public String toString()
     {
         return col + "," + row;
@@ -243,6 +267,8 @@ public abstract class Cell
 
     public void initGraphics(int col, int row, double x, double y)
     {
+        this.col = col;
+        this.row = row;
         m_x = x;
         m_y = y;
         updateIce();
@@ -385,10 +411,62 @@ public abstract class Cell
     {
     }
 
+    public CellState copyState()
+    {
+        return new CellState(item, ice, getType());
+    }
+    
+    public void restoreState(CellState state)
+    {
+        ice = state.ice;
+        updateIce();
+        
+        if (item != null)
+        {
+            item.removeShapeFromLayer(ctx.dotLayer);
+            item = null;
+        }
+            
+        if (state.item != null)
+        {
+            item = state.item.copy();
+            item.init(ctx);
+            item.moveShape(ctx.state.x(col), ctx.state.y(row));
+            item.addShapeToLayer(ctx.dotLayer);
+        }
+    }
+    
+    public static class CellState
+    {
+        Item item;
+        int ice;
+        int type;
+        
+        public CellState(Item item, int ice)
+        {
+            this(item, ice, UNKNOWN_TYPE);
+        }
+        
+        public CellState(Item item, int ice, int type)
+        {
+            this.type = type;
+            this.ice = ice;
+            
+            if (item != null)
+                this.item = item.copy();
+        }
+   }
+    
     public static class ItemCell extends Cell
     {
         public ItemCell()
         {            
+        }
+        
+        @Override
+        public int getType()
+        {
+            return ITEM_CELL;
         }
         
         @Override
@@ -819,6 +897,12 @@ public abstract class Cell
         }
 
         @Override
+        public boolean isFallThru()
+        {
+            return true;
+        }
+        
+        @Override
         public boolean canContainItems()
         {
             return false;
@@ -933,6 +1017,23 @@ public abstract class Cell
     
     public static class Door extends Cell implements Controllable, Unlockable
     {
+        public static class State extends CellState
+        {
+            public int strength;
+            public int direction;
+            public int time;
+
+            public State(Item item, int ice, int strength, int direction, Controller controller)
+            {
+                super(item, ice);
+                this.strength = strength;
+                this.direction = direction;
+                
+                if (controller != null)
+                    time = controller.getTime();
+            }
+        }
+        
         private boolean m_blinking;
         private Controller m_controller;
         
@@ -963,6 +1064,32 @@ public abstract class Cell
             m_rotationDirection = 0;
             m_direction = Direction.NONE;
             m_controller = new Controller(sequence);
+        }
+        
+        @Override
+        public CellState copyState()
+        {
+            return new State(item, ice, m_strength, m_direction, m_controller);
+        }
+        
+        @Override
+        public void restoreState(CellState state)
+        {
+            super.restoreState(state);
+            
+            State s = (State) state;
+            m_strength = s.strength;
+            m_direction = s.direction;
+            if (m_controller != null)
+                m_controller.setTime(s.time);
+            
+            updateStrength();
+            
+            if (m_direction != Direction.NONE)
+            {
+                setRotation();
+                m_neighbor = determineNeighbor(col, row);
+            }
         }
         
         public boolean isBlinking()
@@ -1281,9 +1408,9 @@ public abstract class Cell
                 if (m_strength == 0)
                 {
                     ctx.score.explodedDoor();                    
-                    ctx.doorLayer.remove(m_shape);
+                    m_shape.setVisible(false);
                     
-                    super.explode(color, chainSize);
+                    // don't explode item!
                 }
                 
                 updateStrength();
@@ -1318,7 +1445,7 @@ public abstract class Cell
             
             m_strength = 0;
             ctx.score.explodedDoor();                    
-            ctx.doorLayer.remove(m_shape);
+            m_shape.setVisible(false);
             m_text.setVisible(false);
         }
         
@@ -1386,6 +1513,21 @@ public abstract class Cell
     
     public static class Cage extends Cell implements Controllable, Unlockable
     {
+        public static class State extends CellState
+        {
+            public int strength;
+            public int time;
+
+            public State(Item item, int ice, int strength, Controller controller)
+            {
+                super(item, ice);
+                this.strength = strength;
+                
+                if (controller != null)
+                    time = controller.getTime();
+            }
+        }
+        
         protected int m_strength;
         
         private Group m_shape;
@@ -1412,6 +1554,26 @@ public abstract class Cell
             m_blinking = true;
         }
         
+        @Override
+        public CellState copyState()
+        {
+            return new State(item, ice, m_strength, m_controller);
+        }
+        
+        @Override
+        public void restoreState(CellState state)
+        {
+            super.restoreState(state);
+            
+            State s = (State) state;
+            m_strength = s.strength;
+            if (m_controller != null)
+                m_controller.setTime(s.time);
+            
+            updateStrength();
+            
+        }
+        
         public boolean isBlinking()
         {
             return m_blinking;
@@ -1420,6 +1582,12 @@ public abstract class Cell
         public boolean isBlocking()
         {
             return m_blocking;
+        }
+        
+        @Override
+        public boolean isFallThru()
+        {
+            return !isLockedBlockingCage();
         }
         
         @Override
@@ -1480,7 +1648,7 @@ public abstract class Cell
             
             m_strength = 0;
             ctx.score.explodedCage();                    
-            ctx.doorLayer.remove(m_shape);
+            m_shape.setVisible(false);
             m_text.setVisible(false);
         }
 
@@ -1571,7 +1739,7 @@ public abstract class Cell
                 if (m_strength == 0)
                 {
                     ctx.score.explodedCage();                    
-                    ctx.doorLayer.remove(m_shape);
+                    m_shape.setVisible(false);
                 }
                 
                 updateStrength();
@@ -1731,8 +1899,42 @@ public abstract class Cell
     
     public static class Bubble extends Cell
     {
+        public static class State extends CellState
+        {
+            public boolean popped;
+
+            public State(Item item, int ice, boolean popped)
+            {
+                super(item, ice, BUBBLE);
+                this.popped = popped;
+            }
+        }
+        
         private boolean m_popped;
         private Group m_shape;
+        
+        @Override
+        public int getType()
+        {
+            return BUBBLE;
+        }
+        
+        @Override
+        public CellState copyState()
+        {
+            return new State(item, ice, m_popped);
+        }
+        
+        @Override
+        public void restoreState(CellState state)
+        {
+            super.restoreState(state);
+            
+            State s = (State) state;
+            m_popped = s.popped;
+            
+            m_shape.setVisible(!m_popped);
+        }
         
         public boolean isPopped()
         {
@@ -1881,7 +2083,7 @@ public abstract class Cell
             }
             
             ctx.score.explodedBubble();                    
-            ctx.doorLayer.remove(m_shape);
+            m_shape.setVisible(false);
             m_popped = true;
             
             super.explode(color, chainSize);
@@ -1965,14 +2167,42 @@ public abstract class Cell
     
     public static class CircuitCell extends Cell
     {
-        public enum State { ON, OFF, DONE };
+        public static class State extends CellState
+        {
+            public OnOff onOff;
+
+            public State(Item item, int ice, OnOff onOff)
+            {
+                super(item, ice);
+                this.onOff = onOff;
+            }
+        }
         
-        public State state = State.ON;
+        public enum OnOff { ON, OFF, DONE };
+        
+        public OnOff state = OnOff.ON;
         
         private Group m_onShape;
         private Group m_offShape;
 
         private Rectangle m_offDash;
+        
+        public CellState copyState()
+        {
+            return new State(item, ice, state);
+        }
+        
+        @Override
+        public void restoreState(CellState cellState)
+        {
+            super.restoreState(cellState);
+            
+            State s = (State) cellState;
+            state = s.onOff;
+            
+            m_onShape.setVisible(state == OnOff.ON);
+            m_offShape.setVisible(state == OnOff.OFF);
+        }
         
         @Override
         public Cell copy()
@@ -2022,7 +2252,7 @@ public abstract class Cell
         @Override
         public void animate(long t, double cursorX, double cursorY)
         {
-            if (state == State.OFF)
+            if (state == OnOff.OFF)
             {
                 int n = (int) ((t / 50) % 10);
                 m_offDash.setDashOffset(9 - n);
@@ -2069,11 +2299,11 @@ public abstract class Cell
         
         public void explode(Integer color, int chainSize)
         {
-            if (state != State.DONE)
+            if (state != OnOff.DONE)
             {
-                state = state == State.ON ? State.OFF : State.ON;
-                m_onShape.setVisible(state == State.ON);
-                m_offShape.setVisible(state == State.OFF);
+                state = state == OnOff.ON ? OnOff.OFF : OnOff.ON;
+                m_onShape.setVisible(state == OnOff.ON);
+                m_offShape.setVisible(state == OnOff.OFF);
             }
             
             super.explode(color, chainSize);
@@ -2081,7 +2311,7 @@ public abstract class Cell
 
         public void setDone()
         {
-            state = State.DONE;
+            state = OnOff.DONE;
             m_onShape.setVisible(false);
             m_offShape.setVisible(false);
         }
@@ -2089,12 +2319,23 @@ public abstract class Cell
         @Override
         public boolean stopsLaser()
         {
-            return state != State.DONE || itemStopsLaser();
+            return state != OnOff.DONE || itemStopsLaser();
         }
     }
     
     public static class Machine extends Cell
     {
+        public static class State extends CellState
+        {
+            public int stage;
+
+            public State(Item item, int ice, int stage)
+            {
+                super(item, ice);
+                this.stage = stage;
+            }
+        }
+        
         public static enum MachineType
         {
             ITEM("Item"),
@@ -2179,6 +2420,9 @@ public abstract class Cell
         
         private int m_stage;
         private Text m_howManyText;
+        
+        private String m_coinFrequencies;
+        private double[] m_coinFreqChance;
        
         public Machine()
         {
@@ -2190,13 +2434,90 @@ public abstract class Cell
             m_launchItem = new Fire(false);
         }
         
-        public Machine(String type, Item item, int every, int howMany, String trigger)
+        public Machine(String type, Item item, int every, int howMany, String trigger, String coinFrequencies)
         {
            m_type = MachineType.find(type);
            m_launchItem = item;
            m_every = every;
            m_howMany = howMany;
            m_trigger = MachineTrigger.find(trigger);
+           
+           if (m_type == MachineType.COIN)
+               setCoinFrequencies(coinFrequencies == null ? Coin.DEFAULT_COIN_FREQ : coinFrequencies);           
+        }
+        
+        public String getCoinFrequencies()
+        {
+            return m_coinFrequencies;
+        }
+        
+        public void setCoinFrequencies(String coinFrequencies)
+        {
+            m_coinFrequencies = coinFrequencies;
+            m_coinFreqChance = parseCoinFrequencies(coinFrequencies);
+        }
+        
+        public int nextCoinAmount(Random rnd)
+        {
+            double d = rnd.nextDouble();
+            
+            double totalChance = 0;
+            for (int i = 0; i < Coin.NUM_COINS - 1; i++)
+            {
+                totalChance += m_coinFreqChance[i];
+                if (d < totalChance)
+                    return Coin.COIN_DENOMINATION[i];
+            }
+            return Coin.COIN_DENOMINATION[Coin.NUM_COINS - 1];
+        }
+        
+        public static double[] parseCoinFrequencies(String coinFrequencies)
+        {
+            if (coinFrequencies == null || coinFrequencies.isEmpty())
+                return null;
+            
+            double[] cf = new double[Coin.NUM_COINS];
+            int i = 0;
+            double total = 0;
+            for (String s : coinFrequencies.split(","))
+            {
+                if (i >= Coin.NUM_COINS)
+                    throw new RuntimeException("too many values");
+                
+                cf[i] = Double.parseDouble(s.trim());
+                total += cf[i];
+                i++;
+            }
+            
+            if (i < Coin.NUM_COINS)
+                throw new RuntimeException("must specify 3 values");
+            
+            if (total == 0)
+                throw new RuntimeException("total can't be zero");
+            
+            // normalize
+            for (i = 0; i < cf.length; i++)
+            {
+                cf[i] = cf[i] / total;
+            }
+            
+            return cf;
+        }
+
+        public CellState copyState()
+        {
+            return new State(item, ice, m_stage);
+        }
+        
+        @Override
+        public void restoreState(CellState state)
+        {
+            super.restoreState(state);
+            
+            State s = (State) state;
+            m_stage = s.stage;
+            
+            updateStage();
         }
         
         @Override
@@ -2253,6 +2574,12 @@ public abstract class Cell
         public MachineTrigger getTrigger()
         {
             return m_trigger;
+        }
+        
+        @Override
+        public boolean isFallThru()
+        {
+            return true;
         }
         
         @Override
@@ -2453,7 +2780,7 @@ public abstract class Cell
         @Override
         public Cell copy()
         {
-            return new Machine(m_type.name, m_launchItem == null ? null : m_launchItem.copy(), m_every, m_howMany, m_trigger.name);
+            return new Machine(m_type.name, m_launchItem == null ? null : m_launchItem.copy(), m_every, m_howMany, m_trigger.name, getCoinFrequencies());
         }
 
         public Item createItem(Context ctx, Cell target)
@@ -2480,7 +2807,7 @@ public abstract class Cell
             else if (m_type == MachineType.COIN)
             {
                 Item item = m_launchItem.copy();                
-                ((Coin) item).setAmount(ctx.generator.nextCoinAmount());
+                ((Coin) item).setAmount(nextCoinAmount(ctx.generator.getRandom()));
                 return item;
             }
             else if (m_type == MachineType.BOMBIFY)
@@ -2520,6 +2847,11 @@ public abstract class Cell
             }
             
             throw new RuntimeException("unexpected MachineType " + m_type.name);
+        }
+
+        public boolean isCoinMachine()
+        {
+            return m_type == MachineType.COIN;
         }
 
         public boolean canTargetCell(Cell cell)
@@ -2600,6 +2932,450 @@ public abstract class Cell
             if (m.m_launchItem != null)
                 m.m_launchItem.setStuck(!m.m_launchItem.isStuck());
             return m;
+        }
+    }
+    
+    public static class Slot extends Cell
+    {
+        public static class State extends CellState
+        {
+            public boolean hold;
+            public boolean canHold;
+            public int currShapeIndex;
+            public int nextShapeIndex;
+
+            public State(boolean hold, boolean canHold, int currShapeIndex, int nextShapeIndex)
+            {
+                super(null, 0);
+                
+                this.hold = hold;
+                this.canHold = canHold;
+                this.currShapeIndex = currShapeIndex;
+                this.nextShapeIndex = nextShapeIndex;
+            }
+        }
+        
+        public static final int DT = 250;   // time to roll one slot in ms.
+        public static final int SPINS = 8;
+
+        private IPrimitive<?> m_shape;
+        private Group m_clipBox;
+        private List<IPrimitive<?>> m_shapes;
+
+        private int m_currShapeIndex = -1;
+        private int m_nextShapeIndex = -1;
+
+        private IPrimitive<?> m_currShape;
+        private IPrimitive<?> m_nextShape;
+
+        private long m_startTime;
+
+        private FrequencyGenerator<Integer> m_freqGen;
+        private List<Item> m_possibleItems = new ArrayList<Item>();
+
+        private Text m_holdText;
+        private boolean m_hold;
+        private boolean m_canHold;
+
+        private int m_spins;
+
+        private SlotMachineInfo m_info;
+        private Group m_winShape;
+        
+        public SlotMachineInfo getSlotMachineInfo()
+        {
+            return m_info;
+        }
+
+        public void setSlotMachineInfo(SlotMachineInfo info)
+        {
+            m_info = info;
+        }
+        
+        public boolean isHold()
+        {
+            return m_hold;
+        }
+
+        public void setHold(boolean hold)
+        {
+            m_hold = hold;
+            m_holdText.setVisible(hold);
+        }
+
+        public void toggleHold()
+        {
+            setHold(!isHold());
+        }
+        
+        public void setCanHold(boolean canHold)
+        {
+            m_canHold = canHold;
+        }
+        
+        public boolean canHold()
+        {
+            return m_canHold;
+        }
+        
+        @Override
+        public boolean canDrop()
+        {
+            return false;
+        }
+        
+        @Override
+        public boolean isFallThru()
+        {
+            return true;
+        }
+        
+        @Override
+        public boolean canContainItems()
+        {
+            return false;
+        }
+        
+        @Override
+        public boolean canBeFilled()
+        {
+            return false;
+        }
+        
+        @Override
+        public boolean canGrowFire()
+        {
+            return false;
+        }
+        
+        @Override
+        public boolean canHaveIce()
+        {
+            return false;
+        }
+        
+        @Override
+        public boolean canExplode(Integer color)
+        {
+            return false;
+        }
+        
+        @Override
+        public boolean canBeNuked()
+        {
+            return true;
+        }
+        
+        @Override
+        public boolean canConnect(Integer color, boolean isWordMode)
+        {
+            return false;
+        }
+        
+        @Override
+        public boolean canExplodeNextTo(Collection<Cell> cells, Integer color)
+        {
+            return true;
+        }
+        
+        @Override
+        public void zap()
+        {
+            ctx.state.getSlotMachines().triggeredSlot(this);
+        }
+        
+        @Override
+        public void explode(Integer color, int chainSize)
+        {
+            zap();
+        }
+           
+        @Override
+        public Cell copy()
+        {
+            Slot c = new Slot();
+            c.copyValues(this);
+            c.m_info = m_info; // no need to deep copy
+            return c;
+        }
+        
+        @Override
+        public State copyState()
+        {
+            return new State(m_hold, m_canHold, m_currShapeIndex, m_nextShapeIndex);
+        }
+        
+        @Override
+        public void restoreState(CellState state)
+        {
+            super.restoreState(state);
+            
+            State s = (State) state;
+            setHold(s.hold);
+            setCanHold(s.canHold);
+            
+            if (m_currShape != null)
+                m_clipBox.remove(m_currShape);
+            if (m_nextShape != null)
+                m_clipBox.remove(m_nextShape);
+            
+            m_currShapeIndex = s.currShapeIndex;
+            if (m_currShapeIndex != -1)
+            {
+                m_currShape = m_shapes.get(m_currShapeIndex);
+                m_currShape.setY(ctx.cfg.size / 2);
+                m_clipBox.add(m_currShape);
+            }
+            
+            m_nextShapeIndex = s.nextShapeIndex;
+            if (m_nextShapeIndex != -1)
+            {
+                m_nextShape = m_shapes.get(m_nextShapeIndex);
+                m_nextShape.setY(ctx.cfg.size * -0.5);
+                m_clipBox.add(m_nextShape);
+            }
+        }
+        
+        @Override
+        public void initGraphics(int col, int row, double x, double y)
+        {
+            super.initGraphics(col, row, x, y);
+            
+            m_shape = createShape(ctx.cfg.size);
+            
+//            if (!ctx.isEditing && !ctx.isPreview)
+//                setup();
+            
+//            if (ctx.isEditing || ctx.isPreview)
+//                m_stage = m_every;
+//            
+//            updateStage();
+            ctx.doorLayer.add(m_shape);
+        }
+        
+        @Override
+        public void removeGraphics()
+        {
+            super.removeGraphics();
+            ctx.doorLayer.remove(m_shape);
+        }
+        
+        private IPrimitive<?> createShape(int sz)
+        {
+            Group g = new Group();
+            g.setX(m_x - sz / 2);
+            g.setY(m_y - sz / 2);
+            
+            Rectangle r = new Rectangle(sz, sz);
+            r.setFillColor(ColorName.BLACK);
+//            r.setX(1);
+//            r.setY(1);
+            g.add(r); 
+            
+            double bx = 2;
+            double by = 4;
+            double d = sz * 0.1;
+            double r1 = sz * 0.9;
+            double r2 = sz * 1.2;
+            MultiPath p = new MultiPath();
+            p.M(d + bx, by);
+            p.L(sz - 1 - bx, by);
+            p.A(r1, r2, 0, 0, 0, sz - 1 - bx, sz - 1 - by);
+            p.L(d + bx, sz - 1 - by);
+            p.A(r1, r2, 0, 0, 1, d + bx, by);
+            p.Z();
+            
+            p.setStrokeColor(ColorName.DARKGRAY);
+            p.setStrokeWidth(2);
+            p.setFillColor(ColorName.ANTIQUEWHITE);
+            g.add(p);
+            
+            m_clipBox = new Group();
+            m_clipBox.setPathClipper(new BoundingBox(1, by + 1, sz - 2, sz - by - 2));
+            g.add(m_clipBox);
+            
+//            r = new Rectangle(sz - 3, sz - 3);
+//            r.setStrokeColor(ColorName.GREEN);
+//            r.setStrokeWidth(3);
+//            r.setCornerRadius(4);
+//            r.setX(1);
+//            r.setY(1);
+            //g.add(r);            
+            
+            Line l = new Line(bx, sz * 0.5, sz - 1 - bx, sz * 0.5);
+            l.setAlpha(0.5);
+            l.setStrokeColor(ColorName.BLACK);
+            g.add(l);
+            
+            m_holdText = new Text("HOLD");
+            m_holdText.setFontSize(8);
+            m_holdText.setFontStyle("bold");
+            m_holdText.setTextAlign(TextAlign.CENTER);
+            m_holdText.setTextBaseLine(TextBaseLine.MIDDLE);
+            m_holdText.setFillColor(ColorName.RED);
+            m_holdText.setX(sz * 0.5);
+            m_holdText.setY(sz * 0.5);
+            g.add(m_holdText);
+            
+            m_winShape = new Group();
+            m_winShape.setX(sz / 2);
+            m_winShape.setY(sz / 2);
+            
+            double ww = sz * 0.6;
+            double wh = sz * 0.3;
+            Rectangle wr = new Rectangle(ww, wh);
+            wr.setX(-ww / 2);
+            wr.setY(-wh / 2);
+            wr.setFillColor(ColorName.RED);
+            m_winShape.add(wr);
+            
+            Text winText = new Text("WIN");
+            winText.setFontSize(9);
+            winText.setFontStyle("bold");
+            winText.setTextAlign(TextAlign.CENTER);
+            winText.setTextBaseLine(TextBaseLine.MIDDLE);
+            winText.setFillColor(ColorName.WHITE);
+            m_winShape.add(winText);
+            
+            m_winShape.setVisible(false);
+            g.add(m_winShape);
+            return g;
+        }
+        
+        public void setup()
+        {
+            SlotMachineInfo info = m_info == null ? SlotMachineInfo.createDefaultInfo() : m_info;
+            
+            m_freqGen = new FrequencyGenerator<Integer>();
+            
+            List<IPrimitive<?>> shapes = new ArrayList<IPrimitive<?>>();
+            for (ItemFrequency f : info.frequencies)
+            {
+                addShape(shapes, f.frequency, f.item);
+            }
+            m_shapes = shapes;
+            
+            Random rnd = ctx.generator.getRandom();
+            m_currShapeIndex = getNextShapeIndex(rnd);
+            m_currShape = m_shapes.get(m_currShapeIndex);
+            m_currShape.setY(ctx.cfg.size / 2);
+            m_clipBox.add(m_currShape);
+            
+            m_nextShapeIndex = m_currShapeIndex;    // don't generate this index next            
+            m_nextShapeIndex = getNextShapeIndex(rnd);
+            m_nextShape = m_shapes.get(m_nextShapeIndex);
+            m_nextShape.setY(ctx.cfg.size * -0.5);
+            m_clipBox.add(m_nextShape);
+            
+            m_startTime = System.currentTimeMillis();
+        }
+        
+        public void spin(int spins)
+        {
+            m_spins = spins;
+            m_startTime = System.currentTimeMillis();
+        }
+        
+        public void updateSpin(long t)
+        {
+            long dt = t - m_startTime;
+            boolean past = dt >= DT;
+            if (!past || m_spins > 0)
+            {
+                tick(t);
+            }
+        }
+        
+        public void endSpin()
+        {
+            pullNextItem();
+            m_currShape.setY(ctx.cfg.size * 0.5);
+            m_nextShape.setY(ctx.cfg.size * -0.5);
+        }
+        
+        @Override
+        public void animate(long t, double cursorX, double cursorY)
+        {
+            //tick(t);
+        }
+        
+        private void tick(long t)
+        {
+            long dt = t - m_startTime;
+            boolean past = dt >= DT;
+            double f = (dt % DT) / (double) DT;
+            
+            if (past)
+            {
+                m_spins--;
+                
+//                Console.log("past=" + past + " dt=" + dt + " f=" + f);
+                m_startTime += (dt / DT) * DT;
+                
+//                dt = t - m_startTime;
+//                Console.log("newdt=" + dt);
+                
+                
+                pullNextItem();
+            }
+            
+            m_currShape.setY(ctx.cfg.size * (f + 0.5));
+            m_nextShape.setY(ctx.cfg.size * (f - 0.5));
+        }
+
+        protected void pullNextItem()
+        {
+            m_clipBox.remove(m_currShape);
+            m_currShape = m_nextShape;
+            m_currShapeIndex = m_nextShapeIndex;
+            
+            int i = getNextShapeIndex(ctx.generator.getRandom());
+            m_nextShape = m_shapes.get(i);
+            m_nextShapeIndex = i;
+            
+            m_clipBox.add(m_nextShape);
+        }
+        
+        private int getNextShapeIndex(Random rnd)
+        {
+            int i;
+            do
+            {
+                i = m_freqGen.next(rnd);
+            }
+            while (i == m_nextShapeIndex);
+//            Console.log("next slot " + i);
+            return i;
+        }
+        
+        private void addShape(List<IPrimitive<?>> shapes, double freq, Item item)
+        {
+            m_freqGen.add(freq, shapes.size());
+            m_possibleItems.add(item);
+            
+            item.init(ctx);
+            IPrimitive<?> shape = item.createShape(ctx.cfg.size);
+            shape.setX(ctx.cfg.size / 2);
+            shapes.add(shape);
+        }
+
+        public Item getCurrentItem()
+        {
+            return m_possibleItems.get(m_currShapeIndex);
+        }
+
+        public void setWinning(boolean winning)
+        {
+            m_startTime = System.currentTimeMillis();
+            m_winShape.setVisible(winning);
+        }
+        
+        private static final long BLINK_INTERVAL = 200;
+        
+        public void updateWinning()
+        {
+            long dt = System.currentTimeMillis() - m_startTime;
+            m_winShape.setVisible((dt / BLINK_INTERVAL) % 2 == 0);
         }
     }
 }

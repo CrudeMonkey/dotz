@@ -1,19 +1,25 @@
 package com.enno.dotz.client.item;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.ait.lienzo.client.core.shape.Ellipse;
 import com.ait.lienzo.client.core.shape.Group;
 import com.ait.lienzo.client.core.shape.IPrimitive;
 import com.ait.lienzo.client.core.shape.Line;
 import com.ait.lienzo.client.core.shape.Text;
 import com.ait.lienzo.shared.core.types.Color;
-import com.ait.lienzo.shared.core.types.ColorName;
-import com.ait.lienzo.shared.core.types.IColor;
 import com.ait.lienzo.shared.core.types.TextAlign;
 import com.ait.lienzo.shared.core.types.TextBaseLine;
 import com.enno.dotz.client.Config;
+import com.enno.dotz.client.util.Font;
 
 public class Coin extends Item
 {
+    public static final String DEFAULT_COIN_FREQ = "10,3,1";                // 1,5,10
+    public static final int[]  COIN_DENOMINATION = { 1, 5, 10 };
+    public static final int    NUM_COINS         = COIN_DENOMINATION.length;
+    
     private int m_amount;
 
     public Coin()
@@ -25,6 +31,12 @@ public class Coin extends Item
     {
         m_amount = amount;
         m_stuck = stuck;
+    }
+
+    @Override
+    public String getType()
+    {
+        return "coin";
     }
     
     public int getAmount()
@@ -106,7 +118,7 @@ public class Coin extends Item
         else
             text.setFontSize(12);
         
-        text.setFontFamily("Righteous");
+        text.setFontFamily(Font.COIN);
         //text.setFontStyle("bold");
         text.setTextAlign(TextAlign.CENTER);
         text.setTextBaseLine(TextBaseLine.MIDDLE);
@@ -126,5 +138,22 @@ public class Coin extends Item
     public ExplodeAction explode(Integer color, int chainSize)
     {
         return ExplodeAction.REMOVE;
+    }
+    
+    public static List<Coin> getCoins(int amount)
+    {
+        List<Coin> list = new ArrayList<Coin>();
+        int i = COIN_DENOMINATION.length - 1;
+        while (amount > 0)
+        {
+            int denom = COIN_DENOMINATION[i];
+            if (amount >= denom)
+            {
+                list.add(new Coin(denom, false));
+                amount -= denom;
+            }
+            else i--;            
+        }
+        return list;
     }
 }

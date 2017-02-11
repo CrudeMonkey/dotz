@@ -26,6 +26,12 @@ public class Blaster extends Item
         m_vertical = vertical;
         m_stuck = stuck;
     }
+
+    @Override
+    public String getType()
+    {
+        return "blaster";
+    }
     
     public void setWide(boolean wide)
     {
@@ -163,7 +169,11 @@ public class Blaster extends Item
     
     protected Item doCopy()
     {
-        return new Blaster(m_vertical, m_stuck);
+        Blaster b = new Blaster(m_vertical, m_stuck);
+        b.m_wide = m_wide;
+        b.m_bothWays = m_bothWays;
+        b.m_armed = m_armed;
+        return b;
     }
 
     @Override

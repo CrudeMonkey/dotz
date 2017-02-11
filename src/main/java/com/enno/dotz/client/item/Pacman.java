@@ -26,6 +26,12 @@ public class Pacman extends Item
         m_direction = direction;
         m_stuck = stuck;
     }
+
+    @Override
+    public String getType()
+    {
+        return "pacman";
+    }
     
     public int getDirection()
     {

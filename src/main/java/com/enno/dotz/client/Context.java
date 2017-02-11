@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.ait.lienzo.client.core.shape.FastLayer;
 import com.ait.lienzo.client.core.shape.Layer;
+import com.enno.dotz.client.MainPanel.PlayLevelPanel;
 import com.enno.dotz.client.WordDisplayPanel.FindWordList;
 import com.enno.dotz.client.anim.Pt;
 import com.enno.dotz.shared.WordFinder.ResultList;
@@ -42,14 +43,17 @@ public class Context
     public Set<String> guessedWords = new HashSet<String>();
     public ResultList bestWords = new ResultList(20);
     public FindWordList findWordList;
+    public String lastWord;
     
     public int gridWidth;
     public int gridHeight;
     public int gridDx;
     public int gridDy;
     
+    public PlayLevelPanel playPanel;
     public Recorder recorder;
     public PlaybackDialog playbackDialog;
+    public UndoManager undoManager;
     
     public Context(boolean isEditing, Config level)
     {

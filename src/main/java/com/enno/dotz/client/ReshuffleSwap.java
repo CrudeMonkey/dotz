@@ -12,9 +12,9 @@ import com.enno.dotz.client.util.CallbackChain.Callback;
 
 public class ReshuffleSwap extends Reshuffle
     {
-        public ReshuffleSwap(Context ctx, Random rnd)
+        public ReshuffleSwap(Context ctx)
         {
-            super(ctx, rnd);
+            super(ctx);
         }
         
         @Override

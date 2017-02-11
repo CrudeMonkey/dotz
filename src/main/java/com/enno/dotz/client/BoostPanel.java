@@ -1,5 +1,8 @@
 package com.enno.dotz.client;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.ait.lienzo.client.core.shape.Circle;
 import com.ait.lienzo.client.core.shape.FastLayer;
 import com.ait.lienzo.client.core.shape.IPrimitive;
@@ -8,6 +11,7 @@ import com.ait.lienzo.shared.core.types.ColorName;
 import com.ait.lienzo.shared.core.types.TextAlign;
 import com.ait.lienzo.shared.core.types.TextBaseLine;
 import com.enno.dotz.client.anim.Pt;
+import com.enno.dotz.client.editor.LevelParser;
 import com.enno.dotz.client.editor.Palette;
 import com.enno.dotz.client.editor.Palette.PaletteButton;
 import com.enno.dotz.client.item.ColorBomb;
@@ -47,9 +51,35 @@ public class BoostPanel extends MXHBox
         m_palette.setActive(active);
     }
     
-    public static class BoostPalette extends Palette<Object>
+    public void copyState(UndoState undoState)
     {
-        private PaletteButton<Object> m_selected;
+        m_palette.copyState(undoState);
+    }
+
+    public void restoreState(UndoState undoState)
+    {
+        m_palette.restoreState(undoState);
+    }
+    
+    public void setConnectMode(ConnectMode connectMode)
+    {
+        m_palette.setConnectMode(connectMode);
+    }
+
+    public void addBoost(String type, int n)
+    {
+        m_palette.addBoost(type, n);
+    }
+    
+    public static class BoostState
+    {
+        Item item;
+        int count;
+    }
+    
+    public static class BoostPalette extends Palette<Item>
+    {
+        private PaletteButton<Item> m_selected;
         private ConnectMode m_connectMode;
         private double m_size;
         
@@ -88,6 +118,57 @@ public class BoostPanel extends MXHBox
                 addButton(boosts.picks, new IcePick(), col++, 0);
         }
         
+        private void redraw()
+        {
+            ctx.backgroundLayer.redraw();
+        }
+
+        // Reward from SlotMachine
+        public void addBoost(String type, int n)
+        {
+            for (final PaletteButton<?> b : m_list)
+            {
+                BoostButton bb = (BoostButton) b;
+                if (bb.isType(type))
+                {
+                    bb.setCount(bb.getCount() + n);
+                    redraw();
+                    return;
+                }
+            }
+            
+            addButton(n, LevelParser.createItem(type), m_list.size(), 0);
+            redraw();
+        }
+
+        public void copyState(UndoState undoState)
+        {
+            List<BoostState> list = new ArrayList<BoostState>();
+            for (final PaletteButton<?> b : m_list)
+            {
+                list.add(((BoostButton) b).copyState());
+            }
+            undoState.boosts = list;
+        }
+
+        public void restoreState(UndoState undoState)
+        {
+            List<BoostState> list = undoState.boosts;
+                        
+            for (final PaletteButton<?> b : m_list)
+            {
+                ctx.backgroundLayer.remove(b);
+            }
+            m_list.clear();
+            
+            int col = 0;
+            for (BoostState state : list)
+            {
+                addButton(state.count, state.item, col++, 0);
+            }
+            redraw();
+        }
+
         public void setActive(boolean active)
         {
             m_active = active;
@@ -102,7 +183,7 @@ public class BoostPanel extends MXHBox
                     if (item instanceof Turner)
                     {
                         ((BoostButton) b).swapItem(item);
-                        ctx.backgroundLayer.redraw();
+                        redraw();
                     }
                     
                     m_connectMode.cancelBoostMode();
@@ -125,7 +206,7 @@ public class BoostPanel extends MXHBox
             }
         }
         
-        protected void selected(PaletteButton<Object> selectedButton)
+        protected void selected(PaletteButton<Item> selectedButton)
         {
             if (m_selected == selectedButton && selectedButton != null)
             {
@@ -156,13 +237,13 @@ public class BoostPanel extends MXHBox
             }
             m_selected = selectedButton;
             
-            ctx.backgroundLayer.redraw();
+            redraw();
             
             m_connectMode.cancelBoostMode();
             if (m_selected != null)
             {
                 final BoostButton selected = (BoostButton) selectedButton;                
-                m_connectMode.startBoostMode((Item) selected.getItem(), new Runnable() {
+                m_connectMode.startBoostMode(selected.getItem(), new Runnable() {
                     @Override
                     public void run()
                     {
@@ -205,7 +286,7 @@ public class BoostPanel extends MXHBox
                 shape = item.createShape(ctx.cfg.size);                
             }
             
-            BoostButton b = new BoostButton(col, row, numCols, numRows, cell, shape, count, ctx, m_size);
+            BoostButton b = new BoostButton(col, row, numCols, numRows, (Item) cell, shape, count, ctx, m_size);
             b.setX(x);
             b.setY(y);
             m_list.add(b);
@@ -233,16 +314,11 @@ public class BoostPanel extends MXHBox
             m_selected = null;
             deselectAll();
             
-            ctx.backgroundLayer.redraw();
+            redraw();
         }
     }
     
-    public void setConnectMode(ConnectMode connectMode)
-    {
-        m_palette.setConnectMode(connectMode);
-    }
-    
-    public static class BoostButton extends PaletteButton<Object>
+    public static class BoostButton extends PaletteButton<Item>
     {
         public static final int SIZE = 40 + 10;
         private IPrimitive<?> m_shape;
@@ -252,7 +328,7 @@ public class BoostPanel extends MXHBox
         private Circle m_countCircle;
         private double m_size;
         
-        public BoostButton(int col, int row, int numCols, int numRows, Object cell, IPrimitive<?> shape, int count, Context ctx, double size)
+        public BoostButton(int col, int row, int numCols, int numRows, Item cell, IPrimitive<?> shape, int count, Context ctx, double size)
         {
             super(col, row, numCols, numRows, (int) size, cell, ctx, true);
             
@@ -268,6 +344,19 @@ public class BoostPanel extends MXHBox
             addCountCircle();
         }
         
+        public boolean isType(String type)
+        {
+            return m_cell.getType().equals(type);
+        }
+        
+        public BoostState copyState()
+        {
+            BoostState state = new BoostState();
+            state.item = ((Item) m_cell).copy();
+            state.count = m_count;
+            return state;
+        }
+
         protected void addCountCircle()
         {
             double r = m_size * 0.16;

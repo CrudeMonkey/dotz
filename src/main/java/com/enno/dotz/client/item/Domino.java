@@ -79,6 +79,12 @@ public class Domino extends Item
         this(2, 1, true, false);
     }
 
+    @Override
+    public String getType()
+    {
+        return "domino";
+    }
+
     public boolean isDouble()
     {
         return num[0] == num[1];

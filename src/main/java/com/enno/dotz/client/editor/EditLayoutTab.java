@@ -22,6 +22,7 @@ import com.enno.dotz.client.Cell.Machine;
 import com.enno.dotz.client.Cell.Machine.MachineType;
 import com.enno.dotz.client.Cell.Rock;
 import com.enno.dotz.client.Cell.Slide;
+import com.enno.dotz.client.Cell.Slot;
 import com.enno.dotz.client.Cell.Teleport;
 import com.enno.dotz.client.Config;
 import com.enno.dotz.client.Context;
@@ -31,6 +32,8 @@ import com.enno.dotz.client.Conveyors.ConveyorException;
 import com.enno.dotz.client.Direction;
 import com.enno.dotz.client.Generator;
 import com.enno.dotz.client.GridState;
+import com.enno.dotz.client.SlotMachines;
+import com.enno.dotz.client.SlotMachines.SlotMachineEditor;
 import com.enno.dotz.client.anim.Pt;
 import com.enno.dotz.client.editor.EditLevelDialog.ChangeListener;
 import com.enno.dotz.client.editor.LoopDetector.LoopException;
@@ -60,9 +63,7 @@ import com.enno.dotz.client.item.Item;
 import com.enno.dotz.client.item.Knight;
 import com.enno.dotz.client.item.LazySusan;
 import com.enno.dotz.client.item.RandomItem;
-import com.enno.dotz.client.item.Striped;
 import com.enno.dotz.client.item.Turner;
-import com.enno.dotz.client.item.WrappedDot;
 import com.enno.dotz.client.ui.MXAccordion;
 import com.enno.dotz.client.ui.UTabSet;
 import com.enno.dotz.client.util.Debug;
@@ -476,7 +477,7 @@ public abstract class EditLayoutTab extends VLayout
         {
             Animal animal = (Animal) item;
             animal.setStrength(m_editorProps.getAnimalStrength());
-            animal.setType(m_editorProps.getAnimalType());
+            animal.setAnimalType(m_editorProps.getAnimalType());
             animal.setAction(m_editorProps.getAnimalAction());
         }
         else if (item instanceof Blocker)
@@ -1180,12 +1181,43 @@ public abstract class EditLayoutTab extends VLayout
         private void setController(int col, int row)
         {
             GridState state = ctx.state;
-            Cell cell = state.cell(col, row);
+            final Cell cell = state.cell(col, row);
             
-            if (cell == null || !cell.hasController())
-                SetControllerDialog.closeDialog();
-            else
+            SetControllerDialog.closeDialog();
+            EditMachinePropDialog.closeDialog();
+            
+            if (cell == null)
+                return;
+            
+            if (cell.hasController())
+            {
                 SetControllerDialog.setControllable((Controllable) cell, m_changeListener);
+            }
+            else if (cell instanceof Slot)
+            {
+                SlotMachines sm = new SlotMachines();
+                try
+                {
+                    sm.locateSlotMachines(state);
+                }
+                catch (Exception e)
+                {
+                    SC.warn("Slot machines must be 3 slots in a row.");
+                    return;
+                }
+                
+                new SlotMachineEditor(sm.findLeftSlot((Slot) cell), ctx);   // store SlotMachineInfo in left slot
+            }
+            else if (cell instanceof Machine)
+            {
+                new EditMachinePropDialog((Machine) cell) {
+                    @Override
+                    protected void save(Machine machine)
+                    {
+                        changeCell(cell.col, cell.row, cell, machine);
+                    }
+                };
+            }
         }
 
         private void changeIce(int col, int row)
@@ -1416,6 +1448,8 @@ public abstract class EditLayoutTab extends VLayout
             m_grid.draw();
             
             changed();
+            
+            ctx.doorLayer.redraw();
         }        
         
         protected void rotateItem(Cell cell, boolean shift)
@@ -1478,7 +1512,7 @@ public abstract class EditLayoutTab extends VLayout
         int every = m_editorProps.getMachineEvery();
         int howMany = m_editorProps.getMachineHowMany();
         String trigger = m_editorProps.getMachineTrigger();
-        return new Machine(type, launchItem, every, howMany, trigger);
+        return new Machine(type, launchItem, every, howMany, trigger, Coin.DEFAULT_COIN_FREQ);
     }
 
     public void setLetterMode(boolean isLetterMode)

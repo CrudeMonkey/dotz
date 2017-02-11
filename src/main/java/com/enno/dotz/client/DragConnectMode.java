@@ -15,12 +15,8 @@ import com.ait.lienzo.client.core.event.NodeMouseUpHandler;
 import com.ait.lienzo.client.core.shape.Layer;
 import com.ait.lienzo.client.core.shape.Rectangle;
 import com.ait.lienzo.shared.core.types.ColorName;
-import com.ait.tooling.nativetools.client.NObject;
 import com.enno.dotz.client.Cell.Unlockable;
 import com.enno.dotz.client.SoundManager.Sound;
-import com.enno.dotz.client.anim.Pt;
-import com.enno.dotz.client.anim.Pt.PtList;
-import com.enno.dotz.client.editor.LevelParser;
 import com.enno.dotz.client.item.Animal;
 import com.enno.dotz.client.item.Chest;
 import com.enno.dotz.client.item.Domino;
@@ -36,6 +32,7 @@ import com.enno.dotz.client.item.Knight;
 import com.enno.dotz.client.item.Mirror;
 import com.enno.dotz.client.item.Turner;
 import com.enno.dotz.client.item.Wild;
+import com.enno.dotz.client.util.Debug;
 import com.google.gwt.event.shared.HandlerRegistration;
 
 public class DragConnectMode extends ConnectMode
@@ -130,7 +127,7 @@ public class DragConnectMode extends ConnectMode
     
     protected void endOfDrag()
     {
-        //Debug.p("dragging=false");
+//        Debug.p("dragging=false");
 
         m_dragging = false;
         if (m_lineMoveReg != null)
@@ -576,7 +573,7 @@ public class DragConnectMode extends ConnectMode
         m_cells.clear();
         m_dragLine.clear();
         
-        //Debug.p("mouse down in cell " + col + "," + row);
+//        Debug.p("mouse down in cell " + cell);
         
         if (isTriggeredBySingleClick(cell))
             return;
@@ -588,7 +585,7 @@ public class DragConnectMode extends ConnectMode
         if (!cell.canConnect(null, m_isWordMode) && !(!cell.isLocked() && (cell.item instanceof Knight || cell.item instanceof Egg)))
             return;
         
-        //Debug.p("dragging=true");
+//        Debug.p("dragging=true");
         m_dragging = true;
         
         m_isKnightMode = cell.item instanceof Knight;

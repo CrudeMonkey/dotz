@@ -33,6 +33,12 @@ public class DotBomb extends Item
         m_dot = dot;
         m_stuck = stuck;
     }
+
+    @Override
+    public String getType()
+    {
+        return "dotBomb";
+    }
         
     @Override
     public boolean isRadioActive()

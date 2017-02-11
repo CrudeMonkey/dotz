@@ -14,6 +14,12 @@ public class Key extends Item
     {
         m_stuck = stuck;
     }
+
+    @Override
+    public String getType()
+    {
+        return "key";
+    }
     
     @Override
     public IPrimitive<?> createShape(double size)

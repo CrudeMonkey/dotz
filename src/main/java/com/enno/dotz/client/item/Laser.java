@@ -30,6 +30,12 @@ public class Laser extends Item
         m_stuck = stuck;
     }
 
+    @Override
+    public String getType()
+    {
+        return "laser";
+    }
+
     public int getDirection()
     {
         return m_direction;

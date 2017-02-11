@@ -49,7 +49,7 @@ public class FrequencySliderGroup extends HLayout
     
     private ChangeListener m_changeListener;
     
-    public FrequencySliderGroup(boolean isNew, Config level, ChangeListener changeListener)
+    public FrequencySliderGroup(boolean isNew, List<ItemFrequency> frequencies, ChangeListener changeListener)
     {
         m_changeListener = changeListener;
         
@@ -204,88 +204,84 @@ public class FrequencySliderGroup extends HLayout
         }
         else
         {
-            Generator g = level.generator;
-            if (g != null)
+            double total = 0;
+            for (ItemFrequency f : frequencies)
             {
-                double total = 0;
-                for (ItemFrequency f : g.getFrequencies())
-                {
-                    total += f.frequency;
-                }
+                total += f.frequency;
+            }
+            
+            for (ItemFrequency f : frequencies)
+            {
+                double freq = f.frequency * 100 / total;
                 
-                for (ItemFrequency f : g.getFrequencies())
+                Item item = f.item;
+                if (item instanceof Fire)
+                    fire.initFrequency(freq);
+                else if (item instanceof Anchor)
+                    anchor.initFrequency(freq);
+                else if (item instanceof Spider)
+                    spider.initFrequency(freq);
+                else if (item instanceof Diamond)
+                    diamond.initFrequency(freq);
+                else if (item instanceof Wild)
+                    wild.initFrequency(freq);
+                else if (item instanceof Knight)
+                    knight.initFrequency(freq);
+                else if (item instanceof Clock)
+                    clock.initFrequency(freq);
+                else if (item instanceof Rocket)
+                    rocket.initFrequency(freq);
+                else if (item instanceof Laser)
+                    laser.initFrequency(freq);
+                else if (item instanceof Mirror)
+                    mirror.initFrequency(freq);
+                else if (item instanceof YinYang)
+                    yinyang.initFrequency(freq);
+                else if (item instanceof Egg)
+                    egg.initFrequency(freq);
+                else if (item instanceof DotBomb)
+                    dotBomb.initFrequency(freq);
+                else if (item instanceof Domino)
+                    domino.initFrequency(freq);
+                else if (item instanceof Turner)
+                    turner.initFrequency(freq);
+                else if (item instanceof Drop)
+                    drop.initFrequency(freq);
+                else if (item instanceof ColorBomb)
+                    colorBomb.initFrequency(freq);
+                else if (item instanceof Key)
+                    key.initFrequency(freq);
+                else if (item instanceof IcePick)
+                    pick.initFrequency(freq);
+                else if (item instanceof WrappedDot)
+                    wrappedDot.initFrequency(freq);
+                else if (item instanceof Striped)
+                    striped.initFrequency(freq);
+                else if (item instanceof Blocker)
                 {
-                    double freq = f.frequency * 100 / total;
-                    
-                    Item item = f.item;
-                    if (item instanceof Fire)
-                        fire.initFrequency(freq);
-                    else if (item instanceof Anchor)
-                        anchor.initFrequency(freq);
-                    else if (item instanceof Spider)
-                        spider.initFrequency(freq);
-                    else if (item instanceof Diamond)
-                        diamond.initFrequency(freq);
-                    else if (item instanceof Wild)
-                        wild.initFrequency(freq);
-                    else if (item instanceof Knight)
-                        knight.initFrequency(freq);
-                    else if (item instanceof Clock)
-                        clock.initFrequency(freq);
-                    else if (item instanceof Rocket)
-                        rocket.initFrequency(freq);
-                    else if (item instanceof Laser)
-                        laser.initFrequency(freq);
-                    else if (item instanceof Mirror)
-                        mirror.initFrequency(freq);
-                    else if (item instanceof YinYang)
-                        yinyang.initFrequency(freq);
-                    else if (item instanceof Egg)
-                        egg.initFrequency(freq);
-                    else if (item instanceof DotBomb)
-                        dotBomb.initFrequency(freq);
-                    else if (item instanceof Domino)
-                        domino.initFrequency(freq);
-                    else if (item instanceof Turner)
-                        turner.initFrequency(freq);
-                    else if (item instanceof Drop)
-                        drop.initFrequency(freq);
-                    else if (item instanceof ColorBomb)
-                        colorBomb.initFrequency(freq);
-                    else if (item instanceof Key)
-                        key.initFrequency(freq);
-                    else if (item instanceof IcePick)
-                        pick.initFrequency(freq);
-                    else if (item instanceof WrappedDot)
-                        wrappedDot.initFrequency(freq);
-                    else if (item instanceof Striped)
-                        striped.initFrequency(freq);
-                    else if (item instanceof Blocker)
-                    {
-                        if (((Blocker) item).isZapOnly())
-                            zapBlocker.initFrequency(freq);
-                        else
-                            blocker.initFrequency(freq);
-                    }
-                    else if (item instanceof Bomb)
-                        bomb.initFrequency(freq);
-                    else if (item instanceof Blaster)
-                        blaster.initFrequency(freq);
-                    else if (item instanceof Chest)
-                        chest.initFrequency(freq);
-                    else if (item instanceof Animal)
-                    {
-                        int color = ((Animal) item).getColor();   
-                        if (color == Animal.BLACK_ANIMAL)
-                            blackAnimal.initFrequency(freq);
-                        else
-                            animals.get(color).initFrequency(freq);
-                    }
-                    else if (item instanceof Dot)
-                    {
-                        int color = ((Dot) item).getColor();                    
-                        dots.get(color).initFrequency(freq);
-                    }
+                    if (((Blocker) item).isZapOnly())
+                        zapBlocker.initFrequency(freq);
+                    else
+                        blocker.initFrequency(freq);
+                }
+                else if (item instanceof Bomb)
+                    bomb.initFrequency(freq);
+                else if (item instanceof Blaster)
+                    blaster.initFrequency(freq);
+                else if (item instanceof Chest)
+                    chest.initFrequency(freq);
+                else if (item instanceof Animal)
+                {
+                    int color = ((Animal) item).getColor();   
+                    if (color == Animal.BLACK_ANIMAL)
+                        blackAnimal.initFrequency(freq);
+                    else
+                        animals.get(color).initFrequency(freq);
+                }
+                else if (item instanceof Dot)
+                {
+                    int color = ((Dot) item).getColor();                    
+                    dots.get(color).initFrequency(freq);
                 }
             }
         }
@@ -504,7 +500,8 @@ public class FrequencySliderGroup extends HLayout
                     slider.setFrequency(left / n);
             }
         }
-        m_changeListener.changed();
+        if (m_changeListener != null)
+            m_changeListener.changed();
     }
 
     public void setSelected(int index, boolean selected)
@@ -561,7 +558,8 @@ public class FrequencySliderGroup extends HLayout
                 }
             }
         }
-        m_changeListener.changed();
+        if (m_changeListener != null)
+            m_changeListener.changed();
     }
 
     public boolean validate()
@@ -579,20 +577,25 @@ public class FrequencySliderGroup extends HLayout
         return false;
     }
 
-    public void prepareSave(Config level)
+    public List<ItemFrequency> getFrequencies()
     {
-        Generator g = level.generator;
-        g.getFrequencies().clear();
-        
+        List<ItemFrequency> list = new ArrayList<ItemFrequency>();
         for (FrequencySlider s : m_list)
         {
             if (s.isSelected())
             {
                 double freq = s.getFrequency();
                 if (freq > 0)
-                    g.add(new ItemFrequency(s.getItem(), freq));
+                    list.add(new ItemFrequency(s.getItem(), freq));
             }
         }
+        return list;
+    }
+    
+    public void prepareSave(Config level)
+    {
+        Generator g = level.generator;
+        g.setFrequencies(getFrequencies());
     }
 
     public void equalizeDotFreq()

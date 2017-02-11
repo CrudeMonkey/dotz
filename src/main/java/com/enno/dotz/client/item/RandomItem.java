@@ -22,6 +22,12 @@ public class RandomItem extends Item
         m_stuck = stuck;
         m_radioActive = radioActive;
     }
+
+    @Override
+    public String getType()
+    {
+        return "random";
+    }
     
     @Override
     public boolean isRadioActive()

@@ -34,7 +34,7 @@ public class PlaybackDialog extends MXWindow
 
     private long m_seed;
 
-    private Runnable m_redoCallback;
+    private Runnable m_restartCallback;
     
     public PlaybackDialog(Recorder rec, Context ctx)
     {
@@ -120,13 +120,13 @@ public class PlaybackDialog extends MXWindow
             }
         });
         
-        buttons.add("Redo", new ClickHandler()
+        buttons.add("Restart", new ClickHandler()
         {            
             @Override
             public void onClick(ClickEvent event)
             {
                 closeWindow();
-                m_redoCallback.run();
+                m_restartCallback.run();
             }
         });
         
@@ -150,6 +150,7 @@ public class PlaybackDialog extends MXWindow
             NObject row = new NObject("action", rows.getAsObject(i).toJSONString());
             a.push(row);
         }
+        a.push(new NObject("action", "DONE"));
                 
         m_grid.setData(a);
         m_grid.selectRecord(m_row);
@@ -163,19 +164,27 @@ public class PlaybackDialog extends MXWindow
     public void start() // start of ConnectMode
     {
         m_row++;
-        if (m_row < m_rowCount)
+        if (m_row <= m_rowCount)
         {
             m_grid.deselectAllRecords();
             m_grid.selectRecord(m_row);
             
-            m_ctx.playbackLayer.setAction(getSelectedRow());
-            m_ctx.playbackLayer.start();
-            
-            m_step.setDisabled(false);
-            
-            if (m_stepTo != null && m_row < m_stepTo)
-                nextAction();
+            if (m_row < m_rowCount)
+            {
+                m_ctx.playbackLayer.setAction(getSelectedRow());
+                m_ctx.playbackLayer.start();
+                
+                m_step.setDisabled(false);
+                
+                if (m_stepTo != null && m_row < m_stepTo)
+                    nextAction();
+                
+                return;
+            }
         }
+        
+        m_step.setDisabled(true);
+        m_ctx.playbackLayer.stop();
     }
     
     public void stop()
@@ -222,11 +231,60 @@ public class PlaybackDialog extends MXWindow
     
     public void playback(NObject row)
     {
-        m_ctx.gridPanel.playback(row);
+        m_ctx.playPanel.playback(row);
     }
 
-    public void setRedoCallback(Runnable callback)
+    public void playedBackUndoRedo()
     {
-        m_redoCallback = callback;
+        start();
+    }
+    
+    public void setRestartCallback(Runnable callback)
+    {
+        m_restartCallback = callback;
+    }
+
+    public void undo(boolean playingBack)
+    {
+        if (playingBack)
+        {
+            start();
+            return;
+        }
+        
+        if (m_row > 0)
+        {
+            m_row--;
+            m_grid.deselectAllRecords();
+            m_grid.selectRecord(m_row);
+            m_ctx.playbackLayer.setAction(getSelectedRow());
+            m_ctx.playbackLayer.start();
+            m_step.setDisabled(false);
+        }
+    }
+
+    public void redo(boolean playingBack)
+    {
+        if (playingBack)
+        {
+            start();
+            return;
+        }
+        
+        if (m_row < m_rowCount)
+        {
+            m_row++;
+            m_grid.deselectAllRecords();
+            m_grid.selectRecord(m_row);
+            
+            if (m_row < m_rowCount)
+            {
+                m_ctx.playbackLayer.setAction(getSelectedRow());
+                m_ctx.playbackLayer.start();
+                m_step.setDisabled(false);
+                return;
+            }
+        }
+        m_step.setDisabled(true);
     }
 }

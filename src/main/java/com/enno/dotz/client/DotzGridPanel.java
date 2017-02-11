@@ -122,7 +122,20 @@ public class DotzGridPanel extends LienzoPanel
         
         ctx.score.initGrid(ctx.state);        
     }
-    
+
+    public void copyState(UndoState undoState)
+    {
+        m_state.copyState(undoState);
+    }
+
+    public void restoreState(UndoState undoState)
+    {
+        m_state.restoreState(undoState);
+        m_iceLayer.redraw();
+        m_doorLayer.redraw();
+        m_dotLayer.redraw();
+    }
+
     public void setBorders()
     {
         new BorderFinder(m_state).find(m_borderLayer);

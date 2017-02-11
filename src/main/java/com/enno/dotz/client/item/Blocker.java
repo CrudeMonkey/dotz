@@ -32,6 +32,12 @@ public class Blocker extends Item
         m_stuck = stuck;
         m_zapOnly = zapOnly;
     }
+
+    @Override
+    public String getType()
+    {
+        return "blocker";
+    }
     
     public int getStrength()
     {

@@ -12,6 +12,12 @@ public class Wild extends Item
     {
         m_stuck = stuck;
     }
+
+    @Override
+    public String getType()
+    {
+        return "wild";
+    }
     
     @Override
     public IPrimitive<?> createShape(double size)

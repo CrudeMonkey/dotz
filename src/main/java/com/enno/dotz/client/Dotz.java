@@ -1,6 +1,7 @@
 
 package com.enno.dotz.client;
 
+import com.enno.dotz.client.util.Font;
 import com.enno.dotz.client.util.WebFontLoader;
 import com.enno.dotz.client.util.WebFontLoader.WebFonts;
 import com.google.gwt.core.client.EntryPoint;
@@ -16,7 +17,9 @@ public class Dotz implements EntryPoint
     public void onModuleLoad()
     {
         WebFonts webFonts = new WebFonts();
-              webFonts.addGoogleFamily("Righteous");
+        for (String font : Font.GOOGLE_FONTS)
+            webFonts.addGoogleFamily(font);
+
 //             webFonts.addTypeKitId("mykitid1", "mykitid2");
 //              webFonts.setAscenderKey("myAscenderKey");
 //             webFonts.addAscenderFamily("AscenderSans:bold,bolditalic,italic,regular");

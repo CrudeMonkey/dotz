@@ -20,6 +20,12 @@ public class Clock extends Item
         m_strength = strength;
         m_stuck = stuck;
     }
+
+    @Override
+    public String getType()
+    {
+        return "clock";
+    }
     
     public int getStrength()
     {

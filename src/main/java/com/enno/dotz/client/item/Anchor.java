@@ -14,6 +14,12 @@ public class Anchor extends Item
     }
     
     @Override
+    public String getType()
+    {
+        return "anchor";
+    }
+    
+    @Override
     public IPrimitive<?> createShape(double size)
     {
         Group group = new Group();

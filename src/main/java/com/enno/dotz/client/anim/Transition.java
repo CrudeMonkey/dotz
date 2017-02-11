@@ -2,6 +2,8 @@ package com.enno.dotz.client.anim;
 
 import java.util.Random;
 
+import org.python.modules.math;
+
 import com.ait.lienzo.client.core.animation.IAnimation;
 import com.ait.lienzo.client.core.animation.IAnimationCallback;
 import com.ait.lienzo.client.core.animation.IAnimationHandle;
@@ -299,6 +301,48 @@ public abstract class Transition implements IAnimationCallback
             {
                 double y = from_y + (pct - 0.5) * 2 * dy;
                 moveShape(from_x + dx, y);
+            }
+        }
+    }
+    
+    public static class ParabolaTransition extends Transition
+    {
+        public ParabolaTransition(double from_x, double from_y, double to_x, double to_y, Item item)
+        {
+            super(from_x, from_y, to_x, to_y, item);
+        }
+        
+        public ParabolaTransition(double from_x, double from_y, double to_x, double to_y, IPrimitive<?> shape)
+        {
+            super(from_x, from_y, to_x, to_y, shape);
+        }
+        
+        double r1 = 25;
+        double r2 = 2 * r1;
+        
+        double P1 = 0.50;
+        double P2 = 0.30;
+        double P1_P2 = P1 + P2;
+        double P3 = 1 - P1_P2;
+        
+        @Override
+        protected void move(double pct)
+        {
+            if (pct < P1)
+            {
+                double a = pct * Math.PI / P1;
+                moveShape(from_x - r1 + r1 * Math.cos(a), from_y - r1 * Math.sin(a));
+            }
+            else if (pct < P1_P2)
+            {
+                double a = Math.PI - (pct - P1) * Math.PI / P2;
+                moveShape(from_x + r2 * Math.cos(a), from_y + r2 * Math.sin(a));
+            }
+            else
+            {
+                double p = (pct - P1_P2) / P3;
+                double x = from_x + r2 + p * (dx - r2);
+                moveShape(x, from_y + p * dy);
             }
         }
     }

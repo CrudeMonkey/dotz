@@ -14,6 +14,12 @@ public class Fire extends Item
     {
         m_stuck = stuck;
     }
+
+    @Override
+    public String getType()
+    {
+        return "fire";
+    }
     
     @Override
     public IPrimitive<?> createShape(double size)

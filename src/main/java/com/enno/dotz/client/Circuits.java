@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.enno.dotz.client.Cell.CircuitCell;
-import com.enno.dotz.client.Cell.CircuitCell.State;
+import com.enno.dotz.client.Cell.CircuitCell.OnOff;
 import com.enno.dotz.client.Circuits.Circuit;
 
 public class Circuits extends ArrayList<Circuit>
@@ -65,6 +65,27 @@ public class Circuits extends ArrayList<Circuit>
         }
     }
     
+    public void copyState(UndoState undoState)
+    {
+        int n = size();
+        boolean[] b = new boolean[n];
+        for (int i = 0; i < n; i++)
+        {
+            b[i] = get(i).done;
+        }
+        undoState.circuitsDone = b;
+    }
+    
+    public void restoreState(UndoState undoState)
+    {
+        int n = size();
+        boolean[] b = undoState.circuitsDone;
+        for (int i = 0; i < n; i++)
+        {
+            get(i).done = b[i];
+        }
+    }
+    
     protected void merge(Circuit a, Circuit b)
     {
         if (a != b)
@@ -96,7 +117,7 @@ public class Circuits extends ArrayList<Circuit>
         {
             for (CircuitCell c : this)
             {
-                if (c.state == State.ON)
+                if (c.state == OnOff.ON)
                     return false;
             }
             

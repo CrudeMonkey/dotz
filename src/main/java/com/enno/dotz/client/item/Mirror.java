@@ -14,6 +14,12 @@ public class Mirror extends Item
         m_flipped = flipped;
         m_stuck = stuck;
     }
+
+    @Override
+    public String getType()
+    {
+        return "mirror";
+    }
     
     @Override
     public IPrimitive<?> createShape(double size)

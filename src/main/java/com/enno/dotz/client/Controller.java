@@ -66,6 +66,16 @@ public class Controller
         return state;
     }
     
+    public int getTime()
+    {
+        return m_time;
+    }
+    
+    public void setTime(int time)
+    {
+        m_time = time;
+    }
+    
     public int getState()
     {
         if (m_time < m_initial.length)

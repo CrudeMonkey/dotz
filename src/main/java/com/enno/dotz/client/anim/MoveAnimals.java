@@ -75,11 +75,11 @@ public class MoveAnimals
                         if (n > 1)
                         {
                             Pt lastMove = ctx.lastMove;
-                            if (animal.getType() == Animal.Type.FOLLOW && lastMove != null)
+                            if (animal.getAnimalType() == Animal.Type.FOLLOW && lastMove != null)
                             {
                                 potentialNeighbors = findClosestMove(src, potentialNeighbors, lastMove);
                             }
-                            else if (animal.getType() == Animal.Type.SCARED && lastMove != null)
+                            else if (animal.getAnimalType() == Animal.Type.SCARED && lastMove != null)
                             {
                                 potentialNeighbors = findFurthestMove(src, potentialNeighbors, lastMove);
                             }

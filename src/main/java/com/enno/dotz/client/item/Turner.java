@@ -19,12 +19,17 @@ public class Turner extends Item
         this.n = n;
         m_stuck = stuck;
     }
+
+    @Override
+    public String getType()
+    {
+        return "turner";
+    }
     
     @Override
     public IPrimitive<?> createShape(double size)
     {
         Group g = new Group();
-        
         
         double r = size * 0.3;
         Circle bg = new Circle(r);

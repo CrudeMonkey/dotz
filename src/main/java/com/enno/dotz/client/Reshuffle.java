@@ -29,9 +29,9 @@ public class Reshuffle
     protected ArrayList<Pt> m_toState;
     private Random m_rnd;
 
-    public Reshuffle(Context ctx, Random rnd)
+    public Reshuffle(Context ctx)
     {
-        m_rnd = rnd;
+        m_rnd = ctx.generator.getRandom();
         
         this.ctx = ctx;
         this.state = ctx.state;

@@ -12,7 +12,7 @@ public class Debug
     
     public static void p(String s)
     {
-        s_log.info(s);
+        Console.log(s);
     }
     
     public static void p(String s, Exception e)

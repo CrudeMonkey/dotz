@@ -21,6 +21,12 @@ public class Knight extends Item
         m_strength = strength;
         m_stuck = stuck;
     }
+
+    @Override
+    public String getType()
+    {
+        return "knight";
+    }
     
     public int getStrength()
     {

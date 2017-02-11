@@ -24,6 +24,12 @@ public class Drop extends Item
         m_radius = radius;
         m_stuck = stuck;
     }
+
+    @Override
+    public String getType()
+    {
+        return "drop";
+    }
     
     public void setRadius(int radius)
     {

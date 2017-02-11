@@ -21,6 +21,12 @@ public class Striped extends Item
         this.color = color;
         this.vertical = vertical;
     }
+
+    @Override
+    public String getType()
+    {
+        return "striped";
+    }
     
     public void setWide(boolean wide)
     {
@@ -152,7 +158,11 @@ public class Striped extends Item
     @Override
     protected Item doCopy()
     {
-        return new Striped(color, vertical);
+        Striped s = new Striped(color, vertical);
+        s.armed = armed;
+        s.m_wide = m_wide;
+        s.m_bothWays = m_bothWays;
+        return s;
     }
 
     @Override

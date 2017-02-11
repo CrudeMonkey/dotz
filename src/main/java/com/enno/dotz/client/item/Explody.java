@@ -17,6 +17,12 @@ public class Explody extends Item
     {
         m_radius = radius;
     }
+
+    @Override
+    public String getType()
+    {
+        return "explody";
+    }
     
     public int getRadius()
     {

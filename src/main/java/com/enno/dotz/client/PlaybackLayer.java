@@ -50,7 +50,34 @@ public class PlaybackLayer extends FastLayer
         String action = Recorder.getAction(row);
         PtList list = Recorder.parsePtList(row);
         
-        if (list.size() > 1)
+        if ("undo".equals(action) || "redo".equals(action))
+        {
+            double dx = m_ctx.state.x(m_ctx.state.numColumns / 2 - 2);
+            double dy = m_ctx.state.x(m_ctx.state.numRows / 2 - 2);
+            double sz = m_ctx.state.size();
+            
+            Group g = new Group();
+            Rectangle frame = new Rectangle(sz * 2, sz);
+            frame.setFillColor(ColorName.WHITE);
+            frame.setStrokeColor(ColorName.BLACK);
+            frame.setX(dx);
+            frame.setY(dy);
+            g.add(frame);
+            
+            Text text = new Text("undo".equals(action) ? "UNDO" : "REDO");
+            text.setFillColor(ColorName.BLACK);
+            text.setFontSize(12);
+            text.setFontStyle("bold");
+            text.setTextBaseLine(TextBaseLine.MIDDLE);
+            text.setTextAlign(TextAlign.CENTER);
+            text.setX(dx + sz);
+            text.setY(dy + sz * 0.5);
+            g.add(text);
+            
+            add(g);
+            m_list.add(g);
+        }
+        else if (list.size() > 1)
         {
             for (int i = 0; i < list.size() - 1; i++)
             {

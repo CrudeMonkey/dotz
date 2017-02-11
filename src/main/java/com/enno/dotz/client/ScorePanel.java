@@ -42,6 +42,7 @@ import com.enno.dotz.client.item.Rocket;
 import com.enno.dotz.client.item.Spider;
 import com.enno.dotz.client.item.Striped;
 import com.enno.dotz.client.item.WrappedDot;
+import com.enno.dotz.client.util.Font;
 
 
 public class ScorePanel extends LienzoPanel
@@ -87,7 +88,7 @@ public class ScorePanel extends LienzoPanel
             used += usedLeft;
         }
         
-        m_levelName = new Text(ctx.cfg.name, FONT, "bold", 10);
+        m_levelName = new Text(ctx.cfg.name, Font.LEVEL_NAME, "normal", 12);
         m_levelName.setFillColor(ColorName.BLACK);
         m_levelName.setTextBaseLine(TextBaseLine.TOP); // y position is position of top of the text
         m_levelName.setX(5);
@@ -117,6 +118,24 @@ public class ScorePanel extends LienzoPanel
         m_layer.add(line);
     }
     
+    public void copyState(UndoState undoState)
+    {
+        List<GoalItemState> list = new ArrayList<GoalItemState>();
+        for (GoalItem g : m_list)
+            list.add(g.copyState());
+        undoState.goalItems = list;
+    }
+    
+    public void restoreState(UndoState undoState)
+    {
+        List<GoalItemState> list = undoState.goalItems;
+        for (int i = 0, n = m_list.size(); i < n; i++)
+        {
+            m_list.get(i).restoreState(list.get(i));
+        }
+        draw();
+    }
+
     public void setGoals(Goal goal)
     {
         if (m_list.size() > 0)
@@ -336,6 +355,12 @@ public class ScorePanel extends LienzoPanel
         }
     }
     
+    public static class GoalItemState
+    {
+        public boolean completed;
+        public int currGoal;    // used by ChainGoalItem
+    }
+    
     public abstract static class GoalItem
     {
         public static double SHAPE_SIZE = 40;
@@ -349,7 +374,7 @@ public class ScorePanel extends LienzoPanel
         private Group m_group;
         private PolyLine m_check;
         
-        private boolean m_completed;
+        protected boolean m_completed;
         
         public GoalItem(Context ctx)
         {
@@ -364,6 +389,19 @@ public class ScorePanel extends LienzoPanel
         public boolean isCompleted()
         {
             return m_completed;
+        }
+        
+        public GoalItemState copyState()
+        {
+            GoalItemState undoState = new GoalItemState();
+            undoState.completed = m_completed;
+            return undoState;
+        }
+        
+        public void restoreState(GoalItemState undoState)
+        {
+            m_completed = undoState.completed;
+            updateText();
         }
 
         public void addToPanel(double x, double y, Layer layer)
@@ -417,6 +455,9 @@ public class ScorePanel extends LienzoPanel
             m_text.setText(txt); //TODO recenter
             BoundingBox box = m_text.getBoundingBox();
             m_text.setX((GOAL_WIDTH - box.getWidth())/ 2);
+            
+            m_check.setVisible(false);
+            m_text.setVisible(true);
         }
         
         protected void setCompleted()
@@ -448,6 +489,31 @@ public class ScorePanel extends LienzoPanel
             m_colors = colors;
         }
 
+        @Override
+        public GoalItemState copyState()
+        {
+            GoalItemState undoState = new GoalItemState();
+            undoState.completed = m_completed;
+            undoState.currGoal = m_curr;
+            return undoState;
+        }
+        
+        @Override
+        public void restoreState(GoalItemState undoState)
+        {
+            m_curr = undoState.currGoal;
+            m_completed = undoState.completed;
+            if (m_completed)
+            {
+                setCompleted();
+            }
+            else
+            {
+                updateDots();
+                updateText();
+            }
+        }
+        
         @Override
         public void madeChain(int length, int color)
         {

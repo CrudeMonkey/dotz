@@ -31,6 +31,12 @@ public class Chest extends Item
         this(item, strength);
         setStuck(stuck);
     }
+
+    @Override
+    public String getType()
+    {
+        return "chest";
+    }
     
     @Override
     public boolean canReshuffle()

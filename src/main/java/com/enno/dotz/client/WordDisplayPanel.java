@@ -120,5 +120,34 @@ public class WordDisplayPanel extends LienzoPanel
             }
             return false;
         }
+        
+        public String getCurrentWord()
+        {
+            return m_wordList.size() > 0 ? m_wordList.get(0) : null;
+        }
+        
+        public void undoCurrentWord(String word)
+        {
+            if (word == null)
+                return;
+            
+            if (!word.equals(getCurrentWord()))
+            {
+                m_wordList.add(0, word);
+                m_display.setFindWord(word);
+            }
+        }
+        
+        public void redoCurrentWord(String word)
+        {
+            if (word == null)
+                return;
+            
+            if (!word.equals(getCurrentWord()))
+            {
+                m_wordList.remove(0);
+                m_display.setFindWord(word);
+            }
+        }
     }
 }

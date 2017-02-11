@@ -16,13 +16,16 @@ import com.ait.lienzo.client.core.shape.IPrimitive;
 import com.ait.lienzo.client.core.shape.Layer;
 import com.ait.lienzo.shared.core.types.ColorName;
 import com.enno.dotz.client.Cell.Bubble;
+import com.enno.dotz.client.Cell.CellState;
 import com.enno.dotz.client.Cell.CircuitCell;
 import com.enno.dotz.client.Cell.Door;
 import com.enno.dotz.client.Cell.Hole;
+import com.enno.dotz.client.Cell.ItemCell;
 import com.enno.dotz.client.Cell.Machine;
 import com.enno.dotz.client.Cell.Machine.MachineType;
 import com.enno.dotz.client.Cell.Rock;
 import com.enno.dotz.client.Cell.Slide;
+import com.enno.dotz.client.Cell.Slot;
 import com.enno.dotz.client.Circuits.Circuit;
 import com.enno.dotz.client.Controller.Controllable;
 import com.enno.dotz.client.Conveyors.Conveyor;
@@ -30,6 +33,9 @@ import com.enno.dotz.client.Conveyors.ConveyorException;
 import com.enno.dotz.client.DotzGridPanel.EndOfLevel;
 import com.enno.dotz.client.Rewards.Reward;
 import com.enno.dotz.client.Rewards.RewardStrategy;
+import com.enno.dotz.client.SlotMachines.RewardInfo;
+import com.enno.dotz.client.SlotMachines.SlotException;
+import com.enno.dotz.client.SlotMachines.SlotMachine;
 import com.enno.dotz.client.SoundManager.Sound;
 import com.enno.dotz.client.anim.AnimList;
 import com.enno.dotz.client.anim.Explosions;
@@ -62,8 +68,8 @@ import com.enno.dotz.client.item.RandomItem;
 import com.enno.dotz.client.item.Wild;
 import com.enno.dotz.client.util.CallbackChain;
 import com.enno.dotz.client.util.CallbackChain.Callback;
-import com.enno.dotz.client.util.Console;
 import com.enno.dotz.client.util.Debug;
+import com.enno.dotz.client.util.SerialAnimation;
 
 public class GridState
 {
@@ -80,11 +86,10 @@ public class GridState
     private List<LazySusan> m_lazySusans = new ArrayList<LazySusan>();
     private Circuits m_circuits;
     private Conveyors m_conveyors;
+    private SlotMachines m_slotMachines;
     private List<RewardStrategy> m_rewardStrategies;
     
     public EndOfLevel endOfLevel;
-
-    private Random m_reshuffleRandom;
 
     public GridState(int numColumns, int numRows)
     {
@@ -98,8 +103,6 @@ public class GridState
     {
         this.ctx = ctx;
         this.cfg = ctx.cfg;
-        
-        m_reshuffleRandom = new Random(ctx.generator.getUsedSeed());
         
         for (int row = 0; row < numRows; row++)
         {
@@ -148,6 +151,19 @@ public class GridState
         
         try
         {
+            m_slotMachines = new SlotMachines();
+            m_slotMachines.locateSlotMachines(this);
+            
+            if (!ctx.isEditing && !ctx.isPreview)
+                m_slotMachines.initSlots();
+        }
+        catch (SlotException e)
+        {
+            Debug.p("unexpected SlotMachine problem", e);
+        }
+        
+        try
+        {
             m_conveyors = new Conveyors(this);
         }
         catch (ConveyorException e)
@@ -158,6 +174,11 @@ public class GridState
         m_rewardStrategies = RewardStrategy.parseStrategies(ctx.generator.rewardStrategies);
     }
 
+    public SlotMachines getSlotMachines()
+    {
+        return m_slotMachines;
+    }
+    
     public int getCircuitCount()
     {
         return m_circuits.size();
@@ -237,6 +258,11 @@ public class GridState
         list.run();
     }
 
+    public void startOfMove()
+    {
+        m_slotMachines.startOfMove();
+    }
+
 //    public void processChain(final Runnable nextMoveCallback)
 //    {
 //        if (ctx.generator.swapMode)
@@ -260,6 +286,7 @@ public class GridState
         
         if (action.isWordMode) // && !ctx.generator.findWords)
         {
+            ctx.lastWord = action.word;
             new ShowWordCallback(ctx, action.word, action.wordPoints, action.color)
             {
                 @Override
@@ -322,8 +349,8 @@ public class GridState
             ctx.scorePanel.madeChain(action.cells.size(), action.color);
             if (action.isWordMode)
             {
-                // already added N points for the word
-                ctx.score.addPoints(action.wordPoints - action.cells.size());
+                ctx.score.addPoints(action.wordPoints);
+                
                 if (ctx.generator.findWords)
                 {
                     if (ctx.findWordList.foundWord(action.word))
@@ -344,6 +371,7 @@ public class GridState
         list.add(new GetTransitions(ctx).getCallback(ctx.dotLayer, cfg.dropDuration));        
         list.add(explodeLoop(false, false)); // don't check clocks
         list.add(machines());
+        list.add(slotMachines());
         list.add(radioActives());
         list.add(activateControllers());
         list.add(moveBeasts(action));
@@ -402,7 +430,8 @@ public class GridState
         
         list.add(explodeLoop(false, false)); // don't check clocks
         list.add(activateControllers());
-        list.add(machines());        
+        list.add(machines());
+        list.add(slotMachines());
         list.add(radioActives());        
         list.add(moveBeasts(action));
         list.add(moveSusans());
@@ -516,7 +545,7 @@ public class GridState
         if (ctx.generator.generateLetters)
             return null;
         
-        Reshuffle r = ctx.generator.swapMode ? new ReshuffleSwap(ctx, m_reshuffleRandom) : new Reshuffle(ctx, m_reshuffleRandom);
+        Reshuffle r = ctx.generator.swapMode ? new ReshuffleSwap(ctx) : new Reshuffle(ctx);
         if (r.mustReshuffle())            
             return r;
         
@@ -526,7 +555,7 @@ public class GridState
     /** User clicked YinYang */
     public void reshuffle(Runnable nextCallback)
     {
-        Reshuffle r = ctx.generator.swapMode ? new ReshuffleSwap(ctx, m_reshuffleRandom) : new Reshuffle(ctx, m_reshuffleRandom);
+        Reshuffle r = ctx.generator.swapMode ? new ReshuffleSwap(ctx) : new Reshuffle(ctx);
         r.forceReshuffle(nextCallback);
     }
     
@@ -734,6 +763,7 @@ public class GridState
                 };                
                 chain.add(explosions());
                 chain.add(machines());
+                chain.add(slotMachines());
                 chain.add(transitions());
                 chain.run();
                 return;
@@ -1711,43 +1741,8 @@ public class GridState
                                 {
                                     if (machine.getMachineType() == MachineType.COIN)
                                     {
-                                        final Coin newItem = (Coin) machine.createItem(ctx, null);
-                                        newItem.init(ctx);
-                                        
-                                        int newCol = rnd.nextInt(numColumns);
-                                        int newRow = rnd.nextInt(numRows);
-                                        
-                                        add(new ArchTransition(x(cx), y(cy), x(newCol), y(newRow), dy, newItem) {
-                                            boolean dinged; 
-                                            
-                                            @Override
-                                            public void move2(double pct)
-                                            {
-                                                if (pct > 0 && !dinged)
-                                                {
-                                                    SoundManager.ding(s_dingRandom.nextInt(5));
-                                                    dinged = true;
-                                                }
-                                                super.move2(pct);
-                                            }
-                                            
-                                            @Override
-                                            public void afterStart()
-                                            {
-                                                newItem.addShapeToLayer(ctx.nukeLayer);
-                                                
-//                                                if (playSound)
-//                                                    Sound.WOOSH.play();
-                                            }
-
-                                            @Override
-                                            public void afterEnd()
-                                            {
-                                                newItem.removeShapeFromLayer(ctx.nukeLayer);
-                                                
-                                                ctx.score.explodedCoins(newItem.getAmount());
-                                            }
-                                        }.fadeOut());
+                                        Coin coin = (Coin) machine.createItem(ctx, null);
+                                        add(getCoinTransition(coin, cx, cy, ctx));
                                     }
                                     else
                                     {
@@ -1795,34 +1790,7 @@ public class GridState
                                                     
                                                 default:
                                                     final Item newItem = machine.createItem(ctx, target);
-                                                    newItem.init(ctx);
-                                                    
-                                                    add(new ArchTransition(x(cx), y(cy), x(target.col), y(target.row), dy, newItem) {
-                                                        @Override
-                                                        public void afterStart()
-                                                        {
-                                                            newItem.addShapeToLayer(ctx.nukeLayer);
-                                                            
-                                                            if (playSound)
-                                                                Sound.WOOSH.play();
-                                                        }
-                                                        
-                                                        @Override
-                                                        public void afterEnd()
-                                                        {
-                                                            newItem.removeShapeFromLayer(ctx.nukeLayer);
-                                                            if (target.item != null)
-                                                                target.item.removeShapeFromLayer(ctx.dotLayer);
-                                                            
-//                                                            if (isBombify)
-//                                                                ((DotBomb) newItem).incrementStrength(1);   // TODO immediately decreases
-                                                            
-                                                            ctx.score.replace(target.item, newItem);
-                                                            
-                                                            newItem.addShapeToLayer(ctx.dotLayer);
-                                                            target.item = newItem;
-                                                        }
-                                                    });
+                                                    add(getLaunchItemTransition(newItem, cx, cy, target, ctx, playSound));
                                                     break;
                                             }
                                         }
@@ -1851,6 +1819,270 @@ public class GridState
                 return null;
             }
         };
+    }
+    
+    public static ArchTransition getLaunchItemTransition(final Item newItem, int cx, int cy, final Cell target, final Context ctx, final boolean playSound)
+    {
+        GridState state = ctx.state;
+        double dy = state.size() * -2;
+        
+        newItem.init(ctx);
+        
+        return new ArchTransition(state.x(cx), state.y(cy), state.x(target.col), state.y(target.row), dy, newItem) {
+            @Override
+            public void afterStart()
+            {
+                newItem.addShapeToLayer(ctx.nukeLayer);
+                
+                if (playSound)
+                    Sound.WOOSH.play();
+            }
+            
+            @Override
+            public void afterEnd()
+            {
+                newItem.removeShapeFromLayer(ctx.nukeLayer);
+                if (target.item != null)
+                    target.item.removeShapeFromLayer(ctx.dotLayer);
+                
+//                if (isBombify)
+//                    ((DotBomb) newItem).incrementStrength(1);   // TODO immediately decreases
+                
+                ctx.score.replace(target.item, newItem);
+                
+                newItem.addShapeToLayer(ctx.dotLayer);
+                target.item = newItem;
+            }
+        };
+    }
+    
+    public static IAnimationCallback getCoinTransition(final Coin coin, int cx, int cy, final Context ctx)
+    {
+        GridState state = ctx.state;
+        Random rnd = ctx.generator.getRandom();
+        double dy = state.size() * -2;
+        
+        int newCol = rnd.nextInt(state.numColumns);
+        int newRow = rnd.nextInt(state.numRows);
+        
+        coin.init(ctx);
+
+        return new ArchTransition(state.x(cx), state.y(cy), state.x(newCol), state.y(newRow), dy, coin) {
+            boolean dinged; 
+            
+            @Override
+            public void move2(double pct)
+            {
+                if (pct > 0 && !dinged)
+                {
+                    SoundManager.ding(s_dingRandom.nextInt(5));
+                    dinged = true;
+                }
+                super.move2(pct);
+            }
+            
+            @Override
+            public void afterStart()
+            {
+                coin.addShapeToLayer(ctx.nukeLayer);
+                
+//                if (playSound)
+//                    Sound.WOOSH.play();
+            }
+
+            @Override
+            public void afterEnd()
+            {
+                coin.removeShapeFromLayer(ctx.nukeLayer);
+                
+                ctx.score.explodedCoins(coin.getAmount());
+            }
+        }.fadeOut();
+    }
+    
+    public class SpinSlotMachines extends Callback
+    {
+        private static final long SLOT_PULL_DELAY = 400;
+        
+        @Override
+        public void run()
+        {
+            boolean found = false;
+            int max = 0;
+            for (SlotMachine sm : m_slotMachines)
+            {
+                if (sm.isTriggered())
+                {
+                    int notHoldCount = sm.notOnHoldCount();
+                    if (notHoldCount > max)
+                        max = notHoldCount;
+                    
+                    found = true;
+                }
+            }
+            if (!found)
+            {
+                doNext();
+                return;
+            }
+            
+            final int n = max - 1;
+            final long spinDuration = (Slot.SPINS + n) * Slot.DT;
+            TransitionList trans = new TransitionList("slotMachines", ctx.doorLayer, SLOT_PULL_DELAY + spinDuration) //TODO machineDuration
+            {
+                public void init()
+                {
+                    Sound.SLOT_PULL.play();
+                    
+                    for (SlotMachine sm : m_slotMachines)
+                    {
+                        if (sm.isTriggered())
+                        {
+                            int notOnHold = sm.notOnHoldCount();
+                            
+                            int pause = notOnHold - 1;
+                            for (Slot slot : sm)
+                            {
+                                if (!slot.isHold())
+                                {
+                                    addTransition(slot, Slot.SPINS + n, pause);
+                                    pause--;
+                                }                            
+                            }
+                        }
+                    }
+                }
+
+                private void addTransition(final Slot slot, int totalSpins, int pause)
+                {
+                    final int spins = totalSpins - pause;
+                    IAnimationCallback cb = new IAnimationCallback() 
+                    {
+                        @Override
+                        public void onStart(IAnimation animation, IAnimationHandle handle)
+                        {
+                            slot.spin(spins);
+                            slot.updateSpin(System.currentTimeMillis());
+                            ctx.doorLayer.redraw();
+                        }
+
+                        @Override
+                        public void onFrame(IAnimation animation, IAnimationHandle handle)
+                        {
+                            slot.updateSpin(System.currentTimeMillis());
+                            ctx.doorLayer.redraw();
+                        }
+
+                        @Override
+                        public void onClose(IAnimation animation, IAnimationHandle handle)
+                        {
+                            slot.endSpin();
+                            ctx.doorLayer.redraw();
+                        }
+                    };
+                    
+                    SerialAnimation sa = SerialAnimation.delay(SLOT_PULL_DELAY, spins * Slot.DT, cb, null);
+                    if (pause > 0)
+                        sa.addDelay(pause * Slot.DT);
+                    
+                    add(sa);
+                }
+                
+                @Override
+                public void doNext()
+                {
+                    // check winnings
+                    List<RewardInfo> rewards = new ArrayList<RewardInfo>();
+                    for (SlotMachine sm : ctx.state.getSlotMachines())
+                    {
+                        if (sm.isTriggered())
+                        {
+                            RewardInfo c = sm.getReward(ctx);
+                            if (c != null)
+                                rewards.add(c);
+                            
+                            ctx.state.getSlotMachines().afterSpin(sm, c != null);
+                        }
+                    }
+                    
+                    if (rewards.size() == 0)
+                    {
+                        Sound.MISS.play();
+                        SpinSlotMachines.this.doNext();
+                        return;
+                    }
+                    
+                    awardCombos(rewards);
+                }
+            };
+            trans.doRun();
+        }
+
+        protected void awardCombos(final List<RewardInfo> rewards)
+        {
+            CallbackChain chain = new CallbackChain();
+            
+            TransitionList blink = new TransitionList("slotMachine blink", ctx.doorLayer, 1000) {
+                @Override
+                public void init()
+                {
+                    Sound.WIN_SLOTS.play();
+                    for (RewardInfo rewardInfo : rewards)
+                    {
+                        for (final Slot slot : rewardInfo.slotMachine)
+                        {
+                            add(new IAnimationCallback() {
+                                @Override
+                                public void onStart(IAnimation animation, IAnimationHandle handle)
+                                {
+                                    slot.setWinning(true);
+                                }
+
+                                @Override
+                                public void onFrame(IAnimation animation, IAnimationHandle handle)
+                                {
+                                    slot.updateWinning();
+                                }
+
+                                @Override
+                                public void onClose(IAnimation animation, IAnimationHandle handle)
+                                {
+                                    slot.setWinning(false);
+                                }
+                            });
+                        }
+                    }
+                }
+            };
+            chain.add(blink);
+            
+            TransitionList trans = new NukeTransitionList("slotMachine rewards", ctx, 1000) //TODO duration
+            {
+                @Override
+                public void init()
+                {
+                    Sound.WOOSH.play(); //TODO
+                    
+                    for (RewardInfo rewardInfo : rewards)
+                    {
+                        rewardInfo.reward.addTransitions(ctx, rewardInfo, this, new CellList());
+                    }
+                }
+                
+                @Override
+                public void doNext()
+                {
+                    SpinSlotMachines.this.doNext();
+                }
+            };
+            chain.add(trans);
+            chain.run();
+        }
+    }
+    
+    public Callback slotMachines()
+    {
+        return new SpinSlotMachines();
     }
     
     public TransitionList explosions()
@@ -2048,5 +2280,48 @@ public class GridState
         item.moveShape(x(cell.col), y(cell.row));
         item.addShapeToLayer(ctx.dotLayer);
         cell.item = item;
+    }
+
+    public void copyState(UndoState undoState)
+    {
+        CellState[] grid = new CellState[m_grid.length];
+        for (int i = 0; i < m_grid.length; i++)
+            grid[i] = m_grid[i].copyState();
+        undoState.grid = grid;
+        m_circuits.copyState(undoState);
+    }
+
+    public void restoreState(UndoState undoState)
+    {
+        m_circuits.restoreState(undoState);
+        for (int i = 0; i < m_grid.length; i++)
+        {
+            CellState state = undoState.grid[i];
+            if (state.type != m_grid[i].getType())
+            {
+                // cell type changed due to Bubble Machine
+                Cell cell;
+                if (state.type == Cell.BUBBLE)
+                {
+                    cell = new Bubble();
+                }
+                else // ITEM_CELL
+                {
+                    cell = new ItemCell();
+                }
+                
+                Cell prev = m_grid[i];
+                cell.init(ctx);
+                cell.initGraphics(prev.col, prev.row, x(prev.col), y(prev.row));
+                
+                if (prev.item != null)
+                    prev.item.removeShapeFromLayer(ctx.dotLayer);
+                
+                prev.removeGraphics();
+                
+                m_grid[i] = cell;
+            }
+            m_grid[i].restoreState(state);
+        }
     }
 }

@@ -30,6 +30,12 @@ public class Diamond extends Item
     public Diamond()
     {
     }
+
+    @Override
+    public String getType()
+    {
+        return "diamond";
+    }
     
     @Override
     public IPrimitive<?> createShape(double size)

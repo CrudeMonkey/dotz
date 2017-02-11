@@ -42,6 +42,9 @@ public class SoundManager
         SWAP_RADIOACTIVE("28469__simmfoc__blip-1.wav"),
         PACMAN_EATS_GHOST("pacman_eatghost.wav"),
         PACMAN_CHOMP("pacman_chomp.wav"),
+        SLOT_PULL("316931__timbre__lever-pull-one-armed-bandit-from-freesound-316887-by-ylearkisto.mp3"),
+        CASH_REGISTER("cash_register_x.wav"),
+        WIN_SLOTS("ding4.mp3"),
         
 //        COIN1("coin/coin1.wav"),
 //        COIN2("coin/coin2.wav"),

@@ -151,17 +151,23 @@ public class Animal extends Item
         m_stuck = stuck;
     }
 
+    @Override
+    public String getType()
+    {
+        return "animal";
+    }
+    
     public boolean isBlack()
     {
         return m_color == BLACK_ANIMAL;
     }
     
-    public Type getType()
+    public Type getAnimalType()
     {
         return m_type;
     }
     
-    public void setType(Type type)
+    public void setAnimalType(Type type)
     {
         m_type = type;
     }

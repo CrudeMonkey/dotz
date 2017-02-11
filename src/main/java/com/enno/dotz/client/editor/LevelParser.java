@@ -1,5 +1,8 @@
 package com.enno.dotz.client.editor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.ait.tooling.nativetools.client.NArray;
 import com.ait.tooling.nativetools.client.NObject;
 import com.enno.dotz.client.Boosts;
@@ -15,6 +18,7 @@ import com.enno.dotz.client.Cell.ItemCell;
 import com.enno.dotz.client.Cell.Machine;
 import com.enno.dotz.client.Cell.Rock;
 import com.enno.dotz.client.Cell.Slide;
+import com.enno.dotz.client.Cell.Slot;
 import com.enno.dotz.client.Cell.Teleport;
 import com.enno.dotz.client.ChainGoal;
 import com.enno.dotz.client.Config;
@@ -24,6 +28,8 @@ import com.enno.dotz.client.Generator.ItemFrequency;
 import com.enno.dotz.client.Goal;
 import com.enno.dotz.client.GridState;
 import com.enno.dotz.client.LetterMultiplier;
+import com.enno.dotz.client.SlotMachines;
+import com.enno.dotz.client.SlotMachines.SlotMachineInfo;
 import com.enno.dotz.client.anim.Pt;
 import com.enno.dotz.client.item.Anchor;
 import com.enno.dotz.client.item.Animal;
@@ -120,6 +126,7 @@ public class LevelParser
                     int every = row.getAsInteger("every");
                     String trigger = row.getAsString("trigger");
                     String type = row.getAsString("type");
+                    String coinFreq = row.getAsString("coinFreq");
                     
                     Item launchItem = null;
                     NObject item = row.getAsObject("item");
@@ -129,7 +136,7 @@ public class LevelParser
                         launchItem = parseItem(itemClass, item);
                     }
                     
-                    Machine machine = new Machine(type, launchItem, every, howMany, trigger);
+                    Machine machine = new Machine(type, launchItem, every, howMany, trigger, coinFreq);
                     grid.setCell(pt.col, pt.row, machine);
                 }
             }
@@ -183,6 +190,22 @@ public class LevelParser
                         cage = new Cage(seq);
                     }
                     grid.setCell(pt.col, pt.row, cage);
+                }
+            }
+            if (p.isArray("slots"))
+            {
+                NArray t = p.getAsArray("slots");
+                for (int i = 0, n = t.size(); i < n; i++)
+                {
+                    NObject row = t.getAsObject(i);
+                    Pt pt = pt(row.getAsArray("p"));
+                    
+                    Slot slot = new Slot();
+                    
+                    SlotMachineInfo info = SlotMachineInfo.parseInfo(row.getAsObject("info"));
+                    slot.setSlotMachineInfo(info);
+                    
+                    grid.setCell(pt.col, pt.row, slot);
                 }
             }
             if (p.isArray("conveyors"))
@@ -630,6 +653,9 @@ public class LevelParser
 
     protected void parseGrid(GridState grid, NArray arr)
     {
+        if (arr == null)
+            return;
+        
         for (int row = 0; row < grid.numRows; row++)
         {
             String str = arr.getAsString(row);
@@ -795,6 +821,7 @@ public class LevelParser
             g.spiderGrowth = p.getAsDouble("spiderGrowth");
         
         NArray freq = p.getAsArray("freq");
+        List<ItemFrequency> freqList = new ArrayList<ItemFrequency>();
         for (int i = 0, n = freq.size(); i < n; i++)
         {
             NArray a = freq.getAsArray(i);
@@ -806,7 +833,7 @@ public class LevelParser
                 {
                     if (a.isInteger(2))
                     {
-                        g.add(new ItemFrequency(new Dot(a.getAsInteger(2)), f));
+                        freqList.add(new ItemFrequency(new Dot(a.getAsInteger(2)), f));
                     }
                     else if (a.isArray(2))
                     {
@@ -814,75 +841,27 @@ public class LevelParser
                         for (int j = 0; j < colors.size(); j++)
                         {
                             int color = colors.getAsInteger(j);
-                            g.add(new ItemFrequency(new Dot(color), f));
+                            freqList.add(new ItemFrequency(new Dot(color), f));
                         }
                     }
                 }
-                else if (item.equals("fire"))
+                else if (item.equals("dotBomb"))
                 {
-                    g.add(new ItemFrequency(new Fire(false), f));
-                }
-                else if (item.equals("anchor"))
-                {
-                    g.add(new ItemFrequency(new Anchor(false), f));
-                }
-                else if (item.equals("diamond"))
-                {
-                    g.add(new ItemFrequency(new Diamond(), f));
-                }
-                else if (item.equals("yinyang"))
-                {
-                    g.add(new ItemFrequency(new YinYang(false), f));
-                }
-                else if (item.equals("egg"))
-                {
-                    g.add(new ItemFrequency(new Egg(), f));
-                }
-                else if (item.equals("spider"))
-                {
-                    g.add(new ItemFrequency(new Spider(), f));
-                }
-                else if (item.equals("domino"))
-                {
-                    g.add(new ItemFrequency(new Domino(), f));
-                }
-                else if (item.equals("wild"))
-                {
-                    g.add(new ItemFrequency(new Wild(false), f));
-                }
-                else if (item.equals("dotBomb")) //TODO use getItem
-                {
-                    g.add(new ItemFrequency(new DotBomb(new Dot(0), g.bombStrength, false), f));
+                    freqList.add(new ItemFrequency(new DotBomb(new Dot(0), g.bombStrength, false), f));
                 }
                 else if (item.equals("blocker"))
                 {
-                    g.add(new ItemFrequency(new Blocker(g.blockerStrength, false, false), f));
-                }
-                else if (item.equals("wrappedDot"))
-                {
-                    g.add(new ItemFrequency(new WrappedDot(0), f));
-                }
-                else if (item.equals("striped"))
-                {
-                    g.add(new ItemFrequency(new Striped(0, false), f));
+                    freqList.add(new ItemFrequency(new Blocker(g.blockerStrength, false, false), f));
                 }
                 else if (item.equals("zapBlocker"))
                 {
-                    g.add(new ItemFrequency(new Blocker(g.blockerStrength, false, true), f));
-                }
-                else if (item.equals("blaster"))
-                {
-                    g.add(new ItemFrequency(new Blaster(true, false), f));
-                }
-                else if (item.equals("bomb"))
-                {
-                    g.add(new ItemFrequency(new Bomb(), f));
+                    freqList.add(new ItemFrequency(new Blocker(g.blockerStrength, false, true), f));
                 }
                 else if (item.equals("animal"))
                 {
                     if (a.isInteger(2))
                     {
-                        g.add(new ItemFrequency(new Animal(a.getAsInteger(2), g.animalStrength, g.animalType, g.animalAction, false), f));
+                        freqList.add(new ItemFrequency(new Animal(a.getAsInteger(2), g.animalStrength, g.animalType, g.animalAction, false), f));
                     }
                     else if (a.isArray(2))
                     {
@@ -890,57 +869,116 @@ public class LevelParser
                         for (int j = 0; j < colors.size(); j++)
                         {
                             int color = colors.getAsInteger(j);
-                            g.add(new ItemFrequency(new Animal(color, g.animalStrength, g.animalType, g.animalAction, false), f));
+                            freqList.add(new ItemFrequency(new Animal(color, g.animalStrength, g.animalType, g.animalAction, false), f));
                         }
                     }
                 }
                 else if (item.equals("knight"))
                 {
-                    g.add(new ItemFrequency(new Knight(g.knightStrength, false), f));
+                    freqList.add(new ItemFrequency(new Knight(g.knightStrength, false), f));
                 }
                 else if (item.equals("clock"))
                 {
-                    g.add(new ItemFrequency(new Clock(g.clockStrength, false), f));
+                    freqList.add(new ItemFrequency(new Clock(g.clockStrength, false), f));
                 }
-                else if (item.equals("drop"))
+                else
                 {
-                    g.add(new ItemFrequency(new Drop(), f));
-                }
-                else if (item.equals("pick"))
-                {
-                    g.add(new ItemFrequency(new IcePick(), f));
-                }
-                else if (item.equals("colorBomb"))
-                {
-                    g.add(new ItemFrequency(new ColorBomb(false), f));
-                }
-                else if (item.equals("mirror"))
-                {
-                    g.add(new ItemFrequency(new Mirror(false, false), f));
-                }
-                else if (item.equals("laser"))
-                {
-                    g.add(new ItemFrequency(new Laser(Direction.EAST, false), f));
-                }
-                else if (item.equals("rocket"))
-                {
-                    g.add(new ItemFrequency(new Rocket(Direction.EAST, false), f));
-                }
-                else if (item.equals("turner"))
-                {
-                    g.add(new ItemFrequency(new Turner(1, false), f));
-                }
-                else if (item.equals("key"))
-                {
-                    g.add(new ItemFrequency(new Key(false), f));
-                }
-                else if (item.equals("chest"))
-                {
-                    g.add(new ItemFrequency(new Chest(new RandomItem(), 1), f));
+                    freqList.add(new ItemFrequency(createItem(item), f));
                 }
             }
+            g.setFrequencies(freqList);
         }
         return g;
+    }
+    
+    public static Item createItem(String item)
+    {
+        if (item.equals("fire"))
+        {
+            return new Fire(false);
+        }
+        else if (item.equals("anchor"))
+        {
+            return new Anchor(false);
+        }
+        else if (item.equals("diamond"))
+        {
+            return new Diamond();
+        }
+        else if (item.equals("yinyang"))
+        {
+            return new YinYang(false);
+        }
+        else if (item.equals("egg"))
+        {
+            return new Egg();
+        }
+        else if (item.equals("spider"))
+        {
+            return new Spider();
+        }
+        else if (item.equals("domino"))
+        {
+            return new Domino();
+        }
+        else if (item.equals("wild"))
+        {
+            return new Wild(false);
+        }
+        else if (item.equals("wrappedDot"))
+        {
+            return new WrappedDot(0);
+        }
+        else if (item.equals("striped"))
+        {
+            return new Striped(0, false);
+        }
+        else if (item.equals("blaster"))
+        {
+            return new Blaster(true, false);
+        }
+        else if (item.equals("bomb"))
+        {
+            return new Bomb();
+        }
+        else if (item.equals("drop"))
+        {
+            return new Drop();
+        }
+        else if (item.equals("pick"))
+        {
+            return new IcePick();
+        }
+        else if (item.equals("colorBomb"))
+        {
+            return new ColorBomb(false);
+        }
+        else if (item.equals("mirror"))
+        {
+            return new Mirror(false, false);
+        }
+        else if (item.equals("laser"))
+        {
+            return new Laser(Direction.EAST, false);
+        }
+        else if (item.equals("rocket"))
+        {
+            return new Rocket(Direction.EAST, false);
+        }
+        else if (item.equals("turner"))
+        {
+            return new Turner(1, false);
+        }
+        else if (item.equals("key"))
+        {
+            return new Key(false);
+        }
+        else if (item.equals("chest"))
+        {
+            return new Chest(new RandomItem(), 1);
+        }
+        
+        return null;
     }
 
     public static NObject toJson(Config c)
@@ -970,6 +1008,7 @@ public class LevelParser
         NArray colorBombs = new NArray();
         NArray doors = new NArray();
         NArray cages = new NArray();
+        NArray slots = new NArray();
         NArray conveyors = new NArray();
         NArray mirrors = new NArray();
         NArray lasers = new NArray();
@@ -992,6 +1031,16 @@ public class LevelParser
         NArray yinyangs = new NArray();
         NArray randoms = new NArray();
         NArray pacmans = new NArray();
+        
+        SlotMachines slotMachines = new SlotMachines();
+        try
+        {
+            slotMachines.locateSlotMachines(c.grid);
+        }
+        catch (Exception e)
+        {
+            // can't happen
+        }
         
         for (int row = 0; row < c.numRows; row++)
         {
@@ -1087,6 +1136,21 @@ public class LevelParser
                     gridLine += '.';
                     cages.push(a);
                 }
+                else if (cell instanceof Slot)
+                {
+                    Slot b = (Slot) cell;
+                    NObject a = new NObject();
+                    a.put("p", pt(col, row));
+                    
+                    if (slotMachines.isLeftSlot(b))   // save info of leftmost slot
+                    {
+                        if (b.getSlotMachineInfo() != null)
+                            a.put("info", b.getSlotMachineInfo().asNObject());
+                    }
+                    
+                    gridLine += '.';
+                    slots.push(a);
+                }
                 else if (cell instanceof ConveyorCell)
                 {
                     ConveyorCell b = (ConveyorCell) cell;
@@ -1107,6 +1171,10 @@ public class LevelParser
                     a.put("howMany", b.getHowMany());
                     a.put("trigger", b.getTrigger().name);
                     a.put("type", b.getMachineType().name);
+                    
+                    String coinFreq = b.getCoinFrequencies();
+                    if (coinFreq != null)
+                        a.put("coinFreq", coinFreq);
                     
                     Item launchItem = b.getLaunchItem();
                     if (launchItem != null)
@@ -1256,6 +1324,7 @@ public class LevelParser
         add(p, "teleporters", teleporters);
         add(p, "doors", doors);
         add(p, "cages", cages);
+        add(p, "slots", slots);
         add(p, "conveyors", conveyors);
         add(p, "machines", machines);
         add(p, "lazySusans", lazySusans);
@@ -1312,7 +1381,7 @@ public class LevelParser
             Animal an = (Animal) item;
             a.put("strength", an.getStrength());
             a.put("color", an.getColor());
-            a.put("type", an.getType().getName());
+            a.put("type", an.getAnimalType().getName());
             if (an.getAction() != Animal.Action.DEFAULT)
                 a.put("action", an.getAction().getName());
             if (addClass)
@@ -1749,63 +1818,13 @@ public class LevelParser
         
     protected static void addItem(NArray a, Item item)
     {
-        if (item instanceof Fire)
-            a.push("fire");
-        else if (item instanceof Anchor)
-            a.push("anchor");
-        else if (item instanceof Diamond)
-            a.push("diamond");
-        else if (item instanceof Wild)
-            a.push("wild");
-        else if (item instanceof RandomItem)
-            a.push("random");
-        else if (item instanceof Knight)
-            a.push("knight");
-        else if (item instanceof Clock)
-            a.push("clock");
-        else if (item instanceof Turner)
-            a.push("turner");
-        else if (item instanceof Key)
-            a.push("key");
-        else if (item instanceof Drop)
-            a.push("drop");
-        else if (item instanceof IcePick)
-            a.push("pick");
-        else if (item instanceof ColorBomb)
-            a.push("colorBomb");
-        else if (item instanceof Laser)
-            a.push("laser");
-        else if (item instanceof Mirror)
-            a.push("mirror");
-        else if (item instanceof Rocket)
-            a.push("rocket");
-        else if (item instanceof YinYang)
-            a.push("yinyang");
-        else if (item instanceof Egg)
-            a.push("egg");
-        else if (item instanceof Spider)
-            a.push("spider");
-        else if (item instanceof DotBomb)
-            a.push("dotBomb");
-        else if (item instanceof WrappedDot)
-            a.push("wrappedDot");
-        else if (item instanceof Striped)
-            a.push("striped");
-        else if (item instanceof Blocker)
+        if (item instanceof Blocker)
         {
             if (((Blocker) item).isZapOnly())
                 a.push("zapBlocker");
             else
                 a.push("blocker");
         }
-        else if (item instanceof Bomb)
-            a.push("bomb");
-        else if (item instanceof Blaster)
-            a.push("blaster");
-        else if (item instanceof Domino)
-            a.push("domino");
-        else if (item instanceof Chest)
-            a.push("chest");
         else if (item instanceof Dot)
         {
             a.push("dot");
@@ -1815,7 +1834,11 @@ public class LevelParser
         {
             a.push("animal");
             a.push(((Animal) item).getColor());
-        }        
+        }
+        else
+        {
+            a.push(item.getType());
+        }
     }
     
     protected static NArray pt(int col, int row)

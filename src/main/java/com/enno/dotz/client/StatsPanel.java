@@ -11,6 +11,7 @@ import com.ait.lienzo.client.core.shape.Picture;
 import com.ait.lienzo.client.core.shape.Text;
 import com.ait.lienzo.client.widget.LienzoPanel;
 import com.ait.lienzo.shared.core.types.ColorName;
+import com.enno.dotz.client.util.Font;
 
 public class StatsPanel extends LienzoPanel
 {
@@ -48,7 +49,8 @@ public class StatsPanel extends LienzoPanel
         m_moves = new Text("Moves: 0");
         m_moves.setFillColor(ColorName.BLACK);
         m_moves.setFontSize(10);
-        m_moves.setFontStyle("bold");
+        m_moves.setFontFamily(Font.SCORE);
+//        m_moves.setFontStyle("bold");
         m_moves.setX(40);
         m_moves.setY(30);
         m_layer.add(m_moves);
@@ -56,7 +58,8 @@ public class StatsPanel extends LienzoPanel
         m_score = new Text("Score: 0");
         m_score.setFillColor(ColorName.BLACK);
         m_score.setFontSize(10);
-        m_score.setFontStyle("bold");
+        m_score.setFontFamily(Font.SCORE);
+//        m_score.setFontStyle("bold");
         m_score.setX(170);
         m_score.setY(30);
         m_layer.add(m_score);
@@ -64,14 +67,33 @@ public class StatsPanel extends LienzoPanel
         m_time = new Text("Time: 0:00");
         m_time.setFillColor(ColorName.BLACK);
         m_time.setFontSize(10);
-        m_time.setFontStyle("bold");
+        m_time.setFontFamily(Font.SCORE);
+//        m_time.setFontStyle("bold");
         m_time.setX(300);
         m_time.setY(30);
         m_layer.add(m_time);
         
         draw();
     }
+
+    public void copyState(UndoState undoState)
+    {
+        undoState.elapsedTime = elapsedTime();
+        undoState.bombWentOff = m_bombWentOff;
+    }
     
+    public void restoreState(UndoState undoState)
+    {
+        m_bombWentOff = undoState.bombWentOff;
+        m_startTime = System.currentTimeMillis() - undoState.elapsedTime * 1000;
+        m_lastTime = 0; // force redraw
+        
+        updateMoves();
+        updateTime();
+        updateScore();
+        draw();
+    }
+
     private static Picture[] initModeIcons()
     {
         return new Picture[] {

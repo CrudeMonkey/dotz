@@ -96,6 +96,253 @@ public class Score
     private int m_moves;    
     private int m_wordCount;
     
+    public static class ScoreState
+    {
+        protected int[] m_explodedDots = new int[Config.MAX_COLORS];
+        protected int m_explodedWildcards; // e.g. by nuke (when not counting as a color)    
+        
+        protected int m_fireInGrid;
+        protected int m_explodedFire;
+        
+        protected int m_spidersInGrid;
+        protected int m_explodedSpiders;
+        
+        protected int m_anchorsInGrid;
+        protected int m_droppedAnchors;
+        protected int m_explodedAnchors;
+        
+        protected int m_diamondsInGrid;
+        protected int m_droppedDiamonds;
+        
+        protected int m_clocksInGrid;
+        protected int m_droppedClocks;
+        protected int m_explodedClocks;
+
+        protected int m_animalsInGrid;
+        protected int m_explodedAnimals;
+        
+        protected int m_knightsInGrid;
+        protected int m_explodedKnights;
+        
+        protected int m_initialDoorCount;
+        protected int m_explodedDoors;
+        
+        protected int m_initialBubbleCount;
+        protected int m_explodedBubbles;
+        
+        protected int m_initialCageCount;
+        protected int m_explodedCages;
+
+        protected int m_initialIceCount;
+        protected int m_explodedIce;
+
+        protected int m_initialCircuitCount;
+        protected int m_explodedCircuits;
+        
+        protected int m_lasersInGrid;
+        protected int m_explodedLasers;
+        protected int m_shortCircuitedLasers;
+        
+        protected int m_mirrorsInGrid;
+        protected int m_explodedMirrors;
+        
+        protected int m_rocketsInGrid;
+        protected int m_explodedRockets;
+        
+        protected int m_blockersInGrid;
+        protected int m_explodedBlockers;
+
+        protected int m_zapBlockersInGrid;
+        protected int m_explodedZapBlockers;
+
+        protected int m_chestsInGrid;
+        protected int m_openedChests;
+        
+        protected int m_explodedDominoes;
+        
+        protected int m_birds;
+        
+        protected int m_usedColorBombs;
+        protected int m_usedBombs;
+        protected int m_usedBlasters;
+        protected int m_usedWrappedDots;
+        protected int m_usedStriped;
+        
+        protected int m_explodedCoins;
+        
+        protected int m_score;
+        protected int m_moves;    
+        protected int m_wordCount;
+
+    }
+
+    public void copyState(UndoState undoState)
+    {
+        ScoreState state = new ScoreState();
+        undoState.scoreState = state;
+        
+        for (int i = 0; i < Config.MAX_COLORS; i++)
+            state.m_explodedDots[i] = m_explodedDots[i];
+        
+        state.m_explodedWildcards = m_explodedWildcards;
+        
+        state.m_fireInGrid = m_fireInGrid;
+        state.m_explodedFire = m_explodedFire;
+        
+        state.m_spidersInGrid = m_spidersInGrid;
+        state.m_explodedSpiders = m_explodedSpiders;
+        
+        state.m_anchorsInGrid = m_anchorsInGrid;
+        state.m_droppedAnchors = m_droppedAnchors;
+        state.m_explodedAnchors = m_explodedAnchors;
+        
+        state.m_diamondsInGrid = m_diamondsInGrid;
+        state.m_droppedDiamonds = m_droppedDiamonds;
+        
+        state.m_clocksInGrid = m_clocksInGrid;
+        state.m_droppedClocks = m_droppedClocks;
+        state.m_explodedClocks = m_explodedClocks;
+
+        state.m_animalsInGrid = m_animalsInGrid;
+        state.m_explodedAnimals = m_explodedAnimals;
+        
+        state.m_knightsInGrid = m_knightsInGrid;
+        state.m_explodedKnights = m_explodedKnights;
+        
+        state.m_initialDoorCount = m_initialDoorCount;
+        state.m_explodedDoors = m_explodedDoors;
+        
+        state.m_initialBubbleCount = m_initialBubbleCount;
+        state.m_explodedBubbles = m_explodedBubbles;
+        
+        state.m_initialCageCount = m_initialCageCount;
+        state.m_explodedCages = m_explodedCages;
+
+        state.m_initialIceCount = m_initialIceCount;
+        state.m_explodedIce = m_explodedIce;
+
+        state.m_initialCircuitCount = m_initialCircuitCount;
+        state.m_explodedCircuits = m_explodedCircuits;
+        
+        state.m_lasersInGrid = m_lasersInGrid;
+        state.m_explodedLasers = m_explodedLasers;
+        state.m_shortCircuitedLasers = m_shortCircuitedLasers;
+        
+        state.m_mirrorsInGrid = m_mirrorsInGrid;
+        state.m_explodedMirrors = m_explodedMirrors;
+        
+        state.m_rocketsInGrid = m_rocketsInGrid;
+        state.m_explodedRockets = m_explodedRockets;
+        
+        state.m_blockersInGrid = m_blockersInGrid;
+        state.m_explodedBlockers = m_explodedBlockers;
+
+        state.m_zapBlockersInGrid = m_zapBlockersInGrid;
+        state.m_explodedZapBlockers = m_explodedZapBlockers;
+
+        state.m_chestsInGrid = m_chestsInGrid;
+        state.m_openedChests = m_openedChests;
+        
+        state.m_explodedDominoes = m_explodedDominoes;
+        
+        state.m_birds = m_birds;
+        
+        state.m_usedColorBombs = m_usedColorBombs;
+        state.m_usedBombs = m_usedBombs;
+        state.m_usedBlasters = m_usedBlasters;
+        state.m_usedWrappedDots = m_usedWrappedDots;
+        state.m_usedStriped = m_usedStriped;
+        
+        state.m_explodedCoins = m_explodedCoins;
+        
+        state.m_score = m_score;
+        state.m_moves = m_moves;    
+        state.m_wordCount = m_wordCount;
+    }
+    
+    public void restoreState(UndoState undoState)
+    {
+        ScoreState state = undoState.scoreState;
+        
+        for (int i = 0; i < Config.MAX_COLORS; i++)
+            m_explodedDots[i] = state.m_explodedDots[i];
+        
+        m_explodedWildcards = state.m_explodedWildcards;
+        
+        m_fireInGrid = state.m_fireInGrid;
+        m_explodedFire = state.m_explodedFire;
+        
+        m_spidersInGrid = state.m_spidersInGrid;
+        m_explodedSpiders = state.m_explodedSpiders;
+        
+        m_anchorsInGrid = state.m_anchorsInGrid;
+        m_droppedAnchors = state.m_droppedAnchors;
+        m_explodedAnchors = state.m_explodedAnchors;
+        
+        m_diamondsInGrid = state.m_diamondsInGrid;
+        m_droppedDiamonds = state.m_droppedDiamonds;
+        
+        m_clocksInGrid = state.m_clocksInGrid;
+        m_droppedClocks = state.m_droppedClocks;
+        m_explodedClocks = state.m_explodedClocks;
+
+        m_animalsInGrid = state.m_animalsInGrid;
+        m_explodedAnimals = state.m_explodedAnimals;
+        
+        m_knightsInGrid = state.m_knightsInGrid;
+        m_explodedKnights = state.m_explodedKnights;
+        
+        m_initialDoorCount = state.m_initialDoorCount;
+        m_explodedDoors = state.m_explodedDoors;
+        
+        m_initialBubbleCount = state.m_initialBubbleCount;
+        m_explodedBubbles = state.m_explodedBubbles;
+        
+        m_initialCageCount = state.m_initialCageCount;
+        m_explodedCages = state.m_explodedCages;
+
+        m_initialIceCount = state.m_initialIceCount;
+        m_explodedIce = state.m_explodedIce;
+
+        m_initialCircuitCount = state.m_initialCircuitCount;
+        m_explodedCircuits = state.m_explodedCircuits;
+        
+        m_lasersInGrid = state.m_lasersInGrid;
+        m_explodedLasers = state.m_explodedLasers;
+        m_shortCircuitedLasers = state.m_shortCircuitedLasers;
+        
+        m_mirrorsInGrid = state.m_mirrorsInGrid;
+        m_explodedMirrors = state.m_explodedMirrors;
+        
+        m_rocketsInGrid = state.m_rocketsInGrid;
+        m_explodedRockets = state.m_explodedRockets;
+        
+        m_blockersInGrid = state.m_blockersInGrid;
+        m_explodedBlockers = state.m_explodedBlockers;
+
+        m_zapBlockersInGrid = state.m_zapBlockersInGrid;
+        m_explodedZapBlockers = state.m_explodedZapBlockers;
+
+        m_chestsInGrid = state.m_chestsInGrid;
+        m_openedChests = state.m_openedChests;
+        
+        m_explodedDominoes = state.m_explodedDominoes;
+        
+        m_birds = state.m_birds;
+        
+        m_usedColorBombs = state.m_usedColorBombs;
+        m_usedBombs = state.m_usedBombs;
+        m_usedBlasters = state.m_usedBlasters;
+        m_usedWrappedDots = state.m_usedWrappedDots;
+        m_usedStriped = state.m_usedStriped;
+        
+        m_explodedCoins = state.m_explodedCoins;
+        
+        m_score = state.m_score;
+        m_moves = state.m_moves;    
+        m_wordCount = state.m_wordCount;        
+    }
+    
     public void foundWord()
     {
         m_wordCount++;
@@ -193,6 +440,12 @@ public class Score
         m_explodedKnights++;
         m_knightsInGrid--;
         addPoints(20);
+    }
+
+    public void explodedLetter(int color)
+    {
+        m_explodedDots[color]++;
+        // don't add points, those are added for the word
     }
 
     public void explodedDot(int color)
@@ -732,5 +985,36 @@ public class Score
     public void addBubble()
     {
         m_initialBubbleCount++;
+    }
+
+    public void reduce(int n, String type, int color)
+    {
+        for (int i = 0; i < n; i++)
+        {
+            if (type.equals("diamond"))
+            {
+                m_droppedDiamonds++;
+                addPoints(10);
+            }
+            else if (type.equals("dot"))
+            {
+                explodedDot(color);
+            }
+            else if (type.equals("anchor"))
+            {
+                m_droppedAnchors++;
+                addPoints(10);
+            }
+            else if (type.equals("fire"))
+            {
+                m_explodedFire++;
+                addPoints(2);
+            }
+            else if (type.equals("spider"))
+            {
+                m_explodedSpiders++;
+                addPoints(5);
+            }
+        }
     }
 }

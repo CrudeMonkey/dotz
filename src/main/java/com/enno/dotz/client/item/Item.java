@@ -18,11 +18,8 @@ public abstract class Item
         NONE
     };
     
-    private static int s_counter = 0;
-    
     public Context ctx;
     public Config cfg;
-    public Integer id;      // unique number for each Item - still used in AnimList
 
     public IPrimitive<?> shape;
 
@@ -30,7 +27,6 @@ public abstract class Item
     
     protected Item()
     {
-        id = s_counter++;
     }
     
     // only used by ScorePanel and Item
@@ -195,14 +191,14 @@ public abstract class Item
     }
     
     protected abstract Item doCopy();
+    public abstract String getType();
     
     public Item copy()
     {
         Item c = doCopy();
-        c.id = id;
         return c;
     }
-
+    
     public void dropFromBottom()
     {        
     }

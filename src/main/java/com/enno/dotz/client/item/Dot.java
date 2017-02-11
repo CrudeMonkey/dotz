@@ -49,6 +49,12 @@ public class Dot extends Item
         m_radioActive = radioActive;
     }
 
+    @Override
+    public String getType()
+    {
+        return "dot";
+    }
+
     public void setLetter(String letter)
     {
         m_letter = letter;
@@ -397,9 +403,15 @@ public class Dot extends Item
     @Override
     public ExplodeAction explode(Integer color, int chainSize)
     {
-        // ignore passed in color
-        ctx.score.explodedDot(this.color);
-        
+        if (isLetter())
+        {
+            ctx.score.explodedLetter(this.color);
+        }
+        else
+        {
+            // ignore passed in color
+            ctx.score.explodedDot(this.color);
+        }
         return ExplodeAction.REMOVE; // remove dot
     }
     

@@ -21,6 +21,12 @@ public class IcePick extends Item
         m_radius = radius;
         m_stuck = stuck;
     }
+
+    @Override
+    public String getType()
+    {
+        return "pick";
+    }
     
     public void setRadius(int radius)
     {

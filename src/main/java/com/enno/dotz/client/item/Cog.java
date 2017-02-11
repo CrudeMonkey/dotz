@@ -12,6 +12,12 @@ public class Cog extends Item
     {
         
     }
+
+    @Override
+    public String getType()
+    {
+        return "cog";
+    }
     
     @Override
     public IPrimitive<?> createShape(double size)

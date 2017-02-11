@@ -435,8 +435,8 @@ public class GetTransitions
             if (endOfLine(c))
                 return null;
             
-            Pt above = c.pt();            
-            if (c instanceof Hole || c instanceof Machine || c.isLockedCage() && !c.isLockedBlockingCage())
+            Pt above = c.pt();
+            if (c.isFallThru())
             {
                 return getSourceAbove(above);
             }

@@ -52,6 +52,20 @@ public class Recorder
         return Long.parseLong(row.getAsString("seed"));
     }
 
+    public void undo()
+    {
+        NObject row = new NObject();
+        row.put("type", "undo");
+        add(row);
+    }
+    
+    public void redo()
+    {
+        NObject row = new NObject();
+        row.put("type", "redo");
+        add(row);
+    }
+    
     public void click(Cell cell)
     {
         NObject row = new NObject();
@@ -167,6 +181,8 @@ public class Recorder
     {
         PtList list = new PtList();
         NArray p = row.getAsArray(getAction(row));
+        if (p == null)
+            return null;
         
         for (int i = 0, n = p.size(); i < n; i += 2)
         {
@@ -178,6 +194,9 @@ public class Recorder
     
     public static String getAction(NObject row)
     {
+        if (row.isDefined("type"))
+            return row.getAsString("type");
+        
         if (row.isArray("drag"))
             return "drag";
         else if (row.isArray("swap"))

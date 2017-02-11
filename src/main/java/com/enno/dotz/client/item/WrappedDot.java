@@ -20,6 +20,12 @@ public class WrappedDot extends Item
     }
 
     @Override
+    public String getType()
+    {
+        return "wrappedDot";
+    }
+
+    @Override
     public Integer getColor()
     {
         return color;

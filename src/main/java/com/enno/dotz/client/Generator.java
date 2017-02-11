@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 import com.ait.lienzo.shared.core.types.IColor;
+import com.enno.dotz.client.Generator.ItemFrequency;
 import com.enno.dotz.client.anim.Pt;
 import com.enno.dotz.client.item.Anchor;
 import com.enno.dotz.client.item.Animal;
@@ -30,6 +31,8 @@ import com.enno.dotz.client.item.Turner;
 import com.enno.dotz.client.item.Wild;
 import com.enno.dotz.client.item.WrappedDot;
 import com.enno.dotz.client.util.FrequencyGenerator;
+import com.enno.dotz.shared.Random2;
+import com.enno.dotz.shared.RandomUtil;
 
 public class Generator
 {
@@ -47,9 +50,11 @@ public class Generator
     protected List<Generator.ItemFrequency> m_list = new ArrayList<Generator.ItemFrequency>();
     protected long                          m_seed = RANDOM_SEED;
 
-    protected double m_scale;
-    protected double m_dotsOnlyScale;
-    protected Random m_rnd;
+    protected double        m_scale;
+    protected double        m_dotsOnlyScale;
+    protected Random        m_rnd;
+    private Long            m_usedSeed;
+    private DominoGenerator m_dominoGenerator;
 
     public int           fireGrowthRate   = 1;                  // default: 1 fire per turn
     public int           animalStrength   = 10;
@@ -88,12 +93,19 @@ public class Generator
     private int          m_numDotColors;
     private boolean      m_noChest = false;
     
-    private DominoGenerator m_dominoGenerator;
-    private Long m_usedSeed;
-
     public Generator()
     {
     }    
+    
+    public void copyState(UndoState undoState)
+    {
+        undoState.rnd = RandomUtil.copy(m_rnd);
+    }
+
+    public void restoreState(UndoState undoState)
+    {
+        m_rnd = RandomUtil.copy(undoState.rnd);
+    }
     
     public int getMode()
     {
@@ -136,7 +148,7 @@ public class Generator
     {
         if (m_rnd == null)
         {
-            m_rnd = new Random(getUsedSeed());
+            m_rnd = new Random2(getUsedSeed());
         }
         return m_rnd;
     }
@@ -198,16 +210,24 @@ public class Generator
         g.radioActivePct = radioActivePct;
         g.eggsNeeded = eggsNeeded;
         
+        List<ItemFrequency> list = new ArrayList<ItemFrequency>();
         for (ItemFrequency f : m_list)
         {
-            g.add(f.copy());
+            list.add(f.copy());
         }
+        g.setFrequencies(list);
         return g;
     }
     
-    public void add(ItemFrequency f)
+//    public void add(ItemFrequency f)
+//    {
+//        m_list.add(f);
+//        init();
+//    }
+    
+    public void setFrequencies(List<ItemFrequency> frequencies)
     {
-        m_list.add(f);
+        m_list = frequencies;
         init();
     }
     
@@ -272,25 +292,6 @@ public class Generator
     {
         ItemFrequency dot = getNextDot();
         return ((Dot) dot.item).color;
-    }
-    
-    private static final int COIN_10_DISTRIB = 1;
-    private static final int COIN_5_DISTRIB = 3;
-    private static final int COIN_1_DISTRIB = 10;
-    private static final double TOTAL_DISTRIB = COIN_10_DISTRIB + COIN_5_DISTRIB + COIN_1_DISTRIB;
-    
-    private static final double COIN_10_CHANCE = COIN_10_DISTRIB / TOTAL_DISTRIB;
-    private static final double COIN_5_CHANCE = COIN_5_DISTRIB / TOTAL_DISTRIB;
-    private static final double COIN_1_CHANCE = COIN_1_DISTRIB / TOTAL_DISTRIB;
-    
-    public int nextCoinAmount()
-    {
-        double d = getRandom().nextDouble();
-        if (d < COIN_10_CHANCE)
-            return 10;
-        if (d < COIN_10_CHANCE + COIN_5_CHANCE)
-            return 5;
-        return 1;
     }
     
     public Item getNextItem(Context ctx, boolean initial, Boolean radioActive, Boolean isStuck)
@@ -592,13 +593,30 @@ public class Generator
             return new ItemFrequency(item.copy(), frequency);
         }
 
+        public static void normalizeList(List<ItemFrequency> list)
+        {
+            double total = 0;
+            for (ItemFrequency f : list)
+            {
+                total += f.frequency;
+            }
+            
+            if (total != 0)
+            {
+                for (ItemFrequency f : list)
+                {
+                    f.frequency /= total;
+                }
+            }
+        }
+
         public Item createItem(Context ctx, FrequencyGenerator<String> letterGenerator, DominoGenerator dominoGenerator)
         {
             if (item instanceof Animal)
             {
                 Animal animal = (Animal) item;
                 animal.setStrength(ctx.generator.animalStrength);
-                animal.setType(ctx.generator.animalType);
+                animal.setAnimalType(ctx.generator.animalType);
                 animal.setAction(ctx.generator.animalAction);
             }
             else if (item instanceof Spider)

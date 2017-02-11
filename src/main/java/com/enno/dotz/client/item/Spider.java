@@ -42,6 +42,12 @@ public class Spider extends Item
         m_strength = strength;
         m_stuck = stuck;
     }
+
+    @Override
+    public String getType()
+    {
+        return "spider";
+    }
     
     public int getStrength()
     {
@@ -209,7 +215,9 @@ public class Spider extends Item
     @Override
     protected Item doCopy()
     {
-        return new Spider(m_strength, m_stuck);
+        Spider s = new Spider(m_strength, m_stuck);
+        s.lastDirection = lastDirection;
+        return s;
     }
 
     @Override

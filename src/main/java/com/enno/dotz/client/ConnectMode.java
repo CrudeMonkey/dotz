@@ -10,6 +10,7 @@ import com.ait.lienzo.client.core.event.NodeMouseUpHandler;
 import com.ait.lienzo.client.core.shape.Layer;
 import com.ait.tooling.nativetools.client.NObject;
 import com.enno.dotz.client.Cell.Bubble;
+import com.enno.dotz.client.Cell.Slot;
 import com.enno.dotz.client.DragConnectMode.ColorBombMode;
 import com.enno.dotz.client.DragConnectMode.DropMode;
 import com.enno.dotz.client.DragConnectMode.ExplodyMode;
@@ -22,9 +23,9 @@ import com.enno.dotz.client.DragConnectMode.WildCardMode;
 import com.enno.dotz.client.SoundManager.Sound;
 import com.enno.dotz.client.anim.AnimList;
 import com.enno.dotz.client.anim.Pt;
+import com.enno.dotz.client.anim.Pt.PtList;
 import com.enno.dotz.client.anim.Transition.DropTransition;
 import com.enno.dotz.client.anim.TransitionList;
-import com.enno.dotz.client.anim.Pt.PtList;
 import com.enno.dotz.client.anim.TransitionList.NukeTransitionList;
 import com.enno.dotz.client.editor.LevelParser;
 import com.enno.dotz.client.item.Blaster;
@@ -43,6 +44,7 @@ import com.enno.dotz.client.item.Rocket;
 import com.enno.dotz.client.item.Turner;
 import com.enno.dotz.client.item.Wild;
 import com.enno.dotz.client.item.YinYang;
+import com.enno.dotz.client.util.Debug;
 import com.google.gwt.event.shared.HandlerRegistration;
 
 public abstract class ConnectMode
@@ -77,10 +79,16 @@ public abstract class ConnectMode
      */
     public void start()
     {
+//        Debug.p("start");
+        
+        m_state.startOfMove();
+        
         m_mouseDownReg = m_layer.addNodeMouseDownHandler(m_mouseDownHandler);
         m_mouseOutReg = m_layer.addNodeMouseOutHandler(m_mouseOutHandler);
         
         ctx.boostPanel.setActive(true);
+        
+        ctx.undoManager.push();
         
         if (ctx.playbackDialog != null)
             ctx.playbackDialog.start();
@@ -88,6 +96,8 @@ public abstract class ConnectMode
     
     public void stop()
     {
+//        Debug.p("stop");
+        
         if (ctx.playbackDialog != null)
             ctx.playbackDialog.stop();
         
@@ -109,7 +119,7 @@ public abstract class ConnectMode
     
     protected boolean isTriggeredBySingleClick2(Cell cell)
     {
-        return flipMirror(cell) || fireRocket(cell) || reshuffle(cell);
+        return flipMirror(cell) || fireRocket(cell) || reshuffle(cell) || toggleSlot(cell);
     }
 
     protected boolean reshuffle(Cell cell)
@@ -136,6 +146,30 @@ public abstract class ConnectMode
                     });
                 }
             });
+            
+            return true;
+        }
+        return false;
+    }
+    
+    protected boolean toggleSlot(Cell c)
+    {
+        if (c instanceof Slot)
+        {
+            Slot slot = (Slot) c;
+            if (!slot.canHold())
+                return true;    // we didn't toggle, but we did process the click!
+            
+            if (ctx.isRecording())
+                ctx.recorder.click(c);
+            
+            slot.toggleHold();
+            ctx.doorLayer.redraw();
+
+            // Force PlaybackDialog to move to next line
+            // and UndoManager to copyState
+            stop();     
+            start();
             
             return true;
         }
@@ -738,6 +772,7 @@ public abstract class ConnectMode
                 mouseDown(c);
                 mouseUp();
             }
+            
         }
         else if (type.equals("swap"))
         {

@@ -17,6 +17,12 @@ public class Bomb extends Item
     public Bomb()
     {
     }
+
+    @Override
+    public String getType()
+    {
+        return "bomb";
+    }
     
     public Bomb(int radius, boolean stuck)
     {

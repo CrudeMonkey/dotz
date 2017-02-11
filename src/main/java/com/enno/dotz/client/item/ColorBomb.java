@@ -14,6 +14,12 @@ public class ColorBomb extends Item
     }
 
     @Override
+    public String getType()
+    {
+        return "colorBomb";
+    }
+
+    @Override
     public Integer getColor()
     {
         return Config.WILD_ID;

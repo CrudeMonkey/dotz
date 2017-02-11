@@ -20,6 +20,12 @@ public class Rocket extends Item
         m_stuck = stuck;
     }
 
+    @Override
+    public String getType()
+    {
+        return "rocket";
+    }
+
     public void setDirection(int direction)
     {
         m_direction = direction;

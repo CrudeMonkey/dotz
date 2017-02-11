@@ -32,21 +32,21 @@ public class AnimList extends CallbackChain
     
     public void addBounce()
     {
-        Set<Integer> last = new HashSet<Integer>();
-        List<Callback> callbacks = getCallbacks();
-        for (int i = callbacks.size() - 1; i >= 0; i--)
-        {
-            TransitionList list = (TransitionList) callbacks.get(i);
-            for (IAnimationCallback anim : list.getTransitions())
-            {
-                Transition tr = (Transition) anim;
-                Integer id = tr.item.id; //TODo can we do without id?
-                if (!last.contains(id))
-                {
-                    tr.bounce = true;
-                    last.add(id);
-                }
-            }
-        }
+//        Set<Integer> last = new HashSet<Integer>();
+//        List<Callback> callbacks = getCallbacks();
+//        for (int i = callbacks.size() - 1; i >= 0; i--)
+//        {
+//            TransitionList list = (TransitionList) callbacks.get(i);
+//            for (IAnimationCallback anim : list.getTransitions())
+//            {
+//                Transition tr = (Transition) anim;
+//                Integer id = tr.item.id; //TODo can we do without id?
+//                if (!last.contains(id))
+//                {
+//                    tr.bounce = true;
+//                    last.add(id);
+//                }
+//            }
+//        }
     }
 }
